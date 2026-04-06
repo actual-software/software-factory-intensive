@@ -1,0 +1,68 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gc *)",
+      "Bash(bd *)",
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Read(*)",
+      "Glob(*)",
+      "Grep(*)"
+    ]
+  },
+  "mcpServers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "sentry": {
+      "command": "npx",
+      "args": ["-y", "@sentry/mcp-server"],
+      "env": {
+        "SENTRY_AUTH_TOKEN": "${SENTRY_AUTH_TOKEN}"
+      }
+    },
+    "posthog": {
+      "command": "npx",
+      "args": ["-y", "@nichochar/posthog-mcp"],
+      "env": {
+        "POSTHOG_API_KEY": "${POSTHOG_API_KEY}",
+        "POSTHOG_HOST": "${POSTHOG_HOST}"
+      }
+    },
+    "datadog": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-datadog"],
+      "env": {
+        "DD_API_KEY": "${DATADOG_API_KEY}",
+        "DD_APP_KEY": "${DATADOG_APP_KEY}",
+        "DD_SITE": "${DATADOG_SITE}"
+      }
+    },
+    "grafana": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-grafana"],
+      "env": {
+        "GRAFANA_URL": "${GRAFANA_URL}",
+        "GRAFANA_API_KEY": "${GRAFANA_API_KEY}"
+      }
+    },
+    "slack": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-slack"],
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}"
+      }
+    },
+    "linear": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-linear"],
+      "env": {
+        "LINEAR_API_KEY": "${LINEAR_API_KEY}"
+      }
+    }
+  }
+}
