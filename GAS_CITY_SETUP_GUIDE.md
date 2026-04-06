@@ -1,515 +1,561 @@
 # Gas City Setup Guide
 
-> **Status:** This guide documents the intended Gas City setup workflow based on codebase analysis and testing. Some steps may require upstream fixes (see [Known Issues](#known-issues)).
+> **Status:** This guide documents Gas City setup and configuration. Some advanced workflows require beads backend integration that may need additional configuration.
 
 ## Overview
 
-Gas City is a multi-agent workspace manager that coordinates AI agents working on shared codebases. It uses:
-- **Beads** (`bd`) - Issue tracker with first-class dependency support
-- **Gas Town** (`gt`) - Multi-agent workspace orchestration  
-- **Dolt** - Versioned SQL database for issue/work state
-- **Aider** - AI pair programming tool for autonomous code changes
+Gas City is an orchestration-builder SDK for multi-agent coding workflows. It coordinates AI coding agents working on shared codebases through:
+
+- **Beads** (`bd`) - Issue tracker with dependency support
+- **Gas City** (`gc`) - Multi-agent workspace orchestration  
+- **Dolt** - Versioned SQL database for work state (or file backend)
+- **Coding Agent CLI** - Your choice of Claude, Codex, Gemini, Cursor, or other compatible tools
+
+## Terminology
+
+- **City:** A Gas City workspace (the orchestration instance)
+- **Rig:** An individual project workspace within a city
+- **Agent:** A configured coding agent session (can be persistent or pooled)
+- **Order:** Automated task (exec order runs shell, formula order instantiates agent work)
+- **Formula:** Declarative workflow definition for agent-driven tasks
+- **Bead:** A work item (issue/task) in the beads tracker
 
 ## Prerequisites
 
 ### System Requirements
-- **OS:** Ubuntu 24.04 LTS (or similar Linux)
+- **OS:** macOS or Ubuntu 24.04 LTS (or similar Linux)
 - **Memory:** 4GB+ RAM recommended
 - **Disk:** 10GB+ free space
 - **Network:** Internet access for package downloads
 
 ### Required Tools
 
-Install dependencies:
+**macOS:**
 ```bash
-# Core build tools
+# Core dependencies (always required)
+brew install tmux git jq
+
+# Beads backend (default provider)
+brew install dolt flock
+
+# Install beads from releases
+brew install gastownhall/beads/beads
+
+# Install Gas City
+brew install gastownhall/gascity/gascity
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+# Core dependencies (always required)
 sudo apt-get update
 sudo apt-get install -y \
-  build-essential \
-  golang-go \
-  libicu-dev \
+  tmux \
   git \
-  curl \
-  jq
+  jq \
+  procps \
+  lsof
 
-# Dolt database
+# Beads backend (default provider)
+# Dolt - download from releases
 sudo curl -L https://github.com/dolthub/dolt/releases/latest/download/install.sh | sudo bash
 
-# Python & pip (for Aider)
-sudo apt-get install -y python3 python3-pip
+# flock (usually included in util-linux)
+sudo apt-get install -y util-linux
 
-# Aider
-pip3 install aider-chat
+# Build beads from source
+git clone https://github.com/gastownhall/beads.git /tmp/beads
+cd /tmp/beads
+make install
+
+# Build Gas City from source
+git clone https://github.com/gastownhall/gascity.git /tmp/gascity
+cd /tmp/gascity
+make install
 ```
 
-Verify installations:
+### Coding Agent CLI Tools
+
+Gas City supports multiple coding agent providers. Install at least one:
+
+**Claude Code (Anthropic):**
 ```bash
-go version          # Should show 1.21+
-dolt version        # Should show 1.40+
-aider --version     # Should show latest
-python3 --version   # Should show 3.10+
+# Follow Claude Code installation docs
+# Requires API key from Anthropic Console
 ```
 
-## Installation
-
-### 1. Clone Repositories
-
+**Codex:**
 ```bash
-# Choose a workspace directory
-export WORKSPACE_DIR=~/gas-city-workspace
-mkdir -p $WORKSPACE_DIR
-cd $WORKSPACE_DIR
-
-# Clone Beads (issue tracker)
-git clone https://github.com/gastownhall/beads.git
-cd beads
-make build
-sudo cp bd /usr/local/bin/
-cd ..
-
-# Clone Gas Town (workspace manager)
-git clone https://github.com/gastownhall/gastown.git
-cd gastown
-make build
-sudo cp gt /usr/local/bin/
-cd ..
-
-# Verify installations
-bd --version
-gt --version
+# Follow Codex installation docs
 ```
 
-### 2. Initialize Gas Town Workspace
+**Cursor:**
+```bash
+# Follow Cursor installation docs
+```
+
+**Gemini:**
+```bash
+# Follow Gemini installation docs
+```
+
+**Other compatible agents:**
+- Check Gas City documentation for provider-specific setup
+
+### Verify Installation
 
 ```bash
-# Create a new Gas Town HQ (workspace root)
-gt install ~/gas-town-hq
+gc version          # Should show Gas City version
+bd --version        # Should show beads version (if using bd provider)
+dolt version        # Should show 1.80.0+ (if using bd provider)
+tmux -V            # Should show tmux version
+git --version      # Should show git version
+jq --version       # Should show jq version
+```
 
-# Navigate to HQ
-cd ~/gas-town-hq
+## Installation & Setup
 
-# Initialize git if needed
+### 1. Initialize a City
+
+Create your Gas City workspace:
+
+```bash
+# Initialize city (workspace)
+gc init ~/my-city
+cd ~/my-city
+
+# Start the city under supervisor
+gc start
+
+# Verify status
+gc status
+```
+
+### 2. Add Your First Rig
+
+Register a project repository as a rig:
+
+```bash
+# Create or navigate to your project
+mkdir ~/my-project
+cd ~/my-project
 git init
-git config user.name "Your Name"
-git config user.email "your.email@example.com"
+
+# Add it as a rig
+gc rig add .
+
+# Or add an existing repo
+cd ~/my-city
+gc rig add ~/path/to/existing-repo --name my-existing-project
 ```
 
-### 3. Configure Dolt Server
+### 3. Configure City Settings
 
-Gas Town uses a centralized Dolt SQL server for multi-client access:
+Edit `~/my-city/city.toml` to customize your setup:
+
+```toml
+# Example: Configure a coding agent
+[[agent]]
+name = "dev-alpha"
+dir = "my-project"           # Rig scope
+provider = "claude"          # Or: codex, gemini, cursor
+idle_timeout = "4h"
+
+# Configure agent pool for dynamic scaling
+[agent.pool]
+min = 1
+max = 5
+
+# Example: Include Gastown pack (optional - provides mayor, refinery, etc.)
+[[rigs]]
+name = "my-project"
+path = "/absolute/path/to/my-project"
+includes = ["packs/gastown"]  # If using Gastown conventions
+```
+
+### 4. Configure Coding Agent Provider
+
+Set up authentication for your chosen provider:
+
+**Claude:**
+```bash
+# Set API key
+export ANTHROPIC_API_KEY="your-api-key"
+
+# Or configure in city.toml
+```
+
+**Other providers:**
+- Follow provider-specific authentication setup
+- Some providers may require account configuration via `gc account` (check provider docs)
+
+### 5. Create Work Items
+
+Use beads to track work:
 
 ```bash
-# Initialize Dolt configuration
-gt dolt init
+cd ~/my-city/my-project
 
-# Start Dolt server (default port 3307)
-gt dolt start
-
-# Verify server is running
-gt dolt status
-```
-
-Expected output:
-```
-Dolt server: running
-Port: 3307
-Databases: 1
-  - gas_town_hq
-```
-
-### 4. Create a Rig (Project Workspace)
-
-Rigs are individual project workspaces within Gas Town:
-
-```bash
-# Create a new rig for your project
-gt rig create my-project
-
-# Navigate to rig
-cd rigs/my-project
-
-# Initialize beads in this rig
+# Initialize beads in the rig (if not done)
 bd init
 
-# Verify beads database
-bd status
-```
+# Create a work item
+bd create "Implement user authentication"
 
-### 5. Configure Jira Integration (Optional)
+# List work
+bd list
 
-For Jira→Aider autonomous workflow:
-
-```bash
-# Set Jira credentials
-export JIRA_URL="https://your-instance.atlassian.net"
-export JIRA_USER="your-email@example.com"
-export JIRA_TOKEN="your-api-token"
-
-# Configure beads Jira sync
-bd jira configure \
-  --url "$JIRA_URL" \
-  --user "$JIRA_USER" \
-  --token "$JIRA_TOKEN"
-
-# Test connection
-bd jira status
+# View details
+bd show 1
 ```
 
 ## Usage
 
-### Basic Workflow
+### Basic Workflow with Formulas & Orders
 
-#### 1. Import Issues from Jira
+Gas City uses **formulas** (agent-driven workflow) and **orders** (automation tasks) for orchestration.
 
-```bash
-# Sync Jira sprint to beads
-bd jira import --sprint "Sprint 48"
+#### Example: Exec Order (No Agent)
 
-# List imported issues
-bd list
-```
-
-#### 2. Assign Work to Agent
+For simple shell commands:
 
 ```bash
-# Sling work to an agent (creates agent session)
-gt sling --issue SRAI-1234 --agent polecat-alpha
-
-# Check agent status
-gt agents
+# Create exec order in city.toml or pack
+# Example: Automated git fetch
+[[order]]
+name = "fetch-upstream"
+type = "exec"
+command = "git fetch origin"
+trigger.cron = "*/5 * * * *"  # Every 5 minutes
 ```
 
-#### 3. Monitor Progress
+#### Example: Formula Order (Agent Work)
+
+For agent-driven tasks:
 
 ```bash
-# View agent activity
-gt trail polecat-alpha
+# Define formula that routes work to agents
+# Gas City resolves formulas; beads backend executes them
 
-# Check work status
-bd show SRAI-1234
+# Sling a bead to an agent with formula
+gc sling --issue 1 --agent dev-alpha --formula implement-feature
 ```
 
-#### 4. Review Changes
+### Work Routing
+
+#### Manual Sling
 
 ```bash
-# Agent will create a branch and commit
-git log --oneline -10
+# Assign work to a specific agent
+gc sling --issue PROJ-123 --agent dev-alpha
 
-# Review diff
-git diff origin/main
+# Sling with formula
+gc sling --issue PROJ-123 --formula auto-implement
 ```
 
-### Autonomous Jira→Aider Loop
-
-For fully autonomous operation, use the provided POC script:
+#### Attach to Agent Session
 
 ```bash
-# Create cron job (runs every 5 minutes)
-crontab -e
+# List active sessions
+gc session list
 
-# Add this line:
-*/5 * * * * cd ~/gas-town-hq/rigs/my-project && python3 jira_aider_poc.py >> ~/jira-aider.log 2>&1
+# Attach to agent session (if using Gastown pack)
+gc session attach mayor
+
+# Detach: Ctrl-b d (tmux)
 ```
 
-The POC script:
-1. Fetches open Jira tickets from your sprint
-2. Passes ticket context to Aider
-3. Aider autonomously makes changes
-4. Creates commit with ticket reference
-5. Pushes to remote branch
+### Monitor Progress
+
+```bash
+# Check city status
+gc status
+
+# View events
+gc events
+
+# Check bead status
+bd show PROJ-123
+
+# Review changes
+cd ~/my-city/my-project
+git log --oneline
+git diff
+```
+
+### Automation Patterns
+
+Instead of cron-based external scripts, use Gas City's built-in automation:
+
+#### Pattern 1: Formula-based Automation
+
+Define formulas in your pack or city config that describe agent workflows.
+
+#### Pattern 2: Order-based Automation
+
+Use orders for scheduled or event-triggered work:
+
+```toml
+# Example: Periodic issue sync
+[[order]]
+name = "sync-jira"
+type = "exec"
+command = "/path/to/jira-sync-script.sh"
+trigger.cron = "*/10 * * * *"
+
+# Example: Event-triggered build
+[[order]]
+name = "run-tests"
+type = "exec"
+command = "make test"
+trigger.event = "bead.closed"
+```
 
 ## Architecture
 
 ### Component Interaction
 
 ```
-┌─────────────┐
-│    Jira     │ ← Issue source
-└──────┬──────┘
+┌──────────────┐
+│    Jira /    │ ← Issue source (external)
+│  Issue Mgmt  │
+└──────┬───────┘
        │
        ▼
-┌─────────────┐
-│  Gas Town   │ ← Orchestration layer
-│     (gt)    │
-└──────┬──────┘
+┌──────────────┐
+│  Gas City    │ ← Orchestration layer
+│    (gc)      │   - Routing (sling)
+│              │   - Orders (automation)
+│              │   - Formulas (workflow)
+└──────┬───────┘
        │
-       ├──────────────┐
-       │              │
-       ▼              ▼
-┌─────────────┐  ┌──────────┐
-│   Beads     │  │  Agents  │
-│    (bd)     │  │ (Aider)  │
-└──────┬──────┘  └─────┬────┘
-       │                │
-       │                │
-       ▼                ▼
-┌─────────────────────────┐
-│      Dolt Server        │ ← Shared state
-│       (port 3307)       │
-└─────────────────────────┘
-       │
-       ▼
-┌─────────────────────────┐
-│     Git Repository      │ ← Code output
-└─────────────────────────┘
+       ├─────────────┐
+       │             │
+       ▼             ▼
+┌──────────┐  ┌─────────────┐
+│  Beads   │  │ Coding      │
+│  (bd)    │  │ Agents      │
+│          │  │ (Claude/etc)│
+└────┬─────┘  └──────┬──────┘
+     │               │
+     │               │
+     ▼               ▼
+┌──────────────────────────┐
+│     Dolt / File Store    │ ← Work state backend
+│      (or other backend)  │
+└──────────────────────────┘
+     │
+     ▼
+┌──────────────────────────┐
+│   Git Repository         │ ← Code output
+└──────────────────────────┘
 ```
 
 ### Data Flow
 
-1. **Jira** provides issue metadata (description, acceptance criteria, labels)
+1. **External source** (Jira, Linear, manual creation) provides work items
 2. **Beads** tracks work state and dependencies
-3. **Gas Town** dispatches work to agents
-4. **Aider** makes autonomous code changes
-5. **Dolt** persists all work state with version history
+3. **Gas City** orchestrates: routes work via sling, triggers orders, resolves formulas
+4. **Coding agent** (Claude, Codex, etc.) makes autonomous code changes
+5. **Backend** (Dolt or file) persists work state
 6. **Git** receives commits from agents
 
-## Known Issues
+## Configuration Reference
 
-> ⚠️ **Current Blockers:** The following issues were encountered during setup and may require upstream fixes.
+### City Config (`city.toml`)
 
-### Issue 1: Dolt Migration Timing
+Key sections:
 
-**Symptom:**
-```
-error="table not found: config"
-error="Duplicate key name 'idx_issues_issue_type'"
-```
+```toml
+# Rig registration
+[[rigs]]
+name = "project-name"
+path = "/absolute/path"
+includes = ["packs/gastown"]  # Optional
 
-**Analysis:**
-- Beads migration system attempts to re-run migrations against existing schema
-- Race condition: Beads queries config table before Dolt fully initialized
-- NOT data corruption - database integrity verified
+# Agent definition
+[[agent]]
+name = "dev-agent"
+dir = "project-name"     # Rig scope
+provider = "claude"
+idle_timeout = "4h"
 
-**Workaround:**
-None available. Requires upstream fix to Beads bootstrap logic.
+[agent.pool]
+min = 1
+max = 5
 
-**Reported:**
-- GitHub: gastownhall/beads (pending issue creation)
-- Investigation: `~/.openclaw/workspace/gas-city-findings.md`
+# Order definition
+[[order]]
+name = "cleanup"
+type = "exec"
+command = "make clean"
+trigger.cron = "0 2 * * *"
 
-### Issue 2: File Storage Backend Limitation
-
-**Symptom:**
-```bash
-bd --store-type file
-# Server starts but work queues don't function
-```
-
-**Analysis:**
-- File backend doesn't support beads/work queue features
-- Documented limitation, not a bug
-
-**Workaround:**
-Use Dolt backend (requires fixing Issue 1).
-
-### Issue 3: Foreign Key Constraints
-
-**Symptom:**
-```
-error="foreign key `fk_dep_depends_on` was not found"
+# Beads backend
+[beads]
+provider = "bd"  # Or "file" for simpler file-based storage
 ```
 
-**Analysis:**
-- Part of migration replay problem
-- Foreign keys exist but Beads tries to re-create them
+See [Gas City Config Reference](https://docs.gascityhall.com/reference/config) for full details.
 
-**Workaround:**
-Same as Issue 1 - requires upstream fix.
+### Provider Configuration
+
+Each coding agent provider has specific configuration needs. Consult provider documentation for:
+- API key setup
+- Model selection
+- Rate limiting
+- Custom parameters
 
 ## Troubleshooting
 
-### Dolt Server Won't Start
+### City Won't Start
 
 ```bash
-# Check for port conflicts
-sudo lsof -i :3307
+# Check prerequisites
+gc doctor
 
-# Kill imposters
-gt dolt kill-imposters
+# Check supervisor status
+gc supervisor status
 
-# Restart server
-gt dolt restart
+# View supervisor logs
+gc supervisor logs
+
+# Restart city
+gc stop
+gc start
 ```
 
-### Beads Database Errors
+### Beads Backend Errors
+
+**If using Dolt backend:**
 
 ```bash
-# Check database integrity
-cd ~/gas-town-hq/rigs/my-project
-dolt sql -q "SHOW TABLES;"
+# Check Dolt installation
+dolt version
 
-# Verify config table exists
-dolt sql -q "SELECT * FROM config;"
-
-# Check for uncommitted changes
+# Check database state
+cd ~/my-city/my-project
 dolt status
-dolt diff
+
+# Verify beads connection
+bd status
 ```
 
-### Agent Not Making Changes
+**Alternative: Switch to file backend:**
+
+```toml
+# In city.toml
+[beads]
+provider = "file"
+```
+
+Note: File backend is simpler but may have feature limitations compared to `bd` provider.
+
+### Agent Not Responding
 
 ```bash
-# Check Aider configuration
-aider --help
+# List active sessions
+gc session list
 
-# Verify git credentials
+# Check specific session
+gc session peek <session-name>
+
+# View session logs
+gc session logs <session-name>
+
+# Restart agent
+gc session stop <session-name>
+gc sling --issue <issue-id> --agent <agent-name>
+```
+
+### Git/Code Issues
+
+```bash
+# Verify git config
 git config --list | grep user
 
-# Check API keys (if using OpenAI/Anthropic)
-echo $OPENAI_API_KEY
-echo $ANTHROPIC_API_KEY
+# Check working directory state
+git status
+
+# Review recent commits
+git log --oneline -10
+
+# Check agent work directory
+# (defined in city.toml as work_dir for agent)
 ```
 
-### Jira Sync Issues
+## Integration Patterns
+
+### Jira Integration
+
+Use beads Jira commands or create sync orders:
 
 ```bash
-# Test Jira connection
-curl -u "$JIRA_USER:$JIRA_TOKEN" \
-  "$JIRA_URL/rest/api/3/myself" | jq
+# Manual Jira sync (if bd supports it)
+bd jira import --sprint "Sprint 48"
 
-# Check beads Jira config
-bd jira status
-
-# Re-authenticate if needed
-bd jira configure --reset
+# Or: Create sync order
+[[order]]
+name = "jira-sync"
+type = "exec"
+command = "/path/to/jira-import-script.sh"
+trigger.cron = "*/15 * * * *"
 ```
 
-## Alternative: Standalone POC
+### CI/CD Integration
 
-If Gas City setup is blocked, use the standalone POC:
+Trigger orders on Git events or schedule tests:
 
-### Setup
-
-```bash
-# Clone test repo
-git clone https://github.com/your-org/test-project.git
-cd test-project
-
-# Create POC script
-cat > jira_aider_poc.py << 'EOF'
-#!/usr/bin/env python3
-"""
-Autonomous Jira→Aider workflow (standalone)
-"""
-import os
-import json
-import requests
-from datetime import datetime
-
-# Configuration
-JIRA_URL = os.getenv("JIRA_URL")
-JIRA_USER = os.getenv("JIRA_USER") 
-JIRA_TOKEN = os.getenv("JIRA_TOKEN")
-PROJECT_KEY = os.getenv("JIRA_PROJECT", "SRAI")
-
-def fetch_todo_issues():
-    """Fetch TODO issues from current sprint"""
-    jql = f'project = {PROJECT_KEY} AND status = "To Do" ORDER BY priority DESC'
-    
-    response = requests.get(
-        f"{JIRA_URL}/rest/api/3/search",
-        auth=(JIRA_USER, JIRA_TOKEN),
-        params={"jql": jql, "maxResults": 5}
-    )
-    
-    return response.json().get("issues", [])
-
-def process_issue(issue):
-    """Pass issue to Aider for autonomous work"""
-    key = issue["key"]
-    summary = issue["fields"]["summary"]
-    description = issue["fields"].get("description", "")
-    
-    # Extract text from Atlassian Document Format
-    desc_text = ""
-    if description and "content" in description:
-        for block in description["content"]:
-            if block.get("type") == "paragraph":
-                for item in block.get("content", []):
-                    if item.get("type") == "text":
-                        desc_text += item.get("text", "")
-    
-    # Create Aider message
-    message = f"""
-    Issue: {key}
-    Summary: {summary}
-    
-    Description:
-    {desc_text}
-    
-    Please implement this feature/fix.
-    """
-    
-    # Call Aider
-    import subprocess
-    result = subprocess.run(
-        ["aider", "--yes", "--message", message],
-        capture_output=True,
-        text=True
-    )
-    
-    return result.returncode == 0
-
-if __name__ == "__main__":
-    issues = fetch_todo_issues()
-    
-    for issue in issues:
-        print(f"Processing {issue['key']}...")
-        success = process_issue(issue)
-        
-        if success:
-            print(f"  ✓ Completed {issue['key']}")
-        else:
-            print(f"  ✗ Failed {issue['key']}")
-        
-        # Only process one at a time
-        break
-EOF
-
-chmod +x jira_aider_poc.py
+```toml
+[[order]]
+name = "ci-check"
+type = "exec"
+command = "make ci"
+trigger.event = "bead.ready"
 ```
 
-### Run
+### Multi-Rig Setup
 
-```bash
-# Set environment
-export JIRA_URL="https://your-instance.atlassian.net"
-export JIRA_USER="your-email@example.com"
-export JIRA_TOKEN="your-api-token"
-export JIRA_PROJECT="SRAI"
+```toml
+# First rig
+[[rigs]]
+name = "frontend"
+path = "/path/to/frontend"
 
-# Run once
-python3 jira_aider_poc.py
+# Second rig
+[[rigs]]
+name = "backend"
+path = "/path/to/backend"
 
-# Or schedule via cron
-crontab -e
-# Add: */5 * * * * cd ~/test-project && python3 jira_aider_poc.py >> ~/aider.log 2>&1
+# Agent scoped to frontend
+[[agent]]
+name = "fe-dev"
+dir = "frontend"
+provider = "claude"
+
+# Agent scoped to backend
+[[agent]]
+name = "be-dev"
+dir = "backend"
+provider = "codex"
 ```
 
 ## Next Steps
 
-1. **Test the setup** - Follow this guide on a clean Ubuntu VM
-2. **Report blockers** - Open issues on gastownhall/beads and gastownhall/gastown
-3. **Document workarounds** - Update this guide as fixes become available
-4. **Validate POC** - Ensure standalone workflow works for April 21-22 demo
+1. **Explore packs** - Check Gas City's pack system for reusable configurations
+2. **Define formulas** - Create workflow automation for common tasks
+3. **Add orders** - Automate repetitive operations (testing, syncing, cleanup)
+4. **Scale agents** - Configure pools for dynamic agent scaling
+5. **Monitor & iterate** - Use `gc events` and `gc status` to observe and improve
 
 ## Resources
 
-- [Beads Documentation](https://github.com/gastownhall/beads/blob/main/README.md)
-- [Gas Town Documentation](https://github.com/gastownhall/gastown/blob/main/README.md)
-- [Dolt Documentation](https://docs.dolthub.com/)
-- [Aider Documentation](https://aider.chat/)
-- [DoltHub Blog: A Day in Gas Town](https://www.dolthub.com/blog/2026-01-15-a-day-in-gas-town/)
+- [Gas City Documentation](https://docs.gascityhall.com)
+- [Gas City Repository](https://github.com/gastownhall/gascity)
+- [Beads Documentation](https://github.com/gastownhall/beads)
+- [Coming from Gas Town Guide](https://github.com/gastownhall/gascity/blob/main/docs/getting-started/coming-from-gastown.md)
+- [Gas City Config Reference](https://docs.gascityhall.com/reference/config)
 
 ## Contributing
 
-Found a fix for one of the known issues? Please:
-
-1. Fork this repo
-2. Update this guide with your solution
-3. Open a PR with details
-4. Reference the original issue
-
-## License
-
-This guide is part of the Software Factory Intensive curriculum.
+Found an issue or have improvements? Please open an issue or PR in the [software-factory-intensive](https://github.com/actual-software/software-factory-intensive) repository.
