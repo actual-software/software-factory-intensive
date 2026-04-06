@@ -30,18 +30,9 @@ Gas City is an orchestration-builder SDK for multi-agent coding workflows. It co
 
 ### Required Tools
 
-**macOS:**
+**macOS (recommended — installs all dependencies automatically):**
 ```bash
-# Core dependencies (always required)
-brew install tmux git jq
-
-# Beads backend (default provider)
-brew install dolt flock
-
-# Install beads from releases
-brew install gastownhall/beads/beads
-
-# Install Gas City
+# Install Gas City (pulls in tmux, jq, git, dolt, flock, bd automatically)
 brew install gastownhall/gascity/gascity
 ```
 
@@ -133,28 +124,27 @@ gc status
 
 ### 2. Add Your First Rig
 
-Register a project repository as a rig:
+Register a project repository as a rig. Rigs stay at their original path on disk —
+they are not copied or symlinked into the city directory.
 
 ```bash
-# Create or navigate to your project
-mkdir ~/my-project
-cd ~/my-project
-git init
+# Create a project (or use an existing git repo)
+mkdir ~/my-project && cd ~/my-project && git init
 
-# Add it as a rig
-gc rig add .
-
-# Or add an existing repo
+# From within the city directory, add the rig
 cd ~/my-city
-gc rig add ~/path/to/existing-repo --name my-existing-project
+gc rig add ~/my-project
+
+# This initializes beads, hooks, and cross-rig routing in the project
 ```
 
-### 3. Configure City Settings
+### 3. Review Generated City Settings
 
-Edit `~/my-city/city.toml` to customize your setup:
+`gc init` generates a `city.toml` with sensible defaults based on your template
+and agent choices. You can customize it further if needed:
 
 ```toml
-# Example: Configure a coding agent
+# Example: Add a rig-scoped coding agent
 [[agent]]
 name = "dev-alpha"
 dir = "my-project"           # Rig scope
@@ -165,12 +155,12 @@ idle_timeout = "4h"
 [agent.pool]
 min = 1
 max = 5
+```
 
-# Example: Include Gastown pack (optional - provides mayor, refinery, etc.)
-[[rigs]]
-name = "my-project"
-path = "/absolute/path/to/my-project"
-includes = ["packs/gastown"]  # If using Gastown conventions
+To add a rig with a Gastown pack (multi-agent orchestration):
+
+```bash
+gc rig add ~/path/to/my-project --include packs/gastown
 ```
 
 ### 4. Configure Coding Agent Provider
@@ -191,13 +181,12 @@ export ANTHROPIC_API_KEY="your-api-key"
 
 ### 5. Create Work Items
 
-Use beads to track work:
+Use beads to track work. Note: `gc rig add` already initializes beads in the rig,
+so `bd init` is not needed if you added the rig via `gc rig add`.
 
 ```bash
-cd ~/my-city/my-project
-
-# Initialize beads in the rig (if not done)
-bd init
+# Navigate to the rig's actual path (not inside the city directory)
+cd ~/my-project
 
 # Create a work item
 bd create "Implement user authentication"
@@ -205,8 +194,8 @@ bd create "Implement user authentication"
 # List work
 bd list
 
-# View details
-bd show 1
+# View details (beads uses prefixed IDs like "tp-r3a", not numeric IDs)
+bd show <bead-id>
 ```
 
 ## Usage
@@ -217,16 +206,20 @@ Gas City uses **formulas** (agent-driven workflow) and **orders** (automation ta
 
 #### Example: Exec Order (No Agent)
 
-For simple shell commands:
+Orders are defined as individual `order.toml` files in the `orders/` directory:
 
 ```bash
-# Create exec order in city.toml or pack
-# Example: Automated git fetch
-[[order]]
-name = "fetch-upstream"
-type = "exec"
-command = "git fetch origin"
-trigger.cron = "*/5 * * * *"  # Every 5 minutes
+# Create orders/fetch-upstream/order.toml
+mkdir -p ~/my-city/orders/fetch-upstream
+```
+
+```toml
+# orders/fetch-upstream/order.toml
+[order]
+description = "Fetch latest from upstream"
+gate = "cooldown"
+interval = "5m"
+exec = "git fetch origin"
 ```
 
 #### Example: Formula Order (Agent Work)
@@ -234,11 +227,14 @@ trigger.cron = "*/5 * * * *"  # Every 5 minutes
 For agent-driven tasks:
 
 ```bash
-# Define formula that routes work to agents
-# Gas City resolves formulas; beads backend executes them
+# Sling a bead to an agent
+gc sling dev-alpha tp-r3a
 
-# Sling a bead to an agent with formula
-gc sling --issue 1 --agent dev-alpha --formula implement-feature
+# Sling with a formula (instantiates a wisp)
+gc sling dev-alpha implement-feature --formula
+
+# Sling inline text (auto-creates a bead)
+gc sling dev-alpha "Add login endpoint"
 ```
 
 ### Work Routing
@@ -246,11 +242,11 @@ gc sling --issue 1 --agent dev-alpha --formula implement-feature
 #### Manual Sling
 
 ```bash
-# Assign work to a specific agent
-gc sling --issue PROJ-123 --agent dev-alpha
+# Route a bead to a specific agent
+gc sling dev-alpha PROJ-123
 
 # Sling with formula
-gc sling --issue PROJ-123 --formula auto-implement
+gc sling dev-alpha auto-implement --formula
 ```
 
 #### Attach to Agent Session
@@ -277,8 +273,8 @@ gc events
 # Check bead status
 bd show PROJ-123
 
-# Review changes
-cd ~/my-city/my-project
+# Review changes in the rig's actual directory
+cd ~/my-project
 git log --oneline
 git diff
 ```
@@ -293,22 +289,25 @@ Define formulas in your pack or city config that describe agent workflows.
 
 #### Pattern 2: Order-based Automation
 
-Use orders for scheduled or event-triggered work:
+Orders live in `orders/<name>/order.toml` (or `formulas/orders/<name>/order.toml`
+in packs). The controller evaluates gate conditions and dispatches automatically.
 
 ```toml
-# Example: Periodic issue sync
-[[order]]
-name = "sync-jira"
-type = "exec"
-command = "/path/to/jira-sync-script.sh"
-trigger.cron = "*/10 * * * *"
+# orders/sync-jira/order.toml
+[order]
+description = "Sync beads with Jira"
+gate = "cooldown"
+interval = "10m"
+exec = "bd jira sync"
+```
 
-# Example: Event-triggered build
-[[order]]
-name = "run-tests"
-type = "exec"
-command = "make test"
-trigger.event = "bead.closed"
+```toml
+# orders/run-tests/order.toml
+[order]
+description = "Run tests after work completes"
+gate = "cooldown"
+interval = "30m"
+exec = "make test"
 ```
 
 ## Architecture
@@ -384,12 +383,8 @@ idle_timeout = "4h"
 min = 1
 max = 5
 
-# Order definition
-[[order]]
-name = "cleanup"
-type = "exec"
-command = "make clean"
-trigger.cron = "0 2 * * *"
+# Orders are defined in orders/<name>/order.toml, not in city.toml.
+# See the Automation Patterns section for examples.
 
 # Beads backend
 [beads]
@@ -433,8 +428,8 @@ gc start
 # Check Dolt installation
 dolt version
 
-# Check database state
-cd ~/my-city/my-project
+# Check database state (from the rig's actual path)
+cd ~/my-project
 dolt status
 
 # Verify beads connection
@@ -465,7 +460,7 @@ gc session logs <session-name>
 
 # Restart agent
 gc session stop <session-name>
-gc sling --issue <issue-id> --agent <agent-name>
+gc sling <agent-name> <bead-id>
 ```
 
 ### Git/Code Issues
@@ -488,30 +483,55 @@ git log --oneline -10
 
 ### Jira Integration
 
-Use beads Jira commands or create sync orders:
+Beads has built-in Jira sync. First configure it:
 
 ```bash
-# Manual Jira sync (if bd supports it)
-bd jira import --sprint "Sprint 48"
+bd config set jira.url "https://your-company.atlassian.net"
+bd config set jira.project "PROJ"
+bd config set jira.api_token "YOUR_TOKEN"
+bd config set jira.username "your_email@company.com"
+```
 
-# Or: Create sync order
-[[order]]
-name = "jira-sync"
-type = "exec"
-command = "/path/to/jira-import-script.sh"
-trigger.cron = "*/15 * * * *"
+Then sync:
+
+```bash
+# Import issues from Jira
+bd jira sync --pull
+
+# Export beads to Jira
+bd jira sync --push
+
+# Bidirectional sync
+bd jira sync
+
+# Preview without changes
+bd jira sync --dry-run
+
+# Check sync status
+bd jira status
+```
+
+For automated periodic sync, create an order in `orders/jira-sync/order.toml`:
+
+```toml
+[order]
+description = "Sync beads with Jira"
+gate = "cooldown"
+interval = "15m"
+exec = "bd jira sync"
 ```
 
 ### CI/CD Integration
 
-Trigger orders on Git events or schedule tests:
+Schedule test runs via orders:
 
 ```toml
-[[order]]
-name = "ci-check"
-type = "exec"
-command = "make ci"
-trigger.event = "bead.ready"
+# orders/ci-check/order.toml
+[order]
+description = "Run CI checks periodically"
+gate = "cooldown"
+interval = "30m"
+exec = "make ci"
 ```
 
 ### Multi-Rig Setup
