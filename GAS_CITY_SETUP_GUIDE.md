@@ -1,515 +1,406 @@
 # Gas City Setup Guide: Jira→Agent→PR Automation
 
-> **Goal:** Set up an autonomous workflow where Jira tickets automatically flow through Gas City to a coding agent, get implemented, and sync results back to Jira—no manual commands after initial setup.
+> **Goal:** Set up an autonomous workflow where a `[gas-city-poc]` comment on a Jira ticket triggers a Gas City coding agent to implement the work, push changes, and comment results back on Jira—no manual commands after initial setup.
 
 ## What You'll Build
 
 ```
-Jira Ticket Created
+User comments [gas-city-poc] on Jira ticket
       ↓
-Gas City Order (periodic sync)
+Gas City Order (polls Jira comments every 2 min)
       ↓
-Bead Created in Gas City
+Script acknowledges on Jira, slings bead to agent
       ↓
-Formula Routes to Coding Agent
+Coding Agent implements changes
       ↓
-Agent Implements Changes
+Git Commit + Push + PR
       ↓
-Git Commit + Push
-      ↓
-Results Sync Back to Jira
+Results posted back to Jira
 ```
-
-**Expected Time:** 30-45 minutes
 
 ## Prerequisites
 
 - macOS or Linux with admin rights
-- A Jira instance with API access
+- A Jira Cloud instance with API access
 - A Git repository to work on
-- Claude Code CLI (or Codex/Cursor/Gemini)
+- An Anthropic API key (for Claude Code) or equivalent for your chosen agent
 
 ## Step 1: Install Gas City
 
-**macOS:**
+**macOS (one command installs everything):**
 ```bash
-# One command installs everything (Gas City, beads, dolt, tmux, jq, git)
 brew install gastownhall/gascity/gascity
-
-# Verify
-gc version
-bd --version
-dolt version
 ```
+
+This pulls in all dependencies: `gc`, `bd` (beads CLI), `dolt`, `tmux`, `jq`, `git`, `flock`.
 
 **Linux (Ubuntu/Debian):**
 ```bash
-# Install dependencies
 sudo apt-get update && sudo apt-get install -y tmux git jq procps lsof util-linux
-
-# Install Dolt
 sudo curl -L https://github.com/dolthub/dolt/releases/latest/download/install.sh | sudo bash
 
-# Build and install beads + Gas City
 git clone https://github.com/gastownhall/beads.git /tmp/beads
 cd /tmp/beads && make install
 
 git clone https://github.com/gastownhall/gascity.git /tmp/gascity
 cd /tmp/gascity && make install
+```
 
-# Verify
-gc version
-bd --version
+**Verify:**
+```bash
+gc version       # e.g. 0.13.4
+bd --version     # e.g. bd version 0.63.3
+dolt version     # e.g. dolt version 1.85.0
+tmux -V          # e.g. tmux 3.6a
 ```
 
 ## Step 2: Initialize Your City
 
-The `gc init` wizard sets up everything interactively:
-
 ```bash
-# Create city workspace
-gc init ~/my-software-factory
-
-# Follow the wizard:
-# - Choose "tutorial" template (sets up Claude Code agent by default)
-# - Accept default paths
-# - Let it configure the beads backend
-
-# Verify city is running
-gc status
+gc init ~/my-city
 ```
 
-**What this creates:**
-- `~/my-software-factory/city.toml` - Main config
-- `~/my-software-factory/orders/` - Automation definitions
-- `~/my-software-factory/.gc/` - Runtime state
-- Dolt server running on port 3307 (default)
+The interactive wizard will prompt you to:
+1. Choose a config template — select **tutorial** (default)
+2. Choose a coding agent — select **Claude Code** (default)
 
-## Step 3: Add Your Repository
+Then verify:
+```bash
+gc status ~/my-city
+```
 
-Point Gas City to your actual codebase:
+You should see the city running with a `mayor` agent and a `claude` pool.
+
+## Step 3: Add Your Repository as a Rig
+
+Run from **inside the city directory** (gc walks up from cwd to find city.toml):
 
 ```bash
-# Add your repo as a rig (name auto-derived from directory)
-cd ~/my-actual-project
-gc rig add .
+cd ~/my-city
+gc rig add ~/path/to/your-repo
+```
 
-# Verify
+Rigs stay at their original filesystem location — Gas City registers them by path, it doesn't copy or move anything.
+
+Verify:
+```bash
 gc rig list
 ```
 
-**Important:** Rigs stay at their original filesystem location—Gas City doesn't copy or move them.
+## Step 4: Add a Coding Agent for Your Rig
 
-## Step 4: Configure Jira Sync
+Edit `~/my-city/city.toml` to add an agent scoped to your rig:
 
-Set up beads to sync with your Jira instance:
+```toml
+[[agent]]
+name = "dev-agent"
+dir = "your-repo-name"       # Must match the rig name from gc rig list
+provider = "claude"
+idle_timeout = "4h"
+```
+
+The rig name is auto-derived from the directory name. Check `gc rig list` to confirm.
+
+**Provider auth** — set your API key so the agent can use Claude:
+```bash
+export ANTHROPIC_API_KEY="sk-ant-..."
+```
+
+Verify the agent appears:
+```bash
+cd ~/my-city && gc status
+```
+
+## Step 5: Configure Jira Sync
+
+From your **rig directory** (not the city directory), configure beads to talk to Jira:
 
 ```bash
-# Configure Jira connection
+cd ~/path/to/your-repo
+
 bd config set jira.url "https://your-company.atlassian.net"
 bd config set jira.username "your-email@company.com"
-bd config set jira.api_token "your-jira-api-token"
-bd config set jira.project "PROJ"  # Your Jira project key
+bd config set jira.api_token "YOUR_JIRA_API_TOKEN"
+bd config set jira.project "PROJ"
+```
 
-# Test connection
+**Get a Jira API token:** https://id.atlassian.com/manage-profile/security/api-tokens
+
+Test the connection:
+```bash
 bd jira sync --pull --dry-run
+```
 
-# If successful, do real sync
+If it lists tickets, do the real sync:
+```bash
 bd jira sync --pull
 ```
 
-**Get your Jira API token:**
-1. Go to https://id.atlassian.com/manage-profile/security/api-tokens
-2. Create API token
-3. Use it in the `bd config set` command above
+Verify beads were created:
+```bash
+bd list
+```
 
-## Step 5: Create the Jira Sync Order
+## Step 6: Create the Jira Sync Order
 
-Orders are Gas City's automation primitive. Create one to periodically sync Jira:
+Orders automate periodic tasks. Create one to keep beads in sync with Jira:
 
 ```bash
-cd ~/my-software-factory
-
-# Create order directory
+cd ~/my-city
 mkdir -p orders/jira-sync
-
-# Create order config
 cat > orders/jira-sync/order.toml << 'EOF'
-# Periodic Jira sync order
-interval = "5m"  # Run every 5 minutes
-
-[exec]
-# Pull new tickets from Jira
-command = "bd jira sync --pull"
-
-[gate.cooldown]
-# Don't run more than once per minute (safety)
-duration = "1m"
+[order]
+description = "Pull new and updated tickets from Jira"
+gate = "cooldown"
+interval = "5m"
+exec = "cd /absolute/path/to/your-repo && bd jira sync --pull"
 EOF
+```
 
-# Verify order is recognized
+**Important:** Use the absolute path to your rig in the `exec` command, since `bd` needs to find the rig's `.beads` database.
+
+Verify the order is recognized:
+```bash
 gc order list
 ```
 
-**What this does:**
-- Every 5 minutes, Gas City runs `bd jira sync --pull`
-- New Jira tickets become beads in Gas City
-- Cooldown gate prevents excessive API calls
+## Step 7: Create the Comment-Trigger Script
 
-## Step 6: Configure Agent for Auto-Implementation
+Gas City's `bd jira sync` imports tickets but not comments. To trigger work from Jira comments tagged `[gas-city-poc]`, we need a polling script.
 
-Edit `~/my-software-factory/city.toml` to set up your coding agent:
-
-```toml
-# Find the [[agent]] section (created by gc init wizard)
-[[agent]]
-name = "dev-agent"
-dir = "my-actual-project"    # Must match your rig name
-provider = "claude"           # Or: codex, cursor, gemini
-idle_timeout = "4h"
-
-# Enable auto-implementation (requires formula configuration)
-# See Step 7
-```
-
-**Provider auth:**
-```bash
-# Claude Code
-export ANTHROPIC_API_KEY="sk-ant-..."
-
-# Codex (if using)
-# export CODEX_API_KEY="..."
-
-# Verify agent can start
-gc session list
-```
-
-## Step 7: Create Auto-Implementation Formula
-
-Formulas define agent workflows. Create one that implements beads automatically:
+Create `~/my-city/scripts/jira-comment-poll.sh`:
 
 ```bash
-cd ~/my-software-factory
+mkdir -p ~/my-city/scripts
+cat > ~/my-city/scripts/jira-comment-poll.sh << 'SCRIPT'
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Create formulas directory if needed
-mkdir -p formulas
+# === CONFIGURE THESE ===
+CITY_DIR="$HOME/my-city"
+RIG_DIR="/absolute/path/to/your-repo"
+AGENT_TARGET="your-repo-name/dev-agent"   # rig-name/agent-name
+# ========================
 
-# Create auto-implement formula
-cat > formulas/auto-implement.toml << 'EOF'
-# Auto-implementation formula
-# Routes ready beads to coding agent
+STATE_FILE="${HOME}/.gc-jira-poc-state.json"
 
-[[step]]
-# Check if bead is ready (no blockers, in "Todo" state)
-type = "check"
-condition = "state == 'Todo' && !blocked"
+JIRA_URL="$(cd "$RIG_DIR" && bd config get jira.url)"
+JIRA_USER="$(cd "$RIG_DIR" && bd config get jira.username)"
+JIRA_TOKEN="$(cd "$RIG_DIR" && bd config get jira.api_token)"
 
-[[step]]
-# Route to dev-agent
-type = "sling"
-target = "dev-agent"
+if echo "$JIRA_TOKEN" | grep -q "(not set)"; then
+    echo "ERROR: Jira not configured in rig" >&2; exit 1
+fi
 
-[[step]]
-# Agent implements (autonomous coding)
-type = "implement"
-auto_commit = true
+[ -f "$STATE_FILE" ] || echo '{}' > "$STATE_FILE"
 
-[[step]]
-# Push changes
-type = "exec"
-command = "git push origin HEAD"
+cd "$RIG_DIR"
+bd list --json 2>/dev/null | \
+  jq -c '.[] | select(.metadata.source_system // "" | startswith("jira:"))' | \
+while read -r bead; do
+    bead_id=$(echo "$bead" | jq -r '.id')
+    jira_key=$(echo "$bead" | jq -r '.metadata.source_system' | awk -F: '{print $3}')
+    [ -n "$jira_key" ] || continue
 
-[[step]]
-# Update bead state
-type = "transition"
-state = "Done"
+    last=$(jq -r --arg k "$jira_key" '.[$k] // empty' "$STATE_FILE")
+
+    comments=$(curl -sf -u "${JIRA_USER}:${JIRA_TOKEN}" \
+        -H "Accept: application/json" \
+        "${JIRA_URL}/rest/api/3/issue/${jira_key}/comment" || echo '{}')
+
+    match=$(echo "$comments" | jq -r '
+        [.comments[]? |
+         {id: .id, created: .created,
+          text: ([.body.content[]?.content[]? | select(.type=="text") | .text] | join(""))} |
+         select(.text | contains("[gas-city-poc]"))] |
+        sort_by(.created) | last // empty')
+
+    [ -n "$match" ] && [ "$match" != "null" ] || continue
+
+    cid=$(echo "$match" | jq -r '.id')
+    [ "$last" != "$cid" ] || continue
+
+    cmd=$(echo "$match" | jq -r '.text' | sed 's/\[gas-city-poc\]//g' | xargs)
+    echo "$(date -u +%FT%TZ) [${jira_key}] → ${cmd}"
+
+    # Acknowledge on Jira
+    ack=$(jq -n '{body:{type:"doc",version:1,content:[{type:"paragraph",content:[{type:"text",text:("Gas City received and routing to agent:\n"+$c)}]}]}}' --arg c "$cmd")
+    curl -sf -u "${JIRA_USER}:${JIRA_TOKEN}" -H "Content-Type: application/json" \
+        -X POST -d "$ack" "${JIRA_URL}/rest/api/3/issue/${jira_key}/comment" >/dev/null || true
+
+    # Add context to bead and sling to agent
+    bd comments add "$bead_id" "[gas-city-poc] ${cmd}" 2>/dev/null || true
+    gc sling "$AGENT_TARGET" "$bead_id" --city "$CITY_DIR" 2>&1 || true
+
+    # Mark processed
+    jq --arg k "$jira_key" --arg c "$cid" '. + {($k): $c}' "$STATE_FILE" > "${STATE_FILE}.tmp" \
+        && mv "${STATE_FILE}.tmp" "$STATE_FILE"
+done
+
+echo "$(date -u +%FT%TZ) Poll complete"
+SCRIPT
+chmod +x ~/my-city/scripts/jira-comment-poll.sh
+```
+
+**Edit the three config variables** at the top of the script to match your setup.
+
+## Step 8: Create the Comment-Poll Order
+
+Wire the script into Gas City as a periodic order:
+
+```bash
+cd ~/my-city
+mkdir -p orders/jira-comment-poll
+cat > orders/jira-comment-poll/order.toml << 'EOF'
+[order]
+description = "Poll Jira comments for [gas-city-poc] commands and route to agents"
+gate = "cooldown"
+interval = "2m"
+exec = "$GC_CITY_ROOT/scripts/jira-comment-poll.sh"
 EOF
 ```
 
-## Step 8: Link Formula to Jira-Synced Beads
-
-Configure beads created from Jira to automatically trigger the formula:
-
+Verify both orders:
 ```bash
-# Edit beads config
-bd config set formula.auto "auto-implement"
-
-# Or: add label-based routing
-bd config set formula.on_label "auto-implement=auto-implement"
-
-# Verify
-bd config list | grep formula
+gc order list
 ```
 
-**What this means:**
-- New beads from Jira with label "auto-implement" → formula triggers
-- Or: all new beads → formula triggers (if using `formula.auto`)
+You should see:
+```
+NAME                 TYPE     GATE         INTERVAL/SCHED  POOL
+jira-comment-poll    exec     cooldown     2m              -
+jira-sync            exec     cooldown     5m              -
+```
 
 ## Step 9: Test End-to-End
 
-Time to verify the full pipeline works:
+### 9.1: Verify Orders Run
 
-### 9.1: Create Test Jira Ticket
+Manually trigger the Jira sync order to confirm it works:
+```bash
+gc order run jira-sync
+```
 
-In your Jira instance:
-1. Create a new ticket in your project
-2. Set status to "Todo"
-3. Add label "auto-implement" (if using label-based routing)
-4. Description: "Add a hello world function to utils.py"
+Then manually run the comment poll:
+```bash
+bash ~/my-city/scripts/jira-comment-poll.sh
+```
 
-### 9.2: Watch It Flow
+If there are no `[gas-city-poc]` comments yet, it should print `Poll complete` with no matches.
+
+### 9.2: Trigger from Jira
+
+Go to a Jira ticket in your project and add a comment:
+```
+[gas-city-poc] Add a hello world function to utils.py
+```
+
+Wait up to 2 minutes (or manually run the poll script again). You should see:
+1. The script finds the comment and prints the command
+2. An acknowledgment comment appears on the Jira ticket
+3. The bead is slung to the agent
+
+### 9.3: Monitor
 
 ```bash
-# Watch for Jira sync (should happen within 5 minutes)
+# Watch events in real time
 gc events --follow
 
-# Check if bead was created
-bd list --state Todo
-
-# Check if agent picked it up
+# Check agent session
 gc session list
-
-# Watch agent session
 gc session peek dev-agent
 
-# Check for new commits
-cd ~/my-actual-project
-git log --oneline -5
+# View order execution history
+gc order history jira-comment-poll
+
+# Check bead status
+cd ~/path/to/your-repo && bd list
 ```
 
-### 9.3: Verify Jira Update
-
-Check your Jira ticket—it should now have:
-- Comment from Gas City with commit link
-- Status updated to "Done" (or your configured state)
-
-## Step 10: Monitor & Iterate
+### 9.4: Stop the Agent (if needed)
 
 ```bash
-# View all automation activity
-gc events --since 1h
-
-# Check order execution history
-gc order logs jira-sync
-
-# View agent logs
-gc session logs dev-agent
-
-# Check beads state
-bd list --state all
+gc session suspend <session-id>   # Pause, can resume later
+gc session close <session-id>     # Stop permanently
 ```
+
+Get the session ID from `gc session list`.
 
 ## Troubleshooting
 
-### Jira sync not running
+### gc rig add fails with "no such file: city.toml"
+
+You must run `gc rig add` from inside the city directory, or pass `--city ~/my-city`.
+
+### bd config / bd jira commands fail with "no beads database found"
+
+Run `bd` commands from inside the rig directory (where `.beads/` lives), not the city directory.
+
+### Order not running
 
 ```bash
-# Check order status
-gc order list
-
-# Check cooldown gate (might be preventing execution)
-gc order inspect jira-sync
-
-# Manually trigger
-bd jira sync --pull
+gc order list              # Is it listed?
+gc order show <name>       # Check config
+gc order run <name>        # Manual trigger
+gc order history <name>    # Execution history
 ```
 
-### Agent not picking up beads
+### Agent not picking up work
 
 ```bash
-# Check formula configuration
-cat ~/my-software-factory/formulas/auto-implement.toml
-
-# Verify beads have correct label/state
-bd list --state Todo
-
-# Check agent is running
-gc session list
-
-# Manually sling bead to agent
-gc sling dev-agent "tp-xyz"  # Use actual bead ID
+gc status                       # Is the agent running?
+gc session list                 # Active sessions?
+gc session peek <session-id>    # What's it doing?
+gc doctor                       # Diagnose issues
 ```
 
-### Commits not pushing
+### Jira comment not detected
 
 ```bash
-# Check git credentials
-cd ~/my-actual-project
-git push origin HEAD
+# Run poll script manually with verbose output
+bash -x ~/my-city/scripts/jira-comment-poll.sh
 
-# Verify agent has git access
-gc session attach dev-agent
-# Inside agent session:
-git config --list | grep user
-```
+# Check state file (shows processed comment IDs)
+cat ~/.gc-jira-poc-state.json
 
-### Formula not triggering
-
-```bash
-# Check beads config
-bd config list | grep formula
-
-# Verify order is running
-gc order logs jira-sync
-
-# Check events for formula evaluation
-gc events | grep formula
-```
-
-## What You've Built
-
-You now have a fully autonomous software development pipeline:
-
-1. **Jira ticket created** → `bd jira sync --pull` (every 5 min)
-2. **Bead created in Gas City** → formula evaluates conditions
-3. **Formula routes to agent** → `gc sling dev-agent <bead>`
-4. **Agent implements changes** → Claude Code writes code
-5. **Auto-commit and push** → changes appear in Git
-6. **Jira updated automatically** → ticket status changes, comment added
-
-## Next Steps
-
-### Scale Up
-
-```bash
-# Add more agents for parallelism
-# Edit city.toml:
-[[agent]]
-name = "dev-agent-2"
-dir = "my-actual-project"
-provider = "claude"
-
-[agent.pool]
-min = 1
-max = 5  # Auto-scale up to 5 agents
-```
-
-### Add More Orders
-
-```bash
-# Example: Run tests after implementation
-mkdir -p orders/run-tests
-cat > orders/run-tests/order.toml << 'EOF'
-interval = "10m"
-
-[exec]
-command = "cd ~/my-actual-project && make test"
-
-[gate.event]
-type = "bead.closed"
-EOF
-```
-
-### Multi-Rig Setup
-
-```bash
-# Add another repository
-cd ~/my-frontend-repo
-gc rig add .
-
-# Add rig-specific agent
-# Edit city.toml:
-[[agent]]
-name = "frontend-agent"
-dir = "my-frontend-repo"
-provider = "claude"
-```
-
-### Custom Formulas
-
-Create specialized formulas for different types of work:
-
-```bash
-# Example: bug-fix formula (higher priority)
-cat > formulas/bug-fix.toml << 'EOF'
-[[step]]
-type = "check"
-condition = "labels contains 'bug'"
-
-[[step]]
-type = "sling"
-target = "dev-agent"
-priority = "high"
-
-[[step]]
-type = "implement"
-auto_commit = true
-EOF
+# Reset state to reprocess all comments
+echo '{}' > ~/.gc-jira-poc-state.json
 ```
 
 ## Reference Commands
 
-**City Management:**
-```bash
-gc start              # Start city supervisor
-gc stop               # Stop city
-gc status             # Show city status
-gc events             # View event log
-```
-
-**Rig Management:**
-```bash
-gc rig add <path>     # Add repository
-gc rig list           # List rigs
-gc rig remove <name>  # Remove rig
-```
-
-**Order Management:**
-```bash
-gc order list         # List orders
-gc order logs <name>  # View order execution logs
-gc order inspect <name> # Show order details
-```
-
-**Agent/Session Management:**
-```bash
-gc session list       # List active sessions
-gc session attach <name>  # Attach to agent session (tmux)
-gc session logs <name>    # View agent logs
-gc session peek <name>    # View agent output
-```
-
-**Beads Management:**
-```bash
-bd list                    # List beads
-bd show <id>              # Show bead details
-bd jira sync --pull       # Sync from Jira
-bd config set <key> <val> # Configure beads
-```
-
-**Sling (Manual Work Routing):**
-```bash
-gc sling <target> <bead-or-text>  # Route work to agent
-# Example: gc sling dev-agent "tp-abc"
-# Example: gc sling dev-agent "Implement login feature"
-```
+| Command | Description |
+|---------|-------------|
+| `gc init <path>` | Create a new city |
+| `gc start` / `gc stop` | Start/stop city |
+| `gc status` | Show city and agent status |
+| `gc rig add <path>` | Register a repository |
+| `gc rig list` | List registered rigs |
+| `gc sling <target> <bead>` | Route work to an agent |
+| `gc session list` | List active sessions |
+| `gc session peek <id>` | View agent output |
+| `gc session suspend <id>` | Pause a session |
+| `gc session close <id>` | Stop a session permanently |
+| `gc events` | View event log |
+| `gc events --follow` | Stream events in real time |
+| `gc order list` | List automation orders |
+| `gc order run <name>` | Manually trigger an order |
+| `gc order history <name>` | View order execution log |
+| `gc doctor` | Diagnose city health |
+| `bd list` | List beads (work items) |
+| `bd show <id>` | Show bead details |
+| `bd jira sync --pull` | Import from Jira |
+| `bd jira sync --push` | Export to Jira |
+| `bd jira status` | Show Jira sync status |
+| `bd config set <key> <val>` | Configure beads |
 
 ## Resources
 
 - [Gas City Documentation](https://docs.gascityhall.com)
 - [Gas City Repository](https://github.com/gastownhall/gascity)
 - [Beads Documentation](https://github.com/gastownhall/beads)
-- [Coming from Gas Town Guide](https://github.com/gastownhall/gascity/blob/main/docs/getting-started/coming-from-gastown.md)
-
-## Advanced Topics
-
-For production deployments, multi-team setups, and advanced configuration, see:
-
-- **Packs:** Reusable configuration bundles
-- **Provider Configuration:** Custom model parameters, rate limiting
-- **Kubernetes Deployment:** Running Gas City at scale
-- **Security:** API key management, agent sandboxing
-- **Observability:** Metrics, dashboards, alerting
-
-These topics are covered in the full Gas City documentation.
+- [Gas City Installation Guide](https://github.com/gastownhall/gascity/blob/main/docs/getting-started/installation.md)
 
 ## Contributing
 
 Found an issue? Please open an issue or PR in the [software-factory-intensive](https://github.com/actual-software/software-factory-intensive) repository.
-
----
-
-**Related:**
-- SRAI-1657: Gas City PoC demo (working implementation)
-- SRAI-1685: This setup guide
-- `examples/jira-aider-poc.py`: Pre-Gas City validation script
