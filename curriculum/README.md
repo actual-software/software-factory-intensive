@@ -27,17 +27,17 @@ Reference Project: Fired Up Pizza · 50 participants · 10 pods x 5
 
 ## Activity Overview
 
-| ID | Day | Time | Type | Title | Theme |
-|----|-----|------|------|-------|-------|
-| [W1](workshops/W1-optimize-individual-workflow.md) | Day 1 | 10:30-11:30 | WORKSHOP | Optimize the Individual AI Workflow | Human-AI loop mastery |
-| [L1](labs/L1-build-structured-dev-loop.md) | Day 1 | 11:30-12:30 | LAB | Build a Structured Development Loop | Repeatability over brilliance |
-| [W2](workshops/W2-design-6-agent-factory.md) | Day 1 | 1:30-2:15 | WORKSHOP | Design the 6-Agent Software Factory | Architecture before automation |
-| [L2](labs/L2-deploy-planner-architect.md) | Day 1 | 2:15-3:30 | LAB | Deploy Planner + Architect Agents | Front two stages go live |
-| [L3](labs/L3-deploy-designer-coder.md) | Day 1 | 3:45-5:00 | LAB | Deploy Designer + Coder Agents | Creative middle stages live |
-| [W3](workshops/W3-architect-multi-agent-coordination.md) | Day 2 | 9:30-10:15 | WORKSHOP | Architect Multi-Agent Coordination | Orchestration patterns |
-| [L4](labs/L4-deploy-reviewer-devops.md) | Day 2 | 10:30-11:45 | LAB | Deploy Reviewer + DevOps Agents | Quality and delivery |
-| [W4](workshops/W4-continuous-improvement-loops.md) | Day 2 | 11:45-12:30 | WORKSHOP | Create Continuous Improvement Loops | The factory learns |
-| [C1](capstone/C1-run-factory-end-to-end.md) | Day 2 | 1:30-3:00 | CAPSTONE | Run the Software Factory End-to-End | Full factory run |
+| ID | Day | Time | Type | Title |
+|----|-----|------|------|-------|
+| [W1](workshops/W1-optimize-individual-workflow.md) | Day 1 | 10:30-11:30 | WORKSHOP | Optimize the Individual AI Workflow |
+| [L1](labs/L1-build-structured-dev-loop.md) | Day 1 | 11:30-12:30 | LAB | Build a Structured Development Loop |
+| [W2](workshops/W2-design-6-agent-factory.md) | Day 1 | 1:30-2:15 | WORKSHOP | Design the 6-Agent Software Factory |
+| [L2](labs/L2-deploy-planner-architect.md) | Day 1 | 2:15-3:30 | LAB | Deploy Planner + Architect Agents |
+| [L3](labs/L3-deploy-designer-coder.md) | Day 1 | 3:45-5:00 | LAB | Deploy Designer + Coder Agents |
+| [W3](workshops/W3-architect-multi-agent-coordination.md) | Day 2 | 9:30-10:15 | WORKSHOP | Architect Multi-Agent Coordination |
+| [L4](labs/L4-deploy-reviewer-devops.md) | Day 2 | 10:30-11:45 | LAB | Deploy Reviewer + DevOps Agents |
+| [W4](workshops/W4-continuous-improvement-loops.md) | Day 2 | 11:45-12:30 | WORKSHOP | Create Continuous Improvement Loops |
+| [C1](capstone/C1-run-factory-end-to-end.md) | Day 2 | 1:30-3:00 | CAPSTONE | Run the Software Factory End-to-End |
 
 ## Scoring Summary & Significance Matrix
 
@@ -58,3 +58,7 @@ Reference Project: Fired Up Pizza · 50 participants · 10 pods x 5
 The single most important discipline this workshop teaches is: **change agent behavior through config, not through ad-hoc prompting.**
 
 AGENTS.md, CLAUDE.md, and orchestrator.yaml are the source of truth for agent behavior. When an agent produces wrong output, the fix is to update its config and re-run -- not to type a correction into the chat. This discipline is the bridge between individual AI use and a factory that runs 24/7 without a human at the keyboard.
+
+## Prerequisite Materials
+
+All members of the audience should come prepared with a project manifest, which describes the project that they want to apply their gas city to. This is described in the [PROJECT_MANIFEST_TEMPLATE.md](./PROJECT_MANIFEST_TEMPLATE.md).
