@@ -13,18 +13,6 @@ Reference Project: Fired Up Pizza · 50 participants · 10 pods x 5
 | **Format** | In-Person · Hands-On |
 | **Participants** | 50 engineers · 10 pods x 5 |
 
-## Framework & Rubric Legend
-
-| Term | Definition |
-|------|-----------|
-| **Activity Types** | WORKSHOP = instructor-led concept & design session. LAB = hands-on build with committed artifacts. CAPSTONE = full-factory run assessment. |
-| **Grading Scale** | Each criterion scored 0-max points. Partial credit awarded at 50% threshold. Total = 100 pts per activity. |
-| **Ranking** | Within each pod (5 participants), activities ranked 1-5. Across pods, ranked 1-10. Top artifact shared with full cohort. |
-| **Significance** | Foundational > High > Critical > Summative. Significance determines whether a failed exit-criteria gate blocks the next activity. |
-| **Exit Criteria** | Binary gate. Unmet exit criteria trigger a help-desk escalation -- not a skip. Every activity has exactly one exit-criteria statement. |
-| **Reference Project** | Fired Up Pizza: a pizza restaurant web app used when participants lack a personal project or need a controlled baseline. |
-| **Config Discipline** | Core principle: agent behavior is changed via AGENTS.md / CLAUDE.md / orchestrator.yaml -- NEVER via ad-hoc re-prompting. This is scored in every lab. |
-
 ## Activity Overview
 
 | ID | Day | Time | Type | Title |
