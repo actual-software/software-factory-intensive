@@ -1,0 +1,92 @@
+# Fired Up Pizza — 6-agent software factory pack.
+#
+# A lean reference implementation of the Software Factory Intensive
+# architecture. Six agents form a complete SDLC pipeline:
+#
+#   planner   → breaks feature requests into work packages
+#   architect → produces ADRs and technical decisions
+#   designer  → creates component specs from work packages
+#   coder     → implements code from specs (worktree-isolated)
+#   reviewer  → automated code review against specs + policy
+#   deployer  → release gate evaluation and deployment prep
+#
+# The mayor coordinates the pipeline. Participants swap in their
+# own project manifest and tickets to run their own factory.
+#
+# Usage:
+#   gc init ~/my-factory
+#   gc rig add ~/fired-up-pizza --include packs/fired-up-pizza
+
+[pack]
+name = "fired-up-pizza"
+schema = 1
+description = "6-agent software factory for the Software Factory Intensive workshop"
+
+[formulas]
+dir = "formulas"
+
+[[doctor]]
+name = "check-project"
+script = "doctor/check-project.sh"
+description = "Verify reference project is ready"
+
+# ── PLANNER — Breaks features into structured work packages ────────────
+[[agent]]
+name = "planner"
+scope = "rig"
+prompt_template = "prompts/planner.md"
+nudge = "Check your hook for new feature requests to plan."
+overlay_dir = "overlays/default"
+idle_timeout = "1h"
+max_active_sessions = 1
+
+# ── ARCHITECT — Produces ADRs and technical decisions ──────────────────
+[[agent]]
+name = "architect"
+scope = "rig"
+prompt_template = "prompts/architect.md"
+nudge = "Check your hook for work packages needing architecture decisions."
+overlay_dir = "overlays/default"
+idle_timeout = "1h"
+max_active_sessions = 1
+
+# ── DESIGNER — Creates component specs from work packages ─────────────
+[[agent]]
+name = "designer"
+scope = "rig"
+prompt_template = "prompts/designer.md"
+nudge = "Check your hook for work packages needing component specs."
+overlay_dir = "overlays/default"
+idle_timeout = "1h"
+max_active_sessions = 1
+
+# ── CODER — Implements code from specs ─────────────────────────────────
+[[agent]]
+name = "coder"
+scope = "rig"
+prompt_template = "prompts/coder.md"
+nudge = "Check your hook for component specs ready to implement."
+overlay_dir = "overlays/default"
+idle_timeout = "2h"
+min_active_sessions = 0
+max_active_sessions = 3
+
+# ── REVIEWER — Automated code review ──────────────────────────────────
+[[agent]]
+name = "reviewer"
+scope = "rig"
+prompt_template = "prompts/reviewer.md"
+nudge = "Check your hook for code ready for review."
+overlay_dir = "overlays/default"
+idle_timeout = "1h"
+max_active_sessions = 1
+
+# ── DEPLOYER — Release gates and deployment prep ──────────────────────
+[[agent]]
+name = "deployer"
+scope = "rig"
+prompt_template = "prompts/deployer.md"
+nudge = "Check your hook for reviewed code ready for release evaluation."
+overlay_dir = "overlays/default"
+idle_timeout = "1h"
+max_active_sessions = 1
