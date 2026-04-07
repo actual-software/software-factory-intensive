@@ -39,20 +39,6 @@ Reference Project: Fired Up Pizza · 50 participants · 10 pods x 5
 | [W4](workshops/W4-continuous-improvement-loops.md) | Day 2 | 11:45-12:30 | WORKSHOP | Create Continuous Improvement Loops |
 | [C1](capstone/C1-run-factory-end-to-end.md) | Day 2 | 1:30-3:00 | CAPSTONE | Run the Software Factory End-to-End |
 
-## Scoring Summary & Significance Matrix
-
-| ID | Title | Day | Type | Significance | Blocks Next? |
-|----|-------|-----|------|-------------|-------------|
-| W1 | Optimize the Individual AI Workflow | Day 1 | WORKSHOP | Foundational | No |
-| L1 | Build a Structured Development Loop | Day 1 | LAB | High | YES |
-| W2 | Design the 6-Agent Software Factory | Day 1 | WORKSHOP | Architectural | YES |
-| L2 | Deploy Planner + Architect Agents | Day 1 | LAB | High | YES |
-| L3 | Deploy Designer + Coder Agents | Day 1 | LAB | Medium-High | YES |
-| W3 | Architect Multi-Agent Coordination | Day 2 | WORKSHOP | Critical | YES |
-| L4 | Deploy Reviewer + DevOps Agents | Day 2 | LAB | High | YES |
-| W4 | Create Continuous Improvement Loops | Day 2 | WORKSHOP | Strategic | No |
-| C1 | Run the Software Factory End-to-End | Day 2 | CAPSTONE | Summative | No |
-
 ## The Config Discipline Principle
 
 The single most important discipline this workshop teaches is: **change agent behavior through config, not through ad-hoc prompting.**
