@@ -34,8 +34,5 @@ The single most important discipline this workshop teaches is: **change agent be
 AGENTS.md, CLAUDE.md, and orchestrator.yaml are the source of truth for agent behavior. When an agent produces wrong output, the fix is to update its config and re-run -- not to type a correction into the chat. This discipline is the bridge between individual AI use and a factory that runs 24/7 without a human at the keyboard.
 
 ## Prerequisite Materials
-All members of the audience should come prepared with a project manifest, which describes the project that they want to apply their gas city to. This is described in the [PROJECT_MANIFEST_TEMPLATE.md](./PROJECT_MANIFEST_TEMPLATE.md).
-
-## Prerequisite Materials
 
 All members of the audience should come prepared with a project manifest, which describes the project that they want to apply their gas city to. This is described in the [PROJECT_MANIFEST_TEMPLATE.md](./PROJECT_MANIFEST_TEMPLATE.md).
