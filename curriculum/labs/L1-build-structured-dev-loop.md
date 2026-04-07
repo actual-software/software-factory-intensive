@@ -1,62 +1,333 @@
 # L1 · Build a Structured Development Loop
 
-> Repeatability over brilliance -- encode the loop, not just the prompt
+> **Goal:** Create your first Gas City agent configuration (AGENTS.md) that drives consistent, repeatable behavior for implementing features—no manual prompting required after initial setup.
 
 | | |
 |---|---|
 | **Day** | Day 1 |
 | **Time** | 11:30 - 12:30 |
 | **Type** | LAB |
+| **Deliverable** | Working AGENTS.md file + feature implementation |
 
-## Goal
+---
 
-Translate the personal workflow card into a working, repo-committed development loop: a CLAUDE.md / AGENTS.md spec that drives consistent agent behavior across a feature.
+## What You'll Build
 
-## Acceptance Criteria
+```
+User story in backlog
+      ↓
+Agent reads AGENTS.md spec
+      ↓
+Agent implements feature autonomously
+      ↓
+Code passes quality gates (lint, tests)
+      ↓
+Decision log records what was learned
+```
 
-- CLAUDE.md or AGENTS.md created with: role definition, iteration rule, quality gate, and decision log pointer.
-- Agent successfully generates a passing feature implementation for one Fired Up Pizza story using only the spec.
-- No manual prompt corrections required after spec is loaded.
+**The Config Discipline:** When the agent produces wrong output, you update AGENTS.md and re-run—NOT type a correction into the chat.
+
+---
 
 ## Prerequisites
 
-- W1 AI Workflow Card complete
-- Fired Up Pizza repo cloned
-- Claude Code CLI authenticated
+✅ Complete W1 (AI Workflow Card)  
+✅ Gas City installed and city initialized  
+✅ Project repository added as a rig  
+✅ Coding agent configured in city.toml
 
-## Inputs
+---
 
-- AI Workflow Card from W1
-- Fired Up Pizza user story backlog (provided)
-- Starter CLAUDE.md template (scaffold, provided)
+## Step 1: Create Your AGENTS.md Spec File
 
-## Outputs
+Navigate to your project repository (rig):
 
-- CLAUDE.md / AGENTS.md committed to repo
-- Feature branch with one completed story
-- Decision log entry
+```bash
+cd ~/path/to/your-repo
+```
 
-## Activity Instructions
+Create `AGENTS.md` using this template:
 
-1. Using the scaffold CLAUDE.md, encode W1 workflow card rules into the spec file.
-2. Pick ONE story from the Fired Up Pizza backlog (e.g., "Show order total in cart") and instruct the agent to implement it using ONLY the spec -- no ad-hoc prompting allowed.
-3. If the agent deviates or fails, update the spec (not the prompt) and re-run.
-4. Goal: three runs maximum to a passing implementation.
-5. The decision log records what changed between runs and why.
+```markdown
+# Agent Specification
 
-## Evaluation
+## Role
+You are a feature implementation agent for [PROJECT NAME]. Your job is to take user stories from the backlog and implement them with production-quality code.
 
-| Criterion | Weight | Rubric |
-|-----------|--------|--------|
-| Spec completeness | 25 pts | 0 = missing required sections · 12 = partial · 25 = all four sections present |
-| Runs-to-passing | 30 pts | 30 = 1 run · 20 = 2 runs · 10 = 3 runs · 0 = >3 or manual intervention |
-| Decision log quality | 25 pts | 0 = absent · 12 = what changed · 25 = what + why + what was learned |
-| Code quality gate pass | 20 pts | Binary: 20 = passes lint/test · 0 = fails |
+## Iteration Rule
+- Read the user story completely before starting
+- Break implementation into logical commits
+- Run tests after each significant change
+- If tests fail, analyze the failure and fix before proceeding
 
-**Ranking:** Pods ranked by (30 - runs-to-passing x 10) + spec score. Ties broken by decision log quality.
+## Quality Gates
+All code must pass before considering the feature complete:
+1. **Linting:** No lint errors or warnings
+2. **Tests:** All existing tests pass + new tests for new functionality
+3. **Type checking:** No type errors (if applicable)
+4. **Build:** Project builds without errors
 
-**Significance:** High -- this loop is the substrate for all agent factory stages.
+## Decision Log
+Record significant implementation decisions in DECISIONS.md:
+- What alternative approaches were considered?
+- Why was this approach chosen?
+- What tradeoffs were made?
+
+## Output Format
+- Commit messages follow: `type(scope): description`
+- PR descriptions include: problem, solution, testing approach
+- Code comments explain WHY, not WHAT
+```
+
+**Save this as `AGENTS.md` in your repository root.**
+
+---
+
+## Step 2: Pick a Test Story
+
+Choose ONE feature from your project backlog. Keep it small for this first test.
+
+**Example stories (Fired Up Pizza reference project):**
+- "Show order total in cart"
+- "Add 'Remove Item' button to cart"
+- "Display estimated delivery time"
+
+**For your project:**
+Pick something that takes 15-30 minutes to implement manually.
+
+**Write it clearly:**
+```markdown
+# User Story: [Title]
+
+**As a** [user type]  
+**I want** [goal]  
+**So that** [benefit]
+
+## Acceptance Criteria
+- [ ] Criterion 1
+- [ ] Criterion 2
+- [ ] Criterion 3
+
+## Technical Notes
+[Any constraints, APIs to use, styling requirements, etc.]
+```
+
+---
+
+## Step 3: Create a Bead for the Story
+
+In Gas City, work items are tracked as "beads". Create one for your story:
+
+```bash
+cd ~/my-city
+bd create "Implement: [Your Story Title]" \
+  --description "$(cat <<'EOF'
+[Paste your user story here]
+EOF
+)"
+```
+
+This returns a bead ID like `my-city-abc123`.
+
+---
+
+## Step 4: Sling the Bead to Your Agent
+
+Tell Gas City to assign this work to your agent:
+
+```bash
+gc sling dev-agent my-city-abc123
+```
+
+Where `dev-agent` is the agent name from your `city.toml`.
+
+**What happens:**
+1. Gas City starts your agent in a tmux session
+2. Agent reads AGENTS.md for behavior rules
+3. Agent reads the bead description (your user story)
+4. Agent implements the feature
+
+---
+
+## Step 5: Monitor Agent Progress
+
+Watch your agent work in real-time:
+
+```bash
+gc watch dev-agent
+```
+
+Press `Ctrl+C` to stop watching (agent keeps running).
+
+**Check current status:**
+```bash
+gc status
+bd show my-city-abc123
+```
+
+---
+
+## Step 6: Review Agent Output
+
+When the agent finishes (or if it gets stuck), check what it did:
+
+```bash
+cd ~/path/to/your-repo
+git log -3 --oneline     # Recent commits
+git diff HEAD~1          # Changes in last commit
+```
+
+**Run quality gates manually:**
+```bash
+npm run lint              # or your linting command
+npm test                  # or your test command
+npm run build             # or your build command
+```
+
+---
+
+## Step 7: Iterate on AGENTS.md (If Needed)
+
+**If quality gates fail or agent behavior was wrong:**
+
+1. **Don't manually fix the code**
+2. **Update AGENTS.md** with more specific guidance
+3. **Reset the repository** to before agent ran
+4. **Re-sling the bead** to try again
+
+Example improvements to AGENTS.md:
+```markdown
+## Quality Gates
+...
+5. **Accessibility:** All interactive elements have ARIA labels
+6. **Performance:** No console warnings in browser
+
+## Implementation Guidelines
+- Use TypeScript for all new files
+- Follow existing file structure in src/components/
+- Import utilities from src/utils/, never re-implement
+```
+
+**Goal:** <= 3 attempts to get a passing implementation
+
+---
+
+## Step 8: Document Your Decision Log
+
+Create `DECISIONS.md` in your repository:
+
+```markdown
+# Implementation Decisions
+
+## [YYYY-MM-DD] [Feature Name]
+
+### Problem
+[What was the user story? What challenge did it present?]
+
+### Approaches Considered
+1. **Option A:** [Description] - Rejected because [reason]
+2. **Option B:** [Description] - Chosen because [reason]
+
+### Implementation Details
+- Used [library/pattern/approach] for [reason]
+- Avoided [alternative] due to [tradeoff]
+
+### Lessons Learned
+- AGENTS.md needed refinement: [specific change made]
+- Next time, would [improvement]
+
+### Metrics
+- Attempts to passing: [1-3]
+- Agent runtime: [X minutes]
+```
+
+---
+
+## Recommended Prompts
+
+### Initial Agent Interaction (via bead description)
+```
+Implement the feature described below following all guidelines in AGENTS.md.
+
+[User story with acceptance criteria]
+
+Before starting:
+1. Read AGENTS.md completely
+2. Understand all quality gates
+3. Plan your implementation approach
+
+After implementation:
+1. Run all quality gates
+2. Record decision in DECISIONS.md
+3. Commit with descriptive message
+```
+
+### If Agent Gets Stuck (via gc sling or manual prompt)
+```
+The previous attempt failed quality gates. Review the errors:
+
+[Paste error output]
+
+Analyze what went wrong, update your approach, and retry.
+Ensure you're following all AGENTS.md guidelines.
+```
+
+### When Updating AGENTS.md Between Runs
+```
+I've updated AGENTS.md with additional guidance:
+- [Specific change 1]
+- [Specific change 2]
+
+Re-read the spec and retry the implementation from scratch.
+```
+
+---
+
+## Evaluation Rubric
+
+| Criterion | Points | Scoring |
+|-----------|--------|---------|
+| **AGENTS.md Completeness** | 25 pts | All 4 sections (Role, Iteration Rule, Quality Gates, Decision Log) present and specific to your project |
+| **Runs to Passing** | 30 pts | 1 run = 30pts, 2 runs = 20pts, 3 runs = 10pts, >3 or manual fix = 0pts |
+| **Decision Log Quality** | 25 pts | Documents what changed between runs, why, and lessons learned |
+| **Quality Gates Pass** | 20 pts | Binary: All gates pass = 20pts, any fail = 0pts |
+
+**Total:** 100 points
+
+**Pod Ranking:** Sum scores across all 5 members. Highest total wins.
+
+---
 
 ## Exit Criteria
 
-CLAUDE.md committed; feature branch passes automated quality gate; decision log has >= 1 entry.
+✅ AGENTS.md committed to repository  
+✅ Feature implementation passes all quality gates  
+✅ DECISIONS.md has >= 1 entry documenting this lab  
+✅ Bead marked complete in Gas City (`bd close my-city-abc123`)
+
+---
+
+## Common Issues & Solutions
+
+### Issue: Agent ignores AGENTS.md
+**Solution:** Ensure AGENTS.md is in repository root. Check agent logs with `gc watch dev-agent`.
+
+### Issue: Quality gates fail repeatedly
+**Solution:** Add more specific guidelines to AGENTS.md Quality Gates section. Be explicit about tools/commands to run.
+
+### Issue: Agent takes too long
+**Solution:** Break story into smaller pieces. Aim for 15-30 min implementations.
+
+### Issue: Can't find agent in Gas City
+**Solution:** Run `gc status` to verify agent name. Ensure `dir` in city.toml matches rig name from `gc rig list`.
+
+---
+
+## Next Steps
+
+After completing L1, you'll have:
+- ✅ A working agent configuration pattern
+- ✅ Experience with the config-driven discipline
+- ✅ A baseline for building more complex agent systems
+
+In **L2**, you'll add specialized roles (Planner + Architect) that work together via Gas City coordination.
