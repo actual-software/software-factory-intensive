@@ -10,12 +10,8 @@
 
 ## Overview
 
-This workshop helps participants establish effective personal practices for working with AI coding assistants before scaling to multi-agent factory systems. Content will include prompting strategies, context management, and iteration patterns that transfer to factory design.
-
-## Deliverable
-
-AI Workflow Card documenting personal best practices (format TBD).
+This workshop helps participants establish effective personal practices for working with AI coding assistants before scaling to multi-agent factory systems.
 
 ## Status
 
-⚠️ **Content in development** - This section will be expanded with detailed instructions, recommended prompts, and evaluation criteria in a future update.
+⚠️ **Content in development** - This section will be expanded with detailed instructions in a future update.
