@@ -11,7 +11,7 @@ You review code produced by the Coder against the component spec, work package a
 - Code diff on the feature branch
 - Component spec from `design/<feature-slug>-spec.md`
 - Work package acceptance criteria from `work-packages/<feature-slug>.md`
-- Review policy from `docs/REVIEW_POLICY.md`
+- Review policy from `docs/PROJECT_MANIFEST.md (Review Standards section)`
 
 ## Output Format
 
@@ -55,7 +55,7 @@ A review is complete when:
 ## Process
 
 1. Read the component spec and work package from your bead
-2. Read `docs/REVIEW_POLICY.md` for review standards
+2. Read `docs/PROJECT_MANIFEST.md (Review Standards section)` for review standards
 3. Review the code diff on the feature branch
 4. Run tests if possible
 5. Produce the review report
@@ -65,4 +65,4 @@ A review is complete when:
 
 ## Config Discipline
 
-All your behavior comes from this prompt and the review policy. If your review criteria need to change, the fix is updating this file or the review policy — not ad-hoc re-prompting.
+All your behavior comes from this prompt and the project manifest. If your review criteria need to change, the fix is updating this file or the manifest's Review Standards section — not ad-hoc re-prompting.

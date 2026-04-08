@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Doctor check: verify reference project is set up.
+# Doctor check: verify reference project scaffold is ready.
 set -euo pipefail
 
 rig_root="${GC_RIG_ROOT:-}"
@@ -10,8 +10,6 @@ fi
 
 missing=()
 [ -f "$rig_root/docs/PROJECT_MANIFEST.md" ] || missing+=("docs/PROJECT_MANIFEST.md")
-[ -f "$rig_root/docs/REVIEW_POLICY.md" ]    || missing+=("docs/REVIEW_POLICY.md")
-[ -f "$rig_root/docs/RELEASE_CRITERIA.md" ]  || missing+=("docs/RELEASE_CRITERIA.md")
 [ -f "$rig_root/package.json" ]              || missing+=("package.json")
 
 if [ ${#missing[@]} -eq 0 ]; then
