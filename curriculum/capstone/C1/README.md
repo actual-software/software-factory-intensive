@@ -36,6 +36,7 @@
 ✅ Gas City running with orchestrator.yaml configured  
 ✅ Project repository set up as rig  
 ✅ Deployment pipeline ready (staging + production)  
+✅ (Optional) [`packs/workshop`](../../../packs/workshop/) integrations connected — issue tracker sync, observability, and communication channels enable the factory to pull tickets, post review findings, and report status back to external systems automatically  
 
 ---
 
