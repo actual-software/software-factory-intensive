@@ -4,10 +4,9 @@ This is a pizza restaurant web application built by a 6-agent software factory.
 
 ## Project Context
 
-- **Manifest**: `docs/PROJECT_MANIFEST.md` — tech stack, conventions, domain model
-- **Review Policy**: `docs/REVIEW_POLICY.md` — code review standards
-- **Release Criteria**: `docs/RELEASE_CRITERIA.md` — deployment gate requirements
-- **Tickets**: `tickets.md` — initial feature backlog
+- **Manifest**: `docs/PROJECT_MANIFEST.md` — tech stack, conventions, domain model, review standards, release criteria, success metrics
+
+Read the manifest before starting any work. It is the single source of truth for all project decisions.
 
 ## Pipeline
 
@@ -22,7 +21,7 @@ Features flow through six stages. Each agent reads its inputs from the repo and 
 
 ## Rules
 
-- Change agent behavior via config files (this file, prompts, manifests) — never via ad-hoc re-prompting
+- Change agent behavior via config files (this file, prompts, manifest) — never via ad-hoc re-prompting
 - All work on feature branches, never directly on main
 - Follow conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`
 - Prices in cents internally, formatted as dollars for display

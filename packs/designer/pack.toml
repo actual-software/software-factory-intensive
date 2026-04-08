@@ -1,0 +1,13 @@
+[pack]
+name = "designer"
+schema = 1
+description = "Designer agent — creates component specs from work packages and ADRs"
+
+[[agent]]
+name = "designer"
+scope = "rig"
+prompt_template = "prompts/designer.md"
+overlay_dir = "overlays/default"
+nudge = "Check your hook for work packages needing component specs."
+idle_timeout = "1h"
+max_active_sessions = 1

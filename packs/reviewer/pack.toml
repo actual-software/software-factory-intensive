@@ -1,0 +1,13 @@
+[pack]
+name = "reviewer"
+schema = 1
+description = "Reviewer agent — automated code review against specs and policy"
+
+[[agent]]
+name = "reviewer"
+scope = "rig"
+prompt_template = "prompts/reviewer.md"
+overlay_dir = "overlays/default"
+nudge = "Check your hook for code ready for review."
+idle_timeout = "1h"
+max_active_sessions = 1

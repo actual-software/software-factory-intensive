@@ -1,0 +1,13 @@
+[pack]
+name = "architect"
+schema = 1
+description = "Architect agent — produces ADRs and technical decisions from work packages"
+
+[[agent]]
+name = "architect"
+scope = "rig"
+prompt_template = "prompts/architect.md"
+overlay_dir = "overlays/default"
+nudge = "Check your hook for work packages needing architecture decisions."
+idle_timeout = "1h"
+max_active_sessions = 1

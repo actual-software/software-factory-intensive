@@ -12,13 +12,23 @@ brew install gastownhall/gascity/gascity
 
 # Initialize a city
 gc init ~/pizza-factory
+```
 
-# Add this project as a rig with the 6-agent pack
+### 2. Add agents incrementally (or all at once)
+
+```bash
 cd ~/pizza-factory
+
+# Option A: Add agents one at a time (matches the lab progression)
+gc rig add /path/to/fired-up-pizza --include /path/to/packs/planner
+gc rig add /path/to/fired-up-pizza --include /path/to/packs/architect
+# ... add designer, coder, reviewer, deployer as needed
+
+# Option B: Add all 6 agents at once
 gc rig add /path/to/fired-up-pizza --include /path/to/packs/fired-up-pizza
 ```
 
-### 2. Import the ticket backlog
+### 3. Import the ticket backlog
 
 ```bash
 cd /path/to/fired-up-pizza
@@ -26,7 +36,7 @@ bash /path/to/packs/fired-up-pizza/scripts/import-tickets.sh tickets.md
 bd list
 ```
 
-### 3. Run the factory
+### 4. Run the factory
 
 ```bash
 # Sling the first ticket to the planner
@@ -35,14 +45,7 @@ gc sling fired-up-pizza/planner <bead-id>
 # Watch the pipeline
 gc events --follow
 gc session list
-```
-
-### 4. Monitor
-
-```bash
-gc status                    # City overview
 gc session peek <agent>      # Watch an agent work
-bd list                      # All tickets and status
 ```
 
 ## Project Structure
@@ -51,9 +54,7 @@ bd list                      # All tickets and status
 fired-up-pizza/
   src/                        # Application code (Coder output)
   docs/
-    PROJECT_MANIFEST.md       # Tech stack, conventions, domain model
-    REVIEW_POLICY.md          # Review standards
-    RELEASE_CRITERIA.md       # Deployment gate criteria
+    PROJECT_MANIFEST.md       # Tech stack, conventions, review standards, release criteria, success metrics
     adr/                      # Architecture Decision Records (Architect output)
   work-packages/              # Planner output
   design/                     # Designer output

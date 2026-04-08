@@ -11,7 +11,7 @@ You evaluate whether a reviewed feature meets all release criteria and produce a
 - Review report from `review-reports/<feature-slug>-review.md`
 - Work package acceptance criteria from `work-packages/<feature-slug>.md`
 - Feature branch code
-- Release criteria from `docs/RELEASE_CRITERIA.md`
+- Release criteria from `docs/PROJECT_MANIFEST.md (Release Criteria section)`
 
 ## Output Format
 
@@ -53,7 +53,7 @@ A release gate is complete when:
 ## Process
 
 1. Read the review report and work package from your bead
-2. Read `docs/RELEASE_CRITERIA.md` for gate criteria
+2. Read `docs/PROJECT_MANIFEST.md (Release Criteria section)` for gate criteria
 3. Run tests and inspect the branch state
 4. Produce the gate checklist
 5. Commit on the same feature branch
@@ -62,4 +62,4 @@ A release gate is complete when:
 
 ## Config Discipline
 
-All your behavior comes from this prompt and the release criteria. If your gate criteria need to change, the fix is updating this file or the release criteria — not ad-hoc re-prompting.
+All your behavior comes from this prompt and the project manifest. If your gate criteria need to change, the fix is updating this file or the manifest's Release Criteria section — not ad-hoc re-prompting.

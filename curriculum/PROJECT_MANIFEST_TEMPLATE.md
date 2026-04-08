@@ -1,6 +1,6 @@
 # Project Manifest Template
 
-**Purpose:** This template helps you prepare the essential information about your software project before attending the Software Factory Intensive. Coming prepared with this information ensures you can immediately apply the workshop learnings to your actual work.
+**Purpose:** This template helps you prepare the essential information about your software project before attending the Software Factory Intensive. Your completed manifest becomes the single source of truth that every agent in your factory reads — it defines tech stack, conventions, review standards, release criteria, and success metrics.
 
 **Instructions:** Fill out each section below for the project you plan to use during the intensive. If you don't have a project, you may use the reference project (Fired Up Pizza) provided during the workshop.
 
@@ -9,7 +9,6 @@
 ## Project Information
 
 ### Name of Software Project
-*What is your project called?*
 
 ```
 [Your answer here]
@@ -26,42 +25,154 @@
 
 ## Technical Context
 
-### Services Used
-*List all external services, APIs, databases, or platforms your project uses to operate and build the software.*
+### Tech Stack
 
-**Examples:** AWS S3, Stripe API, PostgreSQL, GitHub Actions, Vercel, Auth0, SendGrid, etc.
+| Layer | Technology | Notes |
+|-------|-----------|-------|
+| Frontend | | |
+| Styling | | |
+| Backend | | |
+| Database | | |
+| Testing | | |
+| Linting | | |
 
-```
-- [Service 1]: [Purpose]
-- [Service 2]: [Purpose]
-- [Service 3]: [Purpose]
-...
-```
-
-### Dependencies
-*List software libraries, frameworks, or other codebases your project depends on.*
-
-**Examples:** React, Next.js, Django, Express, TensorFlow, etc.
+### Project Structure
+*Describe your directory layout — where does code live, where do docs go?*
 
 ```
-- [Dependency 1]: [Version if relevant]
-- [Dependency 2]: [Version if relevant]
-- [Dependency 3]: [Version if relevant]
-...
+[Your directory tree here]
+```
+
+### Domain Model
+*What are the core entities and their relationships?*
+
+```
+[Your domain model here]
+```
+
+### Conventions
+*File naming, commit messages, branch naming, API patterns, etc.*
+
+```
+[Your conventions here - bullet points]
+```
+
+### Constraints
+*Hard limits on the project — what is explicitly out of scope or disallowed?*
+
+```
+[Your constraints here - bullet points]
 ```
 
 ### Previous Architectural or Design Decisions
-*Describe any significant technical decisions that have already been made that would affect how a software factory should operate.*
-
-**Examples:**
-- "We use a microservices architecture with 5 separate services"
-- "All data must remain in EU data centers for GDPR compliance"
-- "We follow trunk-based development with feature flags"
-- "PRs require 2 approvals and must pass 95% test coverage"
+*Significant technical decisions already made that affect how the factory should operate.*
 
 ```
-[Your answer here - bullet points preferred]
+[Your decisions here - bullet points]
 ```
+
+---
+
+## Task Inputs
+
+*Define what goes into each task at each stage of the factory pipeline. This tells agents what to expect and where to find their inputs.*
+
+| Agent | Receives | From |
+|-------|----------|------|
+| Planner | Feature request | [Where do feature requests come from? Jira, Linear, GitHub Issues, manual?] |
+| Architect | Work package | `work-packages/<slug>.md` |
+| Designer | Work package + ADR | `work-packages/` + `docs/adr/` |
+| Coder | Component spec + test cases | `design/<slug>-spec.md` + work package |
+| Reviewer | Code diff + spec + review standards | Feature branch + `design/` + this manifest |
+| Deployer | Review report + release criteria | `review-reports/` + this manifest |
+
+---
+
+## Services to Connect
+
+*List all external services your project uses. These determine which Gas City integrations to configure.*
+
+| Service | Purpose | Config Required |
+|---------|---------|-----------------|
+| [e.g., GitHub] | [Source control, PRs] | [GITHUB_TOKEN] |
+| [e.g., Jira] | [Issue tracking] | [JIRA_URL, JIRA_API_TOKEN] |
+| [e.g., AWS S3] | [File storage] | [AWS credentials] |
+| [e.g., Vercel] | [Deployment] | [VERCEL_TOKEN] |
+| [e.g., Sentry] | [Error tracking] | [SENTRY_AUTH_TOKEN] |
+| | | |
+
+---
+
+## Success Criteria
+
+### Per-Feature Success
+*How do you know a single feature is done?*
+
+- [ ] [e.g., All acceptance criteria from work package met]
+- [ ] [e.g., Code review approved with no high-severity findings]
+- [ ] [e.g., All tests pass]
+- [ ] [e.g., Deployed to staging and smoke tests pass]
+
+### Factory-Level Success
+*How do you know the factory itself is working?*
+
+- [ ] [e.g., Feature completed with zero ad-hoc prompts]
+- [ ] [e.g., All 6 pipeline stages produced artifacts]
+- [ ] [e.g., Handoffs between agents used defined artifact paths]
+
+---
+
+## Review Standards
+
+*What does your Reviewer agent check? Define severity levels so findings are actionable.*
+
+### Spec Compliance
+
+```
+[e.g., Every prop from the component spec must be implemented]
+[e.g., Edge cases (empty, error, loading) must be handled]
+```
+
+### Style
+
+```
+[e.g., No inline styles]
+[e.g., Components under 200 lines]
+[e.g., No `any` types in TypeScript]
+```
+
+### Security
+
+```
+[e.g., No user input rendered without sanitization]
+[e.g., API endpoints validate all inputs]
+[e.g., SQL queries use parameterized statements]
+```
+
+### Severity Scale
+
+- **Low**: [e.g., style nit, minor improvement]
+- **Medium**: [e.g., missing test, incomplete error handling]
+- **High**: [e.g., security issue, data corruption risk, spec violation]
+
+---
+
+## Release Criteria
+
+*What must be true before a feature is deployment-ready? The Deployer agent evaluates these as binary PASS/FAIL gates.*
+
+### Required (all must PASS)
+
+1. [e.g., All acceptance criteria met]
+2. [e.g., Review approved with no open high-severity findings]
+3. [e.g., Tests pass]
+4. [e.g., Lint clean]
+5. [e.g., Branch mergeable with main]
+
+### Informational (reported but non-blocking)
+
+- [e.g., Test coverage percentage]
+- [e.g., Bundle size delta]
 
 ---
 
@@ -70,16 +181,12 @@
 ### Current Development Process
 *How do you currently build and ship features?*
 
-**Examples:**
-- "Designer creates Figma mockups → Engineer implements → QA tests → Deploy to staging → Production"
-- "Product manager writes user stories → Team picks from backlog → Individual engineers implement and deploy"
-
 ```
 [Your answer here - 2-3 sentences]
 ```
 
 ### Pain Points or Bottlenecks
-*What slows you down today? Where do errors occur most frequently?*
+*What slows you down today?*
 
 ```
 [Your answer here - bullet points]
@@ -87,23 +194,15 @@
 
 ---
 
-## Gas City Factory Goals
+## Factory Goals
 
 ### What do you hope your software factory will automate?
-*Be specific about which parts of your development workflow you want the factory to handle.*
-
-**Examples:**
-- "Automate code generation from design specs"
-- "Auto-generate unit tests for new features"
-- "Automatically review PRs for architectural consistency"
-- "Generate deployment scripts and infrastructure config"
 
 ```
 [Your answer here - bullet points]
 ```
 
 ### What should NOT be automated?
-*What decisions or tasks require human judgment?*
 
 ```
 [Your answer here - bullet points]
@@ -111,35 +210,26 @@
 
 ---
 
-## Additional Context
-
-### Repository Information
-*If applicable:*
+## Repository Information
 
 - **Repository URL:** `[GitHub/GitLab/etc URL or "Private"]`
-- **Primary programming language(s):** `[e.g., TypeScript, Python, Go]`
+- **Primary language(s):** `[e.g., TypeScript, Python, Go]`
 - **Deployment target:** `[e.g., AWS, Vercel, self-hosted]`
 
-### Team Context
-*Optional but helpful:*
+## Team Context
 
 - **Team size:** `[Number of engineers]`
 - **Release cadence:** `[e.g., Daily, weekly, monthly]`
-- **Current AI tools in use:** `[e.g., GitHub Copilot, ChatGPT, Claude Code, none]`
+- **Current AI tools in use:** `[e.g., GitHub Copilot, Claude Code, none]`
 
 ---
 
 ## Pre-Workshop Checklist
 
-Before arriving at the workshop, ensure you have:
+- [ ] Completed this project manifest (all sections above)
+- [ ] Identified 2-3 features or user stories to use as test cases
+- [ ] Confirmed access to your project repository
+- [ ] Installed Gas City: `brew install gastownhall/gascity/gascity`
+- [ ] Installed Claude Code (or your preferred coding agent)
 
-- [ ] Completed this project manifest
-- [ ] Identified 2-3 specific features or user stories you could use as test cases
-- [ ] Gathered any relevant documentation (architecture diagrams, API docs, coding standards)
-- [ ] Confirmed you have access to your project repository (if using your own project)
-- [ ] Installed required tools: Git, Docker (if applicable), your preferred code editor
-- [ ] Reviewed the [Gas City Setup Guide](../GAS_CITY_SETUP_GUIDE.md) (optional but recommended)
-
----
-
-**Bring this completed manifest to the workshop!** We will reference it throughout the intensive as we build your software factory.
+**Bring this completed manifest to the workshop!**

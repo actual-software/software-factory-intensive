@@ -1,0 +1,13 @@
+[pack]
+name = "planner"
+schema = 1
+description = "Planner agent — breaks feature requests into structured work packages"
+
+[[agent]]
+name = "planner"
+scope = "rig"
+prompt_template = "prompts/planner.md"
+overlay_dir = "overlays/default"
+nudge = "Check your hook for new feature requests to plan."
+idle_timeout = "1h"
+max_active_sessions = 1
