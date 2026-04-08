@@ -236,7 +236,16 @@ Start numbering at 0001.
 
 ## Step 5: Create Test Feature Request
 
-Create a bead for a feature that needs planning + architecture:
+If you connected an issue tracker in L1 using [`packs/workshop`](../../../packs/workshop/), your tickets may already be synced as beads. Check with `bd list`. You can also sync on demand:
+
+```bash
+gc workshop sync-all        # All connected trackers
+bd jira sync --pull          # Jira only
+bd linear sync --pull        # Linear only
+bd github sync               # GitHub Issues
+```
+
+Otherwise, create a bead manually for a feature that needs planning + architecture:
 
 ```bash
 cd ~/my-city

@@ -36,6 +36,7 @@
 ✅ Gas City running with orchestrator.yaml configured  
 ✅ Project repository set up as rig  
 ✅ Deployment pipeline ready (staging + production)  
+✅ (Optional) [`packs/workshop`](../../../packs/workshop/) integrations connected — enables ticket sync, observability, and status reporting to external systems  
 
 ---
 

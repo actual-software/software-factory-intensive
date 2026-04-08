@@ -16,7 +16,12 @@ gc init ~/my-city
 cd ~/my-city
 gc rig add ~/path/to/my-factory
 
-# 4. Agent packs are added incrementally during the labs:
+# 4. (Optional) Add integrations for Jira/Linear/GitHub sync, observability, etc.
+#    gc rig add ~/path/to/my-factory --include packs/workshop
+#    cp packs/workshop/env.example .env  # fill in your credentials
+#    gc doctor                           # validate connections
+
+# 5. Agent packs are added incrementally during the labs:
 #    L2: gc rig add ~/path/to/my-factory --include packs/planner
 #    L2: gc rig add ~/path/to/my-factory --include packs/architect
 #    L3: gc rig add ~/path/to/my-factory --include packs/designer

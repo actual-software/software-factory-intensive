@@ -38,6 +38,22 @@ Decision log records what was learned
 
 ---
 
+## Optional: Connect External Services
+
+If your project uses Jira, Linear, GitHub Issues, or other external tools, you can connect them now using the [`packs/workshop`](../../../packs/workshop/) integrations pack:
+
+```bash
+cd ~/my-city
+gc rig add ~/path/to/your-repo --include packs/workshop
+cp packs/workshop/env.example .env   # fill in credentials for services you use
+gc workshop setup
+gc doctor
+```
+
+This enables automatic syncing of tickets from your issue tracker into beads, and gives agents MCP tool access to services like Sentry, DataDog, and Slack. See [`packs/workshop/README.md`](../../../packs/workshop/README.md) for the full list. You can skip this and add integrations later.
+
+---
+
 ## Step 1: Create Your AGENTS.md Spec File
 
 Navigate to your project repository (rig):

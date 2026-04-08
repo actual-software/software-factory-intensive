@@ -59,7 +59,7 @@ my-factory/                    # Your workspace — start here with your own pro
   docs/PROJECT_MANIFEST.md     # Your project manifest (copy from template)
   CLAUDE.md                    # Your agent instructions
 
-packs/                         # Gas City agent packs (one per factory stage)
+packs/                         # Gas City agent packs
   planner/                     # Added in L2
   architect/                   # Added in L2
   designer/                    # Added in L3
@@ -67,7 +67,30 @@ packs/                         # Gas City agent packs (one per factory stage)
   reviewer/                    # Added in L4
   deployer/                    # Added in L4
   fired-up-pizza/              # All 6 bundled (reference project only)
+  workshop/                    # Pre-configured integrations (Jira, Linear, GitHub, etc.)
 ```
+
+## Integrations
+
+The [`packs/workshop/`](packs/workshop/) pack provides pre-configured integrations for external services your factory can connect to. Include it alongside your agent packs to get:
+
+- **Issue tracker sync** -- Jira, Linear, GitHub Issues, GitLab Issues, Azure DevOps, Notion (via `bd` native sync with periodic orders)
+- **Observability** -- Sentry, DataDog, PostHog, Grafana (via MCP servers giving agents direct tool access)
+- **Cloud providers** -- AWS, GCP, Azure (validated via CLI auth)
+- **Communication** -- Slack, Discord (via MCP servers)
+
+```bash
+# Add the workshop integrations pack to your rig
+gc rig add ~/your-project --include packs/workshop
+
+# Copy the env template and fill in your credentials
+cp packs/workshop/env.example .env
+
+# Validate connections
+gc doctor
+```
+
+Only configure the integrations your project actually uses. See [`packs/workshop/README.md`](packs/workshop/README.md) for the full list and setup details.
 
 ## Before You Arrive
 
