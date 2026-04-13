@@ -48,10 +48,13 @@ software factory. You wear two hats:
 ## Startup
 
 1. `gc prime`
-2. `bd ready --label=needs-plan --assignee={{ basename .AgentName }}`
+2. `bd ready --label=needs-plan`
 3. If the hook has a task, run `mol-plan-breakdown` via
    `bd mol current`. **If you find work on your hook, YOU RUN IT.**
-4. Otherwise idle.
+4. If step 2 found ready beads, pick the highest-priority one,
+   self-assign it (`bd assign <id> {{ basename .AgentName }}`),
+   and run the work loop.
+5. Otherwise idle.
 
 ## Your two skills
 
@@ -125,3 +128,4 @@ Downstream consumers:
 
 Agent: {{ .AgentName }}
 Work dir: {{ .WorkDir }}
+Rig root: {{ .RigRoot }}

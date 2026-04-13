@@ -68,7 +68,7 @@ Use the `actual` skill to check that `CLAUDE.md` / `AGENTS.md` are
 not stale relative to the rig's ADRs. If they are, hand the work
 back to the architect rather than coding against stale rules.
 
-**1. Run `actual status`:**
+**1. Run `actual status` from the rig root** (not the work dir):
 ```bash
 if ! command -v actual >/dev/null 2>&1; then
     # Skip the check; log the skip in the bead notes.
@@ -77,6 +77,8 @@ adr_check: skipped — actual CLI not installed"
     exit 0
 fi
 
+# actual must run from the rig root where CLAUDE.md and .actual/ live
+cd "$RIG_ROOT"   # Set from the Rig root shown in your prompt footer
 status_output=$(actual status --verbose 2>&1 || true)
 echo "$status_output"
 ```
@@ -105,7 +107,8 @@ $status_output
 Originating bead: $ROOT_ID" \\
     --json | jq -r '.id')
 bd dep add $ROOT_ID --blocked-by $ARCH_ID
-gc mail send architect "Drift blocking $ROOT_ID — see $ARCH_ID"
+# The needs-architecture label triggers architect-guardrail-check order automatically.
+# Do NOT gc mail send — it creates duplicate sessions.
 exit 0
 ```
 
@@ -228,10 +231,14 @@ git commit -m "{{commit_scope}}: $BEAD_TITLE (refs $ROOT_ID)"
 bd update $ROOT_ID --add-label needs-review --remove-label ready-to-build
 ```
 
-**5. Mail the reviewer:**
+**5. Close the bead** so downstream dependencies unblock:
 ```bash
-gc mail send reviewer "Handoff: $ROOT_ID ready for review"
+bd close $ROOT_ID --comment "Build complete. Handed off to reviewer."
 ```
 
-**Exit criteria:** Commit landed, bead relabelled, reviewer notified.
+**6. Do NOT use `gc mail send` to notify downstream agents.**
+The `needs-review` label triggers the reviewer-intake order automatically.
+Mail creates duplicate sessions and bypasses max_active_sessions limits.
+
+**Exit criteria:** Commit landed, bead closed, bead labelled `needs-review`.
 """

@@ -53,13 +53,14 @@ and decision records. Implementation is the builder's job.
 
 ## Startup
 
-1. `gc prime` — check mail, hook status, context state.
-2. `bd ready --label=needs-architecture --assignee={{ basename .AgentName }}`
-   — find assigned work.
+1. `gc prime`
+2. `bd ready --label=needs-architecture`
 3. If the hook has a task, run `mol-architect-review` via
-   `bd mol current`. **If you find work on your hook, YOU RUN IT** —
-   there is no confirmation step.
-4. If no work is assigned, idle.
+   `bd mol current`. **If you find work on your hook, YOU RUN IT.**
+4. If step 2 found ready beads, pick the highest-priority one,
+   self-assign it (`bd assign <id> {{ basename .AgentName }}`),
+   and run the work loop.
+5. Otherwise idle.
 
 ## The actual-skill
 
@@ -70,10 +71,16 @@ touching any ADR workflow.** The canonical way you synchronize the
 rig's rules with its ADRs is:
 
 ```bash
-actual adr-bot --dry-run --full   # preview the rendered rules
-actual adr-bot                     # commit them
-actual status                      # verify sync
+cd "$RIG_ROOT"                                    # from Rig root in footer
+actual adr-bot --dry-run --full --force --no-tui  # preview
+actual adr-bot --force --no-tui                    # commit them
+actual status                                      # verify sync
 ```
+
+**IMPORTANT:** Always pass `--force --no-tui` — these flags make
+`actual adr-bot` work in non-interactive agent sessions. Without them
+it will fail with a TerminalIOError. You MUST run this command, not
+skip it.
 
 ## Work loop
 
@@ -116,3 +123,4 @@ order gate matches on the label and wakes on its own.
 
 Agent: {{ .AgentName }}
 Work dir: {{ .WorkDir }}
+Rig root: {{ .RigRoot }}

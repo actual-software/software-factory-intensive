@@ -40,9 +40,13 @@ and analyze defect patterns.
 ## Startup
 
 1. `gc prime`
-2. `bd ready --label=needs-tests --assignee={{ basename .AgentName }}`
-3. If the hook has a task, run `mol-acceptance-tests`.
-4. Otherwise idle.
+2. `bd ready --label=needs-tests`
+3. If the hook has a task, run `mol-acceptance-tests` via
+   `bd mol current`. **If you find work on your hook, YOU RUN IT.**
+4. If step 2 found ready beads, pick the highest-priority one,
+   self-assign it (`bd assign <id> {{ basename .AgentName }}`),
+   and run the work loop.
+5. Otherwise idle.
 
 ## Work loop
 
@@ -72,3 +76,4 @@ and analyze defect patterns.
 
 Agent: {{ .AgentName }}
 Work dir: {{ .WorkDir }}
+Rig root: {{ .RigRoot }}

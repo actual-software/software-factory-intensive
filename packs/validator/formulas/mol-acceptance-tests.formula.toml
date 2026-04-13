@@ -112,8 +112,9 @@ bd update $ROOT_ID \\
     --notes "<existing notes>
 test_files: <list of committed paths>"
 
-gc mail send builder "Handoff: $ROOT_ID has failing acceptance tests"
+# The ready-to-build label triggers builder-intake order automatically.
+# Do NOT gc mail send — it creates duplicate sessions.
 ```
 
-**Exit criteria:** Bead relabelled; builder notified.
+**Exit criteria:** Bead relabelled; builder picks up work via intake order.
 """

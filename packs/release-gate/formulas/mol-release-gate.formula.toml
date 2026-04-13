@@ -41,7 +41,8 @@ bd show $ROOT_ID
 ```bash
 VERDICT=$(bd show $ROOT_ID --json | jq -r '.notes' | grep -m1 '^verdict:' | awk '{print $2}')
 if [ "$VERDICT" != "pass" ]; then
-    gc mail send reviewer "Release-gate rejected $ROOT_ID: verdict was '$VERDICT'"
+    # The needs-review label triggers reviewer-intake order automatically.
+    # Do NOT gc mail send — it creates duplicate sessions.
     bd update $ROOT_ID --add-label needs-review --remove-label ready-to-ship
     exit 0
 fi
@@ -97,7 +98,8 @@ if [ -n "{{smoke_cmd}}" ]; then
     if ! {{smoke_cmd}}; then
         bd update $ROOT_ID --notes "<existing notes>
 smoke: FAIL"
-        gc mail send builder "Smoke failed on $ROOT_ID"
+        # The ready-to-build label triggers builder-intake order automatically.
+        # Do NOT gc mail send — it creates duplicate sessions.
         bd update $ROOT_ID --add-label ready-to-build --remove-label ready-to-ship
         exit 0
     fi

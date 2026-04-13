@@ -214,9 +214,9 @@ $(bd list --label plan:{{slug}} --format=markdown)
 
 ## Dependency graph
 
-\\\`\\\`\\\`
+```
 $(bd dep graph $ROOT_ID --format=ascii)
-\\\`\\\`\\\`
+```
 EOF
 ```
 
@@ -243,20 +243,15 @@ fi
 bd close $ROOT_ID --reason "plan complete: .actual/plans/{{slug}}.md"
 ```
 
-**3. Mail the right downstream agents.** Only mail those whose
-labels actually got used:
+**3. Downstream agents pick up work automatically via labels:**
 ```bash
-if bd list --label needs-design --label plan:{{slug}} --limit=1 | grep -q .; then
-    gc mail send designer "Handoff: {{slug}} has design work"
-fi
-if bd list --label needs-tests --label plan:{{slug}} --limit=1 | grep -q .; then
-    gc mail send validator "Handoff: {{slug}} has test work"
-fi
-if bd list --label ready-to-build --label plan:{{slug}} --limit=1 | grep -q .; then
-    gc mail send builder "Handoff: {{slug}} has build work"
-fi
+# The labels trigger the corresponding intake orders automatically:
+#   needs-design   → designer-intake
+#   needs-tests    → validator-intake
+#   ready-to-build → builder-intake
+# Do NOT gc mail send — it creates duplicate sessions.
 ```
 
 **Exit criteria:** Root bead closed; plan file committed (if
-possible); downstream agents notified.
+possible); downstream agents pick up labelled work via intake orders.
 """

@@ -64,13 +64,13 @@ Generated: <YYYY-MM-DD>
 
 ### Screen 1: <name>
 
-\\\`\\\`\\\`
+```
 +--------------------+
 | Header             |
 +--------------------+
 | ... ASCII sketch . |
 +--------------------+
-\\\`\\\`\\\`
+```
 
 Components reused: <list from the design system>
 New components needed: <list, or "none">
@@ -123,8 +123,9 @@ bd update $ROOT_ID \\
     --notes "<existing notes>
 design_artifact: .actual/designs/{{slug}}.md"
 
-gc mail send builder "Handoff: $ROOT_ID design ready at .actual/designs/{{slug}}.md"
+# The ready-to-build label triggers builder-intake order automatically.
+# Do NOT gc mail send — it creates duplicate sessions.
 ```
 
-**Exit criteria:** Bead relabelled; builder notified.
+**Exit criteria:** Bead relabelled; builder picks up work via intake order.
 """

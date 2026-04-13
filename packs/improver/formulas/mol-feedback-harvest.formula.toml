@@ -156,16 +156,18 @@ bd ready --label=needs-improve --json 2>/dev/null \\
     done
 ```
 
-**3. Mail each downstream agent that received new work:**
+**3. Downstream agents pick up work automatically via labels:**
 ```bash
-for agent in architect planner designer validator builder reviewer; do
-    count=$(bd list --label=source:actual-improver --label=needs-$agent --limit=50 --json 2>/dev/null | jq 'length')
-    if [ "$count" -gt 0 ] 2>/dev/null; then
-        gc mail send "$agent" "Improver filed $count new $agent item(s) from today's harvest"
-    fi
-done
+# Each label triggers the corresponding intake order automatically:
+#   needs-architecture → architect-guardrail-check
+#   needs-plan         → planner-intake
+#   needs-design       → designer-intake
+#   needs-tests        → validator-intake
+#   ready-to-build     → builder-intake
+#   needs-review       → reviewer-intake
+# Do NOT gc mail send — it creates duplicate sessions.
 ```
 
 **Exit criteria:** Drafted beads exist; needs-improve beads closed;
-downstream agents notified.
+downstream agents pick up labelled work via intake orders.
 """

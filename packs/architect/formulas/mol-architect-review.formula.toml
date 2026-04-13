@@ -101,14 +101,18 @@ id = "actual-adr-sync"
 title = "Sync ADRs to CLAUDE.md/AGENTS.md via the actual skill"
 needs = ["assess"]
 description = """
-Use the bundled `actual` skill to verify the rig's generated docs are
-in sync with its ADRs. If they drift, either reconcile them now or
-file a divergence bead.
+Run `actual adr-bot` to sync the rig's CLAUDE.md/AGENTS.md with its
+ADRs. The `--force --no-tui` flags make it work in non-interactive
+agent environments. **DO NOT skip this step because you think it
+needs an interactive terminal — it does NOT when `--force --no-tui`
+are passed. You MUST actually run the command.**
 
-**Skip this step entirely if `{{skip_adr_sync}}` is "true".**
+**Skip this step ONLY if `{{skip_adr_sync}}` is "true".**
 
-**1. Check the `actual` binary is available:**
+**1. Change to the rig root** (where CLAUDE.md and .actual/ live)
+and check the `actual` binary is available:
 ```bash
+cd "$RIG_ROOT"   # Set from the Rig root shown in your prompt footer
 if ! command -v actual >/dev/null 2>&1; then
     bd update $ROOT_ID --notes "<existing notes>
 adr_sync: skipped — actual CLI not installed"
@@ -129,7 +133,7 @@ fi
 
 **3. Dry-run:**
 ```bash
-actual adr-bot --dry-run --full
+actual adr-bot --dry-run --full --force --no-tui
 ```
 Read the diff carefully. Is it small and sensible (e.g., one added
 rule matching the current topic)? Or is it a large divergence from an
@@ -137,7 +141,7 @@ unrelated ADR drift?
 
 **4a. Small, sensible diff → commit it:**
 ```bash
-actual adr-bot
+actual adr-bot --force --no-tui
 actual status
 git add CLAUDE.md AGENTS.md docs/adr .actual/rules
 git commit -m "actual-architect: sync ADRs for {{topic}}"
@@ -228,11 +232,12 @@ bd dep add $CHILD_ID --blocked-by $ROOT_ID
 bd close $ROOT_ID --reason "architecture complete, see .actual/rules/{{topic}}.md"
 ```
 
-**3. Mail the planner:**
+**3. The planner picks up work automatically:**
 ```bash
-gc mail send planner "Handoff: rule {{topic}} published, <N> child beads labelled needs-plan"
+# The needs-plan label triggers planner-intake order automatically.
+# Do NOT gc mail send — it creates duplicate sessions.
 ```
 
 **Exit criteria:** Root bead closed, at least one child bead created
-with `needs-plan` label, planner notified by mail.
+with `needs-plan` label.
 """

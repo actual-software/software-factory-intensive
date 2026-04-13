@@ -14,7 +14,8 @@
 [workspace]
 name = "actual-factory"
 provider = "claude"
-includes = ["all"]
+start_command = "<user_home>/.nvm/versions/node/v22.19.0/bin/claude"
+includes = ["packs/actual/all"]
 
 [daemon]
 patrol_interval = "30s"
@@ -27,4 +28,4 @@ shutdown_timeout = "5s"
 # [[rigs]]
 # name = "myproject"
 # path = "/path/to/your/project"
-# includes = ["all"]
+# includes = ["packs/actual/all"]
