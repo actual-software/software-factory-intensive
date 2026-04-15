@@ -308,6 +308,57 @@ Include comments explaining each coordination decision.
 
 ---
 
+## Walkthrough: Gas City's Coordination Primitives
+
+You'll implement the patterns above using three Gas City features, each of which maps to a folder you can inspect in `packs/workshop/` or your own rig:
+
+| Primitive | Where it lives | What it does |
+|-----------|----------------|--------------|
+| **Beads with `--depends-on`** | `bd` CLI | Sequential & fan-in: Stage B bead stays blocked until Stage A bead closes |
+| **Orders** | `packs/<name>/orders/<name>/order.toml` (e.g. [`packs/workshop/orders/sync-jira/`](../../../packs/workshop/orders/sync-jira/)) | Periodic triggers — a cron-like block that fires a sling on a schedule. Used for automation (5-min Jira sync) or for polling gates |
+| **Approval beads (`--requires-approval`)** | `bd create --requires-approval` | Human-gate: bead enters `needs-approval` state until an approver comments `bd approve` |
+
+### Reading a real order config
+
+Open [`packs/workshop/orders/sync-jira/order.toml`](../../../packs/workshop/orders/sync-jira/order.toml) — it's the simplest example of a declarative periodic trigger. Note the cron schedule, the agent it targets, and the message it sends. Your orchestrator.yaml (Part 2 deliverable) borrows this shape for factory-wide pipelines.
+
+### Mapping your W3 coordination map to declarative config
+
+For each arrow in your coordination map, your Part 2 orchestrator.yaml should have:
+
+- **Sequential arrow (A → B)**: `stages: [{agent: A}, {agent: B, depends_on: [A]}]`
+- **Parallel fan-out (A → B, A → C)**: `{agent: B, depends_on: [A], parallel: true}` and the same for C, with a downstream join `{agent: D, depends_on: [B, C]}`
+- **Human gate**: `{agent: B, depends_on: [A], gate: approval_required}` plus a `gates:` entry naming the approvers
+
+The declarative form is the source of truth — commands like `gc orchestrate` just *apply* it.
+
+---
+
+## Industry Patterns: How Companies Think About This
+
+Coordination choices aren't arbitrary — they track how industry teams structure agentic systems. A few patterns to be aware of:
+
+- **Anthropic's multi-agent research system** ([blog post](https://www.anthropic.com/engineering/built-multi-agent-research-system)) uses a lead researcher agent that orchestrates subagents via explicit *task handoffs*. Their takeaway: agents work best when each has a tightly scoped contract, and the orchestrator is itself an agent whose only job is routing. Your `orchestrator.yaml` is the declarative equivalent.
+- **Sourcegraph Cody's agent architecture** treats code review, code generation, and context-gathering as distinct agents that compose — mirroring the Reviewer/Coder/Designer split in this curriculum.
+- **Cognition (Devin)'s whitepaper on building agents** highlights the "no hidden handoffs" principle: every state transition between agents produces an artifact that is human-inspectable. Your work packages, ADRs, design specs, and review reports embody this.
+- **Gartner's 2025 Agentic AI report** lists three coordination anti-patterns: (1) agents that can re-assign themselves, (2) gates triggered by agent-generated metrics instead of external signals, (3) parallel stages that share mutable state. Each of your W3 Common Coordination Mistakes maps to one of these.
+
+Use these as cross-references in your pod discussion: "Is our parallel fan-out design safe under Gartner's rule (3)? Where is the shared mutable state?"
+
+---
+
+## Workshop Activity — Part 3: Pod Peer-Review (10 min)
+
+Swap your Part 2 orchestrator.yaml with another pod. Ask three questions of theirs:
+
+1. **Can any stage start before its declared dependencies finish?** Trace every `depends_on` by hand. If yes, dependency graph is broken.
+2. **Is every human gate justified?** Apply W3's "3am test" to each gate. If two of five gates fail the test, they're theatrical, not protective — cut them.
+3. **What happens if Stage B crashes mid-run?** There should be a named retry policy, a state-reset step, or an escalation rule. Not all three — but at least one.
+
+If any question yields "we hadn't thought about that," your pod has a revision to make before L4.
+
+---
+
 ## Next Steps
 
-In **L4**, you'll implement this coordination using Gas City's orchestrator. Your coordination design will determine how smoothly your factory runs end-to-end.
+In **L4**, you'll implement this coordination using Gas City's orchestrator. Your coordination design will determine how smoothly your factory runs end-to-end. Bring to L4: `orchestrator.yaml` draft committed to your repo, plus the peer-review notes from Part 3.

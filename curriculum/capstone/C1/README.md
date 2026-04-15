@@ -31,12 +31,61 @@
 
 ## Prerequisites
 
-✅ All labs complete (L1-L4): 6 agents configured  
-✅ All workshops complete (W2-W4): Coordination + feedback designed  
-✅ Gas City running with orchestrator.yaml configured  
-✅ Project repository set up as rig  
-✅ Deployment pipeline ready (staging + production)  
-✅ (Optional) [`packs/workshop`](../../../packs/workshop/) integrations connected — enables ticket sync, observability, and status reporting to external systems  
+✅ All labs complete (L1-L4): 6 agents configured
+✅ All workshops complete (W2-W4): Coordination + feedback designed
+✅ Gas City running with `orchestrator.yaml` configured
+✅ Project repository set up as rig
+✅ Deployment pipeline ready (staging + production) — or at minimum CI + a sandbox deploy target
+✅ (Optional) [`packs/workshop`](../../../packs/workshop/) integrations connected — enables ticket sync, observability, and status reporting to external systems
+✅ (Optional) `actual adr-bot` has been run so `CLAUDE.md` contains tailored industry ADRs alongside project ADRs
+
+---
+
+## Gas City Capabilities Used in the Capstone
+
+This is the first session where you use Gas City's full orchestration surface, not just individual `gc sling` calls.
+
+| Command | What it does |
+|---------|--------------|
+| `gc orchestrate --pipeline feature-pipeline --bead <id>` | Kick off the orchestrator.yaml pipeline from W3 |
+| `bd list --status needs-approval` | Poll for human-gate beads |
+| `bd approve <bead> --comment "..."` | Release a human gate |
+| `bd event list --since 1h` | Inspect feedback signals the factory emitted |
+| `gc events --follow` | Stream every city-level event |
+| `gc session list` / `gc session peek <agent>` | See and attach to any running agent session |
+
+If your orchestrator isn't wired up, you can still run the capstone **manually sequenced** — sling each stage's bead by hand after the previous bead closes. Report this in your Factory Run Report under "Config Discipline."
+
+---
+
+## Walkthrough: Use the Composite Pack for One-Shot Setup
+
+If you've made it this far, you've installed six packs individually (`planner`, `architect`, `designer`, `coder`, `reviewer`, `deployer`). The [`packs/fired-up-pizza/`](../../../packs/fired-up-pizza/) composite pack bundles all six so that a new participant (or your production rig next Monday) can bootstrap in one command:
+
+```bash
+gc rig add ~/path/to/your-repo --include /path/to/software-factory-intensive/packs/fired-up-pizza
+```
+
+Read the bundle's [`pack.toml`](../../../packs/fired-up-pizza/pack.toml) — it's 20 lines, mostly `includes = ["../planner", ...]` — to understand how composite packs work. Then build a similar composite for your own factory (`packs/my-factory/pack.toml`) so future participants installing your rig get all 6 agents with one call.
+
+---
+
+## Reference: What a Successful Capstone Looks Like
+
+The reference project's directory state after a completed capstone run:
+
+```
+reference-project/fired-up-pizza/
+  work-packages/order-history.md                ← Planner output
+  docs/adr/0005-order-history-storage.md         ← Architect output
+  design/order-history-spec.md                   ← Designer output
+  src/features/order-history/*                   ← Coder output (branch merged)
+  review-reports/order-history-review.md         ← Reviewer output
+  release-gates/order-history-gate.md            ← Deployer output
+  factory-runs/capstone-2026-04-22-order-history.md  ← Your report
+```
+
+Seven artifacts. Each one references the previous by ID. Compare your run's output to this shape — if any directory stays empty, you have a stage that didn't run or an output-path mismatch.
 
 ---
 
@@ -473,6 +522,59 @@ Save as: `factory-runs/capstone-[date]-[feature-name].md`
 1. **Measure impact**: Time saved, quality improvements, velocity increase
 2. **Expand factory**: Add specialized agents (security, performance, docs)
 3. **Share learnings**: Write about your factory, help others build theirs
+
+---
+
+## Post-Capstone: Evolving Your Factory
+
+Once the capstone run lands, your factory is a living system. Three follow-through habits separate factories that *scale* from factories that *atrophy*:
+
+### 1. Re-run `actual adr-bot` weekly
+
+Your codebase changes; industry baselines shift; tailored ADRs go stale. Schedule a weekly order:
+
+```toml
+# my-factory/orders/adr-refresh/order.toml
+[order]
+name = "adr-refresh"
+schedule = "0 9 * * 1"     # every Monday 9am
+agent = "architect"
+message = "Run `actual adr-bot` to refresh tailored ADRs in CLAUDE.md. Commit diffs for review."
+```
+
+This makes the Actual ADR system an ongoing input to your factory, not a one-time setup.
+
+### 2. Promote recurring feedback-rule patterns into ADRs
+
+A feedback rule that fires 5+ times a month is no longer a "pitfall" — it's an architectural principle. Promote it:
+
+1. Move the rule's guidance from `CLAUDE.md`'s auto-generated section into a new ADR under `docs/adr/`
+2. Remove the feedback rule (it's now permanent, not patrolling)
+3. Note the promotion in `DECISIONS.md`
+
+### 3. Measure factory velocity
+
+Capture these metrics after every capstone-style run:
+
+- **Stages-to-passing:** How many slings did each stage need? Target: 1.2 average across stages.
+- **Human gate seconds:** Time from bead → `needs-approval` → approved. Long waits = gate is too frequent or approver is overloaded.
+- **Config-discipline ratio:** Commits tagged `chore:` / `docs:` updating `CLAUDE.md` vs. total commits. High ratio = healthy config-first culture.
+
+Track these in a `factory-runs/metrics.md` rolling table. Over 6 runs you'll see whether your factory is getting faster (good) or whether you're tightening rules faster than the factory adapts (rebalance).
+
+---
+
+## Industry Landscape: Where Software Factories Are Going
+
+Your factory is ahead of most production teams right now. A few signals for what comes next:
+
+- **Cognition AI (Devin)** demonstrated the first commercial agent that can complete a full feature autonomously — from Jira ticket to shipped PR. Your 6-agent factory is the composable, transparent, self-hostable answer to that model. Devin is opaque; your factory is every artifact on disk.
+- **GitHub's Copilot Workspace** is productizing the Planner → Architect → Designer → Coder flow as a single end-to-end UX. Your factory lets you swap each stage's implementation independently — Copilot is monolithic, yours is Unix-philosophy.
+- **AWS Bedrock AgentCore and Google Vertex AI Agent Builder** are making the primitives (MCP, tool access, memory) cloud-native. Your `packs/workshop/` already uses MCP for Sentry/DataDog/Grafana/Slack — the same mechanism these clouds commercialize.
+- **IBM's "Software Engineering Agents" research** argues that the 10x productivity bump comes not from better single agents but from **better handoff artifacts**. Your work packages, ADRs, design specs, and release gates are exactly the handoff layer they describe.
+- **McKinsey's 2025 State of AI** reports that early adopters of agentic pipelines see 40–60% cycle-time reduction on bug-fix workflows and 15–25% on feature development. The variance is explained by *config discipline*: teams that maintain declarative configs see higher retention of gains over 6 months.
+
+The thesis of this intensive — **config over prompting, artifacts as handoffs, config-discipline as the scaling axis** — is the consensus direction. You've built it from first principles.
 
 ---
 

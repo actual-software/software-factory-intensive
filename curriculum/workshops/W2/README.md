@@ -276,6 +276,120 @@ Provide an example contract for my feature: [feature name]
 
 ---
 
+## Walkthrough: Map Your Design onto the Shipped Packs
+
+You're not inventing agents from scratch — Gas City ships a pack per agent, and your job in W2 is to understand the shape each pack provides so that your design *conforms* to that shape.
+
+Open each of these in your editor as a short reading exercise. These are the files you'll customize in L2–L4; recognize the structure now so they feel familiar when you install them.
+
+| Agent | Pack | Prompt file (the "workflow card" for the agent) |
+|-------|------|--------------------------------------------------|
+| Planner | [`packs/planner/`](../../../packs/planner/) | [`packs/planner/prompts/planner.md`](../../../packs/planner/prompts/planner.md) |
+| Architect | [`packs/architect/`](../../../packs/architect/) | [`packs/architect/prompts/architect.md`](../../../packs/architect/prompts/architect.md) |
+| Designer | [`packs/designer/`](../../../packs/designer/) | [`packs/designer/prompts/designer.md`](../../../packs/designer/prompts/designer.md) |
+| Coder | [`packs/coder/`](../../../packs/coder/) | [`packs/coder/prompts/coder.md`](../../../packs/coder/prompts/coder.md) |
+| Reviewer | [`packs/reviewer/`](../../../packs/reviewer/) | [`packs/reviewer/prompts/reviewer.md`](../../../packs/reviewer/prompts/reviewer.md) |
+| Deployer | [`packs/deployer/`](../../../packs/deployer/) | [`packs/deployer/prompts/deployer.md`](../../../packs/deployer/prompts/deployer.md) |
+
+Every prompt file shares a consistent shape — **Role**, **Inputs**, **Output Format**, **Quality Gate**, **Process**, **Config Discipline**. When you design your factory below, use these five headings as the axis for each agent.
+
+### Your pod's design deliverable → pack customization
+
+For each of the 6 agents, your pod's W2 deliverable maps to a specific file you'll edit in an upcoming session:
+
+| W2 deliverable | Becomes | Installed in |
+|----------------|---------|--------------|
+| "Planner produces `[your work package format]`" | Edits to `packs/planner/prompts/planner.md` (Output Format section) | L2 |
+| "Architect produces `[your ADR format]`" | Edits to `packs/architect/prompts/architect.md` (Output Format section) | L2 |
+| "Designer produces `[your implementation plan format]`" | Edits to `packs/designer/prompts/designer.md` | L3 |
+| "Coder writes to `[your src layout]`" | Edits to `packs/coder/prompts/coder.md` | L3 |
+| "Reviewer checks `[your review standards]`" | Edits to `packs/reviewer/prompts/reviewer.md` | L4 |
+| "Deployer gates on `[your release criteria]`" | Edits to `packs/deployer/prompts/deployer.md` | L4 |
+| Handoff contract Planner → Architect | The `## Inputs` and `## Output Format` sections must match across both prompt files | L2 |
+
+**Output your design as a table**, not as prose. Prose will be hard to translate into prompt-file edits on Monday.
+
+---
+
+## Walkthrough: Use the Skeleton Template to Scaffold Your Project
+
+`my-factory/` is the skeleton every participant starts from. Its directory layout matches the Output Location of every pack:
+
+```
+my-factory/
+  docs/
+    PROJECT_MANIFEST.md        ← the source of truth every agent reads first
+    adr/                       ← Architect writes here (ADR-NNNN-slug.md)
+  work-packages/               ← Planner writes here
+  design/                      ← Designer writes here
+  review-reports/              ← Reviewer writes here
+  release-gates/               ← Deployer writes here
+  feedback-loops/              ← W4 feedback rules
+  CLAUDE.md                    ← Global agent instructions
+```
+
+During W2, two of these files matter most:
+
+1. **`my-factory/docs/PROJECT_MANIFEST.md`** — your design's single source of truth. Every agent reads this before doing anything. Your W2 design decisions about domain model, conventions, success criteria, and review standards *all* land here. If you haven't started filling it in, do so now — paste in the Part 1 Map-Your-Project deliverable at minimum.
+
+2. **`my-factory/CLAUDE.md`** — the global agent instructions. Start lightweight (it mirrors Fired Up Pizza's `CLAUDE.md`) and let L1–L4 fill it in.
+
+If you haven't copied the skeleton into your project repo yet, do so now so L2 starts clean:
+
+```bash
+cp -r /path/to/software-factory-intensive/my-factory/* ~/path/to/your-repo/
+```
+
+---
+
+## Walkthrough: Read Fired Up Pizza as a Finished Reference
+
+Fired Up Pizza is the reference project — a complete, working example of a 6-agent factory's *shape*. Spend 5 minutes scanning:
+
+- [`reference-project/fired-up-pizza/CLAUDE.md`](../../../reference-project/fired-up-pizza/CLAUDE.md) — the finished Day-1 `CLAUDE.md`. Note the conventions: "Prices in cents internally, formatted as dollars for display."
+- [`reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md`](../../../reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md) — compare length and specificity to the `my-factory/docs/PROJECT_MANIFEST.md` template you've been filling in.
+- [`reference-project/fired-up-pizza/tickets.md`](../../../reference-project/fired-up-pizza/tickets.md) — the backlog that feeds the factory. Note how each ticket is written: single-sentence goal, explicit acceptance criteria, no implementation detail.
+- [`packs/fired-up-pizza/pack.toml`](../../../packs/fired-up-pizza/pack.toml) — the *composite* pack that bundles all 6 agent packs with a single `gc rig add --include packs/fired-up-pizza` command.
+
+Ask yourself: if I replaced `docs/PROJECT_MANIFEST.md` in Fired Up Pizza with mine, would the agent prompts still make sense? If not, your manifest is under-specified — that's what W2's Part 1 corrects.
+
+---
+
+## Architect Agent: The Actual AI ADR System
+
+Your Architect agent writes ADRs (Architecture Decision Records). You have two ways to source ADR content:
+
+1. **Write each ADR from scratch** — the Architect proposes three options, evaluates trade-offs, picks one. This is what L2 walks you through.
+2. **Use Actual AI's ADR system** (`actual adr-bot`) — a CLI that analyzes your repo and *tailors* best-practice ADRs to your codebase, writing them into `CLAUDE.md` / `AGENTS.md` automatically. Your Architect then references those ADRs when making local decisions instead of rediscovering industry patterns.
+
+Install it (optional but strongly recommended for real projects):
+
+```bash
+brew install actual-software/actual/actual
+
+# From your project repo
+cd ~/path/to/your-repo
+actual adr-bot --dry-run      # Preview what it would write
+actual adr-bot                 # Write tailored ADRs into CLAUDE.md
+```
+
+What this adds to your W2 design:
+
+- **Handoff contract Planner → Architect** gains a prior step: the Architect reads the curated ADR set first, and only writes a new ADR when the decision isn't covered by an existing one.
+- **Quality bar for ADRs** gets higher: a decision to *deviate* from a tailored industry ADR is a more interesting artifact than a decision made in a vacuum.
+- **Review criteria (Reviewer agent, W4 inputs)** now has `actual`-sourced ADRs as an additional compliance axis: "Does this code violate ADR-0007 (serde-rename-all)?"
+
+Note this in your W2 design: *"Architect reads `CLAUDE.md` ADR section first; writes new ADRs to `docs/adr/NNNN-<slug>.md` only for decisions not covered."*
+
+If you're working against `reference-project/fired-up-pizza/`, `actual adr-bot` would populate its `CLAUDE.md` with React/TypeScript ADRs that the Architect then extends with pizza-specific ones (pricing model, menu-categorization rule, etc.).
+
+---
+
 ## Next Steps
 
-In **L2**, you'll build the first two agents (Planner + Architect) using this design. Your handoff contracts will guide how you configure their AGENTS.md specs.
+In **L2**, you'll build the first two agents (Planner + Architect) using this design. Your handoff contracts will guide how you configure their prompt files. Your `docs/PROJECT_MANIFEST.md` becomes what they both read first.
+
+**Bring to L2:**
+- [ ] A filled-in `docs/PROJECT_MANIFEST.md`
+- [ ] The two handoff contracts from Part 2 (written as a table, not prose)
+- [ ] A one-sentence note of which ADRs you'll seed via `actual adr-bot` vs. write by hand

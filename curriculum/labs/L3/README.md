@@ -31,9 +31,44 @@ Feature ready for review
 
 ## Prerequisites
 
-✅ L2 complete (Planner + Architect agents working)  
-✅ Work package + ADR artifacts exist in repo  
-✅ Gas City running  
+✅ L2 complete (Planner + Architect agents working, artifacts committed)
+✅ Work package + ADR exist in repo with cross-references
+✅ Gas City running
+✅ (Recommended) `actual adr-bot` has seeded tailored ADRs into `CLAUDE.md` — Designer reads these, too
+
+---
+
+## Gas City Capabilities Used This Lab
+
+| Command | What it does | Used in step |
+|---------|--------------|--------------|
+| `gc rig add <repo> --include packs/designer` | Register the Designer pack | Step 0 |
+| `gc rig add <repo> --include packs/coder` | Register the Coder pack | Step 0 |
+| `bd create --depends-on <bead>` | Chain Designer and Coder beads after L2 outputs | Steps 5, 7 |
+| `gc sling designer <bead>` | Dispatch to Designer | Step 6 |
+| `gc sling coder <bead>` | Dispatch to Coder (long-running) | Step 8 |
+| `gc session peek <agent>` | Attach to the agent's tmux session (read-only variant of `gc watch`) | Step 9 |
+
+---
+
+## Walkthrough: Install Designer and Coder Packs
+
+Read each pack's prompt file first — you'll customize these for your project's conventions:
+
+- [`packs/designer/pack.toml`](../../../packs/designer/pack.toml) and [`packs/designer/prompts/designer.md`](../../../packs/designer/prompts/designer.md) — Designer produces `design/<slug>-spec.md` and receives work package + ADR as inputs
+- [`packs/coder/pack.toml`](../../../packs/coder/pack.toml) and [`packs/coder/prompts/coder.md`](../../../packs/coder/prompts/coder.md) — Coder produces implementation under `src/` from the Designer's spec. Coder's `idle_timeout` is longer (3h) because implementation spans multiple quality-gate cycles.
+
+Install:
+
+```bash
+cd ~/my-city
+
+gc rig add ~/path/to/your-repo --include /path/to/software-factory-intensive/packs/designer
+gc rig add ~/path/to/your-repo --include /path/to/software-factory-intensive/packs/coder
+
+gc restart
+gc status   # expect: planner, architect, designer, coder
+```
 
 ---
 
@@ -450,6 +485,27 @@ Run quality gates after each step. Only commit when gates pass.
 
 ### Issue: Quality gates fail repeatedly
 **Solution:** Strengthen gate requirements in AGENTS.md. Add specific commands to run and pass thresholds.
+
+---
+
+## How the Reference Project Demonstrates L3
+
+- [`reference-project/fired-up-pizza/design/`](../../../reference-project/fired-up-pizza/design/) — Designer output directory. Each spec is `<slug>-spec.md` — e.g. after running FUP-3 (Shopping cart), you'd see `shopping-cart-spec.md` with interface types, component breakdown, and a test plan.
+- [`reference-project/fired-up-pizza/src/`](../../../reference-project/fired-up-pizza/src/) — Coder output. For a React/TypeScript project, expect `components/`, `state/`, `utils/`, and `__tests__/` subdirectories to match conventions declared in `docs/PROJECT_MANIFEST.md`.
+- [`reference-project/fired-up-pizza/CLAUDE.md`](../../../reference-project/fired-up-pizza/CLAUDE.md) — note the explicit Coder constraint: "Prices in cents internally, formatted as dollars for display." That's a project-specific convention that lives in `CLAUDE.md` so *both* Designer and Coder respect it. When you hit a bug where your Coder keeps violating a convention, the fix is usually a new line here.
+
+If your Coder produces code that passes tests but violates the Designer's file structure, diff the design spec against the code and update `packs/coder/prompts/coder.md` to require: "Open the design spec and list every file you will create. If a file you want to create isn't listed, stop and ask — do not invent structure."
+
+---
+
+## Architect-Coder Feedback Loop via Actual ADRs
+
+If you seeded tailored ADRs with `actual adr-bot` in L2, the Coder reads them too. When the Coder violates a tailored ADR (e.g. writes a struct without `#[serde(deny_unknown_fields)]` when the baseline recommends it), you have two remediation paths:
+
+1. **Strengthen Coder's prompt** — add "Before writing code, read the Tailored ADRs section of `CLAUDE.md`. Every decision in that section is binding unless the Designer's spec explicitly overrides it."
+2. **Re-run `actual adr-bot`** after the feature lands — the tool is idempotent, so running it again captures any new conventions introduced by this feature.
+
+Option 1 prevents the problem next sling. Option 2 ensures the baseline stays up to date with reality.
 
 ---
 

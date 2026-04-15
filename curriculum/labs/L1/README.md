@@ -1,301 +1,421 @@
 # L1 · Build a Structured Development Loop
 
-> **Goal:** Create your first Gas City agent configuration (AGENTS.md) that drives consistent, repeatable behavior for implementing features—no manual prompting required after initial setup.
+> **Goal:** Install Gas City, add your project as a rig, convert your W1 workflow card into a working `CLAUDE.md`, and sling your first real bead to an agent. By the end, the agent implements a small feature and commits it without you typing into the chat.
 
 | | |
 |---|---|
 | **Day** | Day 1 |
 | **Time** | 11:30 - 12:30 |
 | **Type** | LAB |
-| **Deliverable** | Working AGENTS.md file + feature implementation |
+| **Deliverable** | Working `CLAUDE.md` + committed feature + `DECISIONS.md` entry |
 
 ---
 
 ## What You'll Build
 
 ```
-User story in backlog
+User story (from your backlog)
       ↓
-Agent reads AGENTS.md spec
+bd create  →  a bead in Gas City
       ↓
-Agent implements feature autonomously
+gc sling dev-agent <bead-id>
       ↓
-Code passes quality gates (lint, tests)
+Agent reads CLAUDE.md, reads the bead, implements the feature
       ↓
-Decision log records what was learned
+Code passes quality gates (lint, tests, build)
+      ↓
+git log shows the commit — you didn't type a line of code
+      ↓
+DECISIONS.md logs what you changed in CLAUDE.md and why
 ```
 
-**The Config Discipline:** When the agent produces wrong output, you update AGENTS.md and re-run—NOT type a correction into the chat.
+**The Config Discipline:** When the agent produces wrong output, you update `CLAUDE.md` and re-sling the bead. You do **not** type a correction into chat. This is the single most-tested behavior of the lab.
 
 ---
 
 ## Prerequisites
 
-✅ Complete W1 (AI Workflow Card)  
-✅ Gas City installed and city initialized  
-✅ Project repository added as a rig  
-✅ Coding agent configured in city.toml
+- [ ] W1 complete — you have a `workflow-card.md` in your project repo
+- [ ] Gas City installed: `brew install gastownhall/gascity/gascity`
+- [ ] Claude Code (or your preferred AI coding agent) installed and authenticated
+- [ ] Project repo cloned locally
+- [ ] Project Manifest filled in at `docs/PROJECT_MANIFEST.md` (or plan to fill it in during Step 2)
 
 ---
 
-## Optional: Connect External Services
+## Gas City Capabilities Used This Lab
 
-If your project uses Jira, Linear, GitHub Issues, or other external tools, you can connect them now using the [`packs/workshop`](../../../packs/workshop/) integrations pack:
+| Command | What it does | Used in step |
+|---------|--------------|--------------|
+| `gc init <dir>` | Create a new city (a workspace where agents + beads live) | Step 1 |
+| `gc rig add <path>` | Register a project repo as a "rig" — a place agents can work | Step 1 |
+| `gc rig list` | Show all rigs registered with the city | Step 1 |
+| `gc status` | Show all agents, their state, and last activity | Step 3, 6 |
+| `gc doctor` | Validate tools, auth, and pack config | Step 2 (optional) |
+| `bd create` | Create a work item ("bead") that agents can pick up | Step 4 |
+| `bd list` | Show beads and their status | Step 4 |
+| `gc sling <agent> <bead>` | Assign a bead to an agent and start the session | Step 5 |
+| `gc watch <agent>` | Attach to the tmux session and see the agent working | Step 6 |
+| `gc events --follow` | Stream city-wide event log | Step 6 |
+| `bd close <bead>` | Mark a bead complete with a comment | Step 9 |
+
+You will *not* install an agent pack in this lab — the `dev-agent` is a single vanilla agent controlled entirely by `CLAUDE.md`. Agent packs arrive in L2.
+
+---
+
+## Reference: What Mature Looks Like
+
+Before starting, skim two files in the reference project:
+
+- [`reference-project/fired-up-pizza/CLAUDE.md`](../../../reference-project/fired-up-pizza/CLAUDE.md) — a mature `CLAUDE.md` written for a full 6-agent factory. Yours will be simpler (one agent, not six), but the structure carries over.
+- [`reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md`](../../../reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md) — the project manifest an agent reads *before every task*.
+
+And the skeleton you'll start from:
+
+- [`my-factory/CLAUDE.md`](../../../my-factory/CLAUDE.md) — an intentionally bare `CLAUDE.md` template. Read it once — most of L1 is filling this in.
+- [`my-factory/docs/PROJECT_MANIFEST.md`](../../../my-factory/docs/PROJECT_MANIFEST.md) — the manifest template.
+
+---
+
+## Step 1: Initialize Your City and Register Your Rig (10 min)
+
+Your "city" is the workspace where all agents and beads live. Your "rig" is the project repo the agent will work in.
+
+```bash
+# Create a city. You'll use this directory every session from now on.
+gc init ~/my-city
+cd ~/my-city
+
+# Register your project repo. Use the absolute path.
+gc rig add ~/path/to/your-repo
+
+# Verify it's registered.
+gc rig list
+```
+
+Expected output:
+
+```
+NAME            PATH                          PACKS
+your-repo       /Users/you/path/to/your-repo  (none)
+```
+
+If you cloned `software-factory-intensive` and want to use `my-factory/` as a starter workspace inside your own project repo, copy the skeleton in:
+
+```bash
+# Optional: bring the my-factory skeleton into your project
+cp -r /path/to/software-factory-intensive/my-factory/* ~/path/to/your-repo/
+cd ~/path/to/your-repo
+git add CLAUDE.md README.md docs/ work-packages/ design/ review-reports/ release-gates/ feedback-loops/
+git commit -m "chore: bootstrap factory skeleton from my-factory/"
+```
+
+The skeleton gives you the directory layout every downstream agent will expect (`work-packages/`, `docs/adr/`, `design/`, `review-reports/`, `release-gates/`, `feedback-loops/`). Creating it now means you don't scramble in L2–L4.
+
+---
+
+## Step 2: (Optional) Connect External Services via the Workshop Pack (10 min)
+
+If your project uses Jira, Linear, GitHub Issues, GitLab, Sentry, DataDog, etc., install the `packs/workshop/` integrations pack now. Skipping this is fine — you can wire integrations in later.
 
 ```bash
 cd ~/my-city
-gc rig add ~/path/to/your-repo --include packs/workshop
-cp packs/workshop/env.example .env   # fill in credentials for services you use
+gc rig add ~/path/to/your-repo --include /path/to/software-factory-intensive/packs/workshop
+
+# Copy the credential template into the repo and fill it in
+cp /path/to/software-factory-intensive/packs/workshop/env.example ~/path/to/your-repo/.env
+# Edit .env — only fill in the services you actually use
+
+# Tell bd about the env and validate
 gc workshop setup
 gc doctor
 ```
 
-This enables automatic syncing of tickets from your issue tracker into beads, and gives agents MCP tool access to services like Sentry, DataDog, and Slack. See [`packs/workshop/README.md`](../../../packs/workshop/README.md) for the full list. You can skip this and add integrations later.
+Expected `gc doctor` output (truncated):
+
+```
+  ✓ check-core-tools    — gc, bd, dolt, tmux, jq, git, curl all present
+  ✓ check-github        — authenticated as your-user
+  ✓ check-jira          — authenticated as you@co.com (project: PROJ)
+  ⚠ check-linear        — LINEAR_API_KEY not set  (ok — skipping)
+```
+
+Only `check-core-tools` is required. All other checks are informational — each one only activates if you filled in the matching env vars.
+
+What this unlocks:
+
+- Periodic sync orders (every 5 minutes) from your issue tracker into beads — see `packs/workshop/orders/sync-*/`
+- MCP server tool access for observability (Sentry, DataDog, PostHog, Grafana) so agents can query errors and dashboards directly
+- Cloud CLI validation (`aws`, `gcloud`, `az`) for future deploys
+
+The full map of what the pack configures is in [`packs/workshop/README.md`](../../../packs/workshop/README.md).
 
 ---
 
-## Step 1: Create Your AGENTS.md Spec File
+## Step 3: Declare a `dev-agent` in `city.toml` (5 min)
 
-Navigate to your project repository (rig):
+Open `~/my-city/city.toml` and add:
+
+```toml
+[[agent]]
+name = "dev-agent"
+dir = "your-repo"            # must match the name shown by `gc rig list`
+provider = "claude"
+idle_timeout = "2h"
+```
+
+Apply the change and confirm the agent is visible:
+
+```bash
+gc restart
+gc status
+```
+
+Expected:
+
+```
+NAME        STATE   LAST ACTIVITY   BEAD
+dev-agent   idle    --              --
+```
+
+---
+
+## Step 4: Write Your `CLAUDE.md` (15 min)
+
+In **your project repo** (not the city), open `CLAUDE.md` and evolve your W1 workflow card into the structure below. If you copied in the `my-factory/CLAUDE.md` skeleton, edit it in place.
+
+```markdown
+# <Project Name> — Agent Instructions
+
+## Project Context
+- **Manifest**: `docs/PROJECT_MANIFEST.md` — read before every task.
+- **Conventions**: TypeScript strict, conventional commits, feature branches.
+
+## Role
+You are a feature implementation agent. Take a user story from a bead,
+implement it end-to-end, and commit with a conventional message.
+
+## Iteration Rule
+1. Read the bead's description completely. Re-read linked files.
+2. Write a 3-line plan. Confirm the plan by committing it to the bead
+   as a comment before writing code.
+3. Implement in small slices (one test-passable unit at a time).
+4. Run quality gates after every slice. If a gate fails, stop and read
+   the error before touching code.
+5. Commit when gates pass; move to next slice.
+
+## Quality Gates
+Every commit must satisfy:
+1. **Lint:** `npm run lint` — zero errors, zero warnings
+2. **Tests:** `npm test` — all green, new tests for new code
+3. **Types:** `npm run type-check` (or `tsc --noEmit`) — clean
+4. **Build:** `npm run build` — succeeds
+
+## Decision Log
+When you iterate on CLAUDE.md to fix an issue, add an entry to
+`DECISIONS.md`. Include: date, the bead, what rule you added, why.
+
+## Output Format
+- Commits: `type(scope): description`
+- PR descriptions: problem, solution, testing notes
+- Comments explain WHY, not WHAT
+```
+
+Compare yours to the reference: [`reference-project/fired-up-pizza/CLAUDE.md`](../../../reference-project/fired-up-pizza/CLAUDE.md). The reference is longer because it drives six agents — yours drives one.
+
+Commit on a branch:
 
 ```bash
 cd ~/path/to/your-repo
+git checkout -b claude-md-setup
+git add CLAUDE.md
+git commit -m "chore: add CLAUDE.md for dev-agent (L1)"
 ```
-
-Create `AGENTS.md` using this template:
-
-```markdown
-# Agent Specification
-
-## Role
-You are a feature implementation agent for [PROJECT NAME]. Your job is to take user stories from the backlog and implement them with production-quality code.
-
-## Iteration Rule
-- Read the user story completely before starting
-- Break implementation into logical commits
-- Run tests after each significant change
-- If tests fail, analyze the failure and fix before proceeding
-
-## Quality Gates
-All code must pass before considering the feature complete:
-1. **Linting:** No lint errors or warnings
-2. **Tests:** All existing tests pass + new tests for new functionality
-3. **Type checking:** No type errors (if applicable)
-4. **Build:** Project builds without errors
-
-## Decision Log
-Record significant implementation decisions in DECISIONS.md:
-- What alternative approaches were considered?
-- Why was this approach chosen?
-- What tradeoffs were made?
-
-## Output Format
-- Commit messages follow: `type(scope): description`
-- PR descriptions include: problem, solution, testing approach
-- Code comments explain WHY, not WHAT
-```
-
-**Save this as `AGENTS.md` in your repository root.**
 
 ---
 
-## Step 2: Pick a Test Story
+## Step 5: Pick a Small Test Story (5 min)
 
-Choose ONE feature from your project backlog. Keep it small for this first test.
+Choose one story from your backlog that you could manually code in 15–30 minutes. Smaller is better — your first sling is a calibration run, not a hero play.
 
-**Example stories (Fired Up Pizza reference project):**
-- "Show order total in cart"
-- "Add 'Remove Item' button to cart"
-- "Display estimated delivery time"
+If you don't have a backlog yet, borrow from Fired Up Pizza's tickets file:
 
-**For your project:**
-Pick something that takes 15-30 minutes to implement manually.
+- [`reference-project/fired-up-pizza/tickets.md`](../../../reference-project/fired-up-pizza/tickets.md) — e.g. "FUP-1: Menu display page" or "FUP-3: Shopping cart"
 
-**Write it clearly:**
+Write your chosen story in this format:
+
 ```markdown
-# User Story: [Title]
+# User Story: Show Order Total in Cart
 
-**As a** [user type]  
-**I want** [goal]  
-**So that** [benefit]
+**As a** customer
+**I want** to see the total price in my cart
+**So that** I know what I'll pay before checkout
 
 ## Acceptance Criteria
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
+- [ ] Total updates on every quantity change
+- [ ] Total formatted as currency with two decimals
+- [ ] Total is 0.00 when cart is empty
 
 ## Technical Notes
-[Any constraints, APIs to use, styling requirements, etc.]
+- Use existing cart state in src/state/cart.ts
+- Match existing currency util in src/utils/format.ts
 ```
 
 ---
 
-## Step 3: Create a Bead for the Story
-
-In Gas City, work items are tracked as "beads". Create one for your story:
+## Step 6: Create a Bead for the Story (5 min)
 
 ```bash
 cd ~/my-city
-bd create "Implement: [Your Story Title]" \
+bd create "Implement: Show Order Total in Cart" \
   --description "$(cat <<'EOF'
-[Paste your user story here]
+[paste your user story here]
 EOF
 )"
 ```
 
-This returns a bead ID like `my-city-abc123`.
+This returns a bead ID like `my-city-abc123`. Confirm with `bd list`.
 
 ---
 
-## Step 4: Sling the Bead to Your Agent
-
-Tell Gas City to assign this work to your agent:
+## Step 7: Sling the Bead and Watch (15 min)
 
 ```bash
 gc sling dev-agent my-city-abc123
-```
-
-Where `dev-agent` is the agent name from your `city.toml`.
-
-**What happens:**
-1. Gas City starts your agent in a tmux session
-2. Agent reads AGENTS.md for behavior rules
-3. Agent reads the bead description (your user story)
-4. Agent implements the feature
-
----
-
-## Step 5: Monitor Agent Progress
-
-Watch your agent work in real-time:
-
-```bash
 gc watch dev-agent
 ```
 
-Press `Ctrl+C` to stop watching (agent keeps running).
+`gc sling` starts a tmux session, spins up Claude Code in the rig directory, and hands it the bead ID. `gc watch` attaches to that session so you can see tokens stream in real time. Press `Ctrl+b d` to detach (the agent keeps running).
 
-**Check current status:**
+In a second terminal, watch the event stream and status:
+
 ```bash
-gc status
-bd show my-city-abc123
+gc events --follow       # Everything happening city-wide
+gc status                # Agent states
+bd show my-city-abc123   # Bead progress
 ```
 
 ---
 
-## Step 6: Review Agent Output
+## Step 8: Review Output and Iterate (10 min)
 
-When the agent finishes (or if it gets stuck), check what it did:
+When the agent finishes (state returns to `idle`):
 
 ```bash
 cd ~/path/to/your-repo
-git log -3 --oneline     # Recent commits
-git diff HEAD~1          # Changes in last commit
+git log -5 --oneline
+git diff HEAD~1
 ```
 
-**Run quality gates manually:**
+Run the quality gates yourself:
+
 ```bash
-npm run lint              # or your linting command
-npm test                  # or your test command
-npm run build             # or your build command
+npm run lint && npm test && npm run build
+```
+
+### If gates pass
+
+Proceed to Step 9.
+
+### If gates fail or output is wrong
+
+**Do not type into chat. Do not fix the code manually.** Instead:
+
+1. Identify the missing rule. "The agent used inline styles — that's not forbidden in CLAUDE.md." "The agent skipped tests — Quality Gates section doesn't require them explicitly enough."
+2. Edit `CLAUDE.md` to add the missing rule in exact, testable terms.
+3. Reset the branch: `git reset --hard HEAD~1`
+4. Re-sling: `gc sling dev-agent my-city-abc123`
+5. Log the iteration in `DECISIONS.md` (see Step 9).
+
+**Target:** ≤3 slings to passing. If you hit 3 and still failing, flag a facilitator — your `CLAUDE.md` is probably fighting your project's existing conventions.
+
+---
+
+## Step 9: Write Your `DECISIONS.md` Entry (5 min)
+
+Create or append to `DECISIONS.md` in your repo:
+
+```markdown
+# Decisions
+
+## 2026-04-21 · my-city-abc123 · Show Order Total in Cart
+
+### Context
+First L1 sling. dev-agent with baseline CLAUDE.md.
+
+### What Happened
+- Sling 1: agent forgot to run quality gates before committing
+- Sling 2: agent used inline styles in the cart component
+- Sling 3: passed all gates, committed cleanly
+
+### CLAUDE.md Changes
+- Added explicit "Run `npm run lint && npm test && npm run build` before every commit" to Quality Gates.
+- Added "No inline styles — use Tailwind classes or CSS modules" to Project Context.
+
+### Lessons
+- The agent treats CLAUDE.md as law, but only for rules written as imperatives. "Prefer X" is ignored. "NEVER X" is followed.
+- Re-slinging after `git reset --hard` is cheap — don't be afraid to iterate.
+```
+
+Commit everything:
+
+```bash
+git add CLAUDE.md DECISIONS.md
+git commit -m "docs: update agent rules after first sling (L1)"
+git push -u origin claude-md-setup
+```
+
+Close the bead:
+
+```bash
+bd close my-city-abc123 --comment "Feature shipped. CLAUDE.md updated with 2 new rules."
 ```
 
 ---
 
-## Step 7: Iterate on AGENTS.md (If Needed)
+## How the Reference Project Demonstrates This Loop
 
-**If quality gates fail or agent behavior was wrong:**
+Fired Up Pizza is the reference project shipped with this repo. Look at:
 
-1. **Don't manually fix the code**
-2. **Update AGENTS.md** with more specific guidance
-3. **Reset the repository** to before agent ran
-4. **Re-sling the bead** to try again
+- [`reference-project/fired-up-pizza/tickets.md`](../../../reference-project/fired-up-pizza/tickets.md) — the backlog that *would* be slung to agents
+- [`reference-project/fired-up-pizza/CLAUDE.md`](../../../reference-project/fired-up-pizza/CLAUDE.md) — the mature instruction file that drives every agent in the 6-agent pipeline
 
-Example improvements to AGENTS.md:
-```markdown
-## Quality Gates
-...
-5. **Accessibility:** All interactive elements have ARIA labels
-6. **Performance:** No console warnings in browser
-
-## Implementation Guidelines
-- Use TypeScript for all new files
-- Follow existing file structure in src/components/
-- Import utilities from src/utils/, never re-implement
-```
-
-**Goal:** <= 3 attempts to get a passing implementation
-
----
-
-## Step 8: Document Your Decision Log
-
-Create `DECISIONS.md` in your repository:
-
-```markdown
-# Implementation Decisions
-
-## [YYYY-MM-DD] [Feature Name]
-
-### Problem
-[What was the user story? What challenge did it present?]
-
-### Approaches Considered
-1. **Option A:** [Description] - Rejected because [reason]
-2. **Option B:** [Description] - Chosen because [reason]
-
-### Implementation Details
-- Used [library/pattern/approach] for [reason]
-- Avoided [alternative] due to [tradeoff]
-
-### Lessons Learned
-- AGENTS.md needed refinement: [specific change made]
-- Next time, would [improvement]
-
-### Metrics
-- Attempts to passing: [1-3]
-- Agent runtime: [X minutes]
-```
+The `CLAUDE.md` you just wrote is the Day-1 form. By C1 tomorrow, you'll have added sections for six agents — or pushed those role-specific rules into per-agent `packs/*/prompts/*.md` files, like the reference does. That's the transition from "single-agent config" to "factory config."
 
 ---
 
 ## Recommended Prompts
 
-### Initial Agent Interaction (via bead description)
+### In the Bead Description (Agent's First Read)
+
 ```
-Implement the feature described below following all guidelines in AGENTS.md.
+Implement the user story below, following every rule in CLAUDE.md.
 
-[User story with acceptance criteria]
+<paste user story>
 
-Before starting:
-1. Read AGENTS.md completely
-2. Understand all quality gates
-3. Plan your implementation approach
+Before writing code:
+1. Read CLAUDE.md completely. If any rule conflicts with this story,
+   stop and say so.
+2. Read the two files named in Technical Notes.
+3. Post a 3-step plan as a bead comment.
 
-After implementation:
-1. Run all quality gates
-2. Record decision in DECISIONS.md
-3. Commit with descriptive message
-```
-
-### If Agent Gets Stuck (via gc sling or manual prompt)
-```
-The previous attempt failed quality gates. Review the errors:
-
-[Paste error output]
-
-Analyze what went wrong, update your approach, and retry.
-Ensure you're following all AGENTS.md guidelines.
+After writing code:
+1. Run every command in Quality Gates.
+2. Commit with a conventional-commit message.
+3. If you had to deviate from the plan, note it.
 ```
 
-### When Updating AGENTS.md Between Runs
-```
-I've updated AGENTS.md with additional guidance:
-- [Specific change 1]
-- [Specific change 2]
+### When Updating `CLAUDE.md` Between Slings
 
-Re-read the spec and retry the implementation from scratch.
+You're not prompting the agent here — you're editing the file that prompts the agent. But verbalize the delta as a PR-sized sentence:
+
 ```
+Added rule under Quality Gates: "No inline styles in React components.
+Use Tailwind classes or CSS modules only." Reason: sling 2 produced
+an inline-style CartTotal.tsx that violated repo convention.
+```
+
+This gives your facilitator (and your future self) the context to judge whether the rule was right.
 
 ---
 
@@ -303,47 +423,51 @@ Re-read the spec and retry the implementation from scratch.
 
 | Criterion | Points | Scoring |
 |-----------|--------|---------|
-| **AGENTS.md Completeness** | 25 pts | All 4 sections (Role, Iteration Rule, Quality Gates, Decision Log) present and specific to your project |
-| **Runs to Passing** | 30 pts | 1 run = 30pts, 2 runs = 20pts, 3 runs = 10pts, >3 or manual fix = 0pts |
-| **Decision Log Quality** | 25 pts | Documents what changed between runs, why, and lessons learned |
-| **Quality Gates Pass** | 20 pts | Binary: All gates pass = 20pts, any fail = 0pts |
+| **`CLAUDE.md` Completeness** | 25 | All 4 sections (Role, Iteration Rule, Quality Gates, Decision Log) present and specific to your project |
+| **Runs to Passing** | 30 | 1 sling = 30, 2 = 20, 3 = 10, >3 or any manual code edit = 0 |
+| **`DECISIONS.md` Quality** | 25 | Documents what changed between slings, why, and lessons learned |
+| **Quality Gates Pass** | 20 | Binary: all gates pass = 20, any failure = 0 |
 
-**Total:** 100 points
-
-**Pod Ranking:** Sum scores across all 5 members. Highest total wins.
+**Total:** 100. Pod ranking sums across all 5 pod members.
 
 ---
 
 ## Exit Criteria
 
-✅ AGENTS.md committed to repository  
-✅ Feature implementation passes all quality gates  
-✅ DECISIONS.md has >= 1 entry documenting this lab  
-✅ Bead marked complete in Gas City (`bd close my-city-abc123`)
+- [ ] `CLAUDE.md` committed to your project repo
+- [ ] Feature implementation passes all quality gates
+- [ ] `DECISIONS.md` has at least one L1 entry
+- [ ] Bead closed in Gas City (`bd close`)
+- [ ] Zero manual code edits — every iteration went through `CLAUDE.md`
+
+**L1 blocks L2.** If you don't hit exit criteria by 12:30, get to the help desk during lunch. You cannot meaningfully add a second agent in L2 when the single-agent loop isn't working.
 
 ---
 
 ## Common Issues & Solutions
 
-### Issue: Agent ignores AGENTS.md
-**Solution:** Ensure AGENTS.md is in repository root. Check agent logs with `gc watch dev-agent`.
+### Issue: Agent ignores `CLAUDE.md` entirely
+**Solution:** Confirm `CLAUDE.md` is in the repo root, not a subdirectory. Check with `gc watch dev-agent` — the first thing the agent reads should be `CLAUDE.md`. If not, your provider config in `city.toml` may not be set to `claude`.
 
-### Issue: Quality gates fail repeatedly
-**Solution:** Add more specific guidelines to AGENTS.md Quality Gates section. Be explicit about tools/commands to run.
+### Issue: Quality gates fail with the same error twice
+**Solution:** Your rule is too vague. Move from principle → imperative: "Tests must pass" → "Run `npm test`. If any test fails, do not commit. Read the error, fix the cause, re-run."
 
-### Issue: Agent takes too long
-**Solution:** Break story into smaller pieces. Aim for 15-30 min implementations.
+### Issue: Agent takes 40+ minutes on a simple story
+**Solution:** Your story is too big, or your `CLAUDE.md` is under-specified. Kill the session (`tmux kill-session -t dev-agent`), tighten the story scope to one component, tighten `CLAUDE.md`'s Iteration Rule to explicitly limit scope ("Only modify files named in Technical Notes"), re-sling.
 
-### Issue: Can't find agent in Gas City
-**Solution:** Run `gc status` to verify agent name. Ensure `dir` in city.toml matches rig name from `gc rig list`.
+### Issue: `gc status` shows `dev-agent` missing
+**Solution:** Your `city.toml` `[[agent]]` block's `dir` field doesn't match the name in `gc rig list`. Fix the mismatch, run `gc restart`.
+
+### Issue: You caught yourself typing into Claude chat
+**Solution:** Stop immediately. That correction is invisible to your next sling. Undo the agent's current work, translate your chat correction into a `CLAUDE.md` rule, re-sling. The point of L1 is to feel how obvious this mistake is once you're watching for it.
 
 ---
 
 ## Next Steps
 
-After completing L1, you'll have:
-- ✅ A working agent configuration pattern
-- ✅ Experience with the config-driven discipline
-- ✅ A baseline for building more complex agent systems
+In **L2**, you'll:
+- Install your first two agent packs (`packs/planner`, `packs/architect`)
+- Split `CLAUDE.md` into per-agent behavior (still in `CLAUDE.md`) plus per-agent prompt files from the packs
+- Produce your first **Work Package** and **ADR** — the two artifacts that downstream agents will consume
 
-In **L2**, you'll add specialized roles (Planner + Architect) that work together via Gas City coordination.
+The single-agent loop you just built is the atomic unit of the factory. L2–L4 add more agents on top of the exact same iteration pattern.

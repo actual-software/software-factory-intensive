@@ -423,6 +423,82 @@ Generate the complete bash script.
 
 ---
 
+## Where Feedback Rules Live in Your Factory
+
+The skeleton reserves a dedicated directory:
+
+```
+my-factory/
+  feedback-loops/
+    README.md                      ← description of the folder's purpose
+    rules/
+      test-failure-array-check.sh  ← pattern → CLAUDE.md-update scripts
+      security-sql-injection.sh
+      performance-api-latency.sh
+    run-analyzer.sh                ← cron-driven orchestrator
+```
+
+This mirrors what you read in [`reference-project/fired-up-pizza/feedback-loops/`](../../../reference-project/fired-up-pizza/feedback-loops/).
+
+Wire the analyzer into Gas City as an **order** — the same primitive used by `packs/workshop/orders/sync-jira/` for ticket polling:
+
+```toml
+# my-factory/orders/feedback-analyze/order.toml
+[order]
+name = "feedback-analyze"
+schedule = "0 * * * *"           # hourly
+agent = "devops"                 # any idle agent can run it
+message = "Run ./feedback-loops/run-analyzer.sh and commit any CLAUDE.md changes."
+```
+
+After wiring, your factory's improvement loop runs without human initiation — the Gas City scheduler calls it every hour, and the analyzer creates `git commits` you can review with `git log --grep="feedback:"`.
+
+---
+
+## How Feedback Rules Interact with Actual AI ADRs
+
+Feedback rules should *complement*, not compete with, tailored ADRs from `actual adr-bot`:
+
+| Signal source | Lives in | Updated when |
+|---------------|----------|--------------|
+| `actual adr-bot` tailored ADRs | `# Tailored ADRs` section of `CLAUDE.md` | You run `actual adr-bot` (manual or cron) |
+| Feedback-rule auto-updates | "Common Pitfalls" / "Auto-Generated" section of `CLAUDE.md` | Hourly, as feedback rules trigger |
+| Project ADRs | `docs/adr/NNNN-*.md` | Architect writes during L2 flow |
+
+**Order of precedence** (encoded in your Reviewer's prompt):
+
+1. Project ADRs (most specific)
+2. Feedback-rule pitfalls (local pattern history)
+3. Tailored industry ADRs (baseline)
+
+When feedback rules detect a pattern that *contradicts* a tailored ADR, the rule should **not** silently auto-commit. It should escalate a bead for human review — "Feedback rule wants to relax §serde-deny-unknown-fields, contradicts tailored ADR." This is the only guaranteed escape hatch from baseline drift.
+
+---
+
+## Industry Context: The "Self-Healing" Factory Thesis
+
+Continuous-improvement loops in agentic systems are still early. A few reference points:
+
+- **GitHub's "AI-Native Development" research** argues that the highest-leverage investment is in *feedback telemetry*, not better models. Agents that can see their own failure modes (test failures, review comments, production errors) improve faster than agents that don't.
+- **LangChain's LangSmith + Evaluations** treat every run as a datapoint and re-run evaluations on changes to prompts. Your W4 rules are the low-tech equivalent: log the failure, detect the pattern, update the config, verify the fix.
+- **Meta's internal reports on agentic code review** found that explicit "pattern → prompt-update" pipelines cut reviewer false-positive rates by ~30% over six months. The mechanism is identical to what you're designing: codify recurring findings into enforced rules.
+
+Reference these in your Part 1 deliverable if your pod debates whether "auto-updating CLAUDE.md is safe." The answer is: *only if there's a human-in-the-loop escalation path for new patterns and ADR contradictions.*
+
+---
+
+## Activity — Part 3: Safety Review of Your Rule (10 min)
+
+For the rule you wrote in Part 2, answer:
+
+1. **What's the false-positive cost?** If the rule fires wrongly, what bad guidance enters `CLAUDE.md`?
+2. **How does guidance get removed?** A rule that only adds and never removes will bloat `CLAUDE.md` into uselessness within months. Pair your rule with a 90-day decay policy: guidance without a new triggering event in 90 days is auto-commented-out for review.
+3. **Who audits the commit log?** Weekly review of `git log --grep="feedback:"` catches bad rules before they compound.
+
+Document answers in a comment block at the top of your rule script.
+
+---
+
 ## Next Steps
 
-In **C1 (Capstone)**, you'll run your complete factory end-to-end. Feedback loops you design here will help the factory self-improve during the run, reducing the need for manual intervention.
+In **C1 (Capstone)**, you'll run your complete factory end-to-end. Feedback loops you design here will help the factory self-improve during the run, reducing the need for manual intervention. Bring to C1: at least one rule script committed under `feedback-loops/rules/` plus the safety-review comment at the top of each rule.

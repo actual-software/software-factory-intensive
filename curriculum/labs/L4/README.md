@@ -33,9 +33,44 @@ Feature live in production
 
 ## Prerequisites
 
-✅ L3 complete (feature implemented, PR created)  
-✅ Gas City running with Designer + Coder agents  
-✅ Access to deployment environment (staging/production)  
+✅ L3 complete (feature implemented, PR created)
+✅ Gas City running with Designer + Coder agents
+✅ Access to deployment environment (staging/production) — can be local/CI-only for the workshop
+✅ (Recommended) `packs/workshop` integrations installed for GitHub PR access and observability MCP
+
+---
+
+## Gas City Capabilities Used This Lab
+
+| Command | What it does | Used in step |
+|---------|--------------|--------------|
+| `gc rig add <repo> --include packs/reviewer` | Install the Reviewer pack | Step 0 |
+| `gc rig add <repo> --include packs/deployer` | Install the Deployer pack | Step 0 |
+| `gc workshop sync-all` | Pull fresh tickets / PR state before slinging the Reviewer | Pre-Step 3 |
+| `gc sling reviewer <bead>` | Dispatch PR review | Step 4 |
+| `gc sling devops <bead>` | Dispatch deployment | Step 7 |
+| `gc events --follow` | Monitor review + deploy events | Step 4, 7 |
+
+---
+
+## Walkthrough: Install Reviewer and Deployer Packs
+
+- [`packs/reviewer/pack.toml`](../../../packs/reviewer/pack.toml) and [`packs/reviewer/prompts/reviewer.md`](../../../packs/reviewer/prompts/reviewer.md) — Reviewer consumes code diff + Designer spec + review policy, produces `review-reports/<slug>-review.md` and posts findings to the PR.
+- [`packs/deployer/pack.toml`](../../../packs/deployer/pack.toml) and [`packs/deployer/prompts/deployer.md`](../../../packs/deployer/prompts/deployer.md) — Deployer consumes the review report, evaluates release gates, produces `release-gates/<slug>-gate.md`, and (if gates pass) drives the deploy.
+
+Install:
+
+```bash
+cd ~/my-city
+
+gc rig add ~/path/to/your-repo --include /path/to/software-factory-intensive/packs/reviewer
+gc rig add ~/path/to/your-repo --include /path/to/software-factory-intensive/packs/deployer
+
+gc restart
+gc status   # expect all 6 agents: planner, architect, designer, coder, reviewer, devops
+```
+
+If you installed `packs/workshop/` in L1, the Reviewer can automatically pull the PR it's reviewing via the `GITHUB_*` env vars and the `gh` CLI authenticated by `gc doctor`. Without the workshop pack, paste the PR URL into the bead description and let the agent `git fetch` the branch.
 
 ---
 
@@ -407,6 +442,36 @@ Report back with deployment status and any issues encountered.
 
 ### Issue: Documentation incomplete
 **Solution:** Template exact format expected: "CHANGELOG entry must include: date, feature name, work package ID, user-facing changes."
+
+---
+
+## How the Reference Project Demonstrates L4
+
+- [`reference-project/fired-up-pizza/review-reports/`](../../../reference-project/fired-up-pizza/review-reports/) — Reviewer outputs. Each report is `<slug>-review.md` with a structured findings list and severity tags.
+- [`reference-project/fired-up-pizza/release-gates/`](../../../reference-project/fired-up-pizza/release-gates/) — Deployer outputs. Each gate record captures which release criteria passed, which failed, and the decision.
+- Look at the reference project's `docs/PROJECT_MANIFEST.md` — the "Review Standards" and "Release Criteria" sections are the *exact* inputs your Reviewer and Deployer read. If yours are vague ("code should be clean"), expect the Reviewer to produce vague findings. Tighten the manifest, not the prompt.
+
+---
+
+## Reviewer + the Actual AI ADR System
+
+If you seeded tailored ADRs via `actual adr-bot`, your Reviewer agent should check **compliance with both sets of ADRs**:
+
+1. Project-authored ADRs under `docs/adr/` (written by Architect in L2)
+2. Tailored industry ADRs in the `# Tailored ADRs` section of `CLAUDE.md` (written by `actual adr-bot`)
+
+Update `packs/reviewer/prompts/reviewer.md` to make this explicit:
+
+```markdown
+### Review Checklist
+1. **Architectural Consistency:** Does the code follow every ADR under `docs/adr/`?
+2. **Industry Baseline Compliance:** Does the code respect the Tailored ADRs section of `CLAUDE.md`?
+   - Each violation must be called out by name: "Violates CLAUDE.md §serde-rename-all"
+   - Deviations are acceptable ONLY if the PR contains a new ADR explaining why
+3. Code quality, test coverage, security, performance, docs, error handling (unchanged)
+```
+
+This turns the Actual ADR system into an enforced quality gate, not just documentation. Re-run `actual adr-bot` any time the baseline shifts — the Reviewer will automatically pick up the new tailored ADRs on next sling.
 
 ---
 
