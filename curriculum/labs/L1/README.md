@@ -463,6 +463,129 @@ This gives your facilitator (and your future self) the context to judge whether 
 
 ---
 
+## Final File Structure
+
+After completing L1, your project repo should contain:
+
+```
+your-repo/
+├── .env                              # (optional) workshop-pack credentials
+├── CLAUDE.md                         # you wrote this in Step 4
+├── DECISIONS.md                      # you wrote this in Step 9
+├── docs/
+│   ├── PROJECT_MANIFEST.md           # filled in before or during the lab
+│   └── adr/.gitkeep                  # scaffold for L2's Architect output
+├── work-packages/.gitkeep            # scaffold for L2's Planner output
+├── design/.gitkeep                   # scaffold for L3's Designer output
+├── review-reports/.gitkeep           # scaffold for L4's Reviewer output
+├── release-gates/.gitkeep            # scaffold for L4's Deployer output
+├── feedback-loops/.gitkeep           # scaffold for W4
+└── src/ ...                          # your existing code + one new committed feature
+```
+
+And your city should contain:
+
+```
+~/my-city/
+├── city.toml                         # has one [[agent]] block for dev-agent
+└── beads/ ...                        # the bead you just closed
+```
+
+---
+
+## Command Cheat Sheet
+
+Every command you ran, in order:
+
+```bash
+# SETUP (Step 1)
+gc init ~/my-city
+cd ~/my-city
+gc rig add ~/path/to/your-repo
+gc rig list
+cp -r /path/to/software-factory-intensive/my-factory/* ~/path/to/your-repo/
+
+# OPTIONAL INTEGRATIONS (Step 2)
+gc rig add ~/path/to/your-repo --include /path/to/packs/workshop
+cp /path/to/packs/workshop/env.example ~/path/to/your-repo/.env
+gc workshop setup
+gc doctor
+
+# AGENT DECLARATION (Step 3)
+# Edit ~/my-city/city.toml
+gc restart
+gc status
+
+# WRITE CLAUDE.MD (Step 4)
+# Edit ~/path/to/your-repo/CLAUDE.md
+git checkout -b claude-md-setup
+git add CLAUDE.md
+git commit -m "chore: add CLAUDE.md for dev-agent (L1)"
+
+# CREATE BEAD (Step 6)
+bd create "Implement: Show Order Total in Cart" --description "$(cat <<EOF
+... your story ...
+EOF
+)"
+
+# SLING + WATCH (Step 7)
+gc sling dev-agent my-city-abc123
+gc watch dev-agent
+# In parallel terminals:
+gc events --follow
+gc status
+bd show my-city-abc123
+
+# VERIFY (Step 8)
+git log -5 --oneline
+git diff HEAD~1
+npm run lint && npm test && npm run build
+
+# ITERATE on CLAUDE.md if gates fail (no code edits!)
+# Edit CLAUDE.md
+git reset --hard HEAD~1
+gc sling dev-agent my-city-abc123
+
+# CLOSE (Step 9)
+git add CLAUDE.md DECISIONS.md
+git commit -m "docs: update agent rules after first sling (L1)"
+git push -u origin claude-md-setup
+bd close my-city-abc123 --comment "Feature shipped. CLAUDE.md updated."
+```
+
+---
+
+## Quick Reference: What You Built
+
+| Component | Location | What it does |
+|-----------|----------|--------------|
+| City | `~/my-city/` | The workspace where agents and beads live |
+| Rig | Registered via `gc rig add` | Your project repo, registered with the city |
+| `dev-agent` | `[[agent]]` block in `~/my-city/city.toml` | A single Claude-backed agent, controlled by `CLAUDE.md` |
+| `CLAUDE.md` | `your-repo/CLAUDE.md` | The *only* place agent behavior is defined. Edit this, never the chat. |
+| `DECISIONS.md` | `your-repo/DECISIONS.md` | Running log of what you changed in `CLAUDE.md` and why |
+| Bead | Created via `bd create` | A unit of work an agent can pick up and close |
+| Sling | `gc sling dev-agent <bead>` | Dispatches a bead to an agent, starts a tmux session |
+| Quality gates | `npm run lint && npm test && npm run build` | Binary pass/fail per run; the agent's exit criteria |
+
+---
+
+## Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| `gc status` doesn't list `dev-agent` | Your `[[agent]]` block's `dir` field doesn't match the name shown by `gc rig list`. Align them, `gc restart`. |
+| `gc sling` returns "agent not found" | Agent name in the command doesn't match `name = "..."` in `city.toml`. Copy-paste, don't retype. |
+| Agent runs but never reads `CLAUDE.md` | File is in a subdirectory, not the repo root. `ls ~/path/to/your-repo/CLAUDE.md` must succeed. |
+| Agent makes the same mistake after re-sling | Your rule is a suggestion ("Prefer X"), not an imperative ("NEVER do Y"). Rewrite as imperative. |
+| Quality gates pass but feature is wrong | Acceptance criteria were too loose. Strengthen the ACs in the bead description, not the prompt. |
+| `gc doctor` warns about missing `LINEAR_API_KEY` etc. | Expected — only `check-core-tools` is required. Other checks only fire if you fill in env vars for that service. |
+| You caught yourself typing into chat | Stop, undo the agent's work, translate your chat correction into a `CLAUDE.md` rule, re-sling. This *is* the lesson. |
+| Agent takes 40+ minutes on a simple story | Story too big or rules too loose. Kill the tmux session, tighten scope in `CLAUDE.md` and in the bead, re-sling. |
+| Tmux session won't close | `tmux kill-session -t dev-agent` or `gc session stop dev-agent`. |
+
+---
+
 ## Next Steps
 
 In **L2**, you'll:
