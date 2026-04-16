@@ -4,8 +4,7 @@
 
 | | |
 |---|---|
-| **Day** | Day 2 |
-| **Time** | 10:30 - 11:45 |
+| **Estimated duration** | ~75 minutes |
 | **Type** | LAB |
 | **Deliverable** | Working Reviewer + DevOps agents + deployed feature |
 
@@ -81,7 +80,7 @@ If you installed `packs/workshop/` in L1, the Reviewer can automatically pull th
 [[agent]]
 name = "reviewer"
 dir = "your-repo-name"
-provider = "claude"
+provider = "claude"          # other providers (codex, cursor, gemini, etc.) are also supported
 idle_timeout = "1h"
 role = "reviewer"
 ```
@@ -150,7 +149,7 @@ Post review as GitHub PR comment
 [[agent]]
 name = "devops"
 dir = "your-repo-name"
-provider = "claude"
+provider = "claude"          # other providers (codex, cursor, gemini, etc.) are also supported
 idle_timeout = "2h"
 role = "devops"
 ```
@@ -405,16 +404,14 @@ Report back with deployment status and any issues encountered.
 
 ---
 
-## Evaluation Rubric
+## Quality Bar
 
-| Criterion | Points | Scoring |
-|-----------|--------|---------|
-| **Review Quality** | 30 pts | Comprehensive checklist, specific actionable feedback |
-| **Deployment Success** | 30 pts | Feature live in production, health checks pass |
-| **Monitoring Setup** | 20 pts | Metrics, alerts, dashboards configured |
-| **Documentation** | 20 pts | CHANGELOG, deployment guide, runbook updated |
+When you review your own output, check:
 
-**Total:** 100 points
+- **Review Quality** — Comprehensive checklist, specific actionable feedback
+- **Deployment Success** — Feature live in production, health checks pass
+- **Monitoring Setup** — Metrics, alerts, dashboards configured
+- **Documentation** — CHANGELOG, deployment guide, runbook updated
 
 ---
 

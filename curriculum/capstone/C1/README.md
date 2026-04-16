@@ -4,8 +4,7 @@
 
 | | |
 |---|---|
-| **Day** | Day 2 |
-| **Time** | 1:30 - 3:00 (90 minutes) |
+| **Estimated duration** | ~90 minutes |
 | **Type** | CAPSTONE |
 | **Deliverable** | Deployed feature + Factory Run Report |
 
@@ -108,7 +107,7 @@ Implement a NEW feature (not loyalty points—pick something fresh) using ONLY y
 
 ---
 
-## Step 1: Submit Feature Request (5 min)
+## Step 1: Submit Feature Request (~5 min)
 
 Create the initial bead with a clear feature request:
 
@@ -144,7 +143,7 @@ Note the bead ID. This is your factory's starting point.
 
 ---
 
-## Step 2: Start the Factory Pipeline (2 min)
+## Step 2: Start the Factory Pipeline (~2 min)
 
 If you have `orchestrator.yaml` configured:
 
@@ -301,7 +300,7 @@ open https://yourapp.com/[your-feature-path]
 
 ---
 
-## Step 8: Complete Factory Run Report (15 min)
+## Step 8: Complete Factory Run Report (~15 min)
 
 Document the factory run:
 
@@ -438,19 +437,15 @@ Save as: `factory-runs/capstone-[date]-[feature-name].md`
 
 ---
 
-## Evaluation Rubric
+## Quality Bar
 
-| Criterion | Points | Scoring |
-|-----------|--------|---------|
-| **Stages Completed** | 30 pts | 5 pts per stage (Planner through DevOps) |
-| **Quality Gates** | 25 pts | All gates pass = 25pts, 1 failure = 20pts, 2+ failures = 10pts |
-| **Artifacts Produced** | 20 pts | All 7 artifacts present and cross-referenced |
-| **Config Discipline** | 15 pts | Zero ad-hoc prompts = 15pts, 1-2 prompts = 10pts, 3+ = 0pts |
-| **Factory Run Report** | 10 pts | Complete documentation with insights |
+When you review your run, verify:
 
-**Total:** 100 points
-
-**Pod Ranking:** Average scores across all 5 members. Top pod presents their factory run to full cohort.
+- **Stages Completed** — All 6 stages (Planner through DevOps) executed
+- **Quality Gates** — All gates pass (or auto-remediate via feedback)
+- **Artifacts Produced** — All 7 artifacts present and cross-referenced (work package, ADR, design spec, code, review report, release gate, run report)
+- **Config Discipline** — Zero ad-hoc prompts and zero manual code edits
+- **Factory Run Report** — Complete documentation with insights
 
 ---
 
@@ -484,21 +479,21 @@ Save as: `factory-runs/capstone-[date]-[feature-name].md`
 
 ---
 
-## Success Criteria (Capstone Pass/Fail)
+## Exit Criteria
 
-✅ **PASS if:**
+✅ **Full success:**
 - All 6 stages execute
 - Feature deployed to at least staging
 - Quality gates pass (or auto-remediated via feedback)
 - Factory Run Report completed
-- Zero manual code edits (AGENTS.md updates allowed)
+- Zero manual code edits (AGENTS.md / `CLAUDE.md` updates allowed)
 
-❌ **FAIL if:**
+❌ **Needs rework:**
 - Human manually writes code (breaks config discipline)
 - Pipeline blocks with no path forward
 - Deployed code doesn't meet acceptance criteria
 
-🔄 **PARTIAL if:**
+🔄 **Partial:**
 - Feature works but required >3 manual AGENTS.md iterations
 - Deployed to staging but not production
 - Some quality gates bypassed

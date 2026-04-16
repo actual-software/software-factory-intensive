@@ -4,8 +4,7 @@
 
 | | |
 |---|---|
-| **Day** | Day 1 |
-| **Time** | 10:30 - 11:30 |
+| **Estimated duration** | ~60 minutes |
 | **Type** | WORKSHOP |
 | **Deliverable** | `workflow-card.md` committed to your project repo |
 
@@ -51,16 +50,15 @@ Enforced by orchestrator + feedback rules (W3/W4)
 
 Before you write your own card, skim the finished equivalent in the reference project:
 
-- [`reference-project/fired-up-pizza/CLAUDE.md`](../../../reference-project/fired-up-pizza/CLAUDE.md) — the agent instructions file that drives the entire 6-agent factory for Fired Up Pizza
 - [`reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md`](../../../reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md) — the declarative context every agent reads
 
-Your `workflow-card.md` is a pre-cursor to these. It's smaller, still human-focused, and lives in your *project* repo (not the city). In L1 you'll evolve it into a `CLAUDE.md` that targets the `dev-agent` Gas City configuration.
+Your `workflow-card.md` is a pre-cursor to this. It's smaller, still human-focused, and lives in your *project* repo (not the city). In L1 you'll evolve it into agent instructions (`CLAUDE.md` / `AGENTS.md`) that target the `dev-agent` Gas City configuration.
 
 ---
 
-## Step 1: Answer the Discovery Questions (10 min)
+## Step 1: Answer the Discovery Questions (~10 min)
 
-Sit with your pod and answer these three questions. Keep answers specific — *file paths, commit ranges, ticket IDs.* Vague answers fail this step.
+Answer these three questions. Keep answers specific — *file paths, commit ranges, ticket IDs.* Vague answers fail this step.
 
 1. **Think of a recent AI coding session that frustrated you.** What went wrong?
    - Common answers: vague output, lost context, hallucinated APIs, wrong framework version.
@@ -75,7 +73,7 @@ Sit with your pod and answer these three questions. Keep answers specific — *f
 
 ---
 
-## Step 2: Draft Your Workflow Card (20 min)
+## Step 2: Draft Your Workflow Card (~20 min)
 
 Create `workflow-card.md` in the root of your project repo with these four sections:
 
@@ -157,20 +155,19 @@ Agent decides:
 
 ---
 
-## Step 3: Peer Exchange (15 min)
+## Step 3: Self-Review the Card (~15 min)
 
-Pair with someone in your pod you don't already work with daily. Swap `workflow-card.md` files and ask:
+Read your `workflow-card.md` back to yourself as if you were a stranger who knows your tech stack but not your codebase. Ask:
 
-> **"Could you follow this card to implement a feature on my project and get the result I'd accept — without asking me a single question?"**
+> **"Could I follow this card to implement a feature on this project and get the result I'd accept — without asking a single question?"**
 
-- If yes: pass.
-- If no: your partner tells you *exactly* which sentence or bullet failed them. You rewrite that sentence, and re-exchange. Iterate until the answer is yes.
+For every section, find the first sentence or bullet that would force you to stop and ask a question. Rewrite it to be unambiguous. Iterate until each section reads as a self-contained, executable instruction.
 
-The partner isn't asked to *understand* your codebase — they're asked to evaluate whether the card's *structure* is concrete enough that, given familiarity with your repo, they'd know what to do.
+If you have a peer available, swap cards and have them apply the same test — but the card must stand on its own without that.
 
 ---
 
-## Step 4: Commit the Card (5 min)
+## Step 4: Commit the Card (~5 min)
 
 ```bash
 cd ~/path/to/your-repo
@@ -232,14 +229,14 @@ elsewhere in the card, say so. If not, suggest the sentence to add.
 
 ## Industry Context: Why "Individual Workflow" Comes First
 
-The W1 → W2 → L1 order is intentional and evidence-based. A few references for your pod's discussion:
+The W1 → W2 → L1 order is intentional and evidence-based:
 
 - **GitHub's "Research: The AI-Native Developer" (2024)** found that developers who reported "a written personal protocol" for AI-assisted coding were 3.2× more likely to sustain productivity gains past 90 days. Developers with no written protocol regressed to pre-AI velocity within weeks.
 - **Stanford's CRFM study on AI coding tools** identified *context re-establishment* as the largest hidden cost — developers spend 20–40% of their AI-tool time re-explaining the same context to fresh sessions. Your Context Reset Rule is the mitigation.
 - **Anthropic's "Best practices for agentic coding"** recommends that every agent-assisted workflow start with (1) a written spec, (2) a named iteration loop, and (3) explicit decision boundaries. Those are exactly the four sections of your workflow card.
 - **Cognition's Devin post-mortems** on failed runs overwhelmingly trace back to missing decision boundaries — the agent made an architectural call that a human would have vetoed. Your Decision Checkpoint section is the guard rail.
 
-If your pod debates "is this overkill for a single-agent workflow?", the answer is: every one of these studies is about single agents. Scaling to six multiplies the cost of missing the discipline.
+If you find yourself thinking "is this overkill for a single-agent workflow?", the answer is: every one of these studies is about single agents. Scaling to six multiplies the cost of missing the discipline.
 
 ---
 
@@ -276,19 +273,19 @@ If you notice yourself thinking "I'll just dash off a quick prompt without the t
 **Solution:** That *is* your current reset rule ("never"), and it's probably why you waste time untangling polluted sessions. Pick *any* trigger — 10 messages, or switching files, or lint-failing twice — and commit to it for a week.
 
 ### Issue: I'm writing 8 sections because my workflow is complex.
-**Solution:** It isn't. You're hiding decisions under categories. Merge related sections. The 4-section cap exists because L1's `CLAUDE.md` uses the same structure, and your agent will read every section on every run.
+**Solution:** It isn't. You're hiding decisions under categories. Merge related sections. The 4-section cap exists because L1's agent instructions use the same structure, and your agent will read every section on every run.
 
-### Issue: My partner said "looks fine" without reading.
-**Solution:** Force specificity: "Read section 3 aloud. What's the first question you'd still need to ask me?"
+### Issue: A reviewer (or your re-read) said "looks fine" without engaging.
+**Solution:** Force specificity: "Read section 3 aloud. What's the first question you'd still need to ask?"
 
 ---
 
 ## Next Steps
 
-In **L1** (immediately after this session), you'll:
+In **L1** (next), you'll:
 1. Install Gas City and add your project as a rig
-2. Convert `workflow-card.md` into `CLAUDE.md` tailored for a `dev-agent`
+2. Convert `workflow-card.md` into agent instructions (`CLAUDE.md` / `AGENTS.md`) tailored for a `dev-agent`
 3. Pick a small ticket, sling it to the agent, and watch the iteration loop run
-4. Update `CLAUDE.md` when output is wrong — never touch the chat
+4. Update the instructions file when output is wrong — never touch the chat
 
 The card you just wrote is the blueprint. L1 puts it to work.

@@ -4,8 +4,7 @@
 
 | | |
 |---|---|
-| **Day** | Day 1 |
-| **Time** | 1:30 - 2:15 |
+| **Estimated duration** | ~45 minutes |
 | **Type** | WORKSHOP |
 | **Deliverable** | Factory wiring diagram + handoff contracts |
 
@@ -165,9 +164,9 @@ interface SearchProps {
 
 ## Workshop Activity: Design Your Factory
 
-### Part 1: Map Your Project (20 min)
+### Part 1: Map Your Project (~20 min)
 
-**With your pod, answer:**
+**Answer:**
 
 1. **What feature will you implement during the intensive?**
    - Keep it small (implementable in ~2 hours of coding)
@@ -189,7 +188,7 @@ interface SearchProps {
 
 ---
 
-### Part 2: Define Handoff Contracts (15 min)
+### Part 2: Define Handoff Contracts (~15 min)
 
 **Pick TWO adjacent stages** (e.g., Architect → Designer) and document:
 
@@ -272,7 +271,7 @@ Provide an example contract for my feature: [feature name]
 
 ✅ Factory design doc created with roles mapped to your feature  
 ✅ Two handoff contracts documented  
-✅ Pod discussion captured one insight about separation of concerns  
+✅ Captured one insight about separation of concerns in your design notes  
 
 ---
 
@@ -293,9 +292,9 @@ Open each of these in your editor as a short reading exercise. These are the fil
 
 Every prompt file shares a consistent shape — **Role**, **Inputs**, **Output Format**, **Quality Gate**, **Process**, **Config Discipline**. When you design your factory below, use these five headings as the axis for each agent.
 
-### Your pod's design deliverable → pack customization
+### Your design deliverable → pack customization
 
-For each of the 6 agents, your pod's W2 deliverable maps to a specific file you'll edit in an upcoming session:
+For each of the 6 agents, your W2 deliverable maps to a specific file you'll edit in an upcoming session:
 
 | W2 deliverable | Becomes | Installed in |
 |----------------|---------|--------------|
@@ -307,7 +306,7 @@ For each of the 6 agents, your pod's W2 deliverable maps to a specific file you'
 | "Deployer gates on `[your release criteria]`" | Edits to `packs/deployer/prompts/deployer.md` | L4 |
 | Handoff contract Planner → Architect | The `## Inputs` and `## Output Format` sections must match across both prompt files | L2 |
 
-**Output your design as a table**, not as prose. Prose will be hard to translate into prompt-file edits on Monday.
+**Output your design as a table**, not as prose. Prose will be hard to translate into prompt-file edits later.
 
 ---
 
@@ -332,7 +331,7 @@ During W2, two of these files matter most:
 
 1. **`my-factory/docs/PROJECT_MANIFEST.md`** — your design's single source of truth. Every agent reads this before doing anything. Your W2 design decisions about domain model, conventions, success criteria, and review standards *all* land here. If you haven't started filling it in, do so now — paste in the Part 1 Map-Your-Project deliverable at minimum.
 
-2. **`my-factory/CLAUDE.md`** — the global agent instructions. Start lightweight (it mirrors Fired Up Pizza's `CLAUDE.md`) and let L1–L4 fill it in.
+2. **`my-factory/CLAUDE.md`** (or `AGENTS.md` for non-Claude assistants) — the global agent instructions. Start lightweight and let L1–L4 fill it in.
 
 If you haven't copied the skeleton into your project repo yet, do so now so L2 starts clean:
 
@@ -346,7 +345,6 @@ cp -r /path/to/software-factory-intensive/my-factory/* ~/path/to/your-repo/
 
 Fired Up Pizza is the reference project — a complete, working example of a 6-agent factory's *shape*. Spend 5 minutes scanning:
 
-- [`reference-project/fired-up-pizza/CLAUDE.md`](../../../reference-project/fired-up-pizza/CLAUDE.md) — the finished Day-1 `CLAUDE.md`. Note the conventions: "Prices in cents internally, formatted as dollars for display."
 - [`reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md`](../../../reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md) — compare length and specificity to the `my-factory/docs/PROJECT_MANIFEST.md` template you've been filling in.
 - [`reference-project/fired-up-pizza/tickets.md`](../../../reference-project/fired-up-pizza/tickets.md) — the backlog that feeds the factory. Note how each ticket is written: single-sentence goal, explicit acceptance criteria, no implementation detail.
 - [`packs/fired-up-pizza/pack.toml`](../../../packs/fired-up-pizza/pack.toml) — the *composite* pack that bundles all 6 agent packs with a single `gc rig add --include packs/fired-up-pizza` command.
@@ -360,7 +358,7 @@ Ask yourself: if I replaced `docs/PROJECT_MANIFEST.md` in Fired Up Pizza with mi
 Your Architect agent writes ADRs (Architecture Decision Records). You have two ways to source ADR content:
 
 1. **Write each ADR from scratch** — the Architect proposes three options, evaluates trade-offs, picks one. This is what L2 walks you through.
-2. **Use Actual AI's ADR system** (`actual adr-bot`) — a CLI that analyzes your repo and *tailors* best-practice ADRs to your codebase, writing them into `CLAUDE.md` / `AGENTS.md` automatically. Your Architect then references those ADRs when making local decisions instead of rediscovering industry patterns.
+2. **Use Actual AI's ADR system** (`actual adr-bot`) — a CLI that analyzes your repo and *tailors* best-practice ADRs to your codebase, writing them into `CLAUDE.md` / `AGENTS.md` automatically (works with any AI coding assistant). Your Architect then references those ADRs when making local decisions instead of rediscovering industry patterns.
 
 Install it (optional but strongly recommended for real projects):
 
@@ -370,7 +368,7 @@ brew install actual-software/actual/actual
 # From your project repo
 cd ~/path/to/your-repo
 actual adr-bot --dry-run      # Preview what it would write
-actual adr-bot                 # Write tailored ADRs into CLAUDE.md
+actual adr-bot                 # Write tailored ADRs into CLAUDE.md / AGENTS.md
 ```
 
 What this adds to your W2 design:
@@ -381,7 +379,7 @@ What this adds to your W2 design:
 
 Note this in your W2 design: *"Architect reads `CLAUDE.md` ADR section first; writes new ADRs to `docs/adr/NNNN-<slug>.md` only for decisions not covered."*
 
-If you're working against `reference-project/fired-up-pizza/`, `actual adr-bot` would populate its `CLAUDE.md` with React/TypeScript ADRs that the Architect then extends with pizza-specific ones (pricing model, menu-categorization rule, etc.).
+If you're working against `reference-project/fired-up-pizza/`, `actual adr-bot` would populate its agent instructions file with React/TypeScript ADRs that the Architect then extends with pizza-specific ones (pricing model, menu-categorization rule, etc.).
 
 ---
 

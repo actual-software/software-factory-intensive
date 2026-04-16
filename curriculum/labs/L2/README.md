@@ -4,8 +4,7 @@
 
 | | |
 |---|---|
-| **Day** | Day 1 |
-| **Time** | 2:15 - 3:30 (75 min) |
+| **Estimated duration** | ~75 minutes |
 | **Type** | LAB |
 | **Deliverable** | Working Planner + Architect agents, one work package, one ADR, cross-referenced and committed |
 
@@ -72,7 +71,7 @@ If you're working against your own project, substitute your own feature — but 
 
 ---
 
-## Part 0: Read the Shipped Packs (5 min)
+## Part 0: Read the Shipped Packs (~5 min)
 
 Before installing anything, read what you're about to install. Each pack is a folder with three things: a `pack.toml` (metadata), a prompt file (the agent's instructions), and an overlay directory (environment overrides).
 
@@ -183,7 +182,7 @@ You're done reading. Now install.
 
 ---
 
-## Part 1: Install the Planner Agent (10 min)
+## Part 1: Install the Planner Agent (~10 min)
 
 ### Step 1: Add the Planner Pack to Your Rig
 
@@ -261,7 +260,7 @@ git commit -m "chore(planner): customize planner prompt for project conventions"
 
 ---
 
-## Part 2: Install the Architect Agent (10 min)
+## Part 2: Install the Architect Agent (~10 min)
 
 ### Step 1: (Recommended) Seed Tailored Industry ADRs
 
@@ -414,7 +413,7 @@ git commit -m "chore(architect): customize architect prompt with tailored-ADR in
 
 ---
 
-## Part 3: Create and Run the Planner (20 min)
+## Part 3: Create and Run the Planner (~20 min)
 
 Now the agents are installed. Time to give the Planner real work.
 
@@ -636,7 +635,7 @@ Closed bead: my-city-a1b2c3
 
 ---
 
-## Part 4: Create and Run the Architect (20 min)
+## Part 4: Create and Run the Architect (~20 min)
 
 The Planner's output is the Architect's input. Now the Architect reads the work package and produces an ADR for the open technical question: *where to store loyalty points?*
 
@@ -858,7 +857,7 @@ bd close my-city-d4e5f6 --comment "ADR completed: docs/adr/0001-loyalty-points-s
 
 ---
 
-## Part 5: Commit, Review, and Document (10 min)
+## Part 5: Commit, Review, and Document (~10 min)
 
 ### Step 1: Review the Full Artifact Set
 
@@ -1074,16 +1073,14 @@ git push
 
 ---
 
-## Evaluation Rubric
+## Quality Bar
 
-| Criterion | Points | What the evaluator checks |
-|-----------|--------|---------------------------|
-| **Work Package Completeness** | 30 | All 6 sections present (Goal, Stories, ACs, Dependencies, Tests, Scope). Stories have measurable ACs. |
-| **ADR Quality** | 30 | All 4 MADR sections present. 2+ options with explicit trade-offs. Decision rationale is specific, not generic. |
-| **Cross-Reference Integrity** | 20 | Work package references the ADR by path. ADR references the work package by path. Both are valid file paths. |
-| **Config Discipline** | 20 | Every iteration was a prompt-file diff + re-sling. Zero ad-hoc chat corrections. DECISIONS.md documents each change. |
+When you review your own output, check:
 
-**Total: 100 points.** Pod ranking sums all 5 members.
+- **Work Package Completeness** — All 6 sections present (Goal, Stories, ACs, Dependencies, Tests, Scope). Stories have measurable ACs.
+- **ADR Quality** — All 4 MADR sections present. 2+ options with explicit trade-offs. Decision rationale is specific, not generic.
+- **Cross-Reference Integrity** — Work package references the ADR by path. ADR references the work package by path. Both are valid file paths.
+- **Config Discipline** — Every iteration was a prompt-file diff + re-sling. Zero ad-hoc chat corrections. DECISIONS.md documents each change.
 
 ---
 
@@ -1118,13 +1115,13 @@ Before leaving this lab, verify all of these:
 - [ ] `DECISIONS.md` has an L2 entry
 - [ ] All changes pushed to remote
 
-**L2 blocks L3.** If you don't have both artifacts committed by 3:30, get to the help desk during the break. L3's Designer agent reads the work package and ADR as its primary inputs — without them, you'll be flying blind.
+**L2 blocks L3.** Don't move on without both artifacts committed — L3's Designer agent reads the work package and ADR as its primary inputs. Without them, you'll be flying blind.
 
 ---
 
 ## Next Steps
 
-In **L3** (3:45–5:00), you'll:
+In **L3**, you'll:
 - Install the Designer and Coder packs (`packs/designer`, `packs/coder`)
 - The Designer reads your work package + ADR and produces a component spec at `design/<slug>-spec.md`
 - The Coder reads the spec and implements actual code under `src/`

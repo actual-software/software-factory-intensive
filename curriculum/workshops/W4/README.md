@@ -4,8 +4,7 @@
 
 | | |
 |---|---|
-| **Day** | Day 2 |
-| **Time** | 11:45 - 12:30 |
+| **Estimated duration** | ~45 minutes |
 | **Type** | WORKSHOP |
 | **Deliverable** | Feedback loop design + automated improvement rules |
 
@@ -219,7 +218,7 @@ fi
 
 ## Workshop Activity: Design Your Feedback Loops
 
-### Part 1: Identify Failure Patterns (15 min)
+### Part 1: Identify Failure Patterns (~15 min)
 
 **Think about your past projects. What errors happened repeatedly?**
 
@@ -243,7 +242,7 @@ Examples:
 
 ---
 
-### Part 2: Write One Feedback Rule (20 min)
+### Part 2: Write One Feedback Rule (~20 min)
 
 **Pick your most frequent failure pattern** and write a script that:
 
@@ -483,11 +482,11 @@ Continuous-improvement loops in agentic systems are still early. A few reference
 - **LangChain's LangSmith + Evaluations** treat every run as a datapoint and re-run evaluations on changes to prompts. Your W4 rules are the low-tech equivalent: log the failure, detect the pattern, update the config, verify the fix.
 - **Meta's internal reports on agentic code review** found that explicit "pattern → prompt-update" pipelines cut reviewer false-positive rates by ~30% over six months. The mechanism is identical to what you're designing: codify recurring findings into enforced rules.
 
-Reference these in your Part 1 deliverable if your pod debates whether "auto-updating CLAUDE.md is safe." The answer is: *only if there's a human-in-the-loop escalation path for new patterns and ADR contradictions.*
+Reference these in your Part 1 deliverable if you're weighing whether "auto-updating CLAUDE.md / AGENTS.md is safe." The answer is: *only if there's a human-in-the-loop escalation path for new patterns and ADR contradictions.*
 
 ---
 
-## Activity — Part 3: Safety Review of Your Rule (10 min)
+## Activity — Part 3: Safety Review of Your Rule (~10 min)
 
 For the rule you wrote in Part 2, answer:
 

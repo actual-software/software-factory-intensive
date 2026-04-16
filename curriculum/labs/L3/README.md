@@ -4,8 +4,7 @@
 
 | | |
 |---|---|
-| **Day** | Day 1 |
-| **Time** | 3:45 - 5:00 |
+| **Estimated duration** | ~75 minutes |
 | **Type** | LAB |
 | **Deliverable** | Working Designer + Coder agents + implemented feature |
 
@@ -78,7 +77,7 @@ gc status   # expect: planner, architect, designer, coder
 [[agent]]
 name = "designer"
 dir = "your-repo-name"
-provider = "claude"
+provider = "claude"          # other providers (codex, cursor, gemini, etc.) are also supported
 idle_timeout = "2h"
 role = "designer"
 ```
@@ -187,7 +186,7 @@ Save plans to: `design-docs/[feature-name].md`
 [[agent]]
 name = "coder"
 dir = "your-repo-name"
-provider = "claude"
+provider = "claude"          # other providers (codex, cursor, gemini, etc.) are also supported
 idle_timeout = "3h"
 role = "coder"
 ```
@@ -448,16 +447,14 @@ Run quality gates after each step. Only commit when gates pass.
 
 ---
 
-## Evaluation Rubric
+## Quality Bar
 
-| Criterion | Points | Scoring |
-|-----------|--------|---------|
-| **Design Doc Completeness** | 25 pts | File structure, interfaces, test plan, implementation order all present |
-| **Code Quality** | 30 pts | Follows design, passes all gates, clean commits |
-| **Test Coverage** | 25 pts | >= 80% coverage, tests match plan |
-| **Config Discipline** | 20 pts | Iterations via AGENTS.md, no manual code fixes |
+When you review your own output, check:
 
-**Total:** 100 points
+- **Design Doc Completeness** — File structure, interfaces, test plan, implementation order all present
+- **Code Quality** — Follows design, passes all gates, clean commits
+- **Test Coverage** — >= 80% coverage, tests match plan
+- **Config Discipline** — Iterations via AGENTS.md, no manual code fixes
 
 ---
 
@@ -492,7 +489,8 @@ Run quality gates after each step. Only commit when gates pass.
 
 - [`reference-project/fired-up-pizza/design/`](../../../reference-project/fired-up-pizza/design/) — Designer output directory. Each spec is `<slug>-spec.md` — e.g. after running FUP-3 (Shopping cart), you'd see `shopping-cart-spec.md` with interface types, component breakdown, and a test plan.
 - [`reference-project/fired-up-pizza/src/`](../../../reference-project/fired-up-pizza/src/) — Coder output. For a React/TypeScript project, expect `components/`, `state/`, `utils/`, and `__tests__/` subdirectories to match conventions declared in `docs/PROJECT_MANIFEST.md`.
-- [`reference-project/fired-up-pizza/CLAUDE.md`](../../../reference-project/fired-up-pizza/CLAUDE.md) — note the explicit Coder constraint: "Prices in cents internally, formatted as dollars for display." That's a project-specific convention that lives in `CLAUDE.md` so *both* Designer and Coder respect it. When you hit a bug where your Coder keeps violating a convention, the fix is usually a new line here.
+
+When the Coder repeatedly violates a project convention, the fix is usually a new explicit constraint in your project's agent instructions file (e.g. "Prices in cents internally, formatted as dollars for display") — *both* Designer and Coder will then respect it.
 
 If your Coder produces code that passes tests but violates the Designer's file structure, diff the design spec against the code and update `packs/coder/prompts/coder.md` to require: "Open the design spec and list every file you will create. If a file you want to create isn't listed, stop and ask — do not invent structure."
 

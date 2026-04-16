@@ -65,7 +65,7 @@ gc status  # Should show all 6 agents
 
 ## Config Discipline Check
 
-This lab has the strictest config discipline requirement. The scoring rubric gives 30 points for "Finding resolution via config" — manual code fixes score zero. If the participant typed code into the editor to fix a reviewer finding, they must undo it, update the coder prompt instead, and re-run.
+This lab has the strictest config discipline requirement: manual code fixes are not acceptable. If the participant typed code into the editor to fix a reviewer finding, they must undo it, update the coder prompt instead, and re-run.
 
 ## Exit Criteria
 

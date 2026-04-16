@@ -38,7 +38,7 @@ gc status
 
 ## Discovery Questions
 
-1. **Which feature will the Planner break down?** For Fired Up Pizza, use "Loyalty points system for Fired Up Pizza." For their own project, pick a medium-complexity feature.
+1. **Which feature will the Planner break down into work packages?** For Fired Up Pizza, use "Loyalty points system for Fired Up Pizza." For their own project, pick a medium-complexity feature.
 2. **What architectural constraints from your manifest apply?** (e.g., "must use SQLite" or "must use existing REST API patterns")
 3. **What trade-offs should the Architect consider?** Every ADR needs at least two options with pros/cons.
 
@@ -73,4 +73,4 @@ At the end of the lab, ask: "Did you type any corrections directly into the agen
 - `work-packages/<slug>.md` committed with goal + stories + AC + dependencies
 - `docs/adr/0001-<slug>.md` committed with context + options + decision + consequences
 - Both files cross-reference each other by path
-- Pod anchor has reviewed and left a comment
+- Self-reviewed for completeness and clarity

@@ -4,8 +4,7 @@
 
 | | |
 |---|---|
-| **Day** | Day 2 |
-| **Time** | 9:30 - 10:15 |
+| **Estimated duration** | ~45 minutes |
 | **Type** | WORKSHOP |
 | **Deliverable** | Coordination patterns documented for your factory |
 
@@ -166,7 +165,7 @@ gates:
 
 ## Workshop Activity: Design Your Coordination
 
-### Part 1: Identify Patterns in Your Feature (15 min)
+### Part 1: Identify Patterns in Your Feature (~15 min)
 
 **For the feature you designed in W2, answer:**
 
@@ -188,7 +187,7 @@ gates:
 
 ---
 
-### Part 2: Write Orchestrator Rules (15 min)
+### Part 2: Write Orchestrator Rules (~15 min)
 
 **Create a simplified orchestrator.yaml** for your feature:
 
@@ -236,7 +235,7 @@ gates:
 - **Checking every step**: Defeats purpose of software factory
 
 ### The Test
-Ask: "If this step ran at 3am when I'm asleep, what's the worst that could happen?"
+Ask: "If this step ran while I was asleep, what's the worst that could happen?"
 
 - **Minor bug gets deployed**: Acceptable (can rollback), no gate needed
 - **$10,000 AWS bill**: Not acceptable, gate required
@@ -343,22 +342,22 @@ Coordination choices aren't arbitrary — they track how industry teams structur
 - **Cognition (Devin)'s whitepaper on building agents** highlights the "no hidden handoffs" principle: every state transition between agents produces an artifact that is human-inspectable. Your work packages, ADRs, design specs, and review reports embody this.
 - **Gartner's 2025 Agentic AI report** lists three coordination anti-patterns: (1) agents that can re-assign themselves, (2) gates triggered by agent-generated metrics instead of external signals, (3) parallel stages that share mutable state. Each of your W3 Common Coordination Mistakes maps to one of these.
 
-Use these as cross-references in your pod discussion: "Is our parallel fan-out design safe under Gartner's rule (3)? Where is the shared mutable state?"
+Use these as cross-references when reviewing your design: "Is our parallel fan-out design safe under Gartner's rule (3)? Where is the shared mutable state?"
 
 ---
 
-## Workshop Activity — Part 3: Pod Peer-Review (10 min)
+## Workshop Activity — Part 3: Self-Review (~10 min)
 
-Swap your Part 2 orchestrator.yaml with another pod. Ask three questions of theirs:
+Re-read your Part 2 orchestrator.yaml and answer three questions:
 
 1. **Can any stage start before its declared dependencies finish?** Trace every `depends_on` by hand. If yes, dependency graph is broken.
-2. **Is every human gate justified?** Apply W3's "3am test" to each gate. If two of five gates fail the test, they're theatrical, not protective — cut them.
+2. **Is every human gate justified?** Apply W3's worst-case test to each gate. If two of five gates fail the test, they're theatrical, not protective — cut them.
 3. **What happens if Stage B crashes mid-run?** There should be a named retry policy, a state-reset step, or an escalation rule. Not all three — but at least one.
 
-If any question yields "we hadn't thought about that," your pod has a revision to make before L4.
+If any question yields "I hadn't thought about that," revise the config before moving on to L4.
 
 ---
 
 ## Next Steps
 
-In **L4**, you'll implement this coordination using Gas City's orchestrator. Your coordination design will determine how smoothly your factory runs end-to-end. Bring to L4: `orchestrator.yaml` draft committed to your repo, plus the peer-review notes from Part 3.
+In **L4**, you'll implement this coordination using Gas City's orchestrator. Your coordination design will determine how smoothly your factory runs end-to-end. Bring to L4: `orchestrator.yaml` draft committed to your repo, plus the self-review notes from Part 3.
