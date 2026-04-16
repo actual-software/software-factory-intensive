@@ -8,7 +8,6 @@
 mkdir -p ~/Projects/actual-software
 pushd ~/Projects/actual-software
 git clone git@github.com:actual-software/software-factory-intensive.git
-git checkout david/refine_agents_3
 ```
 
 ## Quick Guide
@@ -23,21 +22,21 @@ gc version
 ```
 
 ```bash
-mkdir -p ~/Projects/factory/20260415-gc-factory-v1
-mkdir -p ~/Projects/factory/20260415-project-v1
+mkdir -p ~/Projects/factory/baseline/base-gc-factory
+mkdir -p ~/Projects/factory/baseline/base-project
 ```
 
 #### Setup Project
 
 ```bash
-pushd ~/Projects/factory/20260415-project-v1
+pushd ~/Projects/factory/baseline/base-project
 git init
 ```
 
 #### Setup Factory
 
 ```bash
-gc init ~/Projects/factory/20260415-gc-factory-v1
+gc init ~/Projects/factory/baseline/base-gc-factory
 ```
 
 ```
@@ -65,7 +64,7 @@ Installed launchd service: /Users/david_miura_actual_ai/Library/LaunchAgents/com
 ```
 
 ```bash
-pushd ~/Projects/factory/20260415-gc-factory-v1
+pushd ~/Projects/factory/baseline/base-gc-factory
 cp ~/Projects/actual-software/software-factory-intensive/packs/city.toml .
 rsync -av ~/Projects/actual-software/software-factory-intensive/packs/ packs/actual/
 
@@ -77,7 +76,7 @@ gc doctor
 Console: 
 
 ```
-20260415-gc-factory-v1  /Users/david_miura_actual_ai/Projects/factory/20260415-gc-factory-v1
+20260415-gc-factory-v1  /Users/david_miura_actual_ai/Projects/factory/20260415-gc-factory
   Controller: standalone (PID 62518)
   Suspended:  no
 
@@ -133,8 +132,8 @@ Agents:
 #### Add "Rig" ie Project Source Repo to Factory
 
 ```bash
-pushd ~/Projects/factory/20260415-gc-factory-v1
-gc rig add ~/Projects/factory/20260415-project-v1
+pushd ~/Projects/factory/baseline/base-gc-factory
+gc rig add ~/Projects/factory/baseline/base-project
 ```
 
 Edit `city.toml`
@@ -149,7 +148,7 @@ includes = ["packs/actual/all"]
 #### Register City
 
 ```bash
-gc register ~/Projects/factory/20260415-gc-factory-v1
+gc register ~/Projects/factory/baseline/base-gc-factory
 ```
 
 Console:
@@ -197,7 +196,7 @@ Console:
 
 bash
 ```
-pushd ~/Projects/factory/20260415-gc-factory-v1
+pushd ~/Projects/factory/baseline/base-gc-factory
 gc start
 gc restart
 ```
@@ -206,7 +205,7 @@ gc restart
 
 bash
 ```
-pushd ~/Projects/factory/20260415-gc-factory-v1
+pushd ~/Projects/factory/baseline/base-gc-factory
 gc dashboard serve
 ```
 
@@ -218,9 +217,8 @@ gc dashboard serve
 
 bash
 ```
-pushd ~/Projects/factory/20260415-project-v1
-gc sling 20260415-project-v1--architect "Create a script that prints hello world"
-gc sling 20260415-hello-world-v0/architect "Create a nextjs web site with hello world home page."
+pushd ~/Projects/factory/baseline/base-project
+gc sling base-project-architect "Create a script that prints hello world"
 ```
 
 ## References
