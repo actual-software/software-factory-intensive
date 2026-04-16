@@ -21,8 +21,19 @@ mkdir -p ~/Projects/factory/workshop_l2/l2-project
 pushd ~/Projects/factory/workshop_l2/l2-project
 git init
 
-mkdir -p ~/Projects/factory/workshop_l2/l2-gc-factory
 gc init ~/Projects/factory/workshop_l2/l2-gc-factory
+```
+
+Select `3. custom`
+
+```bash
+Welcome to Gas City SDK!
+
+Choose a config template:
+  1. tutorial  — default coding agent (default)
+  2. gastown   — multi-agent orchestration pack
+  3. custom    — empty workspace, configure it yourself
+Template [1]: 3
 ```
 
 ##### Configure Factory
