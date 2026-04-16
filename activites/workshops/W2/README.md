@@ -42,23 +42,32 @@ Template [1]: 3
 pushd ~/Projects/factory/workshop_w2/w2-gc-factory
 cp ~/Projects/actual-software/software-factory-intensive/activites/workshops/W2/gascity/step_0/packs/city.toml ~/Projects/factory/workshop_w2/w2-gc-factory
 rsync -av ~/Projects/actual-software/software-factory-intensive/activites/workshops/W2/gascity/step_0/packs/ ~/Projects/factory/workshop_w2/w2-gc-factory/packs/actual/
+```
+
+##### Register City
+
+```bash
+gc register <full_path>/Projects/factory/workshop_w2/w2-gc-factory
 
 gc service restart
 gc status
-gc doctor
+gc doctor --fix
 ```
 
 ##### Add "Rig" ie Project Source Repo to Factory
 
 ```bash
 pushd ~/Projects/factory/workshop_w2/w2-gc-factory
-gc rig add ~/Projects/factory/workshop_w2/w2-project
+gc rig add <full_path>/Projects/factory/workshop_w2/w2-project
 ```
 
-##### Register City
+Update city.toml
 
 ```bash
-gc register ~/Projects/factory/workshop_w2/w2-gc-factory
+[[rigs]]
+name = "w2-project"
+path = "<full_path/Projects/factory/workshop_w2/w2-project"
+includes = ["packs/actual/all"]
 ```
 
 ##### Patch "convoy" in Factory and Project

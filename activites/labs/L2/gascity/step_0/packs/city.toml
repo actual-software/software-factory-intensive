@@ -17,11 +17,6 @@ provider = "claude"
 start_command = "~/.nvm/versions/node/v22.19.0/bin/claude"
 includes = ["packs/actual/all"]
 
-[[rigs]]
-name = "L2-project"
-path = "~/Projects/factory/workshop_l2/l2-gc-factory"
-includes = ["packs/actual/all"]
-
 [session]
 startup_timeout = "3m"
 

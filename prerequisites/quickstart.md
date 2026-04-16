@@ -62,6 +62,12 @@ Template [1]: 3
 pushd ~/Projects/factory/baseline/base-gc-factory
 cp ~/Projects/actual-software/software-factory-intensive/prerequisites/city.toml ~/Projects/factory/baseline/base-gc-factory
 rsync -av ~/Projects/actual-software/software-factory-intensive/packs/ ~/Projects/factory/baseline/base-gc-factory/packs/actual/
+```
+
+##### Register City
+
+```bash
+gc register ~/Projects/factory/baseline/base-gc-factory
 
 gc service restart
 gc status
@@ -72,13 +78,14 @@ gc doctor --fix
 
 ```bash
 pushd ~/Projects/factory/baseline/base-gc-factory
-gc rig add ~/Projects/factory/baseline/base-project
+gc rig add <full_path>/Projects/factory/baseline/base-project
 ```
 
-##### Register City
-
 ```bash
-gc register ~/Projects/factory/baseline/base-gc-factory
+[[rigs]]
+name = "w2-project"
+path = "<full_path/Projects/factory/baseline/base-project"
+includes = ["packs/actual/all"]
 ```
 
 ##### Patch "convoy" in Factory and Project

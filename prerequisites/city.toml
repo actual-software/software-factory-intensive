@@ -17,11 +17,6 @@ provider = "claude"
 start_command = "~/.nvm/versions/node/v22.19.0/bin/claude"
 includes = ["packs/actual/all"]
 
-[[rigs]]
-name = "base-project"
-path = "~/Projects/factory/baseline/base-project"
-includes = ["packs/actual/all"]
-
 [session]
 startup_timeout = "3m"
 
