@@ -91,7 +91,7 @@ git clone https://github.com/actual-software/software-factory-intensive.git
 cd software-factory-intensive
 ```
 
-You'll reference `reference-project/fired-up-pizza/` as a completed example, and copy `my-factory/` into your own project during L1.
+Your Gas City workspace lives at `my-factory/` — you'll register it in L1 and add pack includes as you progress. Your per-session deliverables land under `activities/`. See `reference-project/fired-up-pizza/` for a completed example.
 
 ---
 

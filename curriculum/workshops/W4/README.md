@@ -6,7 +6,13 @@
 |---|---|
 | **Estimated duration** | ~45 minutes |
 | **Type** | WORKSHOP |
-| **Deliverable** | `feedback-loops/*.md` rule files, one updated agent prompt, and a harm-case table committed to the project repo |
+| **Deliverable** | `feedback-loops/*.md` rule files, one updated agent prompt, and a harm-case table committed at `activities/workshops/W4/feedback-loops/` |
+
+---
+
+## Session workspace note
+
+Pack naming: references to *Coder* and *Deployer* in this README map to the shipped packs **`packs/builder`** and **`packs/release-gate`** respectively. Prompt templates live at `packs/<name>/prompts/<name>.md.tmpl`. W4 edits **existing** pack prompts (the ones L3/L4 wired in) — it does not add new entries to `../../../my-factory/city.toml`. Your W4 feedback-loop notes live at `../../../activities/workshops/W4/feedback-loops/`.
 
 ---
 
@@ -79,7 +85,7 @@ Before starting this workshop, verify each of these:
 | L4 complete | `ls ~/path/to/your-repo/review-reports/ ~/path/to/your-repo/release-gates/` → each has at least one `.md` file | Go back and complete L4 so you have real reviewer and deployer output to learn from |
 | At least one full pipeline run | `git log --oneline` shows commits from all six agents | Run a feature through Planner → Architect → Designer → Coder → Reviewer → Deployer end-to-end |
 | Project Manifest | `cat ~/path/to/your-repo/docs/PROJECT_MANIFEST.md` → filled in | Copy from [`curriculum/PROJECT_MANIFEST_TEMPLATE.md`](../../PROJECT_MANIFEST_TEMPLATE.md) and complete the tech stack, conventions, review standards, and release criteria sections |
-| Skeleton scaffold present | `ls ~/path/to/your-repo/feedback-loops/` → directory exists (may only contain `.gitkeep`) | `cp -r /path/to/software-factory-intensive/my-factory/feedback-loops ~/path/to/your-repo/` |
+| Skeleton scaffold present | `ls ~/path/to/your-repo/feedback-loops/` → directory exists (may only contain `.gitkeep`) | `mkdir -p ../../path/to/your-repo/feedback-loops` |
 | Access to prior signals | `ls review-reports/ release-gates/` → real output files, not placeholders | Re-run your agents on a feature so they emit real artifacts; feedback rules without real signal data are just theory |
 
 ---
@@ -173,13 +179,13 @@ cat > feedback-loops/factory-feedback.md << 'EOF'
 
 | # | Signal Type | Threshold | Config Target | Update Action | Category |
 |---|-------------|-----------|---------------|---------------|----------|
-| 1 | Reviewer finds missing try/catch on async handler | 2 occurrences across different features | `packs/coder/prompts/coder.md` (Rules section) | Add: "Wrap every `async` route handler in try/catch. On error, log and respond with the project's standard error envelope." | Reactive |
+| 1 | Reviewer finds missing try/catch on async handler | 2 occurrences across different features | `packs/builder/prompts/builder.md.tmpl` (Rules section) | Add: "Wrap every `async` route handler in try/catch. On error, log and respond with the project's standard error envelope." | Reactive |
 | 2 | Deploy gate fails on "tests pass" with intermittent timeout | 3 timeouts in last 10 gates | `docs/PROJECT_MANIFEST.md` (Release Criteria) | Add: "Test runs must set a 30-second timeout per test and retry once on timeout; three consecutive timeouts block deploy." | Aggregate |
 | 3 | Production 500 error on `/api/orders` reported by user | 1 user report (any severity) | New bead in Gas City, assigned to Planner | Create bead with reproduction steps, link to observability trace, mark `--requires-approval` | External |
 
 ## Encoded Rule
 
-Rule #1 is our first encoded rule. We updated `packs/coder/prompts/coder.md` in the same commit as this file. See the Rules section for the new bullet.
+Rule #1 is our first encoded rule. We updated `packs/builder/prompts/builder.md.tmpl` in the same commit as this file. See the Rules section for the new bullet.
 
 ## Harm Cases
 
@@ -210,7 +216,7 @@ Rewrite the rows so every cell is project-specific. Don't skip cells — the val
 Each row's "Config Target" column must name a real file path in your repo. Verify:
 
 ```bash
-ls packs/coder/prompts/coder.md            # for row 1
+ls packs/builder/prompts/builder.md.tmpl            # for row 1
 ls docs/PROJECT_MANIFEST.md                 # for row 2
 # row 3 has no single target file — it creates a new bead, which is fine
 ```
@@ -260,7 +266,7 @@ Fires on the **second** occurrence across different features (i.e., different
 
 ## Target
 
-`packs/coder/prompts/coder.md` → Rules section.
+`packs/builder/prompts/builder.md.tmpl` → Rules section.
 
 ## Action
 
@@ -296,10 +302,10 @@ re-scope the rule.
 
 ### Step 2: Apply the Rule Manually
 
-Now follow your own rule. Open `packs/coder/prompts/coder.md`:
+Now follow your own rule. Open `packs/builder/prompts/builder.md.tmpl`:
 
 ```bash
-$EDITOR packs/coder/prompts/coder.md
+$EDITOR packs/builder/prompts/builder.md.tmpl
 ```
 
 Find the Rules section. Append the new bullet:
@@ -322,11 +328,11 @@ Save and close.
 ### Step 3: Commit the Rule File and the Prompt Update Together
 
 ```bash
-git add feedback-loops/reactive-async-error-handling.md packs/coder/prompts/coder.md
+git add feedback-loops/reactive-async-error-handling.md packs/builder/prompts/builder.md.tmpl
 git commit -m "feedback(coder): encode async error-handling rule from review pattern"
 ```
 
-Committing the rule file and the prompt update in the same commit is the audit trail. When someone asks "why did we add this rule to the Coder prompt?", `git log -p packs/coder/prompts/coder.md` points them at the feedback loop artifact that explains the *why*.
+Committing the rule file and the prompt update in the same commit is the audit trail. When someone asks "why did we add this rule to the Coder prompt?", `git log -p packs/builder/prompts/builder.md.tmpl` points them at the feedback loop artifact that explains the *why*.
 
 ---
 
@@ -342,7 +348,7 @@ The next time you sling the Coder on any feature, it should now produce code wit
 
 ```bash
 # pick any closed bead whose review report flagged the async issue
-gc sling coder my-city-<bead-id>
+gc sling builder my-factory-<bead-id>
 gc watch coder
 ```
 
@@ -410,7 +416,7 @@ Add a Test Timeout Policy subsection:
 > - Three consecutive timeouts on the same test mark it quarantined and block
 >   the deploy until a human triages.
 
-Also update `packs/deployer/prompts/deployer.md` Quality Gate to reference
+Also update `packs/release-gate/prompts/release-gate.md.tmpl` Quality Gate to reference
 this policy:
 
 > 7. Test Timeout Policy is honored (see manifest Release Criteria §Test
@@ -436,12 +442,12 @@ the manifest change and adjust the threshold upward (5 consecutive timeouts).
 
 ### Step 3: Apply the Rule
 
-Update `docs/PROJECT_MANIFEST.md` by appending a `Test Timeout Policy` subsection under Release Criteria. Update `packs/deployer/prompts/deployer.md` Quality Gate to add item 7 referencing the manifest.
+Update `docs/PROJECT_MANIFEST.md` by appending a `Test Timeout Policy` subsection under Release Criteria. Update `packs/release-gate/prompts/release-gate.md.tmpl` Quality Gate to add item 7 referencing the manifest.
 
 Commit all three files together:
 
 ```bash
-git add feedback-loops/aggregate-test-timeouts.md docs/PROJECT_MANIFEST.md packs/deployer/prompts/deployer.md
+git add feedback-loops/aggregate-test-timeouts.md docs/PROJECT_MANIFEST.md packs/release-gate/prompts/release-gate.md.tmpl
 git commit -m "feedback(manifest): add test timeout policy from aggregated gate failures"
 ```
 
@@ -622,7 +628,7 @@ Mark your chosen rule as "ENCODED" in `factory-feedback.md`:
 
 | # | Rule | Status | Encoded At |
 |---|------|--------|------------|
-| 1 | Reactive: async error handling | ENCODED | packs/coder/prompts/coder.md (Rules, bullet 5) |
+| 1 | Reactive: async error handling | ENCODED | packs/builder/prompts/builder.md.tmpl (Rules, bullet 5) |
 | 2 | Aggregate: test timeout policy | ENCODED | docs/PROJECT_MANIFEST.md (Release Criteria §Test Timeout Policy) |
 | 3 | External: user bug to bead | DOCUMENTED ONLY | (fires on real signal; no config change yet) |
 ```
@@ -661,7 +667,7 @@ This commit log is your factory's self-improvement history. Every commit with pr
 |-------|---------|------------|
 | Rule fires on noise | After encoding the async try/catch rule, the Coder now wraps every literal `async` keyword, including arrow callbacks that can't throw | Rewrite the rule bullet to narrow scope: "async route handlers AND async database calls." Re-sling and verify. |
 | Threshold too aggressive | A reactive rule fires on the first occurrence and adds a prompt bullet the team later disagrees with | Raise the threshold from 1 to 2 or 3. Document the revised threshold in the rule file and in `factory-feedback.md`. Old rule bullet stays if it's still valid. |
-| Prompt bloat | `packs/coder/prompts/coder.md` has grown to 200 lines and Claude starts ignoring earlier bullets | File a bead titled "Coder prompt consolidation." A human reviews the Rules section and merges related bullets into higher-level guidance. Then delete superseded feedback rule files or mark them as consolidated. |
+| Prompt bloat | `packs/builder/prompts/builder.md.tmpl` has grown to 200 lines and Claude starts ignoring earlier bullets | File a bead titled "Coder prompt consolidation." A human reviews the Rules section and merges related bullets into higher-level guidance. Then delete superseded feedback rule files or mark them as consolidated. |
 | Contradicting a tailored ADR | A feedback rule says "always use the ORM" but `CLAUDE.md`'s tailored ADRs allow parameterized raw SQL for admin reports | Do not encode the rule. File a bead for human adjudication: "Feedback rule conflicts with tailored ADR §sql-parameterization — decide which wins." Escape hatch is always human review. |
 | Rule target file doesn't exist | Rule says update `packs/reviewer/prompts/reviewer.md` but that path isn't in your repo | Confirm the pack is installed (`gc rig list`). If it's included by `--include` from a shared directory, either edit the source or copy the pack into your repo for local overrides. Update the rule's Target to match. |
 | No signals to learn from | `review-reports/` and `release-gates/` are empty because you haven't run a full feature yet | Go back and run a feature end-to-end (L2 → L3 → L4). Feedback loops without real signal data are theory, not practice. |
@@ -669,7 +675,7 @@ This commit log is your factory's self-improvement history. Every commit with pr
 | Aggregate rule double-counts a single flaky test | The test timeout appears three times in three different gate files, but it's always the *same* test | Narrow the threshold: "3 distinct tests, not 3 occurrences of the same test." Add a distinctness check to the rule's threshold definition. |
 | External loop creates duplicate beads | Five users report the same bug, producing five beads | Add a deduplication check to the rule: "before creating bead, search for existing open beads by trace ID or route path. If found, append a comment to that bead instead." |
 | Can't tell which rules are still justified | Six months later, `feedback-loops/` has 20 rule files and no one knows which are live | Add a `Last Triggered` field to each rule file. Run a monthly review: any rule without a triggering observation in 90 days is marked `DORMANT` in `factory-feedback.md` and flagged for removal. |
-| Feedback commit is rolled back by another agent | The Coder's next run reverts the Rules section somehow | The Coder should never be slung at prompt files. Add a rule to `packs/coder/prompts/coder.md`: "Never modify files under `packs/`, `docs/`, or `feedback-loops/` — those are configuration, not code." |
+| Feedback commit is rolled back by another agent | The Coder's next run reverts the Rules section somehow | The Coder should never be slung at prompt files. Add a rule to `packs/builder/prompts/builder.md.tmpl`: "Never modify files under `packs/`, `docs/`, or `feedback-loops/` — those are configuration, not code." |
 
 ---
 
@@ -696,7 +702,7 @@ file under `src/api/loyalty.ts`.
 2 occurrences across different features.
 
 ## Target
-`packs/coder/prompts/coder.md` Rules section.
+`packs/builder/prompts/builder.md.tmpl` Rules section.
 
 ## Action
 Append:
@@ -873,12 +879,12 @@ EOF
 cat > feedback-loops/reactive-async-error-handling.md << 'EOF'
 ... (reactive rule file) ...
 EOF
-$EDITOR packs/coder/prompts/coder.md    # append new Rules bullet
-git add feedback-loops/reactive-async-error-handling.md packs/coder/prompts/coder.md
+$EDITOR packs/builder/prompts/builder.md.tmpl    # append new Rules bullet
+git add feedback-loops/reactive-async-error-handling.md packs/builder/prompts/builder.md.tmpl
 git commit -m "feedback(coder): encode async error-handling rule from review pattern"
 
 # Verify it took effect on next sling
-gc sling coder my-city-<bead-id>
+gc sling builder my-factory-<bead-id>
 gc watch coder
 grep -c "try {" src/api/*.ts
 
@@ -888,8 +894,8 @@ cat > feedback-loops/aggregate-test-timeouts.md << 'EOF'
 ... (aggregate rule file with Triggering Observations) ...
 EOF
 $EDITOR docs/PROJECT_MANIFEST.md                       # add Test Timeout Policy
-$EDITOR packs/deployer/prompts/deployer.md             # add Quality Gate item 7
-git add feedback-loops/aggregate-test-timeouts.md docs/PROJECT_MANIFEST.md packs/deployer/prompts/deployer.md
+$EDITOR packs/release-gate/prompts/release-gate.md.tmpl             # add Quality Gate item 7
+git add feedback-loops/aggregate-test-timeouts.md docs/PROJECT_MANIFEST.md packs/release-gate/prompts/release-gate.md.tmpl
 git commit -m "feedback(manifest): add test timeout policy from aggregated gate failures"
 
 # PART 4 — External loop (rule file only; bead created on real signal)

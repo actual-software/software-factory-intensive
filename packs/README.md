@@ -25,7 +25,7 @@ shell that `includes` all 8 leaf packs.
 ## Directory layout
 
 ```
-examples/actual/
+packs/
 ├── README.md            # you are here
 ├── city.toml            # runnable sample workspace
 ├── architect/           # Principal-Engineer persona
@@ -33,18 +33,25 @@ examples/actual/
 │                        # (ships the tracker-to-beads bridge skill)
 ├── designer/            # UI/UX-Designer + Accessibility-Engineer persona
 ├── validator/           # QA-Engineer persona
-├── builder/             # Backend+Frontend generalist persona
+├── builder/             # Backend+Frontend generalist persona (a.k.a. "Coder")
 ├── reviewer/            # Engineering-Manager + Principal-Engineer +
 │                        # Security-Engineer persona
 ├── release-gate/        # Release-Engineer + DevOps-Engineer persona
+│                        # (a.k.a. "Deployer")
 ├── improver/            # SRE + Performance-Engineer + DevRel persona
 └── all/                 # composition pack — includes all 8
 ```
 
+The curriculum draws on six of the eight packs (Planner, Architect,
+Designer, Builder, Reviewer, Release-Gate) to form the 6-agent factory.
+`validator/` and `improver/` are available for self-directed
+extensions but are not required by any lab.
+
 ## Persona mapping
 
-The agent voices are anchored to the built-in personas from
-[`actual-factory`](file:///Users/david_miura_actual_ai/Projects/actual-software/actual-factory/extensions/factory-vscode/shared/actual-agents/built-in-agents.ts):
+The agent voices are anchored to the built-in personas defined in the
+upstream `actual-factory` VS Code extension
+(`extensions/factory-vscode/shared/actual-agents/built-in-agents.ts`):
 
 | Pack | Anchor persona(s) |
 |------|-------------------|
@@ -69,9 +76,9 @@ up automatically when the agent starts.
 To re-vendor after upstream releases a new version:
 
 ```bash
-cd examples/actual/architect && ./scripts/sync-actual-skill.sh
-cd examples/actual/planner   && ./scripts/sync-actual-skill.sh
-cd examples/actual/builder   && ./scripts/sync-actual-skill.sh
+cd packs/architect && ./scripts/sync-actual-skill.sh
+cd packs/planner   && ./scripts/sync-actual-skill.sh
+cd packs/builder   && ./scripts/sync-actual-skill.sh
 ```
 
 The three packs use the skill slightly differently:
@@ -149,11 +156,12 @@ honors Gas City's core invariant: **ZERO hardcoded roles**.
 ## How to run
 
 ```bash
-# 1. Register at least one rig (your project repo)
-gc rig add /path/to/your/project
+# 1. Register at least one rig (your project repo), from your Gas City
+#    workspace (e.g. `my-factory/`):
+gc rig add ../../path/to/your-project
 
-# 2. Start the factory — this brings up all 8 agents
-gc start examples/actual/
+# 2. Start the factory — this brings up whichever agents you've included
+gc start
 
 # 3. File a goal to kick things off
 bd create --title "Build user profiles" --label needs-architecture
@@ -171,7 +179,7 @@ Each leaf pack works on its own. To use just one:
 # in your own city.toml
 [workspace]
 name = "mycity"
-includes = ["/abs/path/to/examples/actual/builder"]
+includes = ["../packs/builder"]
 ```
 
 ## Principles honored

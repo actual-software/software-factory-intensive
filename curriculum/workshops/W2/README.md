@@ -6,7 +6,24 @@
 |---|---|
 | **Estimated duration** | ~45 minutes |
 | **Type** | WORKSHOP |
-| **Deliverable** | Factory wiring diagram + handoff contracts + filled `docs/PROJECT_MANIFEST.md` |
+| **Deliverable** | Factory wiring diagram + handoff contracts + filled `my-factory/PROJECT_MANIFEST.md` |
+
+---
+
+## Session workspace note
+
+Pack mapping, where this README mentions a role → the shipped pack name:
+
+| Role (curriculum) | Shipped pack |
+|-------------------|--------------|
+| Planner | `packs/planner` |
+| Architect | `packs/architect` |
+| Designer | `packs/designer` |
+| **Coder** | **`packs/builder`** |
+| Reviewer | `packs/reviewer` |
+| **Deployer** | **`packs/release-gate`** |
+
+Prompt files end in `.md.tmpl` (Gas City templates). The W2 deliverable (`factory-wiring.md`) belongs in `../../../activities/workshops/W2/`. No pack is installed in this workshop — L2 is the first session that adds packs to `../../../my-factory/city.toml`.
 
 ---
 
@@ -80,7 +97,7 @@ Before starting W2, verify each of these:
 |-------------|---------------|-----------------|
 | W1 complete | You've read `curriculum/workshops/W1/README.md` end-to-end | Read W1 now — 20 min. It frames the "why" for this workshop's "how". |
 | L1 complete | `ls ~/path/to/your-repo/CLAUDE.md` → file exists | Complete L1 first. W2 assumes a Gas City city exists and a rig is pointed at your repo. |
-| Skeleton scaffold copied | `ls ~/path/to/your-repo/work-packages/` → directory exists | `cp -r /path/to/software-factory-intensive/my-factory/* ~/path/to/your-repo/` |
+| Skeleton scaffold copied | `ls ~/path/to/your-repo/work-packages/` → directory exists | `mkdir -p ../../path/to/your-repo/{work-packages,docs/adr,design,review-reports,release-gates,feedback-loops}` |
 | Project Manifest in place | `cat ~/path/to/your-repo/docs/PROJECT_MANIFEST.md` → non-empty | Copy `curriculum/PROJECT_MANIFEST_TEMPLATE.md` and fill in tech stack, domain model, conventions |
 | One feature in mind | You can describe in one sentence the feature you'll trace through all six stages | Pick something small: "add CSV export to the orders page", "ship dark-mode toggle". Use the Fired Up Pizza loyalty points example if nothing else jumps out. |
 | Editor open on the packs dir | You can browse `packs/planner/`, `packs/architect/`, etc. | `cd software-factory-intensive && code .` (or your editor of choice) |
@@ -116,7 +133,7 @@ Before you can design your factory, you need to see the shape each pack provides
 
 Open this file and scan the six headings. It's 65 lines — skim, don't memorize.
 
-[`packs/planner/prompts/planner.md`](../../../packs/planner/prompts/planner.md)
+[`packs/planner/prompts/planner.md.tmpl`](../../../packs/planner/prompts/planner.md.tmpl)
 
 ```markdown
 # Planner Agent
@@ -171,12 +188,12 @@ Open each prompt in the same way. You're looking for the **Inputs** and **Output
 
 | Agent | Prompt file | Output Location |
 |-------|-------------|-----------------|
-| Planner | [`packs/planner/prompts/planner.md`](../../../packs/planner/prompts/planner.md) | `work-packages/<slug>.md` |
-| Architect | [`packs/architect/prompts/architect.md`](../../../packs/architect/prompts/architect.md) | `docs/adr/NNNN-<slug>.md` |
-| Designer | [`packs/designer/prompts/designer.md`](../../../packs/designer/prompts/designer.md) | `design/<slug>-spec.md` |
-| Coder | [`packs/coder/prompts/coder.md`](../../../packs/coder/prompts/coder.md) | `src/**` |
-| Reviewer | [`packs/reviewer/prompts/reviewer.md`](../../../packs/reviewer/prompts/reviewer.md) | `review-reports/<slug>-review.md` |
-| Deployer | [`packs/deployer/prompts/deployer.md`](../../../packs/deployer/prompts/deployer.md) | `release-gates/<slug>-gate.md` |
+| Planner | [`packs/planner/prompts/planner.md.tmpl`](../../../packs/planner/prompts/planner.md.tmpl) | `work-packages/<slug>.md` |
+| Architect | [`packs/architect/prompts/architect.md.tmpl`](../../../packs/architect/prompts/architect.md.tmpl) | `docs/adr/NNNN-<slug>.md` |
+| Designer | [`packs/designer/prompts/designer.md.tmpl`](../../../packs/designer/prompts/designer.md.tmpl) | `design/<slug>-spec.md` |
+| Coder | [`packs/builder/prompts/builder.md.tmpl`](../../../packs/builder/prompts/builder.md.tmpl) | `src/**` |
+| Reviewer | [`packs/reviewer/prompts/reviewer.md.tmpl`](../../../packs/reviewer/prompts/reviewer.md.tmpl) | `review-reports/<slug>-review.md` |
+| Deployer | [`packs/release-gate/prompts/release-gate.md.tmpl`](../../../packs/release-gate/prompts/release-gate.md.tmpl) | `release-gates/<slug>-gate.md` |
 
 **What's happening here:** Notice the shape is identical across all six packs — same six headings, same "read manifest first" step in Process, same Config Discipline paragraph. This uniformity is the point: once you've read one, you can read the rest in 30 seconds each, and you can edit any of them with the same mental model.
 
@@ -465,7 +482,7 @@ high-severity findings.
 
 ## Recommendation
 APPROVE — minor: add console.warn on fetch error (low severity).
-If you want this enforced, add to packs/coder/prompts/coder.md:
+If you want this enforced, add to packs/builder/prompts/builder.md.tmpl:
 "All network errors must be logged via the project logger."
 ```
 
@@ -755,7 +772,7 @@ Use this template per handoff:
 
 ### Step 4: Commit Both Contracts
 
-Append them to `docs/factory-wiring.md` so L2 can read them. In L2, Part 1 Step 3, you'll turn these contracts into concrete edits to `packs/planner/prompts/planner.md` (Output Format) and `packs/architect/prompts/architect.md` (Inputs + Quality Gate).
+Append them to `docs/factory-wiring.md` so L2 can read them. In L2, Part 1 Step 3, you'll turn these contracts into concrete edits to `packs/planner/prompts/planner.md.tmpl` (Output Format) and `packs/architect/prompts/architect.md.tmpl` (Inputs + Quality Gate).
 
 ### Inline Insight: Config over ad-hoc chat corrections
 
@@ -831,12 +848,12 @@ Each row of your factory design maps directly to a file path under `packs/` and 
 
 | W2 design deliverable | Becomes concrete edit in | Installed in |
 |-----------------------|--------------------------|--------------|
-| "Planner produces `<your work package format>`" | `packs/planner/prompts/planner.md` — Output Format section | L2 |
-| "Architect produces `<your ADR format>`" | `packs/architect/prompts/architect.md` — Output Format section | L2 |
-| "Designer produces `<your spec format>`" | `packs/designer/prompts/designer.md` — Output Format section | L3 |
-| "Coder writes to `<your src layout>`" | `packs/coder/prompts/coder.md` — Output + Rules sections | L3 |
-| "Reviewer checks `<your review standards>`" | `packs/reviewer/prompts/reviewer.md` + `docs/PROJECT_MANIFEST.md` Review Standards | L4 |
-| "Deployer gates on `<your release criteria>`" | `packs/deployer/prompts/deployer.md` + `docs/PROJECT_MANIFEST.md` Release Criteria | L4 |
+| "Planner produces `<your work package format>`" | `packs/planner/prompts/planner.md.tmpl` — Output Format section | L2 |
+| "Architect produces `<your ADR format>`" | `packs/architect/prompts/architect.md.tmpl` — Output Format section | L2 |
+| "Designer produces `<your spec format>`" | `packs/designer/prompts/designer.md.tmpl` — Output Format section | L3 |
+| "Coder writes to `<your src layout>`" | `packs/builder/prompts/builder.md.tmpl` — Output + Rules sections | L3 |
+| "Reviewer checks `<your review standards>`" | `packs/reviewer/prompts/reviewer.md.tmpl` + `docs/PROJECT_MANIFEST.md` Review Standards | L4 |
+| "Deployer gates on `<your release criteria>`" | `packs/release-gate/prompts/release-gate.md.tmpl` + `docs/PROJECT_MANIFEST.md` Release Criteria | L4 |
 | Handoff contract Planner → Architect | `## Inputs` + `## Output Format` must match across both prompts | L2 |
 | Handoff contract Architect → Designer | `## Inputs` of designer.md must reference the ADR path format Architect writes | L3 |
 | Handoff contract Designer → Coder | `## Inputs` of coder.md must name the spec format Designer writes | L3 |
@@ -867,7 +884,7 @@ During W2, two of these files matter most:
 If you haven't copied the skeleton into your project repo yet, do so now so L2 starts clean:
 
 ```bash
-cp -r /path/to/software-factory-intensive/my-factory/* ~/path/to/your-repo/
+mkdir -p ../../path/to/your-repo/{work-packages,docs/adr,design,review-reports,release-gates,feedback-loops}
 ```
 
 ---
@@ -951,7 +968,7 @@ W2 is design-only — no agent runs. These are the file-browsing and scaffolding
 ```bash
 # Browse the shipped packs
 ls /path/to/software-factory-intensive/packs/
-cat /path/to/software-factory-intensive/packs/planner/prompts/planner.md
+cat /path/to/software-factory-intensive/packs/planner/prompts/planner.md.tmpl
 cat /path/to/software-factory-intensive/packs/architect/pack.toml
 
 # Read the reference project
@@ -959,7 +976,7 @@ cat /path/to/software-factory-intensive/reference-project/fired-up-pizza/docs/PR
 cat /path/to/software-factory-intensive/reference-project/fired-up-pizza/tickets.md
 
 # Scaffold your project with the skeleton
-cp -r /path/to/software-factory-intensive/my-factory/* ~/path/to/your-repo/
+mkdir -p ../../path/to/your-repo/{work-packages,docs/adr,design,review-reports,release-gates,feedback-loops}
 
 # Optional: seed tailored industry ADRs before L2
 brew install actual-software/actual/actual
@@ -1005,7 +1022,7 @@ After W2, your design doc should answer every row in this table. Fill it in now 
 In **L2**, you'll:
 
 - Install the Planner and Architect packs (`gc rig add --include`)
-- Customize `packs/planner/prompts/planner.md` and `packs/architect/prompts/architect.md` with the handoff contracts you wrote here
+- Customize `packs/planner/prompts/planner.md.tmpl` and `packs/architect/prompts/architect.md.tmpl` with the handoff contracts you wrote here
 - Create your first bead, sling it to the Planner, review the work package against the Quality Gate
 - Optionally seed tailored ADRs via `actual adr-bot` before running the Architect
 - Sling a dependent bead to the Architect, produce ADR-0001, verify cross-references in both directions

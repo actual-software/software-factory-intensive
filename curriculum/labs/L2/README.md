@@ -10,6 +10,21 @@
 
 ---
 
+## Session workspace note
+
+* **Pack locations (shipped):** `../../../packs/planner/` and `../../../packs/architect/`. Prompt templates are `packs/<agent>/prompts/<agent>.md.tmpl` (the `.tmpl` suffix is the Gas City template extension).
+* **Gas City workspace:** `../../../my-factory/` — this is where `city.toml` lives. Earlier drafts of this README used `~/my-city/`; treat any remaining `~/my-city` reference as pointing at `my-factory/`.
+* **Your deliverables this session:** `notes.md` + any customised pack copies go in `../../../activities/labs/L2/`. The work package + ADR themselves are produced by the agents into your project rig, not this folder.
+* **Wiring the packs:** at the end of the session, add the following to `includes` in `../../../my-factory/city.toml`:
+  ```toml
+  includes = ["../packs/planner", "../packs/architect"]
+  ```
+  or use `../activities/labs/L2/packs/<agent>` if you're running customised copies. See [`activities/labs/L2/README.md`](../../../activities/labs/L2/README.md) for the full pattern.
+
+If a pack edit breaks your factory, swap back to the shipped `../packs/<name>` path in `city.toml` and `gc service restart` to continue.
+
+---
+
 ## Architecture Diagram
 
 ```
@@ -57,9 +72,9 @@ Before starting this lab, verify each of these:
 |-------------|---------------|-----------------|
 | L1 complete | `ls ~/path/to/your-repo/CLAUDE.md` → file exists | Go back and complete L1. This lab cannot work without it. |
 | W2 complete | You have a factory design doc with 6 agent roles mapped to your project | Skim the [W2 README](../../workshops/W2/) and sketch the roles — 10 min max |
-| Gas City running | `gc status` → shows at least `dev-agent` from L1 | `gc init ~/my-city` then `gc rig add ~/path/to/your-repo` |
+| Gas City running | `gc status` → shows at least `dev-agent` from L1 | From `my-factory/`: `gc register .` then `gc rig add ../../path/to/your-repo` |
 | Project Manifest | `cat ~/path/to/your-repo/docs/PROJECT_MANIFEST.md` → filled in | Copy from [`curriculum/PROJECT_MANIFEST_TEMPLATE.md`](../../PROJECT_MANIFEST_TEMPLATE.md) and fill in tech stack, conventions, domain model |
-| Skeleton scaffold | `ls ~/path/to/your-repo/work-packages/` → directory exists | `cp -r /path/to/software-factory-intensive/my-factory/* ~/path/to/your-repo/` |
+| Skeleton scaffold | `ls ~/path/to/your-repo/work-packages/` → directory exists | `# (the participant's repo already lives under a `my-factory/` workspace — skeleton lives there)` |
 
 ---
 
@@ -79,7 +94,7 @@ Before installing anything, read what you're about to install. Each pack is a fo
 
 Open this file in your editor and read it end-to-end — it's 65 lines:
 
-[`packs/planner/prompts/planner.md`](../../../packs/planner/prompts/planner.md)
+[`packs/planner/prompts/planner.md.tmpl`](../../../packs/planner/prompts/planner.md.tmpl)
 
 You should see six sections:
 
@@ -131,7 +146,7 @@ max_active_sessions = 1
 
 ### Step 3: Open the Architect Pack
 
-[`packs/architect/prompts/architect.md`](../../../packs/architect/prompts/architect.md)
+[`packs/architect/prompts/architect.md.tmpl`](../../../packs/architect/prompts/architect.md.tmpl)
 
 Same six-section structure as the Planner, but different role:
 
@@ -187,7 +202,7 @@ You're done reading. Now install.
 ### Step 1: Add the Planner Pack to Your Rig
 
 ```bash
-cd ~/my-city
+cd my-factory
 gc rig add ~/path/to/your-repo \
   --include /path/to/software-factory-intensive/packs/planner
 ```
@@ -198,7 +213,7 @@ You should see output like:
 rig "your-repo" updated — added pack "planner"
 ```
 
-**What's happening here:** `gc rig add --include` tells Gas City: "for this rig, also load the agent definition and prompt from the specified pack directory." The `[[agent]]` block from `packs/planner/pack.toml` is merged into your city's effective configuration. The prompt file at `packs/planner/prompts/planner.md` becomes the system prompt for any session started by this agent.
+**What's happening here:** `gc rig add --include` tells Gas City: "for this rig, also load the agent definition and prompt from the specified pack directory." The `[[agent]]` block from `packs/planner/pack.toml` is merged into your city's effective configuration. The prompt file at `packs/planner/prompts/planner.md.tmpl` becomes the system prompt for any session started by this agent.
 
 ### Step 2: Restart Gas City and Verify
 
@@ -221,7 +236,7 @@ If `planner` doesn't appear, check that the `--include` path was correct (absolu
 
 The shipped prompt is generic. You need to tailor two things for your project:
 
-**a) Open `packs/planner/prompts/planner.md` in your editor** (or copy it into your repo if you prefer local overrides).
+**a) Open `packs/planner/prompts/planner.md.tmpl` in your editor** (or copy it into your repo if you prefer local overrides).
 
 **b) Update the Output Format section** with your project's naming convention. For example, if your project is Fired Up Pizza:
 
@@ -332,7 +347,7 @@ git commit -m "chore: seed tailored industry ADRs via actual adr-bot"
 ### Step 2: Add the Architect Pack to Your Rig
 
 ```bash
-cd ~/my-city
+cd my-factory
 gc rig add ~/path/to/your-repo \
   --include /path/to/software-factory-intensive/packs/architect
 ```
@@ -363,7 +378,7 @@ Three agents. The first two stages of your factory pipeline are installed.
 
 ### Step 4: Customize the Architect Prompt
 
-Open `packs/architect/prompts/architect.md` and make two changes:
+Open `packs/architect/prompts/architect.md.tmpl` and make two changes:
 
 **a) Add `CLAUDE.md` to the Inputs section** (so the Architect reads tailored ADRs):
 
@@ -450,7 +465,7 @@ Save this somewhere handy (clipboard, scratch file) — you'll paste it into the
 ### Step 2: Create the Planner Bead
 
 ```bash
-cd ~/my-city
+cd my-factory
 bd create "Feature: Loyalty Points System" \
   --description "$(cat <<'EOF'
 # Feature Request: Loyalty Points System
@@ -481,7 +496,7 @@ EOF
 You should see:
 
 ```
-Created bead: my-city-a1b2c3
+Created bead: my-factory-a1b2c3
 ```
 
 Note this bead ID — you'll use it for the next several steps. Verify it exists:
@@ -494,7 +509,7 @@ You should see:
 
 ```
 ID              TITLE                           STATUS   AGENT    CREATED
-my-city-a1b2c3  Feature: Loyalty Points System  open     --       just now
+my-factory-a1b2c3  Feature: Loyalty Points System  open     --       just now
 ```
 
 **What's happening here:** A bead is a work item in Gas City. It has a title, a markdown description, a status, and an optional dependency chain. The description is the first thing the agent reads when you sling the bead to it. The quality of this description directly determines the quality of the agent's output — just like a Jira ticket determines the quality of a human developer's output.
@@ -502,17 +517,17 @@ my-city-a1b2c3  Feature: Loyalty Points System  open     --       just now
 ### Step 3: Sling the Bead to the Planner
 
 ```bash
-gc sling planner my-city-a1b2c3
+gc sling planner my-factory-a1b2c3
 ```
 
 You should see:
 
 ```
-Slinging my-city-a1b2c3 → planner
+Slinging my-factory-a1b2c3 → planner
 Session started: planner-a1b2c3 (tmux)
 ```
 
-**What's happening here:** Gas City starts a tmux session, launches Claude Code inside your repo directory, loads `packs/planner/prompts/planner.md` as the system prompt, and hands the bead's description as the task. The Planner agent is now working autonomously.
+**What's happening here:** Gas City starts a tmux session, launches Claude Code inside your repo directory, loads `packs/planner/prompts/planner.md.tmpl` as the system prompt, and hands the bead's description as the task. The Planner agent is now working autonomously.
 
 ### Step 4: Watch the Planner Work
 
@@ -532,7 +547,7 @@ Press `Ctrl+b d` to detach from tmux (the agent keeps running). You can also mon
 ```bash
 gc events --follow    # Stream all city events
 gc status             # Check agent state
-bd show my-city-a1b2c3  # Check bead progress
+bd show my-factory-a1b2c3  # Check bead progress
 ```
 
 Wait until the Planner finishes (state returns to `idle` in `gc status`). This typically takes 2–5 minutes.
@@ -585,7 +600,7 @@ page, so that I know how many points I have.
 
 ### Step 6: Check the Work Package Against the Quality Gate
 
-Open `packs/planner/prompts/planner.md` and read the Quality Gate section. Check each rule:
+Open `packs/planner/prompts/planner.md.tmpl` and read the Quality Gate section. Check each rule:
 
 | Quality Gate Rule | Pass? | Evidence |
 |-------------------|-------|----------|
@@ -597,7 +612,7 @@ Open `packs/planner/prompts/planner.md` and read the Quality Gate section. Check
 **If any rule fails:**
 
 1. **Do NOT edit the work package file directly.** That's a manual fix — it breaks config discipline.
-2. Instead, open `packs/planner/prompts/planner.md` and add a more specific rule. For example, if test cases are missing:
+2. Instead, open `packs/planner/prompts/planner.md.tmpl` and add a more specific rule. For example, if test cases are missing:
 
 ```markdown
 ## Quality Gate
@@ -611,7 +626,7 @@ Open `packs/planner/prompts/planner.md` and read the Quality Gate section. Check
 
 ```bash
 rm work-packages/loyalty-points-system.md
-gc sling planner my-city-a1b2c3
+gc sling planner my-factory-a1b2c3
 gc watch planner
 ```
 
@@ -624,13 +639,13 @@ gc watch planner
 Once the work package passes all quality gate rules:
 
 ```bash
-bd close my-city-a1b2c3 --comment "Work package completed: work-packages/loyalty-points-system.md"
+bd close my-factory-a1b2c3 --comment "Work package completed: work-packages/loyalty-points-system.md"
 ```
 
 You should see:
 
 ```
-Closed bead: my-city-a1b2c3
+Closed bead: my-factory-a1b2c3
 ```
 
 ---
@@ -642,7 +657,7 @@ The Planner's output is the Architect's input. Now the Architect reads the work 
 ### Step 1: Create the Architect Bead with a Dependency
 
 ```bash
-cd ~/my-city
+cd my-factory
 bd create "Architecture Review: Loyalty Points Storage" \
   --description "$(cat <<'EOF'
 Review the work package at work-packages/loyalty-points-system.md
@@ -662,21 +677,21 @@ Produce an ADR at docs/adr/0001-loyalty-points-storage.md
 using the MADR template in your prompt.
 EOF
 )" \
-  --depends-on my-city-a1b2c3
+  --depends-on my-factory-a1b2c3
 ```
 
 You should see:
 
 ```
-Created bead: my-city-d4e5f6
+Created bead: my-factory-d4e5f6
 ```
 
-**What's happening here:** The `--depends-on my-city-a1b2c3` flag tells Gas City: "don't let anyone sling this bead until `my-city-a1b2c3` is closed." Since you just closed the Planner bead, this dependency is already satisfied. In the capstone (C1), you'll use dependencies to create automatic sequential pipelines.
+**What's happening here:** The `--depends-on my-factory-a1b2c3` flag tells Gas City: "don't let anyone sling this bead until `my-factory-a1b2c3` is closed." Since you just closed the Planner bead, this dependency is already satisfied. In the capstone (C1), you'll use dependencies to create automatic sequential pipelines.
 
 Verify:
 
 ```bash
-bd show my-city-d4e5f6
+bd show my-factory-d4e5f6
 ```
 
 You should see status `open` and the dependency marked as satisfied.
@@ -684,13 +699,13 @@ You should see status `open` and the dependency marked as satisfied.
 ### Step 2: Sling to the Architect
 
 ```bash
-gc sling architect my-city-d4e5f6
+gc sling architect my-factory-d4e5f6
 ```
 
 You should see:
 
 ```
-Slinging my-city-d4e5f6 → architect
+Slinging my-factory-d4e5f6 → architect
 Session started: architect-d4e5f6 (tmux)
 ```
 
@@ -769,7 +784,7 @@ expected volume (<10K orders/month).
 
 ### Step 5: Check the ADR Against the Quality Gate
 
-Open `packs/architect/prompts/architect.md` and check each Quality Gate rule:
+Open `packs/architect/prompts/architect.md.tmpl` and check each Quality Gate rule:
 
 | Quality Gate Rule | Pass? | Evidence |
 |-------------------|-------|----------|
@@ -780,7 +795,7 @@ Open `packs/architect/prompts/architect.md` and check each Quality Gate rule:
 
 **If any rule fails:**
 
-1. Open `packs/architect/prompts/architect.md` and add a more specific rule. For example, if the Architect only considered one option:
+1. Open `packs/architect/prompts/architect.md.tmpl` and add a more specific rule. For example, if the Architect only considered one option:
 
 ```markdown
 ## Quality Gate
@@ -795,7 +810,7 @@ Open `packs/architect/prompts/architect.md` and check each Quality Gate rule:
 
 ```bash
 rm docs/adr/0001-loyalty-points-storage.md
-gc sling architect my-city-d4e5f6
+gc sling architect my-factory-d4e5f6
 gc watch architect
 ```
 
@@ -832,14 +847,14 @@ You should see:
 
 **If cross-references are missing:** this is a prompt gap. Add to both pack prompts:
 
-In `packs/planner/prompts/planner.md`, add to the Output Format:
+In `packs/planner/prompts/planner.md.tmpl`, add to the Output Format:
 
 ```markdown
 ## Architectural Decisions
 [Leave blank — the Architect agent will fill this in after producing ADRs]
 ```
 
-In `packs/architect/prompts/architect.md`, add to the Process section:
+In `packs/architect/prompts/architect.md.tmpl`, add to the Process section:
 
 ```markdown
 5. After writing the ADR, open the work package file and append the ADR
@@ -852,7 +867,7 @@ Re-sling the Architect. Check again.
 ### Step 7: Close the Architect Bead
 
 ```bash
-bd close my-city-d4e5f6 --comment "ADR completed: docs/adr/0001-loyalty-points-storage.md"
+bd close my-factory-d4e5f6 --comment "ADR completed: docs/adr/0001-loyalty-points-storage.md"
 ```
 
 ---
@@ -989,11 +1004,11 @@ your-repo/
 And your city:
 
 ```
-~/my-city/
-├── city.toml                                    # Now has dev-agent + planner + architect
+my-factory/
+├── city.toml                                      # Now includes planner + architect packs
 └── beads/
-    ├── my-city-a1b2c3 (closed)                  # Planner bead
-    └── my-city-d4e5f6 (closed)                  # Architect bead
+    ├── my-factory-a1b2c3 (closed)                 # Planner bead
+    └── my-factory-d4e5f6 (closed)                 # Architect bead
 ```
 
 ---
@@ -1009,7 +1024,7 @@ Every command you ran during this lab, in order:
 gc rig add ~/path/to/your-repo --include /path/to/packs/planner
 gc restart
 gc status
-# (edit packs/planner/prompts/planner.md — add project-specific Quality Gate rule)
+# (edit packs/planner/prompts/planner.md.tmpl — add project-specific Quality Gate rule)
 git checkout -b l2-planner-architect
 git add -A && git commit -m "chore(planner): customize planner prompt"
 
@@ -1021,7 +1036,7 @@ git add CLAUDE.md && git commit -m "chore: seed tailored industry ADRs"
 gc rig add ~/path/to/your-repo --include /path/to/packs/architect
 gc restart
 gc status
-# (edit packs/architect/prompts/architect.md — add CLAUDE.md as input)
+# (edit packs/architect/prompts/architect.md.tmpl — add CLAUDE.md as input)
 git add -A && git commit -m "chore(architect): customize architect prompt"
 
 # PART 3 — Run the Planner
@@ -1029,22 +1044,22 @@ bd create "Feature: Loyalty Points System" --description "$(cat <<'EOF'
 ...feature request...
 EOF
 )"
-gc sling planner my-city-a1b2c3
+gc sling planner my-factory-a1b2c3
 gc watch planner                                 # Ctrl+b d to detach
 cat work-packages/loyalty-points-system.md       # review output
 # (if quality gate fails: edit prompt, rm work package, re-sling)
-bd close my-city-a1b2c3 --comment "Work package completed"
+bd close my-factory-a1b2c3 --comment "Work package completed"
 
 # PART 4 — Run the Architect
 bd create "Architecture Review: Loyalty Points Storage" \
-  --description "..." --depends-on my-city-a1b2c3
-gc sling architect my-city-d4e5f6
+  --description "..." --depends-on my-factory-a1b2c3
+gc sling architect my-factory-d4e5f6
 gc watch architect
 cat docs/adr/0001-loyalty-points-storage.md      # review output
 grep -i "adr" work-packages/loyalty-points-system.md   # check cross-ref
 grep -i "work-package" docs/adr/0001-loyalty-points-storage.md
 # (if quality gate fails: edit prompt, rm ADR, re-sling)
-bd close my-city-d4e5f6 --comment "ADR completed"
+bd close my-factory-d4e5f6 --comment "ADR completed"
 
 # PART 5 — Commit and document
 git push -u origin l2-planner-architect
@@ -1060,16 +1075,16 @@ git push
 | Component | File / Location | What It Does |
 |-----------|-----------------|--------------|
 | Planner pack | `packs/planner/` | Defines the Planner agent: prompt, overlay, metadata |
-| Planner prompt | `packs/planner/prompts/planner.md` | System prompt for the Planner — Role, Inputs, Output Format, Quality Gate, Process |
+| Planner prompt | `packs/planner/prompts/planner.md.tmpl` | System prompt for the Planner — Role, Inputs, Output Format, Quality Gate, Process |
 | Architect pack | `packs/architect/` | Defines the Architect agent: prompt, overlay, metadata |
-| Architect prompt | `packs/architect/prompts/architect.md` | System prompt for the Architect — same six-section structure |
+| Architect prompt | `packs/architect/prompts/architect.md.tmpl` | System prompt for the Architect — same six-section structure |
 | Tailored ADRs | `CLAUDE.md` (appended by `actual adr-bot`) | Industry-standard ADRs tailored to your codebase — the Architect's baseline |
 | Work package | `work-packages/loyalty-points-system.md` | Planner's output: Goal, Stories, ACs, Dependencies, Tests, Scope |
 | ADR | `docs/adr/0001-loyalty-points-storage.md` | Architect's output: Context, Options, Decision, Consequences, References |
 | Cross-reference (WP → ADR) | Appended to work package by Architect | "See ADR-0001" |
 | Cross-reference (ADR → WP) | In ADR's References section | `work-packages/loyalty-points-system.md` |
-| Planner bead | `bd show my-city-a1b2c3` | The work item that triggered the Planner |
-| Architect bead | `bd show my-city-d4e5f6` | The work item that triggered the Architect, with dependency on Planner bead |
+| Planner bead | `bd show my-factory-a1b2c3` | The work item that triggered the Planner |
+| Architect bead | `bd show my-factory-d4e5f6` | The work item that triggered the Architect, with dependency on Planner bead |
 
 ---
 
@@ -1090,8 +1105,8 @@ When you review your own output, check:
 |---------|-----|
 | `gc rig add --include` says "pack not found" | Use the absolute path to the pack directory, not relative. Verify with `ls /path/to/packs/planner/pack.toml`. |
 | `gc status` doesn't show `planner` after restart | The `--include` may have failed silently. Run `gc rig list` and check the PACKS column. Re-run `gc rig add --include` with the correct path. |
-| Planner writes to wrong directory (e.g., `plan/` instead of `work-packages/`) | Open `packs/planner/prompts/planner.md` → Output Format section. Make the path explicit and add "never anywhere else." Re-sling. |
-| Architect writes ADR without reading the work package | The bead description didn't include the work package path. Edit the bead: `bd edit my-city-d4e5f6` and add the path explicitly. Re-sling. |
+| Planner writes to wrong directory (e.g., `plan/` instead of `work-packages/`) | Open `packs/planner/prompts/planner.md.tmpl` → Output Format section. Make the path explicit and add "never anywhere else." Re-sling. |
+| Architect writes ADR without reading the work package | The bead description didn't include the work package path. Edit the bead: `bd edit my-factory-d4e5f6` and add the path explicitly. Re-sling. |
 | Architect produces a 1-option ADR | Add to Quality Gate: "You MUST evaluate at least 3 options. List the naive approach and explain why it was rejected." Re-sling. |
 | Cross-references are missing | Add explicit instructions to both prompts (see Part 4, Step 6). Re-sling the Architect only — it's responsible for back-linking. |
 | `actual adr-bot` hangs or errors | Check that your Claude Code runner is authenticated: `claude auth login`. Or switch runner: `actual config set runner anthropic-api`. |
@@ -1122,7 +1137,7 @@ Before leaving this lab, verify all of these:
 ## Next Steps
 
 In **L3**, you'll:
-- Install the Designer and Coder packs (`packs/designer`, `packs/coder`)
+- Install the Designer and Builder (Coder) packs (`packs/designer`, `packs/builder`)
 - The Designer reads your work package + ADR and produces a component spec at `design/<slug>-spec.md`
 - The Coder reads the spec and implements actual code under `src/`
 - Quality gates include `npm run build`, `npm test`, `npm run lint` — real compilation, real tests

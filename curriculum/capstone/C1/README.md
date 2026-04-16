@@ -6,7 +6,28 @@
 |---|---|
 | **Estimated duration** | ~90 minutes |
 | **Type** | CAPSTONE |
-| **Deliverable** | Factory Run Report + committed feature branch (any stage) + retrospective card |
+| **Deliverable** | Factory Run Report + committed feature branch (any stage) + retrospective card (all at `activities/capstone/C1/`) |
+
+---
+
+## Session workspace note
+
+Pack mapping: *Coder* → `packs/builder`, *Deployer* → `packs/release-gate`. Prompt templates are `packs/<name>/prompts/<name>.md.tmpl`. Commands use the pack names: `gc sling builder <bead>`, `gc sling release-gate <bead>`.
+
+Before starting the run, verify all six packs are wired in `../../../my-factory/city.toml`:
+
+```toml
+includes = [
+    "../packs/planner",
+    "../packs/architect",
+    "../packs/designer",
+    "../packs/builder",
+    "../packs/reviewer",
+    "../packs/release-gate",
+]
+```
+
+If you skipped an earlier lab, add the shipped path for that pack — the capstone still runs against the reference packs even without customisations. The run report + retrospective land at `../../../activities/capstone/C1/`.
 
 ---
 
@@ -72,9 +93,9 @@ Before starting the capstone, verify each row. If any row fails, fix it *before*
 | L2 complete | `gc status` shows `planner` and `architect` as idle agents | Complete L2 (Part 1 + Part 2 install flow) |
 | L3 complete | `gc status` also shows `designer` and `coder`; prior work package + ADR committed | Complete L3 |
 | L4 complete | `gc status` also shows `reviewer` and `devops`; prior PR has a review report | Complete L4 |
-| All 6 agents declared in `city.toml` | `grep -c '^\[\[agent\]\]' ~/my-city/city.toml` → returns 6 (or more if you kept `dev-agent`) | Re-run `gc rig add --include` for any missing pack |
+| All 6 agents declared in `city.toml` | `grep -c '^\[\[agent\]\]' my-factory/city.toml` → returns 6 (or more if you kept `dev-agent`) | Re-run `gc rig add --include` for any missing pack |
 | Project manifest is tight | `cat ~/path/to/your-repo/docs/PROJECT_MANIFEST.md` — Review Standards and Release Criteria sections have explicit, testable rules (not "code should be clean") | Tighten before starting — vague manifests produce vague agent output |
-| Orchestrator present (optional but recommended) | `cat ~/my-city/orchestrator.yaml` shows the 6-stage pipeline from W3 | You can run manually (slinging each stage by hand); note this in the report's "Config Discipline" row |
+| Orchestrator present (optional but recommended) | `cat my-factory/orchestrator.yaml` shows the 6-stage pipeline from W3 | You can run manually (slinging each stage by hand); note this in the report's "Config Discipline" row |
 | At least one feedback loop encoded | `ls ~/path/to/your-repo/feedback-loops/rules/` → at least one `*.sh` rule | Go back to W4 Part 2 and write one rule |
 | `CLAUDE.md` has tailored industry ADRs (optional) | `grep -i "tailored" ~/path/to/your-repo/CLAUDE.md` returns results | Run `actual adr-bot` (see L2 Part 2 Step 1) |
 | `packs/workshop/` integrations installed (optional) | `gc rig list` shows the workshop pack | L1 walkthrough covers install — without it, ticket sync and observability signals are absent but the run still works |
@@ -144,7 +165,7 @@ If an agent produces wrong output — missing sections, wrong directory, vague r
 
 **Example violation.** The Planner's work package omits the Scope Boundary section. You notice, and in the same `gc watch planner` tmux you type "please add a Scope Boundary section." The section gets added — and the next time the Planner runs on a different bead, the scope boundary is missing again. The fix didn't stick.
 
-**Correct move.** Open `packs/planner/prompts/planner.md`, sharpen the Output Format or Quality Gate to require Scope Boundary explicitly, commit the change, delete the half-finished work package, re-sling the Planner.
+**Correct move.** Open `packs/planner/prompts/planner.md.tmpl`, sharpen the Output Format or Quality Gate to require Scope Boundary explicitly, commit the change, delete the half-finished work package, re-sling the Planner.
 
 ### Rule 2: All fixes via config.
 
@@ -154,7 +175,7 @@ If tests fail after the Coder runs, if the Reviewer flags an issue, if the Deplo
 
 **Example violation.** The Coder writes a React component that imports from `@/lib/formatPrice` but your project uses `src/utils/formatPrice`. You open the file and change the import path by hand. The code builds, the PR merges. Three features later the Coder makes the same mistake — because the fix never reached its prompt.
 
-**Correct move.** Open `packs/coder/prompts/coder.md`, add a rule to the Output Format: "All imports use project-relative paths from `src/` — never aliases like `@/lib/*` unless they're declared in the manifest's `tsconfig.paths`." Commit. Re-sling the Coder on the same bead.
+**Correct move.** Open `packs/builder/prompts/builder.md.tmpl`, add a rule to the Output Format: "All imports use project-relative paths from `src/` — never aliases like `@/lib/*` unless they're declared in the manifest's `tsconfig.paths`." Commit. Re-sling the Coder on the same bead.
 
 ### Rule 3: Log everything.
 
@@ -177,7 +198,7 @@ Below is the full run, broken into six agent-stage sub-steps plus a pre-run setu
 Create the feature bead and start the live run report.
 
 ```bash
-cd ~/my-city
+cd my-factory
 
 # Create the capstone bead
 bd create "Order history page — customers view past orders by phone number" \
@@ -209,14 +230,14 @@ EOF
 )"
 ```
 
-Note the bead ID returned (e.g., `my-city-c1a2p3`). This is the anchor for every subsequent sling.
+Note the bead ID returned (e.g., `my-factory-c1a2p3`). This is the anchor for every subsequent sling.
 
 Open the Factory Run Report template (further down in this document) in a split-pane editor. Add the feature name, date, and bead ID to the header. You will fill in the rest as the run proceeds.
 
 If you have `orchestrator.yaml` from W3 fully wired:
 
 ```bash
-gc orchestrate --pipeline feature-pipeline --bead my-city-c1a2p3
+gc orchestrate --pipeline feature-pipeline --bead my-factory-c1a2p3
 ```
 
 This will sequentially sling each stage. You still monitor and still handle human gates. **If orchestrator is not wired, sling each stage manually below.** Note which path you took in the Config Discipline section of your report.
@@ -236,7 +257,7 @@ gc session list         # refresh as needed
 **Command:**
 
 ```bash
-gc sling planner my-city-c1a2p3
+gc sling planner my-factory-c1a2p3
 gc watch planner          # Ctrl+b d to detach when you've seen it start
 ```
 
@@ -253,15 +274,15 @@ gc watch planner          # Ctrl+b d to detach when you've seen it start
 
 | Symptom | Root cause | Config fix |
 |---------|-----------|-----------|
-| Work package missing Scope Boundary | Planner prompt Output Format is ambiguous | Sharpen `packs/planner/prompts/planner.md` Output Format; require `## Scope Boundary` verbatim; re-sling |
-| Work package uses "improve UX" or "make it faster" language | Quality Gate rule on ambiguous terms isn't being enforced | Add explicit forbidden-words list to `packs/planner/prompts/planner.md` Quality Gate |
+| Work package missing Scope Boundary | Planner prompt Output Format is ambiguous | Sharpen `packs/planner/prompts/planner.md.tmpl` Output Format; require `## Scope Boundary` verbatim; re-sling |
+| Work package uses "improve UX" or "make it faster" language | Quality Gate rule on ambiguous terms isn't being enforced | Add explicit forbidden-words list to `packs/planner/prompts/planner.md.tmpl` Quality Gate |
 | File written to `plan/` or `docs/plans/` instead of `work-packages/` | Output path drift | Make output path literal in the prompt: "Write to `work-packages/<feature-slug>.md` — never anywhere else" |
 | Acceptance criteria are rephrases of bead criteria, not expansions | Planner isn't adding edge cases | Add Quality Gate rule: "Each AC must include a happy-path AND at least one edge case" |
 
 Close the Planner bead when the work package passes its Quality Gate:
 
 ```bash
-bd close my-city-c1a2p3 --comment "Work package: work-packages/order-history.md"
+bd close my-factory-c1a2p3 --comment "Work package: work-packages/order-history.md"
 ```
 
 ### Step 2: Architect (~10 min)
@@ -283,7 +304,7 @@ Read CLAUDE.md for tailored-ADR baselines.
 Produce docs/adr/NNNN-order-history-lookup.md using MADR.
 EOF
 )" \
-  --depends-on my-city-c1a2p3
+  --depends-on my-factory-c1a2p3
 
 gc sling architect <architect-bead-id>
 gc watch architect
@@ -305,7 +326,7 @@ gc watch architect
 | Symptom | Root cause | Config fix |
 |---------|-----------|-----------|
 | ADR considers only 1 option | Architect prompt doesn't force comparison | Add Quality Gate: "You MUST evaluate at least 3 distinct approaches. List the naive approach and explain why rejected" |
-| ADR decides something already covered in tailored ADRs | Architect isn't reading `CLAUDE.md` | Add `CLAUDE.md` to Inputs section of `packs/architect/prompts/architect.md` (see L2 Part 2 Step 4) |
+| ADR decides something already covered in tailored ADRs | Architect isn't reading `CLAUDE.md` | Add `CLAUDE.md` to Inputs section of `packs/architect/prompts/architect.md.tmpl` (see L2 Part 2 Step 4) |
 | No cross-reference appended to work package | Process step 5 missing or unclear | Make it literal in the Process: "Open the work package file and append the ADR path under `## Architectural Decisions`. Create the heading if it doesn't exist" |
 | Consequences lists only positives | Quality Gate isn't requiring risk | Add rule: "Consequences must include at least one line starting with `- Risk:`" |
 
@@ -352,7 +373,7 @@ bd create "Implement: Order history page + lookup endpoint" \
   --description "Implement design/order-history-spec.md. Follow the component tree exactly. All tests from the spec's test plan must pass before marking ready." \
   --depends-on <designer-bead-id>
 
-gc sling coder <coder-bead-id>
+gc sling builder <coder-bead-id>
 gc watch coder
 ```
 
@@ -371,7 +392,7 @@ gc watch coder
 | Symptom | Root cause | Config fix |
 |---------|-----------|-----------|
 | Tests fail on the same pattern repeatedly (e.g., "Cannot read property 'map' of undefined") | This is exactly what W4 feedback loops exist for | Your feedback rule from W4 should detect this and append a "Common Pitfalls" section to `CLAUDE.md`. If it doesn't fire, the rule's detection logic is wrong — fix the rule, not the code |
-| Coder writes to wrong directory (e.g., `components/` instead of `src/components/`) | Coder prompt doesn't reference manifest's Project Structure explicitly | Add to `packs/coder/prompts/coder.md` Process: "Read `docs/PROJECT_MANIFEST.md` Project Structure section and use those paths exclusively" |
+| Coder writes to wrong directory (e.g., `components/` instead of `src/components/`) | Coder prompt doesn't reference manifest's Project Structure explicitly | Add to `packs/builder/prompts/builder.md.tmpl` Process: "Read `docs/PROJECT_MANIFEST.md` Project Structure section and use those paths exclusively" |
 | Coder re-implements something that already exists (e.g., a `formatPhone` util) | Coder isn't scanning existing `src/utils/` | Add to Process: "Before writing any util function, grep `src/utils/` for an existing implementation" |
 | Lint fails on every commit | Coder isn't running lint locally | Add to Quality Gate: "Before marking ready, run `npm run lint` and `npm test` — both must exit 0" |
 | Coder commits secrets or `.env` contents | Guardrail missing | Add hard rule: "Never commit files matching `.env*`, `*.pem`, `credentials*`" |
@@ -484,7 +505,7 @@ Create `factory-runs/capstone-<date>-<feature-slug>.md`. Update it continuously 
 Order history page — customers view past orders by phone number
 
 **Date:** 2026-04-22
-**Bead ID:** my-city-c1a2p3
+**Bead ID:** my-factory-c1a2p3
 **Branch:** feat/order-history
 **Report status:** COMPLETE | PARTIAL | ABANDONED
 
@@ -778,7 +799,7 @@ A "stall" is 10+ minutes of no session activity or a stage producing output that
 
 **Root cause 85% of the time.** The bead description is too thin. You fed the Planner three sentences of feature intent and no acceptance criteria.
 
-**Config fix.** Open the bead description (or the source ticket the bead came from) and tighten it. If the Planner is halting for clarification on every run, add a rule to `packs/planner/prompts/planner.md` Process: "If acceptance criteria are absent from the bead, write your own best-guess AC list and mark the work package as `Status: draft — AC needs human review`." This converts halting into progress-with-a-flag.
+**Config fix.** Open the bead description (or the source ticket the bead came from) and tighten it. If the Planner is halting for clarification on every run, add a rule to `packs/planner/prompts/planner.md.tmpl` Process: "If acceptance criteria are absent from the bead, write your own best-guess AC list and mark the work package as `Status: draft — AC needs human review`." This converts halting into progress-with-a-flag.
 
 ### Stall at Architect
 
@@ -786,7 +807,7 @@ A "stall" is 10+ minutes of no session activity or a stage producing output that
 
 **Root cause.** Quality Gate isn't forcing option count, or Inputs doesn't include `CLAUDE.md`, or no decision threshold tells the Architect when *not* to write an ADR.
 
-**Config fix.** Add to `packs/architect/prompts/architect.md`: "Only write an ADR if the decision affects more than one file OR has long-term consequences OR contradicts a tailored ADR. For cosmetic or single-file changes, write a one-line note in the work package and close the bead." Then the minimum-3-options rule for cases that do pass this threshold.
+**Config fix.** Add to `packs/architect/prompts/architect.md.tmpl`: "Only write an ADR if the decision affects more than one file OR has long-term consequences OR contradicts a tailored ADR. For cosmetic or single-file changes, write a one-line note in the work package and close the bead." Then the minimum-3-options rule for cases that do pass this threshold.
 
 ### Stall at Designer
 
@@ -965,23 +986,24 @@ includes = [
   "../planner",
   "../architect",
   "../designer",
-  "../coder",
+  "../builder",
   "../reviewer",
-  "../deployer",
+  "../release-gate",
 ]
 ```
 
 After the capstone, build the equivalent for your own factory:
 
 ```bash
-mkdir -p packs/my-factory
-# Write packs/my-factory/pack.toml using the shape above
+mkdir -p packs/team-factory
+# Write packs/team-factory/pack.toml using the shape above,
+# listing the six leaf packs under includes.
 ```
 
-Then the next teammate bootstraps with:
+Then the next teammate bootstraps with a single include in their `my-factory/city.toml`:
 
-```bash
-gc rig add ~/their-repo --include /path/to/packs/my-factory
+```toml
+includes = ["../packs/team-factory"]
 ```
 
 One command instead of six. This is how your factory becomes shareable.
@@ -994,7 +1016,7 @@ Every command you might use during the capstone, grouped by purpose.
 
 ```bash
 # ----- Pre-run setup -----
-cd ~/my-city
+cd my-factory
 bd create "Order history page — customers view past orders by phone number" \
   --label "capstone-feature" \
   --description "$(cat <<'EOF'
@@ -1007,12 +1029,12 @@ EOF
 gc orchestrate --pipeline feature-pipeline --bead <bead-id>
 
 # ----- Manual mode (if running stage-by-stage) -----
-gc sling planner      <bead-id>
-gc sling architect    <architect-bead-id>
-gc sling designer     <designer-bead-id>
-gc sling coder        <coder-bead-id>
-gc sling reviewer     <reviewer-bead-id>
-gc sling devops       <deployer-bead-id>
+gc sling planner       <bead-id>
+gc sling architect     <architect-bead-id>
+gc sling designer      <designer-bead-id>
+gc sling builder       <builder-bead-id>
+gc sling reviewer      <reviewer-bead-id>
+gc sling release-gate  <release-gate-bead-id>
 
 # ----- Each sling pairs with one of these to observe -----
 gc watch <agent>               # stream that agent's session
@@ -1066,12 +1088,12 @@ gc events --dump --since 2h > factory-runs/capstone-<date>-events.log
 
 | Stage | Agent | Primary Input | Output Artifact | Quality Gate Source |
 |-------|-------|---------------|------------------|--------------------|
-| 1 | Planner | Bead description + manifest | `work-packages/<slug>.md` | `packs/planner/prompts/planner.md` |
-| 2 | Architect | Work package + manifest + `CLAUDE.md` + existing ADRs | `docs/adr/NNNN-<slug>.md` | `packs/architect/prompts/architect.md` |
-| 3 | Designer | Work package + ADR + manifest | `design/<slug>-spec.md` | `packs/designer/prompts/designer.md` |
-| 4 | Coder | Design spec + manifest + `CLAUDE.md` | Feature branch under `src/` + tests | `packs/coder/prompts/coder.md` + manifest build gates |
-| 5 | Reviewer | Code diff + spec + manifest Review Standards + `CLAUDE.md` | `review-reports/<slug>-review.md` + PR comment | `packs/reviewer/prompts/reviewer.md` + manifest |
-| 6 | Deployer | Review report + manifest Release Criteria | `release-gates/<slug>-gate.md` + (if passes) deploy | `packs/deployer/prompts/deployer.md` + manifest |
+| 1 | Planner | Bead description + manifest | `work-packages/<slug>.md` | `packs/planner/prompts/planner.md.tmpl` |
+| 2 | Architect | Work package + manifest + `CLAUDE.md` + existing ADRs | `docs/adr/NNNN-<slug>.md` | `packs/architect/prompts/architect.md.tmpl` |
+| 3 | Designer | Work package + ADR + manifest | `design/<slug>-spec.md` | `packs/designer/prompts/designer.md.tmpl` |
+| 4 | Coder | Design spec + manifest + `CLAUDE.md` | Feature branch under `src/` + tests | `packs/builder/prompts/builder.md.tmpl` + manifest build gates |
+| 5 | Reviewer | Code diff + spec + manifest Review Standards + `CLAUDE.md` | `review-reports/<slug>-review.md` + PR comment | `packs/reviewer/prompts/reviewer.md.tmpl` + manifest |
+| 6 | Deployer | Review report + manifest Release Criteria | `release-gates/<slug>-gate.md` + (if passes) deploy | `packs/release-gate/prompts/release-gate.md.tmpl` + manifest |
 
 ### Capstone deliverables
 
@@ -1108,12 +1130,12 @@ One-line fixes for the top issues you're likely to hit during the run. These are
 | Symptom | One-line fix |
 |---------|-------------|
 | `gc sling` "agent not found" | `gc rig list`; re-run `gc rig add --include /abs/path/to/pack`; `gc restart` |
-| Planner produces output with vague language | Add forbidden-words list to `packs/planner/prompts/planner.md` Quality Gate; re-sling |
-| Architect writes 1-option ADR | Add "minimum 3 options" rule to `packs/architect/prompts/architect.md`; re-sling |
+| Planner produces output with vague language | Add forbidden-words list to `packs/planner/prompts/planner.md.tmpl` Quality Gate; re-sling |
+| Architect writes 1-option ADR | Add "minimum 3 options" rule to `packs/architect/prompts/architect.md.tmpl`; re-sling |
 | Designer spec has no types | Convert Output Format to literal template with `### Types` required; re-sling |
-| Coder uses wrong import paths | Add manifest-declared-paths-only rule to `packs/coder/prompts/coder.md`; re-sling |
-| Reviewer over-approves | Add severity-threshold-for-verdict rule to `packs/reviewer/prompts/reviewer.md`; re-sling |
-| Deployer marks gates PASS without evidence | Add "show command + exit code per gate" rule to `packs/deployer/prompts/deployer.md`; re-sling |
+| Coder uses wrong import paths | Add manifest-declared-paths-only rule to `packs/builder/prompts/builder.md.tmpl`; re-sling |
+| Reviewer over-approves | Add severity-threshold-for-verdict rule to `packs/reviewer/prompts/reviewer.md.tmpl`; re-sling |
+| Deployer marks gates PASS without evidence | Add "show command + exit code per gate" rule to `packs/release-gate/prompts/release-gate.md.tmpl`; re-sling |
 | Cross-references missing between artifacts | Add explicit Process step to downstream prompt: "Open upstream artifact and append back-reference"; re-sling downstream |
 | Orchestrator doesn't advance | Check `bd list --status needs-approval`; check previous bead closed; check orchestrator.yaml agent names |
 | Feedback rule not firing | Check detection regex against actual log lines with `bd event list --since 1h` |

@@ -16,17 +16,20 @@ You are a workshop facilitator for the Software Factory Intensive.
 4. Verify the step's output before moving to the next step
 5. Check the session's exit criteria (listed in the README) when all steps are complete
 
-**Read `docs/PROJECT_MANIFEST.md` for the participant's project context.** Tailor your guidance to their specific tech stack, conventions, and constraints.
+**Read `my-factory/PROJECT_MANIFEST.md` for the participant's project context.** Tailor your guidance to their specific tech stack, conventions, and constraints.
 
 The rest of this file provides supplementary guidance — discovery questions, project-type suggestions, and config discipline checkpoints to use as you walk through the README steps.
 
 ## Setup Steps
 
 ```bash
-# Add reviewer and deployer packs
-cd ~/city
-gc rig add ~/path/to/project --include packs/reviewer
-gc rig add ~/path/to/project --include packs/deployer
+# Add the Reviewer + Release-Gate (Deployer) packs to
+# ../my-factory/city.toml:
+#   includes = [..., "../packs/reviewer", "../packs/release-gate"]
+# Shipped packs as-is, or copies under
+# ../activities/labs/L4/packs/<agent>/ if customising.
+cd my-factory
+gc service restart
 
 gc status  # Should show all 6 agents
 ```
@@ -46,13 +49,13 @@ gc status  # Should show all 6 agents
 4. Identify the highest-severity finding
 
 ### Fix Via Config (Critical Step)
-1. The finding must be fixed by updating `packs/coder/prompts/coder.md` — NOT by manually editing code
-2. Re-run the coder: `gc sling <rig>/coder <bead-id>`
+1. The finding must be fixed by updating `packs/builder/prompts/builder.md.tmpl` — NOT by manually editing code
+2. Re-run the builder: `gc sling <rig>/builder <bead-id>`
 3. Re-run the reviewer to verify the fix
 4. This loop is the core discipline: **code quality improves by improving agent config, not by human intervention**
 
-### Deployer Run
-1. Sling to the deployer: `gc sling <rig>/deployer <bead-id>`
+### Release-Gate (Deployer) Run
+1. Sling to the release-gate: `gc sling <rig>/release-gate <bead-id>`
 2. Verify the gate checklist at `release-gates/<slug>-gate.md`
 3. Every criterion should have PASS/FAIL with evidence, not opinions
 
@@ -65,11 +68,11 @@ gc status  # Should show all 6 agents
 
 ## Config Discipline Check
 
-This lab has the strictest config discipline requirement: manual code fixes are not acceptable. If the participant typed code into the editor to fix a reviewer finding, they must undo it, update the coder prompt instead, and re-run.
+This lab has the strictest config discipline requirement: manual code fixes are not acceptable. If the participant typed code into the editor to fix a reviewer finding, they must undo it, update the builder prompt instead, and re-run.
 
 ## Exit Criteria
 
 - `review-reports/<slug>-review.md` committed with spec compliance + style + security findings
-- At least one finding resolved by updating coder prompt (not manual edit)
+- At least one finding resolved by updating the builder prompt (not manual edit)
 - `release-gates/<slug>-gate.md` committed with binary PASS/FAIL evidence for every criterion
-- `orchestrator.yaml` drives both reviewer and deployer (not run ad-hoc)
+- `orchestrator.yaml` drives both reviewer and release-gate (not run ad-hoc)

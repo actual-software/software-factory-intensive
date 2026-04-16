@@ -1,0 +1,39 @@
+# Gas City workspace config for the Software Factory Intensive.
+#
+# This is your "top-level city.toml" — the one you update as you progress
+# through the curriculum. Each session adds or replaces one or more pack
+# includes here. See README.md in this folder for the quickstart.
+#
+# Pack and rig paths are interpreted relative to this file's directory
+# (my-factory/). The shipped packs live at ../packs/ and your per-session
+# customisations live at ../activities/<session>/packs/.
+
+[workspace]
+name = "my-factory"
+provider = "claude"
+# Uncomment and adjust if `claude` is not on your PATH:
+# start_command = "<user_home>/.nvm/versions/node/v22.19.0/bin/claude"
+
+# No pack includes yet. Sessions add them here — see
+# curriculum/<session>/README.md and activities/<session>/README.md
+# for the exact lines to paste. Each session is independent and additive:
+# skipping a session means using the shipped pack from ../packs/<name>
+# as-is (no customisation), not a broken pipeline.
+includes = []
+
+# [[rigs]]
+# Register your project repo as a rig. Add this block after the rig step
+# in my-factory/README.md, replacing `path` with the actual path to your
+# project. Pack includes listed here apply only to that rig.
+# name = "your-project"
+# path = "../../your-project"
+# includes = []
+
+[session]
+startup_timeout = "3m"
+
+[daemon]
+patrol_interval = "30s"
+max_restarts = 5
+restart_window = "1h"
+shutdown_timeout = "5s"

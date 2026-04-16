@@ -1,21 +1,20 @@
-# Actual Software Factory — runnable sample city.
+# Software Factory — runnable sample city for the Gas City agent packs.
 #
-# Brings up the 8 Agent Operation packs from examples/actual/ as a
-# self-contained Gas City workspace. Maps to the Actual AI software
-# factory: https://www.actual.ai/softwarefactory
+# This is a reference `city.toml` showing how to wire all 8 shipped
+# packs into a single workspace. For the curriculum, participants use
+# `../my-factory/city.toml` instead and include packs incrementally as
+# they progress through the labs.
 #
-# To use:
-#   gc rig add /path/to/your/project
-#   gc start examples/actual/
-#
-# Each operation is a rig-scoped agent — the factory only comes to
-# life once you have at least one rig registered.
+# To use this file as-is (outside the curriculum):
+#   cp packs/city.toml /path/to/your-workspace/city.toml
+#   cd /path/to/your-workspace
+#   gc rig add /path/to/your-project
+#   gc start
 
 [workspace]
-name = "20260415-gc-factory-v1"
+name = "software-factory-sample"
 provider = "claude"
-start_command = "<user_home>/.nvm/versions/node/v22.19.0/bin/claude"
-includes = ["packs/actual/all"]
+includes = ["./all"]
 
 [daemon]
 patrol_interval = "30s"
@@ -23,8 +22,7 @@ max_restarts = 5
 restart_window = "1h"
 shutdown_timeout = "5s"
 
-#
 # [[rigs]]
-# name = "myproject"
-# path = "/path/to/your/project"
-# includes = ["packs/actual/all"]
+# name = "my-project"
+# path = "/path/to/your-project"
+# includes = ["./all"]

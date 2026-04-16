@@ -10,6 +10,19 @@
 
 ---
 
+## Session workspace note
+
+This README was first written when the shipped pack was named `coder`. The current repository renames it to **`builder`** (same role, same outputs) — wherever this file says *Coder*, the corresponding pack lives at `../../../packs/builder/` and the prompt template is `packs/builder/prompts/builder.md.tmpl`. Commands `gc sling builder <bead>` and `gc session peek <rig>/builder` replace their `coder` equivalents.
+
+**Where your work goes this session:**
+* Session deliverables → `../../../activities/labs/L3/` (the activity folder for L3)
+* Customised pack copies (if you deviate from shipped defaults) → `../../../activities/labs/L3/packs/<agent>/`
+* Wire packs into `../../../my-factory/city.toml` at the end of the session — by adding `../packs/designer` and `../packs/builder` to `includes`, or the `../activities/labs/L3/packs/<agent>` path if you customised. See [`activities/labs/L3/README.md`](../../../activities/labs/L3/README.md) for exact lines.
+
+If you skipped an earlier lab or a prompt edit breaks the pack, point `includes` at the shipped `../packs/<name>` path and `gc service restart` — the shipped pack always passes `gc doctor`.
+
+---
+
 ## Architecture Diagram
 
 ```
@@ -44,7 +57,7 @@
                     │    • docs/adr/NNNN-<slug>.md│
                     │    • docs/PROJECT_MANIFEST  │
                     │    • CLAUDE.md (tailored)   │
-                    │    • packs/coder/prompts    │
+                    │    • packs/builder/prompts    │
                     │                            │
                     │  Produces:                  │
                     │    src/<Location>/*.ts(x)   │───► Implementation files,
@@ -75,12 +88,12 @@ Before starting this lab, verify each of these:
 | Command | What it does | Used in step |
 |---------|--------------|--------------|
 | `gc rig add <repo> --include packs/designer` | Register the Designer pack | Part 1 |
-| `gc rig add <repo> --include packs/coder` | Register the Coder pack | Part 1 |
+| `gc rig add <repo> --include packs/builder` | Register the Coder pack | Part 1 |
 | `gc restart` | Reload city configuration after pack additions | Part 1, Part 2 |
 | `gc status` | Confirm which agents are live | Part 1, Part 2 |
 | `bd create --depends-on <bead>` | Chain the Designer bead after L2 outputs | Part 3 |
 | `gc sling designer <bead>` | Dispatch the Designer | Part 3 |
-| `gc sling coder <bead>` | Dispatch the Coder (longer-running) | Part 4 |
+| `gc sling builder <bead>` | Dispatch the Coder (longer-running) | Part 4 |
 | `gc watch <agent>` | Attach to the agent's live tmux session | Parts 3, 4 |
 | `gc events --follow` | Stream all city events from another terminal | Part 4 |
 | `bd close <bead>` | Mark a bead done after its artifact is committed | Parts 3, 4 |
@@ -132,7 +145,7 @@ max_active_sessions = 1
 
 Open this file and read it end-to-end — it's ~75 lines:
 
-[`packs/designer/prompts/designer.md`](../../../packs/designer/prompts/designer.md)
+[`packs/designer/prompts/designer.md.tmpl`](../../../packs/designer/prompts/designer.md.tmpl)
 
 You should see the familiar six-section structure:
 
@@ -174,7 +187,7 @@ Pay attention to one line in the Output Format section:
 
 ### Step 3: Open the Coder Pack Metadata
 
-[`packs/coder/pack.toml`](../../../packs/coder/pack.toml)
+[`packs/builder/pack.toml`](../../../packs/builder/pack.toml)
 
 ```toml
 [pack]
@@ -199,7 +212,7 @@ max_active_sessions = 3
 
 Open this file and read it end-to-end — it's ~50 lines:
 
-[`packs/coder/prompts/coder.md`](../../../packs/coder/prompts/coder.md)
+[`packs/builder/prompts/builder.md.tmpl`](../../../packs/builder/prompts/builder.md.tmpl)
 
 Same six-section structure, with one extra section (`Rules`) unique to the Coder:
 
@@ -240,7 +253,7 @@ You're done reading. Now install.
 ### Step 1: Add the Designer Pack to Your Rig
 
 ```bash
-cd ~/my-city
+cd my-factory
 gc rig add ~/path/to/your-repo \
   --include /path/to/software-factory-intensive/packs/designer
 ```
@@ -293,7 +306,7 @@ If `designer` doesn't appear, run `gc rig list` to confirm the pack is registere
 
 The shipped prompt is generic. Two edits make it project-specific:
 
-**a) Open `packs/designer/prompts/designer.md` in your editor.**
+**a) Open `packs/designer/prompts/designer.md.tmpl` in your editor.**
 
 **b) Update the Output Format's Location example** with your project's src layout. For a React/TypeScript feature-folder layout (Fired Up Pizza's convention per `docs/PROJECT_MANIFEST.md`):
 
@@ -336,7 +349,7 @@ git add -A
 git commit -m "chore(designer): customize designer prompt for project conventions"
 ```
 
-**Why commit now?** Same reason as L2: the diff between the shipped prompt and your edited version is your config-discipline evidence. If the Designer drifts later, `git log packs/designer/prompts/designer.md` tells you exactly what changed and when.
+**Why commit now?** Same reason as L2: the diff between the shipped prompt and your edited version is your config-discipline evidence. If the Designer drifts later, `git log packs/designer/prompts/designer.md.tmpl` tells you exactly what changed and when.
 
 ---
 
@@ -345,9 +358,9 @@ git commit -m "chore(designer): customize designer prompt for project convention
 ### Step 1: Add the Coder Pack to Your Rig
 
 ```bash
-cd ~/my-city
+cd my-factory
 gc rig add ~/path/to/your-repo \
-  --include /path/to/software-factory-intensive/packs/coder
+  --include /path/to/software-factory-intensive/packs/builder
 ```
 
 You should see:
@@ -393,7 +406,7 @@ All five agents (four from the factory pipeline plus the `dev-agent` from L1).
 
 ### Step 4: Customize the Coder Prompt for Your Project
 
-Open `packs/coder/prompts/coder.md` and make two edits:
+Open `packs/builder/prompts/builder.md.tmpl` and make two edits:
 
 **a) Add the project's quality-gate commands to the Quality Gate section.** The shipped prompt says "Code passes lint (`npm run lint` or equivalent)." Replace with exact commands from the project manifest. For a React/TypeScript project:
 
@@ -450,7 +463,7 @@ The Designer's inputs are the work package and ADR from L2. You'll chain a new b
 ### Step 1: Create the Designer Bead
 
 ```bash
-cd ~/my-city
+cd my-factory
 bd create "Design: Loyalty Points Badge Component" \
   --description "$(cat <<'EOF'
 Produce a component spec for the Loyalty Points Badge — the first user-facing
@@ -472,15 +485,15 @@ Requirements:
 Output: design/loyalty-points-badge-spec.md
 EOF
 )" \
-  --depends-on my-city-d4e5f6
+  --depends-on my-factory-d4e5f6
 ```
 
-Replace `my-city-d4e5f6` with your L2 Architect bead ID (from `bd list`).
+Replace `my-factory-d4e5f6` with your L2 Architect bead ID (from `bd list`).
 
 You should see:
 
 ```
-Created bead: my-city-design123
+Created bead: my-factory-design123
 ```
 
 Note this bead ID — you'll sling it next.
@@ -490,17 +503,17 @@ Note this bead ID — you'll sling it next.
 ### Step 2: Sling the Bead to the Designer
 
 ```bash
-gc sling designer my-city-design123
+gc sling designer my-factory-design123
 ```
 
 You should see:
 
 ```
-Slinging my-city-design123 → designer
+Slinging my-factory-design123 → designer
 Session started: designer-design123 (tmux)
 ```
 
-**What's happening here:** Gas City started a tmux session, launched Claude Code inside your repo, loaded `packs/designer/prompts/designer.md` as the system prompt, and handed the bead's description as the task. The Designer is now autonomous.
+**What's happening here:** Gas City started a tmux session, launched Claude Code inside your repo, loaded `packs/designer/prompts/designer.md.tmpl` as the system prompt, and handed the bead's description as the task. The Designer is now autonomous.
 
 ### Step 3: Watch the Designer Work
 
@@ -521,7 +534,7 @@ Press `Ctrl+b d` to detach from tmux; the agent continues. Monitor progress from
 ```bash
 gc events --follow            # stream all city events
 gc status                     # designer state: working → idle
-bd show my-city-design123     # bead status
+bd show my-factory-design123     # bead status
 ```
 
 Typical runtime: 2–4 minutes.
@@ -593,7 +606,7 @@ never computes balance client-side.
 
 ### Step 5: Check the Spec Against the Quality Gate
 
-Open `packs/designer/prompts/designer.md` and walk the Quality Gate rules:
+Open `packs/designer/prompts/designer.md.tmpl` and walk the Quality Gate rules:
 
 | Quality Gate Rule | Pass? | Evidence |
 |-------------------|-------|----------|
@@ -605,7 +618,7 @@ Open `packs/designer/prompts/designer.md` and walk the Quality Gate rules:
 **If any rule fails:**
 
 1. **Do NOT edit the spec file directly.** That breaks config discipline.
-2. Open `packs/designer/prompts/designer.md` and add a more specific rule. For example, if the Location is too vague:
+2. Open `packs/designer/prompts/designer.md.tmpl` and add a more specific rule. For example, if the Location is too vague:
 
 ```markdown
 ## Quality Gate
@@ -619,7 +632,7 @@ Open `packs/designer/prompts/designer.md` and walk the Quality Gate rules:
 
 ```bash
 rm design/loyalty-points-badge-spec.md
-gc sling designer my-city-design123
+gc sling designer my-factory-design123
 gc watch designer
 ```
 
@@ -630,7 +643,7 @@ gc watch designer
 ### Step 6: Close the Designer Bead
 
 ```bash
-bd close my-city-design123 --comment "Component spec committed: design/loyalty-points-badge-spec.md"
+bd close my-factory-design123 --comment "Component spec committed: design/loyalty-points-badge-spec.md"
 ```
 
 ---
@@ -642,7 +655,7 @@ The Coder's inputs are the spec you just produced plus the original work package
 ### Step 1: Create the Coder Bead
 
 ```bash
-cd ~/my-city
+cd my-factory
 bd create "Implement: Loyalty Points Badge Component" \
   --description "$(cat <<'EOF'
 Implement the Loyalty Points Badge component per the design spec.
@@ -666,25 +679,25 @@ Commit on the existing feature branch. Use conventional-commit messages
 per the tailored ADR baselines.
 EOF
 )" \
-  --depends-on my-city-design123
+  --depends-on my-factory-design123
 ```
 
 You should see:
 
 ```
-Created bead: my-city-impl456
+Created bead: my-factory-impl456
 ```
 
 ### Step 2: Sling the Bead to the Coder
 
 ```bash
-gc sling coder my-city-impl456
+gc sling builder my-factory-impl456
 ```
 
 You should see:
 
 ```
-Slinging my-city-impl456 → coder
+Slinging my-factory-impl456 → coder
 Session started: coder-impl456 (tmux)
 ```
 
@@ -763,7 +776,7 @@ All three should exit zero. If any fails, the Coder's commit was premature — m
 Once the quality gates pass:
 
 ```bash
-bd close my-city-impl456 --comment "Implementation committed on feature branch; tests pass"
+bd close my-factory-impl456 --comment "Implementation committed on feature branch; tests pass"
 ```
 
 ---
@@ -792,7 +805,7 @@ The Coder wrote `import { describe, it, expect } from 'jest';` but the project's
 - Tell the tmux session "hey, this project uses vitest, fix it"
 - Re-sling with a longer bead description
 
-**What to do:** Update `packs/coder/prompts/coder.md` so the *next* feature doesn't hit this problem. Add to the Process section:
+**What to do:** Update `packs/builder/prompts/builder.md.tmpl` so the *next* feature doesn't hit this problem. Add to the Process section:
 
 ```markdown
 ## Process
@@ -805,11 +818,11 @@ The Coder wrote `import { describe, it, expect } from 'jest';` but the project's
 Then:
 
 ```bash
-git add packs/coder/prompts/coder.md
+git add packs/builder/prompts/builder.md.tmpl
 git commit -m "chore(coder): require explicit test-framework detection"
 
 rm -r src/features/loyalty-points/
-gc sling coder my-city-impl456
+gc sling builder my-factory-impl456
 gc watch coder
 ```
 
@@ -821,7 +834,7 @@ gc watch coder
 
 **What NOT to do:** Move the files manually with `git mv`.
 
-**What to do:** Update `packs/coder/prompts/coder.md` Rules section:
+**What to do:** Update `packs/builder/prompts/builder.md.tmpl` Rules section:
 
 ```markdown
 ## Rules
@@ -839,20 +852,20 @@ gc watch coder
 Then:
 
 ```bash
-git add packs/coder/prompts/coder.md
+git add packs/builder/prompts/builder.md.tmpl
 git commit -m "chore(coder): require literal adherence to spec Location paths"
 
 # Back out the wrong-location commit
 git reset --hard HEAD~1    # only if the Coder committed on a feature branch
 # OR: if the wrong files are unstaged, just `rm` them
 
-gc sling coder my-city-impl456
+gc sling builder my-factory-impl456
 gc watch coder
 ```
 
 ### Scenario 3 (bonus): Coder skips the empty-state edge case
 
-If the Coder implemented loading and error but silently dropped the empty state, the fix is in the Designer prompt, not the Coder prompt. The Designer's spec should have been explicit enough that a skipped state is a flag the Coder sees. Update `packs/designer/prompts/designer.md` Output Format:
+If the Coder implemented loading and error but silently dropped the empty state, the fix is in the Designer prompt, not the Coder prompt. The Designer's spec should have been explicit enough that a skipped state is a flag the Coder sees. Update `packs/designer/prompts/designer.md.tmpl` Output Format:
 
 ```markdown
 ## Edge Cases
@@ -893,7 +906,7 @@ Making manifest-reading explicit in the Coder prompt forces the agent to pull in
 
 ## Inline Insight: Config Changes Compound Across Agents
 
-When you fix a Coder issue in `packs/coder/prompts/coder.md`, that fix applies to every future feature the Coder touches — including ones no one has thought of yet. This is the compounding return on config discipline: every prompt edit pays down a class of failures, not a single instance. A chat-based "just fix it this time" correction pays down *only* the single instance, and the next bead re-encounters the same failure. Over a factory lifetime (dozens to hundreds of features), the gap between these two strategies is enormous. This is why the Quality Bar below includes "Zero manual code edits" — it's the single most leveraged habit in the whole lab.
+When you fix a Coder issue in `packs/builder/prompts/builder.md.tmpl`, that fix applies to every future feature the Coder touches — including ones no one has thought of yet. This is the compounding return on config discipline: every prompt edit pays down a class of failures, not a single instance. A chat-based "just fix it this time" correction pays down *only* the single instance, and the next bead re-encounters the same failure. Over a factory lifetime (dozens to hundreds of features), the gap between these two strategies is enormous. This is why the Quality Bar below includes "Zero manual code edits" — it's the single most leveraged habit in the whole lab.
 
 ---
 
@@ -901,19 +914,19 @@ When you fix a Coder issue in `packs/coder/prompts/coder.md`, that fix applies t
 
 ### Issue 1: Designer produces a spec without a Location path
 **Symptom:** Spec has props, state, layout — but the Location section is empty or says `TBD`.
-**Fix:** Add to `packs/designer/prompts/designer.md` Quality Gate: "Location must name at least one concrete file path ending in a valid extension (`.tsx`, `.ts`, `.py`, `.go`). Never leave it as a placeholder." Re-sling.
+**Fix:** Add to `packs/designer/prompts/designer.md.tmpl` Quality Gate: "Location must name at least one concrete file path ending in a valid extension (`.tsx`, `.ts`, `.py`, `.go`). Never leave it as a placeholder." Re-sling.
 
 ### Issue 2: Designer produces a spec with untyped props
 **Symptom:** Props table has `Name` and `Description` filled in but `Type` column is blank or says "any".
-**Fix:** Add to `packs/designer/prompts/designer.md` Quality Gate: "Every row in the Props and State tables must have a concrete type. Prohibited values in the Type column: `any`, `object`, `unknown`, empty string." Re-sling.
+**Fix:** Add to `packs/designer/prompts/designer.md.tmpl` Quality Gate: "Every row in the Props and State tables must have a concrete type. Prohibited values in the Type column: `any`, `object`, `unknown`, empty string." Re-sling.
 
 ### Issue 3: Coder skips tests
 **Symptom:** Implementation files exist, but no test file — or test file has zero `it(...)` blocks.
-**Fix:** Add to `packs/coder/prompts/coder.md` Process section: "You may not commit until `npm test` passes with at least 2 passing test cases that reference the work package's Story <N> acceptance criteria in their test descriptions." Re-sling.
+**Fix:** Add to `packs/builder/prompts/builder.md.tmpl` Process section: "You may not commit until `npm test` passes with at least 2 passing test cases that reference the work package's Story <N> acceptance criteria in their test descriptions." Re-sling.
 
 ### Issue 4: Coder writes code but doesn't commit
 **Symptom:** `git status` shows uncommitted changes after the Coder session ends.
-**Fix:** Add to `packs/coder/prompts/coder.md` Process section: "After all quality gates pass, run `git add` and `git commit` before marking the bead ready. An uncommitted implementation is equivalent to no implementation." Re-sling.
+**Fix:** Add to `packs/builder/prompts/builder.md.tmpl` Process section: "After all quality gates pass, run `git add` and `git commit` before marking the bead ready. An uncommitted implementation is equivalent to no implementation." Re-sling.
 
 ### Issue 5: Coder writes files at the wrong location
 **Symptom:** Files exist but under `src/components/` instead of `src/features/<slug>/`.
@@ -925,11 +938,11 @@ When you fix a Coder issue in `packs/coder/prompts/coder.md`, that fix applies t
 
 ### Issue 7: Coder violates a tailored ADR from CLAUDE.md
 **Symptom:** The tailored ADR says "use parameterized queries" and the Coder writes string-concatenation SQL.
-**Fix:** Add to `packs/coder/prompts/coder.md` Process section: "Before writing code, read the Tailored ADRs section of `CLAUDE.md`. Every decision in that section is binding unless the Designer's spec explicitly overrides it." Re-sling.
+**Fix:** Add to `packs/builder/prompts/builder.md.tmpl` Process section: "Before writing code, read the Tailored ADRs section of `CLAUDE.md`. Every decision in that section is binding unless the Designer's spec explicitly overrides it." Re-sling.
 
 ### Issue 8: Coder stalls on `npm install`
 **Symptom:** The tmux session shows `npm install` running for 30+ minutes with no progress.
-**Fix:** This is usually a network or registry issue, not a prompt issue. In another terminal: `cd ~/path/to/your-repo && npm install` manually, then `gc sling coder my-city-impl456` again — the Coder will skip install if `node_modules/` is already present.
+**Fix:** This is usually a network or registry issue, not a prompt issue. In another terminal: `cd ~/path/to/your-repo && npm install` manually, then `gc sling builder my-factory-impl456` again — the Coder will skip install if `node_modules/` is already present.
 
 ### Issue 9: `gc status` doesn't show `designer` or `coder` after restart
 **Symptom:** Expected 5 agents, only see 3.
@@ -937,15 +950,15 @@ When you fix a Coder issue in `packs/coder/prompts/coder.md`, that fix applies t
 
 ### Issue 10: Coder produces code that passes tests but violates the spec
 **Symptom:** `npm test` is green but the component has different prop names than the spec declared.
-**Fix:** This is the most common failure mode in L3. Add to `packs/coder/prompts/coder.md` Process section: "Before writing any source file, copy the Props table from the spec into a comment at the top of the component file. Your implementation must match those names and types exactly." Re-sling.
+**Fix:** This is the most common failure mode in L3. Add to `packs/builder/prompts/builder.md.tmpl` Process section: "Before writing any source file, copy the Props table from the spec into a comment at the top of the component file. Your implementation must match those names and types exactly." Re-sling.
 
 ### Issue 11: Coder modifies files outside the feature folder
 **Symptom:** The commit diff includes edits to `src/api/orders.ts` or `src/App.tsx` that you didn't expect.
-**Fix:** Add to `packs/coder/prompts/coder.md` Rules: "You may read any file in the repo. You may write only files inside the Location path from the spec. If you believe an external file must change for the feature to work, stop, append a `## Open Follow-ups` section to the spec noting what needs to change, and mark the bead blocked." Re-sling.
+**Fix:** Add to `packs/builder/prompts/builder.md.tmpl` Rules: "You may read any file in the repo. You may write only files inside the Location path from the spec. If you believe an external file must change for the feature to work, stop, append a `## Open Follow-ups` section to the spec noting what needs to change, and mark the bead blocked." Re-sling.
 
 ### Issue 12: The spec and the work package disagree on a requirement
 **Symptom:** The work package says "earn 1 point per dollar spent" and the spec says "earn 1 point per $10 spent."
-**Fix:** This is a Designer-side bug that the Coder inherited. Delete the spec, update `packs/designer/prompts/designer.md` Process: "Before writing the spec, list every numeric value and quantifier from the work package's Goal and User Stories. Every one must appear verbatim in the spec." Re-sling the Designer, then the Coder.
+**Fix:** This is a Designer-side bug that the Coder inherited. Delete the spec, update `packs/designer/prompts/designer.md.tmpl` Process: "Before writing the spec, list every numeric value and quantifier from the work package's Goal and User Stories. Every one must appear verbatim in the spec." Re-sling the Designer, then the Coder.
 
 ---
 
@@ -970,7 +983,7 @@ Before leaving this lab, verify all of these:
 - [ ] Implementation code is committed at the spec's Location path
 - [ ] At least 2 test cases from the work package are passing
 - [ ] `npm run typecheck`, `npm run lint`, and `npm test` all pass (or equivalent for your stack)
-- [ ] Zero manual code edits — all fixes were prompt updates to `packs/coder/prompts/coder.md` or `packs/designer/prompts/designer.md` followed by re-slings
+- [ ] Zero manual code edits — all fixes were prompt updates to `packs/builder/prompts/builder.md.tmpl` or `packs/designer/prompts/designer.md.tmpl` followed by re-slings
 - [ ] Both beads (Designer, Coder) are closed
 - [ ] All changes pushed to remote
 
@@ -998,45 +1011,45 @@ Every command you ran during this lab, in order:
 # PART 0 — Read the packs (no commands — just read the files)
 
 # PART 1 — Install Designer
-cd ~/my-city
+cd my-factory
 gc rig add ~/path/to/your-repo --include /path/to/packs/designer
-# (edit ~/my-city/city.toml — ensure [[agent]] block for designer exists)
+# (edit my-factory/city.toml — ensure [[agent]] block for designer exists)
 gc restart
 gc status
-# (edit packs/designer/prompts/designer.md — project-specific Quality Gate rule)
+# (edit packs/designer/prompts/designer.md.tmpl — project-specific Quality Gate rule)
 cd ~/path/to/your-repo
 git add -A && git commit -m "chore(designer): customize designer prompt"
 
 # PART 2 — Install Coder
-cd ~/my-city
-gc rig add ~/path/to/your-repo --include /path/to/packs/coder
-# (edit ~/my-city/city.toml — ensure [[agent]] block for coder exists)
+cd my-factory
+gc rig add ~/path/to/your-repo --include /path/to/packs/builder
+# (edit my-factory/city.toml — ensure [[agent]] block for coder exists)
 gc restart
 gc status
-# (edit packs/coder/prompts/coder.md — project-specific quality gates + manifest reading)
+# (edit packs/builder/prompts/builder.md.tmpl — project-specific quality gates + manifest reading)
 cd ~/path/to/your-repo
 git add -A && git commit -m "chore(coder): customize coder prompt"
 
 # PART 3 — Run the Designer
-cd ~/my-city
+cd my-factory
 bd create "Design: Loyalty Points Badge Component" \
-  --description "..." --depends-on my-city-d4e5f6
-gc sling designer my-city-design123
+  --description "..." --depends-on my-factory-d4e5f6
+gc sling designer my-factory-design123
 gc watch designer                                # Ctrl+b d to detach
 cat design/loyalty-points-badge-spec.md          # review output
 # (if quality gate fails: edit prompt, rm spec, re-sling)
-bd close my-city-design123 --comment "Component spec committed"
+bd close my-factory-design123 --comment "Component spec committed"
 
 # PART 4 — Run the Coder
 bd create "Implement: Loyalty Points Badge Component" \
-  --description "..." --depends-on my-city-design123
-gc sling coder my-city-impl456
+  --description "..." --depends-on my-factory-design123
+gc sling builder my-factory-impl456
 gc watch coder                                   # longer run — 10–25 min
 cd ~/path/to/your-repo
 git log --oneline | head -10                     # verify commits
 npm run typecheck && npm run lint && npm test    # quality gates
 # (if quality gate fails: edit prompt, reset/rm files, re-sling)
-bd close my-city-impl456 --comment "Implementation committed; tests pass"
+bd close my-factory-impl456 --comment "Implementation committed; tests pass"
 
 # PART 5 — Commit prompt changes and push
 cd ~/path/to/your-repo
@@ -1050,14 +1063,14 @@ git push
 | Component | File / Location | What It Does |
 |-----------|-----------------|--------------|
 | Designer pack | `packs/designer/` | Defines the Designer agent: prompt, overlay, metadata |
-| Designer prompt | `packs/designer/prompts/designer.md` | System prompt for the Designer — Role, Inputs, Output Format, Quality Gate, Process, Config Discipline |
-| Coder pack | `packs/coder/` | Defines the Coder agent: prompt, overlay, metadata |
-| Coder prompt | `packs/coder/prompts/coder.md` | System prompt for the Coder — same six-section structure plus a Rules section |
+| Designer prompt | `packs/designer/prompts/designer.md.tmpl` | System prompt for the Designer — Role, Inputs, Output Format, Quality Gate, Process, Config Discipline |
+| Coder pack | `packs/builder/` | Defines the Coder agent: prompt, overlay, metadata |
+| Coder prompt | `packs/builder/prompts/builder.md.tmpl` | System prompt for the Coder — same six-section structure plus a Rules section |
 | Component spec | `design/<slug>-spec.md` | Designer's output: Purpose, Location, Props, State, Layout, Interactions, Data Flow, Edge Cases, References |
 | Implementation | `src/<Location from spec>/` | Coder's output: typed implementation, co-located tests, matching the spec verbatim |
 | Feature-branch commits | `git log feature-branch --oneline` | Conventional-commit history showing Designer commit + Coder commits |
-| Designer bead | `bd show my-city-design123` | Work item that triggered the Designer, chained after the Architect bead |
-| Coder bead | `bd show my-city-impl456` | Work item that triggered the Coder, chained after the Designer bead |
+| Designer bead | `bd show my-factory-design123` | Work item that triggered the Designer, chained after the Architect bead |
+| Coder bead | `bd show my-factory-impl456` | Work item that triggered the Coder, chained after the Designer bead |
 | Passing tests | `npm test` output | Proof of Quality Gate rule 4: at least 2 work-package test cases pass |
 
 ---
@@ -1095,13 +1108,13 @@ your-repo/
 And your city:
 
 ```
-~/my-city/
+my-factory/
 ├── city.toml                                         # Now has dev-agent + planner + architect + designer + coder
 └── beads/
     ├── my-city-a1b2c3 (closed)                      # L2 Planner bead
-    ├── my-city-d4e5f6 (closed)                      # L2 Architect bead
-    ├── my-city-design123 (closed)                   # L3 Designer bead
-    └── my-city-impl456 (closed)                     # L3 Coder bead
+    ├── my-factory-d4e5f6 (closed)                      # L2 Architect bead
+    ├── my-factory-design123 (closed)                   # L3 Designer bead
+    └── my-factory-impl456 (closed)                     # L3 Coder bead
 ```
 
 ---

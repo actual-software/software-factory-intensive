@@ -6,7 +6,20 @@
 |---|---|
 | **Estimated duration** | ~75 minutes |
 | **Type** | LAB |
-| **Deliverable** | Working Reviewer + Deployer agents, one `review-reports/<slug>-review.md`, one `release-gates/<slug>-gate.md`, and at least one finding resolved via a Coder prompt edit (never a manual code change) |
+| **Deliverable** | Working Reviewer + Release-Gate agents, one `review-reports/<slug>-review.md`, one `release-gates/<slug>-gate.md`, and at least one finding resolved via a Builder prompt edit (never a manual code change) |
+
+---
+
+## Session workspace note
+
+Pack renames since this README was first written: **Coder → `builder`** and **Deployer → `release-gate`** (same roles, same outputs, new pack directories). Prompt template paths are `packs/builder/prompts/builder.md.tmpl` and `packs/release-gate/prompts/release-gate.md.tmpl`. Commands `gc sling builder` and `gc sling release-gate` replace their `coder` / `deployer` equivalents.
+
+**Where your work goes this session:**
+* Session deliverables → `../../../activities/labs/L4/` (the activity folder for L4)
+* Customised pack copies → `../../../activities/labs/L4/packs/<agent>/`
+* Wire packs into `../../../my-factory/city.toml` — `includes = [..., "../packs/reviewer", "../packs/release-gate"]` (shipped) or `../activities/labs/L4/packs/<agent>` (customised). See [`activities/labs/L4/README.md`](../../../activities/labs/L4/README.md) for exact lines.
+
+If a prompt edit breaks the pack, swap `includes` back to the shipped `../packs/<name>` path and `gc service restart` — the shipped pack always passes `gc doctor`.
 
 ---
 
@@ -38,7 +51,7 @@
                     └─────────────┬─────────────┘     Test Coverage, Recommendation
                                   │
                                   │   If REQUEST_CHANGES:
-                                  │   ◂────── edit packs/coder/prompts/coder.md
+                                  │   ◂────── edit packs/builder/prompts/builder.md.tmpl
                                   │           re-sling coder, re-sling reviewer
                                   │
                                   │   If APPROVE:
@@ -71,7 +84,7 @@ Before starting this lab, verify each of these:
 | Prerequisite | How to verify | If it's missing |
 |-------------|---------------|-----------------|
 | L3 complete | `ls ~/path/to/your-repo/design/` and `ls ~/path/to/your-repo/src/` show the loyalty-points feature files | Go back and complete L3. The Reviewer needs a spec and implementation to review. |
-| Designer + Coder agents working | `gc status` shows `designer` and `coder` as `idle` | Re-run the L3 installs with `gc rig add --include packs/designer` and `gc rig add --include packs/coder`. |
+| Designer + Coder agents working | `gc status` shows `designer` and `coder` as `idle` | Re-run the L3 installs with `gc rig add --include packs/designer` and `gc rig add --include packs/builder`. |
 | All 4 prior packs installed | `gc rig list` shows `planner`, `architect`, `designer`, `coder` on your rig | Re-run `gc rig add --include` for each missing pack from L2 and L3. |
 | Feature branch present | `git branch --show-current` in your repo shows `l3-designer-coder` (or your L3 branch) with the Coder's commits on it | Check out the branch produced in L3 before slinging the Reviewer. |
 | Work package + spec exist | `ls work-packages/loyalty-points-system.md design/loyalty-points-system-spec.md` → both exist | Complete the Planner and Designer steps from L2 and L3 first. |
@@ -162,7 +175,7 @@ max_active_sessions = 1
 
 ### Step 3: Open the Deployer Pack Prompt
 
-[`packs/deployer/prompts/deployer.md`](../../../packs/deployer/prompts/deployer.md)
+[`packs/release-gate/prompts/release-gate.md.tmpl`](../../../packs/release-gate/prompts/release-gate.md.tmpl)
 
 Same six-section structure, different role:
 
@@ -198,7 +211,7 @@ Notice the key phrase in the Quality Gate: **"evidence (not opinions)"**. This i
 
 ### Step 4: Open the Deployer Pack Metadata
 
-[`packs/deployer/pack.toml`](../../../packs/deployer/pack.toml)
+[`packs/release-gate/pack.toml`](../../../packs/release-gate/pack.toml)
 
 ```toml
 [pack]
@@ -225,7 +238,7 @@ Identical shape to the Reviewer pack, differing only in `name`, `description`, `
 ### Step 1: Add the Reviewer Pack to Your Rig
 
 ```bash
-cd ~/my-city
+cd my-factory
 gc rig add ~/path/to/your-repo \
   --include /path/to/software-factory-intensive/packs/reviewer
 ```
@@ -240,7 +253,7 @@ rig "your-repo" updated — added pack "reviewer"
 
 ```bash
 gc rig add ~/path/to/your-repo \
-  --include /path/to/software-factory-intensive/packs/deployer
+  --include /path/to/software-factory-intensive/packs/release-gate
 ```
 
 You should see:
@@ -312,7 +325,7 @@ If you don't see `reviewer` or `deployer` here, the pack didn't register. Check 
 
 ### Step 1: Add the Reviewer Agent Block
 
-Open `~/my-city/city.toml` and add:
+Open `my-factory/city.toml` and add:
 
 ```toml
 [[agent]]
@@ -361,7 +374,7 @@ deployer    idle    --              --
 ### Step 4: Commit the city.toml Change
 
 ```bash
-cd ~/my-city
+cd my-factory
 git add city.toml
 git commit -m "chore(city): declare reviewer + deployer agents"
 ```
@@ -375,7 +388,7 @@ git commit -m "chore(city): declare reviewer + deployer agents"
 ### Step 1: Create the Reviewer Bead
 
 ```bash
-cd ~/my-city
+cd my-factory
 bd create "Review: Loyalty Points PR" \
   --description "$(cat <<'EOF'
 Review the Coder's implementation of the loyalty points system.
@@ -402,7 +415,7 @@ EOF
 Replace `[coder-bead-id]` with the bead ID you closed at the end of L3. You should see:
 
 ```
-Created bead: my-city-r1r2r3
+Created bead: my-factory-r1r2r3
 ```
 
 Note this ID — you will use it in the next few steps.
@@ -410,13 +423,13 @@ Note this ID — you will use it in the next few steps.
 ### Step 2: Sling the Bead to the Reviewer
 
 ```bash
-gc sling reviewer my-city-r1r2r3
+gc sling reviewer my-factory-r1r2r3
 ```
 
 You should see:
 
 ```
-Slinging my-city-r1r2r3 → reviewer
+Slinging my-factory-r1r2r3 → reviewer
 Session started: reviewer-r1r2r3 (tmux)
 ```
 
@@ -443,7 +456,7 @@ Press `Ctrl+b d` to detach from tmux (the agent keeps running). You can also mon
 ```bash
 gc session peek reviewer      # snapshot of the current session
 gc events --follow            # stream of city events
-bd show my-city-r1r2r3        # bead progress
+bd show my-factory-r1r2r3        # bead progress
 ```
 
 Wait until the Reviewer returns to `idle` in `gc status`. This typically takes 3–8 minutes depending on the size of the Coder's diff.
@@ -494,12 +507,12 @@ edits that would prevent recurrence.
 ## Recommendation
 REQUEST_CHANGES. To resolve:
 
-1. **High: concurrent redeem race** — Update packs/coder/prompts/coder.md
+1. **High: concurrent redeem race** — Update packs/builder/prompts/builder.md.tmpl
    Quality Gate to require: "Any code path that both reads and mutates a
    shared balance MUST wrap the read-and-write in a single transaction.
    Use db.transaction() from better-sqlite3."
 
-2. **Medium: redeem auth bypass** — Update packs/coder/prompts/coder.md
+2. **Medium: redeem auth bypass** — Update packs/builder/prompts/builder.md.tmpl
    Rules section to require: "Every endpoint that takes a userId parameter
    MUST verify req.user.id === req.body.userId (or equivalent). If the
    spec does not specify auth behavior, assume the authenticated user is
@@ -541,7 +554,7 @@ This is the crux of L4. The Reviewer has produced findings. A developer's instin
 The discipline is:
 
 1. For each reviewer finding, identify what the Coder should have done differently.
-2. Edit `packs/coder/prompts/coder.md` to make that behavior the Coder's default.
+2. Edit `packs/builder/prompts/builder.md.tmpl` to make that behavior the Coder's default.
 3. Re-sling the Coder against the same bead. The Coder regenerates the code with the updated prompt.
 4. Re-sling the Reviewer against the same review bead. Verify the finding is gone.
 
@@ -556,7 +569,7 @@ The Reviewer flagged this finding:
 #### Step 1: Open the Coder Prompt
 
 ```bash
-$EDITOR packs/coder/prompts/coder.md
+$EDITOR packs/builder/prompts/builder.md.tmpl
 ```
 
 Current Quality Gate section:
@@ -599,15 +612,15 @@ Save and close.
 
 ```bash
 cd ~/path/to/your-repo
-git add packs/coder/prompts/coder.md
+git add packs/builder/prompts/builder.md.tmpl
 git commit -m "chore(coder): require transaction wrapping for balance mutations"
 ```
 
 #### Step 4: Re-Sling the Coder
 
 ```bash
-cd ~/my-city
-gc sling coder [coder-bead-id-from-L3]
+cd my-factory
+gc sling builder [coder-bead-id-from-L3]
 gc watch coder
 ```
 
@@ -616,7 +629,7 @@ The Coder rereads its updated prompt, sees the new Quality Gate rule, and update
 #### Step 5: Re-Sling the Reviewer
 
 ```bash
-gc sling reviewer my-city-r1r2r3
+gc sling reviewer my-factory-r1r2r3
 gc watch reviewer
 ```
 
@@ -672,14 +685,14 @@ Save.
 
 ```bash
 cd ~/path/to/your-repo
-git add packs/coder/prompts/coder.md
+git add packs/builder/prompts/builder.md.tmpl
 git commit -m "chore(coder): require auth check on userId endpoints"
 
-cd ~/my-city
-gc sling coder [coder-bead-id]
+cd my-factory
+gc sling builder [coder-bead-id]
 gc watch coder
 
-gc sling reviewer my-city-r1r2r3
+gc sling reviewer my-factory-r1r2r3
 gc watch reviewer
 ```
 
@@ -689,7 +702,7 @@ After the re-sling, `src/api/loyalty.ts` contains an explicit `if (req.user.id !
 
 Every finding you resolve via config is a systemic improvement — the next feature the Coder writes will already have the transaction-wrapping rule and the auth-check rule baked in. Every finding you resolve via a hand-edit is a one-off — the next feature will re-introduce the bug. The orchestrator runs indefinitely; hand-edits do not accumulate into a better factory. Config edits do.
 
-**Minimum to pass the exit criteria:** at least one review finding must be resolved by editing `packs/coder/prompts/coder.md` (or the Designer's spec when the gap is upstream of the Coder). Zero manual code edits in response to review findings.
+**Minimum to pass the exit criteria:** at least one review finding must be resolved by editing `packs/builder/prompts/builder.md.tmpl` (or the Designer's spec when the gap is upstream of the Coder). Zero manual code edits in response to review findings.
 
 ---
 
@@ -700,7 +713,7 @@ Once the review report returns `APPROVE` (or returns `REQUEST_CHANGES` with only
 ### Step 1: Create the Deployer Bead
 
 ```bash
-cd ~/my-city
+cd my-factory
 bd create "Release Gate: Loyalty Points" \
   --description "$(cat <<'EOF'
 Evaluate release criteria for the loyalty points feature.
@@ -720,27 +733,27 @@ If PASS: mark this bead closed. The feature is deployment-ready.
 If FAIL: list which criteria failed and what would have to change.
 EOF
 )" \
-  --depends-on my-city-r1r2r3
+  --depends-on my-factory-r1r2r3
 ```
 
 You should see:
 
 ```
-Created bead: my-city-d1d2d3
+Created bead: my-factory-d1d2d3
 ```
 
 ### Step 2: Sling the Bead to the Deployer
 
 ```bash
-gc sling deployer my-city-d1d2d3
+gc sling release-gate my-factory-d1d2d3
 ```
 
-(If your project named the agent `devops` in `city.toml` instead of `deployer`, use `gc sling devops my-city-d1d2d3`. The pack name in this lab is `deployer`; the agent name in your city is whatever you declared.)
+(If you renamed the agent to something else in `city.toml` — e.g. `devops` or `deployer` — use `gc sling <your-name> my-factory-d1d2d3`. The shipped pack in this lab declares the agent as `release-gate`; the agent name in your city is whatever you declared.)
 
 You should see:
 
 ```
-Slinging my-city-d1d2d3 → deployer
+Slinging my-factory-d1d2d3 → deployer
 Session started: deployer-d1d2d3 (tmux)
 ```
 
@@ -817,8 +830,8 @@ and redeemed in the admin dashboard under /admin/loyalty.
 ### Step 6: Close the Deployer Bead
 
 ```bash
-cd ~/my-city
-bd close my-city-d1d2d3 --comment "Release gate PASS. Feature deployment-ready."
+cd my-factory
+bd close my-factory-d1d2d3 --comment "Release gate PASS. Feature deployment-ready."
 ```
 
 ---
@@ -971,7 +984,7 @@ Re-sling the Reviewer. Specific standards produce specific findings.
 
 **Cause:** The prompt edit wasn't reloaded, or the new rule was ambiguous.
 
-**Fix:** Run `gc restart` after editing `packs/coder/prompts/coder.md`. Verify the new text is present with `grep "<new rule text>" packs/coder/prompts/coder.md`. If ambiguous, tighten the wording — prefer imperative "MUST" over suggestive "should."
+**Fix:** Run `gc restart` after editing `packs/builder/prompts/builder.md.tmpl`. Verify the new text is present with `grep "<new rule text>" packs/builder/prompts/builder.md.tmpl`. If ambiguous, tighten the wording — prefer imperative "MUST" over suggestive "should."
 
 ### Issue 6: Deployer writes PASS/FAIL without evidence
 
@@ -994,7 +1007,7 @@ Re-sling the Reviewer. Specific standards produce specific findings.
 ```bash
 bd create "Spec gap: refundOrder path in loyalty points" \
   --description "Reviewer finding: design/loyalty-points-system-spec.md does not include the refundOrder code path required by ADR-0001. Update the spec to include refund handling as a negative ledger entry." \
-  --depends-on my-city-r1r2r3
+  --depends-on my-factory-r1r2r3
 gc sling designer <new-bead-id>
 ```
 
@@ -1010,7 +1023,7 @@ After the Designer updates the spec, re-sling the Coder and Reviewer.
 
 **Cause:** The pack registered but the agent didn't load into `city.toml`'s runtime. Usually a restart was skipped.
 
-**Fix:** Run `gc restart`, then `gc status` to verify the agent appears. If still missing, inspect `~/my-city/city.toml` to see whether the `[[agent]]` block was merged. If not, add it manually (see Part 2, Step 1).
+**Fix:** Run `gc restart`, then `gc status` to verify the agent appears. If still missing, inspect `my-factory/city.toml` to see whether the `[[agent]]` block was merged. If not, add it manually (see Part 2, Step 1).
 
 ### Issue 11: Reviewer and Deployer keep running concurrently and collide
 
@@ -1045,7 +1058,7 @@ Before leaving this lab, verify all of these:
 
 - [ ] `gc status` shows all 6 factory agents: `planner`, `architect`, `designer`, `coder`, `reviewer`, `deployer` (or `devops` if you kept that role name)
 - [ ] `review-reports/loyalty-points-system-review.md` is committed with Spec Compliance, Style, Security, and Test Coverage sections filled in
-- [ ] At least one reviewer finding was resolved by editing `packs/coder/prompts/coder.md` (or the Designer's spec), not by hand-editing code
+- [ ] At least one reviewer finding was resolved by editing `packs/builder/prompts/builder.md.tmpl` (or the Designer's spec), not by hand-editing code
 - [ ] `release-gates/loyalty-points-system-gate.md` is committed with binary PASS/FAIL evidence for every criterion
 - [ ] Both the review report and the gate record reference the work package by path
 - [ ] `orchestrator.yaml` drives both the reviewer and the deployer (not just manual `gc sling` invocations)
@@ -1075,42 +1088,42 @@ Every command you ran during this lab, in order:
 # PART 0 — Read the packs (no commands — just read the files)
 
 # PART 1 — Install Reviewer and Deployer
-cd ~/my-city
+cd my-factory
 gc rig add ~/path/to/your-repo --include /path/to/packs/reviewer
-gc rig add ~/path/to/your-repo --include /path/to/packs/deployer
+gc rig add ~/path/to/your-repo --include /path/to/packs/release-gate
 gc restart
 gc status
 gc doctor
 gc rig list
 
 # PART 2 — Declare agents in city.toml
-$EDITOR ~/my-city/city.toml             # add [[agent]] blocks
+$EDITOR my-factory/city.toml             # add [[agent]] blocks
 gc restart
 gc status
-git -C ~/my-city add city.toml && git -C ~/my-city commit -m "chore(city): declare reviewer + deployer agents"
+git -C my-factory add city.toml && git -C my-factory commit -m "chore(city): declare reviewer + release-gate agents"
 
 # PART 3 — Sling to Reviewer
 bd create "Review: Loyalty Points PR" --description "..." --depends-on [coder-bead]
-gc sling reviewer my-city-r1r2r3
+gc sling reviewer my-factory-r1r2r3
 gc watch reviewer                        # Ctrl+b d to detach
 cat review-reports/loyalty-points-system-review.md
 
 # PART 4 — Fix via config
-$EDITOR packs/coder/prompts/coder.md    # add Quality Gate / Rules entries
-git -C ~/path/to/your-repo add packs/coder/prompts/coder.md
+$EDITOR packs/builder/prompts/builder.md.tmpl    # add Quality Gate / Rules entries
+git -C ~/path/to/your-repo add packs/builder/prompts/builder.md.tmpl
 git -C ~/path/to/your-repo commit -m "chore(coder): <what rule you added>"
-gc sling coder [coder-bead-id]          # re-sling after prompt edit
+gc sling builder [coder-bead-id]          # re-sling after prompt edit
 gc watch coder
-gc sling reviewer my-city-r1r2r3        # re-verify
+gc sling reviewer my-factory-r1r2r3        # re-verify
 gc watch reviewer
 # repeat until review report is APPROVE
 
 # PART 5 — Sling to Deployer
-bd create "Release Gate: Loyalty Points" --description "..." --depends-on my-city-r1r2r3
-gc sling deployer my-city-d1d2d3
+bd create "Release Gate: Loyalty Points" --description "..." --depends-on my-factory-r1r2r3
+gc sling release-gate my-factory-d1d2d3
 gc watch deployer
 cat release-gates/loyalty-points-system-gate.md
-bd close my-city-d1d2d3 --comment "Release gate PASS"
+bd close my-factory-d1d2d3 --comment "Release gate PASS"
 
 # PART 6 — (optional) tighten Reviewer with tailored ADRs
 $EDITOR packs/reviewer/prompts/reviewer.md   # add CLAUDE.md compliance rule
@@ -1118,7 +1131,7 @@ git -C ~/path/to/your-repo add packs/reviewer/prompts/reviewer.md
 git -C ~/path/to/your-repo commit -m "chore(reviewer): enforce CLAUDE.md tailored-ADR baselines"
 
 # Cleanup
-bd close my-city-r1r2r3 --comment "Review APPROVE"
+bd close my-factory-r1r2r3 --comment "Review APPROVE"
 git -C ~/path/to/your-repo push
 ```
 
@@ -1130,15 +1143,15 @@ git -C ~/path/to/your-repo push
 |-----------|-----------------|--------------|
 | Reviewer pack | `packs/reviewer/` | Defines the Reviewer agent: prompt, overlay, metadata |
 | Reviewer prompt | `packs/reviewer/prompts/reviewer.md` | System prompt for the Reviewer — Role, Inputs, Output Format, Quality Gate, Process, Config Discipline |
-| Deployer pack | `packs/deployer/` | Defines the Deployer agent: prompt, overlay, metadata |
-| Deployer prompt | `packs/deployer/prompts/deployer.md` | System prompt for the Deployer — same six-section structure |
+| Deployer pack | `packs/release-gate/` | Defines the Deployer agent: prompt, overlay, metadata |
+| Deployer prompt | `packs/release-gate/prompts/release-gate.md.tmpl` | System prompt for the Deployer — same six-section structure |
 | Review Standards | `docs/PROJECT_MANIFEST.md` (Review Standards section) | Project-specific review policy — what counts as a finding |
 | Release Criteria | `docs/PROJECT_MANIFEST.md` (Release Criteria section) | Project-specific release gate rows — what must be PASS for a release |
 | Review report | `review-reports/loyalty-points-system-review.md` | Reviewer's output: Summary, Spec Compliance, Style, Security, Test Coverage, Recommendation |
 | Release gate | `release-gates/loyalty-points-system-gate.md` | Deployer's output: Overall Verdict, Criteria table with binary PASS/FAIL + evidence, Release Notes, References |
-| Coder prompt edits | `packs/coder/prompts/coder.md` diff | The config-discipline artifact — each reviewer finding resolved is a commit on this file |
-| Reviewer bead | `bd show my-city-r1r2r3` | Work item that triggered the Reviewer, depends on the Coder bead |
-| Deployer bead | `bd show my-city-d1d2d3` | Work item that triggered the Deployer, depends on the Reviewer bead |
+| Coder prompt edits | `packs/builder/prompts/builder.md.tmpl` diff | The config-discipline artifact — each reviewer finding resolved is a commit on this file |
+| Reviewer bead | `bd show my-factory-r1r2r3` | Work item that triggered the Reviewer, depends on the Coder bead |
+| Deployer bead | `bd show my-factory-d1d2d3` | Work item that triggered the Deployer, depends on the Reviewer bead |
 | Orchestrator config | `orchestrator.yaml` | Automation wiring: Coder-close → Reviewer-sling → (if APPROVE) Deployer-sling |
 
 ---

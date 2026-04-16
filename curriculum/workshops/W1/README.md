@@ -163,7 +163,7 @@ Write down three bullets describing your current practice, without judging it:
 
 ## Step 2: Draft Your Workflow Card (~20 min)
 
-Create `workflow-card.md` in the **root of your project repo** (not the curriculum repo, not `~/my-city`) with the template below. Spend about 5 minutes per section. Write the content inline — don't try to outline first and flesh out later.
+Create `workflow-card.md` at `activities/workshops/W1/workflow-card.md` (inside this repo) using the template below. Spend about 5 minutes per section. Write the content inline — don't try to outline first and flesh out later.
 
 ```bash
 cd ~/path/to/your-repo
