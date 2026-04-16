@@ -47,6 +47,7 @@ rsync -av ~/Projects/actual-software/software-factory-intensive/activites/worksh
 ##### Register City
 
 ```bash
+gc stop
 gc register <full_path>/Projects/factory/workshop_w2/w2-gc-factory
 
 gc service restart
@@ -61,7 +62,7 @@ pushd ~/Projects/factory/workshop_w2/w2-gc-factory
 gc rig add <full_path>/Projects/factory/workshop_w2/w2-project
 ```
 
-Update city.toml
+Update city.toml with the includes:
 
 ```bash
 [[rigs]]

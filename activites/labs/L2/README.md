@@ -61,11 +61,11 @@ pushd ~/Projects/factory/workshop_l2/l2-gc-factory
 gc rig add <full_path>/Projects/factory/workshop_l2/l2-project
 ```
 
-Update city.toml
+Update city.toml with the includes:
 
 ```bash
 [[rigs]]
-name = "w2-project"
+name = "l2-project"
 path = "<full_path/Projects/factory/workshop_l2/l2-project"
 includes = ["packs/actual/all"]
 ```
