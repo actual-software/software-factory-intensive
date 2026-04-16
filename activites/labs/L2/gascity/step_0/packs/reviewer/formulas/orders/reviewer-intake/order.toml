@@ -1,6 +1,0 @@
-[order]
-description = "Wake the reviewer when any bead is labelled needs-review"
-formula = "mol-code-review"
-gate = "condition"
-check = "bd ready --label=needs-review --limit=1 | grep -q ."
-pool = "reviewer"

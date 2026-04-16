@@ -12,19 +12,21 @@
 # life once you have at least one rig registered.
 
 [workspace]
-name = "20260415-gc-factory-v1"
+name = "l2-gc-factory"
 provider = "claude"
-start_command = "<user_home>/.nvm/versions/node/v22.19.0/bin/claude"
+start_command = "~/.nvm/versions/node/v22.19.0/bin/claude"
 includes = ["packs/actual/all"]
+
+[[rigs]]
+name = "L2-project"
+path = "~/Projects/factory/workshop_l2/l2-gc-factory"
+includes = ["packs/actual/all"]
+
+[session]
+startup_timeout = "3m"
 
 [daemon]
 patrol_interval = "30s"
 max_restarts = 5
 restart_window = "1h"
 shutdown_timeout = "5s"
-
-#
-# [[rigs]]
-# name = "myproject"
-# path = "/path/to/your/project"
-# includes = ["packs/actual/all"]

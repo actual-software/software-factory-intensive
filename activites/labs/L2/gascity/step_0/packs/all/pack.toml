@@ -17,10 +17,4 @@ schema = 1
 includes = [
     "../architect",
     "../planner",
-    "../designer",
-    "../validator",
-    "../builder",
-    "../reviewer",
-    "../release-gate",
-    "../improver",
 ]
