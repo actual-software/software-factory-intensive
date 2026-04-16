@@ -47,6 +47,7 @@ rsync -av ~/Projects/actual-software/software-factory-intensive/activites/worksh
 ##### Register City
 
 ```bash
+gc stop
 gc register <full_path>/Projects/factory/workshop_l2/l2-gc-factory
 
 gc service restart

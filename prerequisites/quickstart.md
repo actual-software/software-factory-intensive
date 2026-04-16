@@ -67,6 +67,7 @@ rsync -av ~/Projects/actual-software/software-factory-intensive/packs/ ~/Project
 ##### Register City
 
 ```bash
+gc stop
 gc register ~/Projects/factory/baseline/base-gc-factory
 
 gc service restart
@@ -118,7 +119,7 @@ Open Gascity Dashboard in Browser
 ##### Generate Task to Verify Factory
 
 ```bash
-gc sling base-gc-factory "Create a script that prints hello world"
+gc sling base-project/architect "Create a script that prints hello world"
 ```
 
 ## References
