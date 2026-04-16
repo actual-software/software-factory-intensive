@@ -19,7 +19,7 @@ includes = ["packs/actual/all"]
 
 [[rigs]]
 name = "base-project"
-path = "~/Projects/factory/baseline/base-gc-factory"
+path = "~/Projects/factory/baseline/base-project"
 includes = ["packs/actual/all"]
 
 [session]
