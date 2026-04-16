@@ -1,251 +1,453 @@
 # L2 · Deploy Planner + Architect Agents
 
-> **Goal:** Set up specialized Planner and Architect agents in Gas City that work together to break down features and make architectural decisions—producing structured work packages and ADRs (Architecture Decision Records).
+> **What you'll build:** Two specialized AI agents managed by Gas City — a Planner that breaks feature requests into structured work packages, and an Architect that reviews those packages and produces Architecture Decision Records (ADRs). By the end of this lab, you'll sling a feature request through both agents and commit the artifacts they produce.
 
 | | |
 |---|---|
-| **Day** | Day 1 |
-| **Time** | 2:15 - 3:30 |
+| **Estimated duration** | ~75 minutes |
 | **Type** | LAB |
-| **Deliverable** | Working Planner + Architect agents + sample artifacts |
+| **Deliverable** | Working Planner + Architect agents, one work package, one ADR, cross-referenced and committed |
 
 ---
 
-## What You'll Build
+## Architecture Diagram
 
 ```
-Feature request arrives
-      ↓
-Planner Agent analyzes requirements
-      ↓
-Produces: Work Package (goals, stories, acceptance criteria)
-      ↓
-Architect Agent reviews work package
-      ↓
-Produces: ADR (architectural decision with trade-offs)
-      ↓
-Both artifacts committed to repo with cross-references
+                    ┌───────────────────────────┐
+                    │     Feature Request        │
+                    │  (bead in Gas City)         │
+                    └─────────────┬─────────────┘
+                                  │
+                                  ▼
+                    ┌───────────────────────────┐
+                    │      PLANNER AGENT         │
+                    │                            │
+                    │  Reads:                     │
+                    │    • bead description       │
+                    │    • docs/PROJECT_MANIFEST  │
+                    │    • packs/planner/prompts  │
+                    │                            │
+                    │  Produces:                  │
+                    │    work-packages/<slug>.md  │───► Goal, Stories, ACs,
+                    │                            │     Dependencies, Tests,
+                    └─────────────┬─────────────┘     Scope Boundary
+                                  │
+                    ┌─────────────▼─────────────┐
+                    │     ARCHITECT AGENT         │
+                    │                            │
+                    │  Reads:                     │
+                    │    • work package           │
+                    │    • docs/PROJECT_MANIFEST  │
+                    │    • existing ADRs          │
+                    │    • CLAUDE.md (tailored)   │
+                    │                            │
+                    │  Produces:                  │
+                    │    docs/adr/NNNN-<slug>.md  │───► Context, Options,
+                    │                            │     Decision, Consequences,
+                    └───────────────────────────┘     References
 ```
 
 ---
 
 ## Prerequisites
 
-✅ L1 complete (AGENTS.md pattern established)  
-✅ W2 complete (6-agent factory design)  
-✅ Gas City running with your project rig  
+Before starting this lab, verify each of these:
+
+| Prerequisite | How to verify | If it's missing |
+|-------------|---------------|-----------------|
+| L1 complete | `ls ~/path/to/your-repo/CLAUDE.md` → file exists | Go back and complete L1. This lab cannot work without it. |
+| W2 complete | You have a factory design doc with 6 agent roles mapped to your project | Skim the [W2 README](../../workshops/W2/) and sketch the roles — 10 min max |
+| Gas City running | `gc status` → shows at least `dev-agent` from L1 | `gc init ~/my-city` then `gc rig add ~/path/to/your-repo` |
+| Project Manifest | `cat ~/path/to/your-repo/docs/PROJECT_MANIFEST.md` → filled in | Copy from [`curriculum/PROJECT_MANIFEST_TEMPLATE.md`](../../PROJECT_MANIFEST_TEMPLATE.md) and fill in tech stack, conventions, domain model |
+| Skeleton scaffold | `ls ~/path/to/your-repo/work-packages/` → directory exists | `cp -r /path/to/software-factory-intensive/my-factory/* ~/path/to/your-repo/` |
 
 ---
 
-## Step 1: Add Planner Agent to city.toml
+## The Use Case: Loyalty Points for Fired Up Pizza
 
-Edit `~/my-city/city.toml` and add a Planner agent:
+Throughout this lab, we use a single running example: **adding a loyalty points system to Fired Up Pizza** (or your own project's equivalent feature). This feature is complex enough to require both planning *and* an architectural decision, but small enough to complete in 75 minutes.
+
+If you're working against your own project, substitute your own feature — but make sure it has at least one open technical question the Architect needs to resolve (e.g., "where to store this data?", "which API pattern to use?", "build vs. buy for this component?").
+
+---
+
+## Part 0: Read the Shipped Packs (~5 min)
+
+Before installing anything, read what you're about to install. Each pack is a folder with three things: a `pack.toml` (metadata), a prompt file (the agent's instructions), and an overlay directory (environment overrides).
+
+### Step 1: Open the Planner Pack
+
+Open this file in your editor and read it end-to-end — it's 65 lines:
+
+[`packs/planner/prompts/planner.md`](../../../packs/planner/prompts/planner.md)
+
+You should see six sections:
+
+```
+# Planner Agent
+
+## Role              ← "You receive feature requests and break them into
+                        structured work packages..."
+
+## Inputs            ← bead description + docs/PROJECT_MANIFEST.md
+
+## Output Format     ← work-packages/<feature-slug>.md with 6 sections:
+                        Goal, User Stories, Acceptance Criteria,
+                        Dependencies, Test Cases, Scope Boundary
+
+## Quality Gate      ← 4 rules: every story has an AC, 2+ test cases,
+                        explicit scope boundary, no ambiguous terms
+
+## Process           ← 6 steps: read bead → read manifest → produce file
+                        → commit on branch → update bead → mark ready
+
+## Config Discipline ← "the fix is updating this file — not ad-hoc
+                        re-prompting"
+```
+
+**What's happening here:** This prompt file is the Planner's entire personality. When you `gc sling planner <bead>`, Gas City starts a Claude session, loads this prompt as the system message, and hands the bead's description as the user message. Everything the Planner does comes from this file and `docs/PROJECT_MANIFEST.md`. Nothing else.
+
+### Step 2: Open the Planner Pack Metadata
+
+[`packs/planner/pack.toml`](../../../packs/planner/pack.toml)
 
 ```toml
+[pack]
+name = "planner"
+schema = 1
+description = "Planner agent — breaks feature requests into structured work packages"
+
 [[agent]]
 name = "planner"
-dir = "your-repo-name"
-provider = "claude"
-idle_timeout = "2h"
-role = "planner"           # Optional metadata
+scope = "rig"
+prompt_template = "prompts/planner.md"
+overlay_dir = "overlays/default"
+nudge = "Check your hook for new feature requests to plan."
+idle_timeout = "1h"
+max_active_sessions = 1
 ```
 
-Restart Gas City to pick up the new agent:
+**What's happening here:** The `[[agent]]` block is what gets merged into your city when you run `gc rig add --include`. `prompt_template` points to the prompt file you just read. `idle_timeout = "1h"` means the agent's tmux session shuts down after 1 hour of inactivity. `max_active_sessions = 1` means one bead at a time.
 
-```bash
-gc restart
-gc status  # Verify planner agent appears
+### Step 3: Open the Architect Pack
+
+[`packs/architect/prompts/architect.md`](../../../packs/architect/prompts/architect.md)
+
+Same six-section structure as the Planner, but different role:
+
+```
+## Role              ← "You receive work packages and produce ADRs..."
+
+## Inputs            ← work-packages/<slug>.md + PROJECT_MANIFEST
+                        + existing ADRs for consistency
+
+## Output Format     ← docs/adr/NNNN-<decision-slug>.md using MADR:
+                        Status, Context, Options Considered, Decision,
+                        Consequences, References
+
+## Quality Gate      ← 4 rules: all MADR sections present, 2+ options
+                        with trade-offs, references work package by path,
+                        consequences include at least one risk
+
+## Process           ← 7 steps: read WP → read manifest → review existing
+                        ADRs → produce ADR → cross-reference the WP →
+                        commit → mark ready for Designer
 ```
 
----
+Notice the key difference from the Planner: Step 5 says "Add a cross-reference to the work package (append ADR path to it)." This is the **handoff contract** — the Architect doesn't just produce its own artifact, it also back-links to the Planner's artifact. You designed this contract in W2.
 
-## Step 2: Create Planner AGENTS.md
+### Step 4: Open the Architect Pack Metadata
 
-In your repository, create or update `AGENTS.md` to add Planner-specific guidance:
-
-```markdown
-# Agent Specifications
-
-## Planner Agent
-
-### Role
-You are a product planning agent. You break down feature requests into structured work packages that other agents can execute.
-
-### Responsibilities
-1. Analyze feature requests for completeness
-2. Break features into logical user stories
-3. Define clear acceptance criteria for each story
-4. Identify dependencies and ordering constraints
-5. Estimate complexity (S/M/L/XL)
-
-### Work Package Template
-Every work package you create must follow this structure:
-
-\`\`\`markdown
-# Work Package: [Feature Name]
-
-**ID:** WP-[YYYY-MM-DD]-[short-id]  
-**Status:** Draft  
-**Created:** [Date]
-
-## Goal
-[One sentence: what does this feature achieve?]
-
-## User Stories
-
-### Story 1: [Title]
-**As a** [user type]  
-**I want** [capability]  
-**So that** [benefit]
-
-**Acceptance Criteria:**
-- [ ] AC 1
-- [ ] AC 2
-- [ ] AC 3
-
-**Complexity:** [S/M/L/XL]
-
-### Story 2: [Title]
-...
-
-## Dependencies
-- **Blocker:** [What must exist before this can start?]
-- **Parallel:** [What can be built at the same time?]
-- **Downstream:** [What will depend on this?]
-
-## Architectural Considerations
-[Flag any decisions that need Architect review]
-
-## Estimated Timeline
-[Based on complexity, how long for full implementation?]
-\`\`\`
-
-### Output Location
-Save work packages to: `work-packages/[feature-name].md`
-
-### Quality Standards
-- All user stories must have measurable acceptance criteria
-- No vague language ("improve", "better", "enhance")
-- Dependencies must reference specific components or stories
-- Complexity estimates justified by scope
-```
-
----
-
-## Step 3: Add Architect Agent to city.toml
+[`packs/architect/pack.toml`](../../../packs/architect/pack.toml)
 
 ```toml
+[pack]
+name = "architect"
+schema = 1
+description = "Architect agent — produces ADRs and technical decisions from work packages"
+
 [[agent]]
 name = "architect"
-dir = "your-repo-name"
-provider = "claude"
-idle_timeout = "2h"
-role = "architect"
+scope = "rig"
+prompt_template = "prompts/architect.md"
+overlay_dir = "overlays/default"
+nudge = "Check your hook for work packages needing architecture decisions."
+idle_timeout = "1h"
+max_active_sessions = 1
 ```
 
-Restart Gas City:
+Same shape as the Planner's `pack.toml`. The only differences are `name`, `description`, `prompt_template`, and `nudge`. All agent packs follow this pattern — you'll see it again in L3 (Designer, Coder) and L4 (Reviewer, Deployer).
+
+You're done reading. Now install.
+
+---
+
+## Part 1: Install the Planner Agent (~10 min)
+
+### Step 1: Add the Planner Pack to Your Rig
+
+```bash
+cd ~/my-city
+gc rig add ~/path/to/your-repo \
+  --include /path/to/software-factory-intensive/packs/planner
+```
+
+You should see output like:
+
+```
+rig "your-repo" updated — added pack "planner"
+```
+
+**What's happening here:** `gc rig add --include` tells Gas City: "for this rig, also load the agent definition and prompt from the specified pack directory." The `[[agent]]` block from `packs/planner/pack.toml` is merged into your city's effective configuration. The prompt file at `packs/planner/prompts/planner.md` becomes the system prompt for any session started by this agent.
+
+### Step 2: Restart Gas City and Verify
 
 ```bash
 gc restart
-gc status  # Verify architect agent appears
+gc status
 ```
 
----
+You should see:
 
-## Step 4: Add Architect Guidance to AGENTS.md
+```
+NAME        STATE   LAST ACTIVITY   BEAD
+dev-agent   idle    12m ago         --
+planner     idle    --              --
+```
 
-Update `AGENTS.md` with Architect specs:
+If `planner` doesn't appear, check that the `--include` path was correct (absolute path, not relative). Run `gc rig list` to see what packs are registered.
+
+### Step 3: Customize the Planner Prompt for Your Project
+
+The shipped prompt is generic. You need to tailor two things for your project:
+
+**a) Open `packs/planner/prompts/planner.md` in your editor** (or copy it into your repo if you prefer local overrides).
+
+**b) Update the Output Format section** with your project's naming convention. For example, if your project is Fired Up Pizza:
+
+Find this line:
+```markdown
+Create a work package at `work-packages/<feature-slug>.md` with this structure:
+```
+
+It's already correct for the `my-factory/` skeleton. But if your project uses a different directory (e.g., `docs/plans/`), change it here. **The Planner will write to whatever path this line says.** If the path is wrong, the Architect won't find the artifact.
+
+**c) Add a project-specific constraint** to the Quality Gate section. Append one rule that references your project's domain. For Fired Up Pizza:
 
 ```markdown
-## Architect Agent
+## Quality Gate
 
-### Role
-You are a software architecture agent. You review work packages and make architectural decisions, documenting them as ADRs (Architecture Decision Records).
+A work package is complete when:
+1. Every user story has at least one acceptance criterion
+2. At least two test cases are defined
+3. Scope boundary is explicit
+4. No ambiguous terms remain (quantify everything)
+5. All prices must be in cents (not dollars) per project convention
+```
 
-### Responsibilities
-1. Review work packages for architectural implications
-2. Evaluate multiple implementation approaches
-3. Document decisions with trade-off analysis
-4. Consider: performance, maintainability, cost, complexity
-5. Reference work packages explicitly
+For your project, replace rule 5 with something from your `docs/PROJECT_MANIFEST.md` conventions section.
 
-### ADR Template (MADR Format)
-Use this structure for all architectural decisions:
+### Step 4: Commit Your Customization
 
-\`\`\`markdown
-# ADR-[NUMBER]: [Title]
+```bash
+cd ~/path/to/your-repo
+git checkout -b l2-planner-architect
+git add -A
+git commit -m "chore(planner): customize planner prompt for project conventions"
+```
 
-**Status:** Proposed | Accepted | Deprecated | Superseded  
-**Date:** [YYYY-MM-DD]  
-**Work Package:** [Reference WP ID]
+**Why commit now?** The diff between the shipped prompt and your customized version is the evidence of config discipline. If the Planner's output is wrong later, this diff tells you what you changed and what you might need to change next.
 
-## Context
-[What is the problem? What constraints exist? What are we trying to achieve?]
+---
 
-## Decision Drivers
-- [Key factor 1]
-- [Key factor 2]
-- [Key factor 3]
+## Part 2: Install the Architect Agent (~10 min)
 
-## Considered Options
-1. **Option A:** [Description]
-2. **Option B:** [Description]
-3. **Option C:** [Description]
+### Step 1: (Recommended) Seed Tailored Industry ADRs
 
-## Decision
-Chosen: **Option [X]**
+Before the Architect writes any ADR, give it a curated baseline. [Actual AI's `actual` CLI](https://github.com/actual-software/actual-cli) analyzes your repo, fetches relevant Architecture Decision Records from a curated library, tailors them to your codebase via an LLM, and writes the result into `CLAUDE.md`.
 
-### Rationale
-[Why this option? What makes it better than alternatives?]
+```bash
+brew install actual-software/actual/actual
+```
 
-## Consequences
+Verify the install:
 
-### Positive
-- [Benefit 1]
-- [Benefit 2]
+```bash
+actual --version
+```
 
-### Negative
-- [Trade-off 1]
-- [Trade-off 2]
+You should see:
 
-### Neutral
-- [Impact that's neither clearly good nor bad]
+```
+actual 0.x.x
+```
 
-## Validation
-[How will we know this decision was correct? What metrics or signals?]
+Now preview what it would write:
 
-## References
-- Work Package: [WP-ID]
-- Related ADRs: [If any]
-- External docs: [Links if relevant]
-\`\`\`
+```bash
+cd ~/path/to/your-repo
+actual adr-bot --dry-run
+```
 
-### Output Location
-Save ADRs to: `docs/adr/[NUMBER]-[short-title].md`
+You should see output like:
 
-Start numbering at 0001.
+```
+Analyzing repository...
+Found 12 relevant ADRs for your codebase
+Tailoring to your project's TypeScript + React + SQLite stack...
 
-### Quality Standards
-- All four MADR sections required
-- At least 3 options considered
-- Trade-offs explicitly called out
-- Work package referenced by ID
+Would write 8 tailored ADRs to CLAUDE.md:
+  - Use conventional commits for all commit messages
+  - Prefer explicit TypeScript types over inference at module boundaries
+  - Use parameterized queries for all database access
+  ...
+
+Dry run complete. Run `actual adr-bot` to write.
+```
+
+If it looks reasonable, run it for real:
+
+```bash
+actual adr-bot
+```
+
+You should see:
+
+```
+Writing 8 tailored ADRs to CLAUDE.md...
+Done. Review the changes with `git diff CLAUDE.md`.
+```
+
+Commit:
+
+```bash
+git add CLAUDE.md
+git commit -m "chore: seed tailored industry ADRs via actual adr-bot"
+```
+
+**What's happening here:** The Actual API is free, no account needed. It looked at your repo's language, framework, dependencies, and file patterns, then fetched ADRs that match. Each one was rewritten to reference your project's specific conventions. Now when the Architect runs, it will read `CLAUDE.md` first and see these baselines. It only needs to write a *new* ADR when the decision isn't already covered.
+
+**Skipping this step is fine.** Your Architect will just write every ADR from scratch. But seeding baselines means higher-quality first-run output.
+
+### Step 2: Add the Architect Pack to Your Rig
+
+```bash
+cd ~/my-city
+gc rig add ~/path/to/your-repo \
+  --include /path/to/software-factory-intensive/packs/architect
+```
+
+You should see:
+
+```
+rig "your-repo" updated — added pack "architect"
+```
+
+### Step 3: Restart and Verify
+
+```bash
+gc restart
+gc status
+```
+
+You should see:
+
+```
+NAME        STATE   LAST ACTIVITY   BEAD
+dev-agent   idle    25m ago         --
+planner     idle    --              --
+architect   idle    --              --
+```
+
+Three agents. The first two stages of your factory pipeline are installed.
+
+### Step 4: Customize the Architect Prompt
+
+Open `packs/architect/prompts/architect.md` and make two changes:
+
+**a) Add `CLAUDE.md` to the Inputs section** (so the Architect reads tailored ADRs):
+
+Find:
+
+```markdown
+## Inputs
+
+- Work package from `work-packages/<feature-slug>.md`
+- Project manifest (`docs/PROJECT_MANIFEST.md`)
+- Existing ADRs in `docs/adr/` for consistency
+```
+
+Replace with:
+
+```markdown
+## Inputs
+
+- Work package from `work-packages/<feature-slug>.md`
+- Project manifest (`docs/PROJECT_MANIFEST.md`)
+- Existing ADRs in `docs/adr/` for consistency
+- Tailored ADR baselines in `CLAUDE.md` (if present) — check whether the
+  decision you're about to make is already covered. Only write a new ADR
+  if the decision extends, overrides, or is absent from the baselines.
+```
+
+**b) Add a project-specific constraint** to the Quality Gate. For Fired Up Pizza:
+
+```markdown
+## Quality Gate
+
+An ADR is complete when:
+1. All four MADR sections are present (Context, Options, Decision, Consequences)
+2. At least two options were considered with trade-offs
+3. The decision references the work package by path
+4. Consequences include at least one risk
+5. If this decision affects pricing, amounts must be in cents (per project convention)
+```
+
+### Step 5: Commit Your Customization
+
+```bash
+cd ~/path/to/your-repo
+git add -A
+git commit -m "chore(architect): customize architect prompt with tailored-ADR input"
 ```
 
 ---
 
-## Step 5: Create Test Feature Request
+## Part 3: Create and Run the Planner (~20 min)
 
-If you connected an issue tracker in L1 using [`packs/workshop`](../../../packs/workshop/), your tickets may already be synced as beads. Check with `bd list`. You can also sync on demand:
+Now the agents are installed. Time to give the Planner real work.
 
-```bash
-gc workshop sync-all        # All connected trackers
-bd jira sync --pull          # Jira only
-bd linear sync --pull        # Linear only
-bd github sync               # GitHub Issues
+### Step 1: Write the Feature Request
+
+You need a feature request that's complex enough to need both a Planner and an Architect. Here's the Loyalty Points example for Fired Up Pizza — **adapt this to your own project or use it verbatim if you're working against the reference project:**
+
+```markdown
+# Feature Request: Loyalty Points System
+
+## Overview
+Add a loyalty points system to Fired Up Pizza where customers earn
+points on purchases and can redeem them for discounts.
+
+## Requirements
+- Customers earn 1 point per $1 spent
+- Points can be redeemed at checkout (100 points = $5 off)
+- Points balance visible on order confirmation page
+- Admin dashboard shows total points issued/redeemed
+
+## Constraints
+- Must integrate with existing order system
+- Points balance must be accurate (no double-counting)
+- Performance: adding points shouldn't slow checkout
+
+## Open Questions
+- Where to store points? User table? Separate ledger?
+- How to handle refunds?
+- Expiration policy?
 ```
 
-Otherwise, create a bead manually for a feature that needs planning + architecture:
+Save this somewhere handy (clipboard, scratch file) — you'll paste it into the bead description next.
+
+### Step 2: Create the Planner Bead
 
 ```bash
 cd ~/my-city
@@ -254,7 +456,8 @@ bd create "Feature: Loyalty Points System" \
 # Feature Request: Loyalty Points System
 
 ## Overview
-Add a loyalty points system to Fired Up Pizza where customers earn points on purchases and can redeem them for discounts.
+Add a loyalty points system to Fired Up Pizza where customers earn
+points on purchases and can redeem them for discounts.
 
 ## Requirements
 - Customers earn 1 point per $1 spent
@@ -275,210 +478,654 @@ EOF
 )"
 ```
 
-Note the bead ID returned (e.g., `my-city-xyz789`).
+You should see:
 
----
-
-## Step 6: Sling to Planner Agent
-
-```bash
-gc sling planner my-city-xyz789
+```
+Created bead: my-city-a1b2c3
 ```
 
-**Monitor progress:**
+Note this bead ID — you'll use it for the next several steps. Verify it exists:
+
+```bash
+bd list
+```
+
+You should see:
+
+```
+ID              TITLE                           STATUS   AGENT    CREATED
+my-city-a1b2c3  Feature: Loyalty Points System  open     --       just now
+```
+
+**What's happening here:** A bead is a work item in Gas City. It has a title, a markdown description, a status, and an optional dependency chain. The description is the first thing the agent reads when you sling the bead to it. The quality of this description directly determines the quality of the agent's output — just like a Jira ticket determines the quality of a human developer's output.
+
+### Step 3: Sling the Bead to the Planner
+
+```bash
+gc sling planner my-city-a1b2c3
+```
+
+You should see:
+
+```
+Slinging my-city-a1b2c3 → planner
+Session started: planner-a1b2c3 (tmux)
+```
+
+**What's happening here:** Gas City starts a tmux session, launches Claude Code inside your repo directory, loads `packs/planner/prompts/planner.md` as the system prompt, and hands the bead's description as the task. The Planner agent is now working autonomously.
+
+### Step 4: Watch the Planner Work
+
 ```bash
 gc watch planner
 ```
 
-The Planner should create: `work-packages/loyalty-points-system.md`
+You'll see the Claude Code session streaming in real-time. The Planner should:
 
----
+1. Read `docs/PROJECT_MANIFEST.md` (you'll see it open the file)
+2. Read the bead description (the feature request)
+3. Start writing `work-packages/loyalty-points-system.md`
+4. Commit the file on a feature branch
 
-## Step 7: Review Planner Output
+Press `Ctrl+b d` to detach from tmux (the agent keeps running). You can also monitor from another terminal:
+
+```bash
+gc events --follow    # Stream all city events
+gc status             # Check agent state
+bd show my-city-a1b2c3  # Check bead progress
+```
+
+Wait until the Planner finishes (state returns to `idle` in `gc status`). This typically takes 2–5 minutes.
+
+### Step 5: Review the Work Package
 
 ```bash
 cd ~/path/to/your-repo
 cat work-packages/loyalty-points-system.md
 ```
 
-**Check for:**
-- [ ] Clear goal statement
-- [ ] 3-5 user stories with acceptance criteria
-- [ ] Dependencies identified
-- [ ] Architectural considerations flagged
+You should see a file with this structure (content will vary):
 
-**If output is incomplete:**
-1. Update AGENTS.md Planner section with more specific guidance
-2. Delete the work package file
-3. Re-sling the bead: `gc sling planner my-city-xyz789`
+```markdown
+# Work Package: Loyalty Points System
+
+## Goal
+Allow customers to earn points on purchases and redeem them for discounts,
+increasing repeat business and customer retention.
+
+## User Stories
+
+### Story 1: Earn Points on Purchase
+As a customer, I want to automatically earn 1 point per dollar spent,
+so that my loyalty is rewarded.
+
+Acceptance Criteria:
+- [ ] Points are added to the customer's balance after order placement
+- [ ] Points calculation uses order total in cents (1 point per 100 cents)
+- [ ] Points are not awarded for cancelled or refunded orders
+
+### Story 2: View Points Balance
+As a customer, I want to see my points balance on the order confirmation
+page, so that I know how many points I have.
+...
+
+## Dependencies
+- Existing order system (src/api/orders.ts)
+- Customer authentication (src/auth/)
+
+## Test Cases
+- Given a $12.99 order, when placed, then 12 points are added
+- Given 100 points balance, when redeemed at checkout, then $5 discount applied
+...
+
+## Scope Boundary
+- IN: Points earning, redemption at checkout, balance display
+- OUT: Points expiration, admin dashboard (separate feature), transfer between accounts
+```
+
+### Step 6: Check the Work Package Against the Quality Gate
+
+Open `packs/planner/prompts/planner.md` and read the Quality Gate section. Check each rule:
+
+| Quality Gate Rule | Pass? | Evidence |
+|-------------------|-------|----------|
+| Every user story has at least one AC | ✅ or ❌ | Count ACs per story |
+| At least two test cases defined | ✅ or ❌ | Count test cases |
+| Scope boundary is explicit | ✅ or ❌ | IN and OUT sections present? |
+| No ambiguous terms | ✅ or ❌ | Search for "improve", "better", "enhance", "nice" |
+
+**If any rule fails:**
+
+1. **Do NOT edit the work package file directly.** That's a manual fix — it breaks config discipline.
+2. Instead, open `packs/planner/prompts/planner.md` and add a more specific rule. For example, if test cases are missing:
+
+```markdown
+## Quality Gate
+...
+5. Test cases must include at least one happy-path case AND one error case.
+   Example error case: "Given an order of $0.00, when placed, then zero points
+   are awarded (not an error)."
+```
+
+3. Delete the work package and re-sling:
+
+```bash
+rm work-packages/loyalty-points-system.md
+gc sling planner my-city-a1b2c3
+gc watch planner
+```
+
+4. Review the new output. Repeat until all quality gate rules pass.
+
+**Target: ≤2 slings.** If you're on sling #3, ask a facilitator — your prompt is probably fighting your project's existing conventions.
+
+### Step 7: Mark the Planner Bead as Done
+
+Once the work package passes all quality gate rules:
+
+```bash
+bd close my-city-a1b2c3 --comment "Work package completed: work-packages/loyalty-points-system.md"
+```
+
+You should see:
+
+```
+Closed bead: my-city-a1b2c3
+```
 
 ---
 
-## Step 8: Create Architecture Request Bead
+## Part 4: Create and Run the Architect (~20 min)
 
-Now ask the Architect to review the work package:
+The Planner's output is the Architect's input. Now the Architect reads the work package and produces an ADR for the open technical question: *where to store loyalty points?*
+
+### Step 1: Create the Architect Bead with a Dependency
 
 ```bash
+cd ~/my-city
 bd create "Architecture Review: Loyalty Points Storage" \
   --description "$(cat <<'EOF'
 Review the work package at work-packages/loyalty-points-system.md
 
 Make an architectural decision about:
-- How to store loyalty points (user table? separate service? ledger?)
-- Trade-offs of each approach
-- Impact on performance, data consistency, and future features
+- How to store loyalty points (add column to users table? separate
+  points_ledger table? external service?)
+- Trade-offs of each approach for performance, data consistency,
+  and future features
+- Impact on the existing order placement flow
 
-Produce an ADR documenting your decision.
+Read docs/PROJECT_MANIFEST.md for tech stack constraints.
+Read CLAUDE.md for any tailored ADR baselines that may already
+cover this decision pattern.
+
+Produce an ADR at docs/adr/0001-loyalty-points-storage.md
+using the MADR template in your prompt.
 EOF
 )" \
-  --depends-on my-city-xyz789    # Blocks on planner completing first
+  --depends-on my-city-a1b2c3
 ```
 
-Note the new bead ID (e.g., `my-city-arch123`).
+You should see:
 
----
+```
+Created bead: my-city-d4e5f6
+```
 
-## Step 9: Sling to Architect Agent
+**What's happening here:** The `--depends-on my-city-a1b2c3` flag tells Gas City: "don't let anyone sling this bead until `my-city-a1b2c3` is closed." Since you just closed the Planner bead, this dependency is already satisfied. In the capstone (C1), you'll use dependencies to create automatic sequential pipelines.
+
+Verify:
 
 ```bash
-gc sling architect my-city-arch123
+bd show my-city-d4e5f6
 ```
 
-**Monitor:**
+You should see status `open` and the dependency marked as satisfied.
+
+### Step 2: Sling to the Architect
+
+```bash
+gc sling architect my-city-d4e5f6
+```
+
+You should see:
+
+```
+Slinging my-city-d4e5f6 → architect
+Session started: architect-d4e5f6 (tmux)
+```
+
+### Step 3: Watch the Architect Work
+
 ```bash
 gc watch architect
 ```
 
-The Architect should create: `docs/adr/0001-loyalty-points-storage.md`
+The Architect should:
 
----
+1. Read `docs/PROJECT_MANIFEST.md`
+2. Read `CLAUDE.md` (checking for tailored ADR baselines)
+3. Read `work-packages/loyalty-points-system.md`
+4. Read any existing files in `docs/adr/` (there are none yet)
+5. Start writing `docs/adr/0001-loyalty-points-storage.md`
+6. Append a cross-reference to the work package
+7. Commit on the feature branch
 
-## Step 10: Verify Cross-References
+Wait until the Architect finishes (2–5 minutes).
 
-Check that both artifacts reference each other:
+### Step 4: Review the ADR
 
-**In work package:**
+```bash
+cat docs/adr/0001-loyalty-points-storage.md
+```
+
+You should see a file with this structure:
+
+```markdown
+# ADR-0001: Loyalty Points Storage Strategy
+
+## Status
+Proposed
+
+## Context
+The loyalty points system (see work-packages/loyalty-points-system.md)
+requires persistent storage for customer point balances. The existing
+tech stack uses SQLite via better-sqlite3. Key constraints:
+- Points must be accurate (no double-counting)
+- Adding points must not slow the checkout flow
+- Must integrate with the existing orders table
+
+## Options Considered
+
+1. **Add points_balance column to users table**
+   - Pros: Simple, single query to check balance
+   - Cons: No audit trail, concurrent updates risk double-counting
+
+2. **Separate points_ledger table (event sourcing)**
+   - Pros: Full audit trail, balance derived from sum of events,
+     naturally handles refunds (negative entries)
+   - Cons: Balance query requires aggregation, more complex
+
+3. **External points microservice**
+   - Pros: Decoupled, independently scalable
+   - Cons: Massive over-engineering for a single-store pizza app,
+     adds network latency to checkout
+
+## Decision
+We chose **Option 2: Separate points_ledger table** because it provides
+an audit trail (critical for financial data), naturally handles refunds
+via negative entries, and the aggregation cost is negligible for the
+expected volume (<10K orders/month).
+
+## Consequences
+- Positive: Full transaction history for debugging and reporting
+- Positive: Refund handling is a ledger entry, not a balance mutation
+- Negative: Admin dashboard queries will need GROUP BY aggregation
+- Risk: If volume grows past 100K orders/month, consider materialized
+  views or caching the balance
+
+## References
+- work-packages/loyalty-points-system.md
+```
+
+### Step 5: Check the ADR Against the Quality Gate
+
+Open `packs/architect/prompts/architect.md` and check each Quality Gate rule:
+
+| Quality Gate Rule | Pass? | Evidence |
+|-------------------|-------|----------|
+| All four MADR sections present (Context, Options, Decision, Consequences) | ✅ or ❌ | Count sections |
+| At least two options with trade-offs | ✅ or ❌ | Count options, check each has pros/cons |
+| References work package by path | ✅ or ❌ | Search for `work-packages/` in the file |
+| Consequences include at least one risk | ✅ or ❌ | Look for "Risk:" line |
+
+**If any rule fails:**
+
+1. Open `packs/architect/prompts/architect.md` and add a more specific rule. For example, if the Architect only considered one option:
+
+```markdown
+## Quality Gate
+...
+5. You MUST evaluate at least 3 distinct approaches. If fewer than 3 are
+   viable, explain why the rejected approaches were eliminated.
+   "Only one way to do it" is never true — list the naive approach and
+   explain why it was rejected.
+```
+
+2. Delete the ADR and re-sling:
+
+```bash
+rm docs/adr/0001-loyalty-points-storage.md
+gc sling architect my-city-d4e5f6
+gc watch architect
+```
+
+3. Review the new output. Repeat until all rules pass.
+
+### Step 6: Verify Cross-References
+
+The Architect's Process (step 5 in the prompt) says: "Add a cross-reference to the work package."
+
+Check the work package:
+
+```bash
+grep -i "adr\|architect" work-packages/loyalty-points-system.md
+```
+
+You should see a line like:
+
+```
+## Architectural Decisions
+- ADR-0001: Loyalty Points Storage Strategy (docs/adr/0001-loyalty-points-storage.md)
+```
+
+Check the ADR:
+
+```bash
+grep -i "work-package\|work_package" docs/adr/0001-loyalty-points-storage.md
+```
+
+You should see:
+
+```
+- work-packages/loyalty-points-system.md
+```
+
+**If cross-references are missing:** this is a prompt gap. Add to both pack prompts:
+
+In `packs/planner/prompts/planner.md`, add to the Output Format:
+
 ```markdown
 ## Architectural Decisions
-See ADR-0001: Loyalty Points Storage Strategy
+[Leave blank — the Architect agent will fill this in after producing ADRs]
 ```
 
-**In ADR:**
+In `packs/architect/prompts/architect.md`, add to the Process section:
+
 ```markdown
-**Work Package:** WP-2026-04-07-loyalty-points
+5. After writing the ADR, open the work package file and append the ADR
+   path under the "## Architectural Decisions" heading. If the heading
+   doesn't exist, create it at the end of the file.
 ```
 
-**If cross-references missing:**
-Update AGENTS.md to require explicit references, then re-run.
+Re-sling the Architect. Check again.
 
----
-
-## Step 11: Commit Both Artifacts
+### Step 7: Close the Architect Bead
 
 ```bash
-git add work-packages/loyalty-points-system.md
-git add docs/adr/0001-loyalty-points-storage.md
-git commit -m "feat(planning): add loyalty points work package and ADR"
-git push origin main
+bd close my-city-d4e5f6 --comment "ADR completed: docs/adr/0001-loyalty-points-storage.md"
 ```
 
-Mark beads complete:
+---
+
+## Part 5: Commit, Review, and Document (~10 min)
+
+### Step 1: Review the Full Artifact Set
 
 ```bash
-bd close my-city-xyz789 --comment "Work package completed"
-bd close my-city-arch123 --comment "ADR completed"
+cd ~/path/to/your-repo
+git log --oneline -5
+```
+
+You should see commits from both agents:
+
+```
+a1b2c3d feat(architect): add ADR-0001 loyalty points storage
+e4f5g6h feat(planner): add loyalty points work package
+i7j8k9l chore(architect): customize architect prompt with tailored-ADR input
+m0n1o2p chore: seed tailored industry ADRs via actual adr-bot
+q3r4s5t chore(planner): customize planner prompt for project conventions
+```
+
+### Step 2: Verify Both Artifacts Exist
+
+```bash
+ls -la work-packages/loyalty-points-system.md
+ls -la docs/adr/0001-loyalty-points-storage.md
+```
+
+Both files should exist and have non-zero size.
+
+### Step 3: Push to Remote
+
+```bash
+git push -u origin l2-planner-architect
+```
+
+### Step 4: Update DECISIONS.md
+
+Append an L2 entry to your `DECISIONS.md`:
+
+```markdown
+## 2026-04-21 · L2 · Planner + Architect
+
+### What Happened
+- Installed planner and architect packs
+- Seeded tailored ADRs via `actual adr-bot` (8 baselines written)
+- Planner produced work-packages/loyalty-points-system.md in 1 sling
+- Architect produced docs/adr/0001-loyalty-points-storage.md in 1 sling
+- Cross-references verified in both directions
+
+### Config Changes Made
+- Added project-specific Quality Gate rule #5 to planner prompt (prices in cents)
+- Added CLAUDE.md as an Architect input for tailored-ADR baselines
+- [List any other prompt changes you made during iteration]
+
+### Lessons Learned
+- The Architect's ADR quality was higher when tailored baselines were present —
+  it spent its reasoning on the project-specific question (storage strategy)
+  instead of re-deriving general patterns
+- Cross-references don't happen automatically — the prompt must explicitly say
+  "open the work package and append the ADR path"
+```
+
+Commit:
+
+```bash
+git add DECISIONS.md
+git commit -m "docs: add L2 decision log entry"
+git push
 ```
 
 ---
 
-## Recommended Prompts
+## Test Scenarios
 
-### For Planner Agent (via bead description)
-```
-Analyze this feature request and create a work package following the template in AGENTS.md.
+Try these variations to stress-test your Planner and Architect:
 
-[Feature request details]
+### Scenario 1: Vague Feature Request
 
-Requirements:
-1. Break into 3-5 user stories
-2. Each story needs measurable acceptance criteria
-3. Identify all dependencies
-4. Flag architectural decisions needed
-5. Estimate complexity for each story
+Sling a bead with a deliberately vague description:
 
-Output: work-packages/[feature-name].md
+```bash
+bd create "Feature: Make the app better" \
+  --description "The app should be improved. Make it nicer."
 ```
 
-### For Architect Agent (via bead description)
-```
-Review the work package at: [path to work package]
+Sling to the Planner. **Expected:** The Planner should either refuse (if your Quality Gate says "no ambiguous terms") or produce a very weak work package. This tests whether your Quality Gate catches vagueness.
 
-Create an ADR addressing: [specific architectural question]
+### Scenario 2: Feature with No Architectural Question
 
-Requirements:
-1. Evaluate at least 3 implementation options
-2. Document trade-offs explicitly
-3. Reference work package by ID
-4. Follow MADR template in AGENTS.md
-
-Output: docs/adr/[next-number]-[short-title].md
+```bash
+bd create "Feature: Change button color to blue" \
+  --description "Change the 'Add to Cart' button from green to blue. File: src/components/MenuCard.tsx, line 42."
 ```
 
-### If Agents Miss Requirements
+Sling to the Planner, then the Architect. **Expected:** The Architect should recognize there's no meaningful architectural decision here and produce a trivial ADR ("no decision needed — cosmetic change"). If your Architect writes a 3-option ADR for a button color, add a decision threshold to the prompt: "Only write an ADR if the decision affects more than one file or has long-term consequences."
+
+### Scenario 3: Feature That Conflicts with a Tailored ADR
+
+If you seeded tailored ADRs, create a feature that deliberately pushes against one of them. For example, if a tailored ADR says "use parameterized queries for all database access," create a feature that might tempt raw SQL:
+
+```bash
+bd create "Feature: Custom Report Builder" \
+  --description "Allow admins to write custom SQL queries against the database to generate reports."
 ```
-The [Planner/Architect] output is missing [specific requirement].
 
-Review AGENTS.md section for [role] and ensure you're following all template requirements.
+**Expected:** The Architect should flag the conflict with the tailored ADR and either propose a safe alternative (parameterized report templates) or write an override ADR explaining why raw SQL is acceptable for admin-only reports.
 
-Regenerate the artifact with all required sections.
+---
+
+## Your Final File Structure
+
+After completing L2, your project repo should contain:
+
+```
+your-repo/
+├── CLAUDE.md                                    # Updated with tailored ADRs (if you ran adr-bot)
+├── DECISIONS.md                                 # Now has L1 + L2 entries
+├── docs/
+│   ├── PROJECT_MANIFEST.md                      # Filled in before workshop
+│   └── adr/
+│       └── 0001-loyalty-points-storage.md       # ← Architect produced this
+├── work-packages/
+│   └── loyalty-points-system.md                 # ← Planner produced this
+├── design/.gitkeep                              # Empty — Designer fills this in L3
+├── review-reports/.gitkeep                      # Empty — Reviewer fills this in L4
+├── release-gates/.gitkeep                       # Empty — Deployer fills this in L4
+├── feedback-loops/.gitkeep                      # Empty — W4 fills this in
+└── src/ ...                                     # Your existing code (untouched by L2)
+```
+
+And your city:
+
+```
+~/my-city/
+├── city.toml                                    # Now has dev-agent + planner + architect
+└── beads/
+    ├── my-city-a1b2c3 (closed)                  # Planner bead
+    └── my-city-d4e5f6 (closed)                  # Architect bead
 ```
 
 ---
 
-## Evaluation Rubric
+## Command Cheat Sheet
 
-| Criterion | Points | Scoring |
-|-----------|--------|---------|
-| **Work Package Completeness** | 30 pts | All sections present (goal, stories with ACs, dependencies, architectural flags) |
-| **ADR Quality** | 30 pts | All MADR sections, 3+ options evaluated, trade-offs explicit |
-| **Cross-Reference Integrity** | 20 pts | Both artifacts reference each other correctly |
-| **Config Discipline** | 20 pts | All iterations via AGENTS.md updates, no ad-hoc prompting |
+Every command you ran during this lab, in order:
 
-**Total:** 100 points
+```bash
+# PART 0 — Read the packs (no commands — just read the files)
+
+# PART 1 — Install Planner
+gc rig add ~/path/to/your-repo --include /path/to/packs/planner
+gc restart
+gc status
+# (edit packs/planner/prompts/planner.md — add project-specific Quality Gate rule)
+git checkout -b l2-planner-architect
+git add -A && git commit -m "chore(planner): customize planner prompt"
+
+# PART 2 — Install Architect
+brew install actual-software/actual/actual       # one-time install
+actual adr-bot --dry-run                         # preview tailored ADRs
+actual adr-bot                                   # write to CLAUDE.md
+git add CLAUDE.md && git commit -m "chore: seed tailored industry ADRs"
+gc rig add ~/path/to/your-repo --include /path/to/packs/architect
+gc restart
+gc status
+# (edit packs/architect/prompts/architect.md — add CLAUDE.md as input)
+git add -A && git commit -m "chore(architect): customize architect prompt"
+
+# PART 3 — Run the Planner
+bd create "Feature: Loyalty Points System" --description "$(cat <<'EOF'
+...feature request...
+EOF
+)"
+gc sling planner my-city-a1b2c3
+gc watch planner                                 # Ctrl+b d to detach
+cat work-packages/loyalty-points-system.md       # review output
+# (if quality gate fails: edit prompt, rm work package, re-sling)
+bd close my-city-a1b2c3 --comment "Work package completed"
+
+# PART 4 — Run the Architect
+bd create "Architecture Review: Loyalty Points Storage" \
+  --description "..." --depends-on my-city-a1b2c3
+gc sling architect my-city-d4e5f6
+gc watch architect
+cat docs/adr/0001-loyalty-points-storage.md      # review output
+grep -i "adr" work-packages/loyalty-points-system.md   # check cross-ref
+grep -i "work-package" docs/adr/0001-loyalty-points-storage.md
+# (if quality gate fails: edit prompt, rm ADR, re-sling)
+bd close my-city-d4e5f6 --comment "ADR completed"
+
+# PART 5 — Commit and document
+git push -u origin l2-planner-architect
+# (edit DECISIONS.md — add L2 entry)
+git add DECISIONS.md && git commit -m "docs: add L2 decision log entry"
+git push
+```
+
+---
+
+## Quick Reference: What You Built
+
+| Component | File / Location | What It Does |
+|-----------|-----------------|--------------|
+| Planner pack | `packs/planner/` | Defines the Planner agent: prompt, overlay, metadata |
+| Planner prompt | `packs/planner/prompts/planner.md` | System prompt for the Planner — Role, Inputs, Output Format, Quality Gate, Process |
+| Architect pack | `packs/architect/` | Defines the Architect agent: prompt, overlay, metadata |
+| Architect prompt | `packs/architect/prompts/architect.md` | System prompt for the Architect — same six-section structure |
+| Tailored ADRs | `CLAUDE.md` (appended by `actual adr-bot`) | Industry-standard ADRs tailored to your codebase — the Architect's baseline |
+| Work package | `work-packages/loyalty-points-system.md` | Planner's output: Goal, Stories, ACs, Dependencies, Tests, Scope |
+| ADR | `docs/adr/0001-loyalty-points-storage.md` | Architect's output: Context, Options, Decision, Consequences, References |
+| Cross-reference (WP → ADR) | Appended to work package by Architect | "See ADR-0001" |
+| Cross-reference (ADR → WP) | In ADR's References section | `work-packages/loyalty-points-system.md` |
+| Planner bead | `bd show my-city-a1b2c3` | The work item that triggered the Planner |
+| Architect bead | `bd show my-city-d4e5f6` | The work item that triggered the Architect, with dependency on Planner bead |
+
+---
+
+## Quality Bar
+
+When you review your own output, check:
+
+- **Work Package Completeness** — All 6 sections present (Goal, Stories, ACs, Dependencies, Tests, Scope). Stories have measurable ACs.
+- **ADR Quality** — All 4 MADR sections present. 2+ options with explicit trade-offs. Decision rationale is specific, not generic.
+- **Cross-Reference Integrity** — Work package references the ADR by path. ADR references the work package by path. Both are valid file paths.
+- **Config Discipline** — Every iteration was a prompt-file diff + re-sling. Zero ad-hoc chat corrections. DECISIONS.md documents each change.
+
+---
+
+## Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| `gc rig add --include` says "pack not found" | Use the absolute path to the pack directory, not relative. Verify with `ls /path/to/packs/planner/pack.toml`. |
+| `gc status` doesn't show `planner` after restart | The `--include` may have failed silently. Run `gc rig list` and check the PACKS column. Re-run `gc rig add --include` with the correct path. |
+| Planner writes to wrong directory (e.g., `plan/` instead of `work-packages/`) | Open `packs/planner/prompts/planner.md` → Output Format section. Make the path explicit and add "never anywhere else." Re-sling. |
+| Architect writes ADR without reading the work package | The bead description didn't include the work package path. Edit the bead: `bd edit my-city-d4e5f6` and add the path explicitly. Re-sling. |
+| Architect produces a 1-option ADR | Add to Quality Gate: "You MUST evaluate at least 3 options. List the naive approach and explain why it was rejected." Re-sling. |
+| Cross-references are missing | Add explicit instructions to both prompts (see Part 4, Step 6). Re-sling the Architect only — it's responsible for back-linking. |
+| `actual adr-bot` hangs or errors | Check that your Claude Code runner is authenticated: `claude auth login`. Or switch runner: `actual config set runner anthropic-api`. |
+| `actual adr-bot` produces irrelevant ADRs | Scope it: `actual adr-bot --dry-run` to preview, then re-run with language/framework filters if available. Or just delete irrelevant sections from `CLAUDE.md`. |
+| Planner hallucinates project features that don't exist | Add to planner prompt: "Only reference files, APIs, and features documented in `docs/PROJECT_MANIFEST.md` or visible in the repo. Never assume infrastructure that isn't committed." |
+| Bead `--depends-on` blocks but the dependency is already closed | Run `bd show <bead-id>` to check dependency status. If it shows "satisfied," the bead is ready to sling. If still "blocked," verify you closed the prerequisite bead. |
+| Agent produces output but doesn't commit | Check `git status` in the repo. The agent may have written files but failed to commit. Add to the prompt's Process section: "Always `git add` and `git commit` your output before marking the bead ready." |
 
 ---
 
 ## Exit Criteria
 
-✅ Both artifacts committed to repository  
-✅ Work package has 3+ user stories with clear ACs  
-✅ ADR has 3+ options with trade-off analysis  
-✅ Cross-references between artifacts valid  
-✅ Both beads marked closed in Gas City  
+Before leaving this lab, verify all of these:
 
----
+- [ ] `gc status` shows both `planner` and `architect` agents
+- [ ] `work-packages/loyalty-points-system.md` exists with all 6 sections
+- [ ] `docs/adr/0001-loyalty-points-storage.md` exists with all 4 MADR sections
+- [ ] The work package references the ADR by path
+- [ ] The ADR references the work package by path
+- [ ] Both beads are closed (`bd list` shows status `closed`)
+- [ ] `DECISIONS.md` has an L2 entry
+- [ ] All changes pushed to remote
 
-## Common Issues & Solutions
-
-### Issue: Planner produces vague acceptance criteria
-**Solution:** Add to AGENTS.md: "Acceptance criteria must be testable. Bad: 'works well'. Good: 'loads in <200ms', 'validates email format'."
-
-### Issue: Architect only considers one option
-**Solution:** Add to AGENTS.md: "You MUST evaluate at least 3 distinct approaches. If only 2 are viable, explain why a third was eliminated."
-
-### Issue: No cross-references between artifacts
-**Solution:** Add explicit requirements to both agent specs: "Reference the [work package/ADR] by its full ID in the [Architectural Considerations/Work Package] section."
-
-### Issue: Agents hallucinate project details
-**Solution:** Add to AGENTS.md: "Only use information from: the feature request, existing codebase, and this AGENTS.md file. Never assume features or infrastructure that aren't documented."
+**L2 blocks L3.** Don't move on without both artifacts committed — L3's Designer agent reads the work package and ADR as its primary inputs. Without them, you'll be flying blind.
 
 ---
 
 ## Next Steps
 
-After L2, you have two specialized agents working together:
-- ✅ Planner breaks down work
-- ✅ Architect makes technical decisions
-- ✅ Artifacts reference each other
+In **L3**, you'll:
+- Install the Designer and Coder packs (`packs/designer`, `packs/coder`)
+- The Designer reads your work package + ADR and produces a component spec at `design/<slug>-spec.md`
+- The Coder reads the spec and implements actual code under `src/`
+- Quality gates include `npm run build`, `npm test`, `npm run lint` — real compilation, real tests
+- You'll have a 4-agent pipeline: Planner → Architect → Designer → Coder
 
-In **L3**, you'll add Designer + Coder agents that consume these artifacts and generate actual implementation code.
+The pattern is identical to what you just did — read pack, install pack, customize prompt, create bead, sling, review, iterate config, commit. You've now done it twice (L1 + L2). L3 adds two more agents on the same loop.

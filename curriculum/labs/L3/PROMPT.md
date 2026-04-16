@@ -62,7 +62,7 @@ gc status  # Should show 4 agents now: planner, architect, designer, coder
 
 ## Config Discipline Check
 
-The key question: when the coder produced wrong output, did you fix it by updating `packs/coder/prompts/coder.md` or by typing instructions into the chat? The former is correct. Track your runs-to-passing count — it's part of the scoring rubric.
+The key question: when the coder produced wrong output, did you fix it by updating `packs/coder/prompts/coder.md` or by typing instructions into the chat? The former is correct. Track your runs-to-passing count — getting to passing in ≤3 slings is the target.
 
 ## Exit Criteria
 
