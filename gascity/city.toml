@@ -1,0 +1,19 @@
+[workspace]
+name = "20260415-gc-factory-v1"
+provider = "claude"
+start_command = "<user_home>/.nvm/versions/node/v22.19.0/bin/claude"
+includes = ["packs/actual/all"]
+
+[[rigs]]
+name = "20260415-project-v1"
+path = "/Users/david_miura_actual_ai/Projects/factory/20260415-project-v1"
+includes = ["packs/actual/all"]
+
+[session]
+startup_timeout = "3m"
+
+[daemon]
+patrol_interval = "30s"
+max_restarts = 5
+restart_window = "1h"
+shutdown_timeout = "5s"

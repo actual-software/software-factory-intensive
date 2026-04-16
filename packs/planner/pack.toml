@@ -1,13 +1,55 @@
-[pack]
-name = "planner"
-schema = 1
-description = "Planner agent — breaks feature requests into structured work packages"
+# actual-planner — Plan / Work-Breakdown agent for the Actual Software Factory.
+#
+# Takes goal-shaped beads (labelled needs-plan) and produces a
+# dependency-ordered graph of concrete task beads that the builder
+# can consume.
+#
+# Ships two skills in its overlay:
+#   1. `actual`       — vendored from actual-software/actual-skill, so the
+#                       planner can keep CLAUDE.md/AGENTS.md in the loop.
+#   2. `tracker-to-beads` — pack-local; probes for sibling tracker skills
+#                       (jira, linear, github-issues, tracker-*) and
+#                       materializes external issues as `bd` beads.
+#
+# Persona anchor: product-manager + program-manager from
+# actual-factory/extensions/factory-vscode/shared/actual-agents/built-in-agents.ts
 
+[pack]
+name = "actual-planner"
+schema = 1
+
+[[doctor]]
+name = "check-planner"
+script = "doctor/check-planner.sh"
+description = "Verify planner prerequisites (bd, gc, jq)"
+
+[[commands]]
+name = "status"
+description = "Show planner work status for the current rig"
+script = "commands/status.sh"
+
+[[commands]]
+name = "plan"
+description = "Print the current work-breakdown graph for a goal bead"
+script = "commands/plan.sh"
+
+[[commands]]
+name = "tracker-sync"
+description = "Manually run the tracker → beads import"
+script = "commands/tracker-sync.sh"
+
+[formulas]
+dir = "formulas"
+
+# ── PLANNER — PM voice + program-management discipline. ──────────────
 [[agent]]
 name = "planner"
 scope = "rig"
-prompt_template = "prompts/planner.md"
+wake_mode = "fresh"
+work_dir = ".gc/agents/{{.Rig}}/planner"
+prompt_template = "prompts/planner.md.tmpl"
+nudge = "Run 'gc prime', then check bd ready --label=needs-plan for work."
 overlay_dir = "overlays/default"
-nudge = "Check your hook for new feature requests to plan."
-idle_timeout = "1h"
+idle_timeout = "2h"
+min_active_sessions = 0
 max_active_sessions = 1
