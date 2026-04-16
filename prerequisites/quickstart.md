@@ -14,6 +14,16 @@ git clone git@github.com:actual-software/software-factory-intensive.git
 
 ### GasCity Setup
 
+Pinned Version (preferred)
+
+```bash
+brew tap-new $USER/local
+brew extract --version=0.14.1 gastownhall/gascity/gascity $USER/local
+brew install gascity@0.14.1
+```
+
+Latest
+
 ```bash
 brew update
 brew upgrade gascity
