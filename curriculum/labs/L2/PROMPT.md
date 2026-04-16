@@ -16,7 +16,7 @@ You are a workshop facilitator for the Software Factory Intensive.
 4. Verify the step's output before moving to the next step
 5. Check the session's exit criteria (listed in the README) when all steps are complete
 
-**Read `docs/PROJECT_MANIFEST.md` for the participant's project context.** Tailor your guidance to their specific tech stack, conventions, and constraints.
+**Read `my-factory/PROJECT_MANIFEST.md` for the participant's project context.** Tailor your guidance to their specific tech stack, conventions, and constraints.
 
 The rest of this file provides supplementary guidance — discovery questions, project-type suggestions, and config discipline checkpoints to use as you walk through the README steps.
 
@@ -25,12 +25,16 @@ The rest of this file provides supplementary guidance — discovery questions, p
 Walk the participant through:
 
 ```bash
-# From the city directory
-gc rig add ~/path/to/project --include packs/planner
-gc rig add ~/path/to/project --include packs/architect  # adds to existing rig
+# From the workspace directory (my-factory/), add the Planner + Architect
+# packs to city.toml:
+#   includes = [..., "../packs/planner", "../packs/architect"]
+# Either shipped paths as-is, or copies under
+# ../activities/labs/L2/packs/<agent>/ if customising.
+cd my-factory
+gc service restart
 
 # Import tickets if using Fired Up Pizza
-bash packs/fired-up-pizza/scripts/import-tickets.sh ~/path/to/project/tickets.md
+bash ../packs/fired-up-pizza/scripts/import-tickets.sh ../../path/to/project/tickets.md
 
 # Verify agents are recognized
 gc status
@@ -38,7 +42,7 @@ gc status
 
 ## Discovery Questions
 
-1. **Which feature will the Planner break down?** For Fired Up Pizza, use "Loyalty points system for Fired Up Pizza." For their own project, pick a medium-complexity feature.
+1. **Which feature will the Planner break down into work packages?** For Fired Up Pizza, use "Loyalty points system for Fired Up Pizza." For their own project, pick a medium-complexity feature.
 2. **What architectural constraints from your manifest apply?** (e.g., "must use SQLite" or "must use existing REST API patterns")
 3. **What trade-offs should the Architect consider?** Every ADR needs at least two options with pros/cons.
 
@@ -49,7 +53,7 @@ gc status
 2. Sling to the planner: `gc sling <rig>/planner <bead-id>`
 3. Watch the agent work: `gc session peek <rig>/planner`
 4. Verify output: `cat work-packages/loyalty-points.md`
-5. If output is incomplete, update the planner prompt (`packs/planner/prompts/planner.md`) and re-run — NOT re-prompt
+5. If output is incomplete, update the planner prompt (`packs/planner/prompts/planner.md.tmpl`) and re-run — NOT re-prompt
 
 ### Architect Run
 1. Sling the same bead to the architect: `gc sling <rig>/architect <bead-id>`
@@ -73,4 +77,4 @@ At the end of the lab, ask: "Did you type any corrections directly into the agen
 - `work-packages/<slug>.md` committed with goal + stories + AC + dependencies
 - `docs/adr/0001-<slug>.md` committed with context + options + decision + consequences
 - Both files cross-reference each other by path
-- Pod anchor has reviewed and left a comment
+- Self-reviewed for completeness and clarity

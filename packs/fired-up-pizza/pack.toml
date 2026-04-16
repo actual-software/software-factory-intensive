@@ -1,8 +1,17 @@
-# Fired Up Pizza — composite pack bundling all 6 factory agents.
+# Fired Up Pizza — composite pack bundling the 6 factory agents.
 #
 # Each agent is its own pack so participants can adopt them
 # incrementally during the workshop labs. This composite includes
-# all of them for running the full factory.
+# all of them for running the full factory against the reference
+# project.
+#
+# Role → shipped pack mapping:
+#   Planner      → ../planner
+#   Architect    → ../architect
+#   Designer     → ../designer
+#   Builder      → ../builder        (called "Coder" in the curriculum)
+#   Reviewer     → ../reviewer
+#   Release-Gate → ../release-gate   (called "Deployer" in the curriculum)
 
 [pack]
 name = "fired-up-pizza"
@@ -12,9 +21,9 @@ includes = [
     "../planner",
     "../architect",
     "../designer",
-    "../coder",
+    "../builder",
     "../reviewer",
-    "../deployer",
+    "../release-gate",
 ]
 
 [formulas]

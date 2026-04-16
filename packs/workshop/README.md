@@ -9,9 +9,11 @@ Gas City pack that pre-configures external service integrations for the Software
 cp packs/workshop/env.example .env
 # Edit .env with your tokens
 
-# 2. Add your project as a rig with the workshop pack
-cd ~/my-city
-gc rig add ~/my-project --include packs/workshop
+# 2. Add the workshop pack to your city's includes.
+#    In the Software Factory Intensive curriculum, that's my-factory/city.toml:
+#      includes = [..., "../packs/workshop"]
+cd my-factory
+gc service restart
 
 # 3. Run setup to write credentials into beads config
 gc workshop setup

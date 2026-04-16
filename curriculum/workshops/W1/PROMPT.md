@@ -64,8 +64,8 @@ Use the SPEC-CONTEXT-CONSTRAINT-CRITERIA structure:
 
 ## Gas City Connection
 
-Explain that this workflow card is the seed for what becomes `CLAUDE.md` in Lab 1 — the config file that drives agent behavior without ad-hoc prompting. The discipline of encoding behavior in config (not chat) is the foundation of the entire software factory.
+Explain that this workflow card is the seed for what becomes the agent instructions file (`CLAUDE.md` / `AGENTS.md`) in Lab 1 — the config file that drives agent behavior without ad-hoc prompting. The discipline of encoding behavior in config (not chat) is the foundation of the entire software factory.
 
 ## Exit Criteria
 
-The participant should commit `workflow-card.md` to their repo. Ask their peer partner to read it and confirm: "Could you follow this card to get the same result without asking any questions?" If yes, it passes. If no, iterate on clarity.
+The participant should commit `workflow-card.md` to their repo. Read it back as a stranger to their codebase and confirm: "Could I follow this card to get the same result without asking any questions?" If yes, it passes. If no, iterate on clarity.

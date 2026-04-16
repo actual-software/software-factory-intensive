@@ -54,16 +54,41 @@ gc session peek <agent>      # Watch an agent work
 fired-up-pizza/
   src/                        # Application code (Coder output)
   docs/
-    PROJECT_MANIFEST.md       # Tech stack, conventions, review standards, release criteria, success metrics
+    PROJECT_OVERVIEW.md       # Loose brief written by the founder before the curriculum
+    PROJECT_MANIFEST.md       # Structured skeleton generated from the overview
+    factory-wiring.md         # W2 deliverable — per-agent table + integration points
+    gates/                    # W3 human-gate justification docs (e.g. approve_deploy.md)
     adr/                      # Architecture Decision Records (Architect output)
-  work-packages/              # Planner output
-  design/                     # Designer output
-  review-reports/             # Reviewer output
-  release-gates/              # Deployer output
+  workflow-card.md            # W1 deliverable — single-agent workflow discipline
+  orchestrator.yaml           # W3 deliverable — 6-stage pipeline with gates + on_reject
+  DECISIONS.md                # L1 log of CLAUDE.md rule evolutions
+  work-packages/              # Planner output (L2)
+  design/                     # Designer output (L3)
+  review-reports/             # Reviewer output (L4)
+  release-gates/              # Deployer output (L4)
+  feedback-loops/             # W4 deliverables — reactive, aggregate, external rules
+  factory-run-report.md       # C1 deliverable — end-to-end run record
+  retrospective-card.md       # C1 deliverable — keep / change / question
   tickets.md                  # Initial feature backlog
   CLAUDE.md                   # Agent instructions
   package.json                # Node.js project
 ```
+
+## Reference Deliverables by Session
+
+Each curriculum session has at least one concrete artifact participants produce. This project ships a completed example of each so participants can see the target shape before they start:
+
+| Session | Deliverable | File in this project |
+|---------|-------------|----------------------|
+| W1 | Workflow card | [`workflow-card.md`](./workflow-card.md) |
+| W2 | Factory wiring | [`docs/factory-wiring.md`](./docs/factory-wiring.md) |
+| W3 | Orchestrator + gate justification | [`orchestrator.yaml`](./orchestrator.yaml), [`docs/gates/approve_deploy.md`](./docs/gates/approve_deploy.md) |
+| W4 | Feedback loops (reactive / aggregate / external) | [`feedback-loops/`](./feedback-loops/) |
+| L1 | Agent instructions + decision log | [`CLAUDE.md`](./CLAUDE.md), [`DECISIONS.md`](./DECISIONS.md) |
+| L2 | Work package + ADR | [`work-packages/loyalty-points-system.md`](./work-packages/loyalty-points-system.md), [`docs/adr/0001-loyalty-points-storage.md`](./docs/adr/0001-loyalty-points-storage.md) |
+| L3 | Design spec | [`design/loyalty-points-spec.md`](./design/loyalty-points-spec.md) |
+| L4 | Review report + release gate | [`review-reports/loyalty-points-review.md`](./review-reports/loyalty-points-review.md), [`release-gates/loyalty-points-gate.md`](./release-gates/loyalty-points-gate.md) |
+| C1 | Factory run report + retrospective | [`factory-run-report.md`](./factory-run-report.md), [`retrospective-card.md`](./retrospective-card.md) |
 
 ## The 6-Agent Pipeline
 

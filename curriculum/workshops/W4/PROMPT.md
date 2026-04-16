@@ -38,9 +38,9 @@ Signal (what happened) → Target (what config to update) → Action (how to upd
 
 | Signal | Threshold | Target | Action |
 |--------|-----------|--------|--------|
-| Reviewer finds missing error handling > 2 times | 2 occurrences | `packs/coder/prompts/coder.md` | Add: "Always handle errors with try/catch. Show user-facing error messages." |
-| Tests fail on edge cases > 3 times | 3 failures | `packs/designer/prompts/designer.md` | Add: "Include at least 3 edge cases in every component spec." |
-| ADR missing trade-offs | 1 occurrence | `packs/architect/prompts/architect.md` | Add: "Every option must list at least 2 pros and 2 cons." |
+| Reviewer finds missing error handling > 2 times | 2 occurrences | `packs/builder/prompts/builder.md.tmpl` | Add: "Always handle errors with try/catch. Show user-facing error messages." |
+| Tests fail on edge cases > 3 times | 3 failures | `packs/designer/prompts/designer.md.tmpl` | Add: "Include at least 3 edge cases in every component spec." |
+| ADR missing trade-offs | 1 occurrence | `packs/architect/prompts/architect.md.tmpl` | Add: "Every option must list at least 2 pros and 2 cons." |
 
 ## What to Build
 
