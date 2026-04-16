@@ -1,0 +1,26 @@
+# Fired Up Pizza — composite pack bundling all 6 factory agents.
+#
+# Each agent is its own pack so participants can adopt them
+# incrementally during the workshop labs. This composite includes
+# all of them for running the full factory.
+
+[pack]
+name = "fired-up-pizza"
+schema = 1
+description = "6-agent software factory — all agents bundled for the Fired Up Pizza reference project"
+includes = [
+    "../planner",
+    "../architect",
+    "../designer",
+    "../coder",
+    "../reviewer",
+    "../deployer",
+]
+
+[formulas]
+dir = "formulas"
+
+[[doctor]]
+name = "check-project"
+script = "doctor/check-project.sh"
+description = "Verify reference project scaffold is ready"

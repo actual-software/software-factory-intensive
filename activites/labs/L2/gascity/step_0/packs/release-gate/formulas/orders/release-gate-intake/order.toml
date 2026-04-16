@@ -1,0 +1,6 @@
+[order]
+description = "Wake the release-gate when any bead is labelled ready-to-ship"
+formula = "mol-release-gate"
+gate = "condition"
+check = "bd ready --label=ready-to-ship --limit=1 | grep -q ."
+pool = "release-gate"
