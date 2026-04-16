@@ -28,7 +28,7 @@ The rest of this file provides supplementary guidance — discovery questions, p
 
 ## The Rules
 
-1. **No ad-hoc prompting.** If an agent produces wrong output, update its prompt file and re-run. Every chat message you type into an agent is a scoring deduction.
+1. **No ad-hoc prompting.** If an agent produces wrong output, update its prompt file and re-run. Every chat message you type into an agent breaks config discipline.
 2. **All fixes via config.** If tests fail, if the reviewer finds issues, if the deployer gates fail — the fix is a prompt update, not a manual code edit.
 3. **Log everything.** The Factory Run Report should update in real-time.
 
@@ -102,19 +102,10 @@ Also fill out a retrospective card:
 - **If the factory stalls at the Coder stage**: The most common issue is an incomplete designer spec. Fix the designer prompt to be more explicit about edge cases.
 - **If the Reviewer rejects repeatedly**: The coder prompt likely needs more specific instructions about your project's conventions. Add examples from your manifest.
 - **If the Deployer fails**: Check that your release criteria in the manifest are actually testable. Vague criteria like "code is clean" should be replaced with "lint passes."
-- **If you're running out of time**: It's OK to not reach all 6 stages. The scoring gives partial credit for stages reached, and the Factory Run Report is required regardless.
-
-## Scoring Reminder
-
-| Criterion | Weight |
-|-----------|--------|
-| Stages reached | 30 pts (0 = ≤2, 10 = 3-5, 20 = 6-7, 30 = all 8) |
-| No ad-hoc prompting | 25 pts (0 = >2 manual, 12 = 1-2, 25 = zero) |
-| Report quality | 25 pts |
-| Retrospective insight | 20 pts |
+- **If you're running out of time**: It's OK to not reach all 6 stages. Reaching partial stages with a complete Factory Run Report is a valid outcome — the report is required regardless.
 
 ## Exit Criteria
 
-- Factory Run Report committed (even if incomplete — commit at 2:45 regardless)
+- Factory Run Report committed (even if incomplete — commit what you have before stopping)
 - Feature branch present (any stage)
-- Retrospective card submitted to pod anchor
+- Retrospective card written and committed alongside the run report
