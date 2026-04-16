@@ -82,11 +82,39 @@ Your "city" is the workspace where all agents and beads live. Your "rig" is the 
 ```bash
 # Create a city. You'll use this directory every session from now on.
 gc init ~/my-city
-cd ~/my-city
+```
 
+Expected output (truncated):
+
+```
+City "my-city" already exists; reusing existing configuration and resuming startup checks.
+[6/8] Checking provider readiness
+[7/8] Registering city with supervisor
+Registered city 'my-city' (/Users/you/my-city)
+Installed launchd service: /Users/you/Library/LaunchAgents/com.gascity.supervisor.plist
+[8/8] Waiting for supervisor to start city
+  Adopting sessions...
+  Starting agents...
+```
+
+```bash
 # Register your project repo. Use the absolute path.
+cd ~/my-city
 gc rig add ~/path/to/your-repo
+```
 
+Expected output:
+
+```
+Re-initializing rig 'your-repo'...
+  Detected git repo at /Users/you/path/to/your-repo
+  Prefix: yr
+  Initialized beads database
+  Generated routes.jsonl for cross-rig routing
+Rig re-initialized.
+```
+
+```bash
 # Verify it's registered.
 gc rig list
 ```
@@ -94,8 +122,14 @@ gc rig list
 Expected output:
 
 ```
-NAME            PATH                          PACKS
-your-repo       /Users/you/path/to/your-repo  (none)
+Rigs in /Users/you/my-city:
+  my-city (HQ):
+    Prefix: mc
+    Beads:  initialized
+  your-repo:
+    Path:   /Users/you/path/to/your-repo
+    Prefix: yr
+    Beads:  initialized
 ```
 
 If you cloned `software-factory-intensive` and want to use `my-factory/` as a starter workspace inside your own project repo, copy the skeleton in:
@@ -124,21 +158,28 @@ gc rig add ~/path/to/your-repo --include /path/to/software-factory-intensive/pac
 cp /path/to/software-factory-intensive/packs/workshop/env.example ~/path/to/your-repo/.env
 # Edit .env — only fill in the services you actually use
 
-# Tell bd about the env and validate
-gc workshop setup
+# Validate the setup
 gc doctor
 ```
 
 Expected `gc doctor` output (truncated):
 
 ```
-  ✓ check-core-tools    — gc, bd, dolt, tmux, jq, git, curl all present
-  ✓ check-github        — authenticated as your-user
-  ✓ check-jira          — authenticated as you@co.com (project: PROJ)
-  ⚠ check-linear        — LINEAR_API_KEY not set  (ok — skipping)
+  ✓ city-structure — city.toml present
+  ✓ city-config — city.toml loaded
+  ✓ config-valid — agents, rigs, and services valid
+  ✓ config-refs — all config references valid
+  ✓ tmux-binary — found /opt/homebrew/bin/tmux
+  ✓ git-binary — found /usr/bin/git
+  ✓ jq-binary — found /usr/bin/jq
+  ✓ rig:your-repo:path — path "/Users/you/path/to/your-repo" exists
+  ✓ rig:your-repo:git — git repository
+  ✓ rig:your-repo:beads — store accessible
+  ✓ bd:check-bd — bd available
+  ✓ dolt:check-dolt — dolt available
 ```
 
-Only `check-core-tools` is required. All other checks are informational — each one only activates if you filled in the matching env vars.
+Only the core tool checks are required. Warnings for optional integrations (Jira, Linear, etc.) are expected — each activates only if you filled in the matching env vars.
 
 What this unlocks:
 
@@ -169,12 +210,23 @@ gc restart
 gc status
 ```
 
-Expected:
+Expected output (truncated):
 
 ```
-NAME        STATE   LAST ACTIVITY   BEAD
-dev-agent   idle    --              --
+my-city  /Users/you/my-city
+  Controller: supervisor (PID <pid>)
+  Suspended:  no
+Agents:
+  mayor                   running
+  your-repo/dev-agent     running
+  claude                  pool (min=0, max=unlimited)
+  your-repo/claude        pool (min=0, max=unlimited)
+2/2 agents running
+Rigs:
+  your-repo  /Users/you/path/to/your-repo
 ```
+
+`dev-agent` should show `running` under Agents. If it doesn't, re-check the `dir` field in your `[[agent]]` block against the name shown by `gc rig list`.
 
 ---
 
@@ -303,11 +355,7 @@ git log -5 --oneline
 git diff HEAD~1
 ```
 
-Run the quality gates yourself:
-
-```bash
-npm run lint && npm test && npm run build
-```
+Run your project's quality gates. These are whatever your project already uses to decide code is committable — lint, type check, tests, build, or some subset. Your `CLAUDE.md` names them explicitly in the Quality Gates section; run exactly those commands, in the same order.
 
 ### If gates pass
 
@@ -446,36 +494,6 @@ This gives your future self the context to judge whether the rule was right.
 
 ---
 
-## Final File Structure
-
-After completing L1, your project repo should contain:
-
-```
-your-repo/
-├── .env                              # (optional) workshop-pack credentials
-├── CLAUDE.md                         # you wrote this in Step 4
-├── DECISIONS.md                      # you wrote this in Step 9
-├── docs/
-│   ├── PROJECT_MANIFEST.md           # filled in before or during the lab
-│   └── adr/.gitkeep                  # scaffold for L2's Architect output
-├── work-packages/.gitkeep            # scaffold for L2's Planner output
-├── design/.gitkeep                   # scaffold for L3's Designer output
-├── review-reports/.gitkeep           # scaffold for L4's Reviewer output
-├── release-gates/.gitkeep            # scaffold for L4's Deployer output
-├── feedback-loops/.gitkeep           # scaffold for W4
-└── src/ ...                          # your existing code + one new committed feature
-```
-
-And your city should contain:
-
-```
-~/my-city/
-├── city.toml                         # has one [[agent]] block for dev-agent
-└── beads/ ...                        # the bead you just closed
-```
-
----
-
 ## Command Cheat Sheet
 
 Every command you ran, in order:
@@ -491,7 +509,6 @@ cp -r /path/to/software-factory-intensive/my-factory/* ~/path/to/your-repo/
 # OPTIONAL INTEGRATIONS (Step 2)
 gc rig add ~/path/to/your-repo --include /path/to/packs/workshop
 cp /path/to/packs/workshop/env.example ~/path/to/your-repo/.env
-gc workshop setup
 gc doctor
 
 # AGENT DECLARATION (Step 3)

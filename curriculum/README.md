@@ -55,27 +55,12 @@ W1: Individual workflow
 
 Each session builds on the previous. Exit criteria gates determine whether you're ready for the next session — unmet gates mean revisit the current session before moving on.
 
-## Significance Matrix
-
-| ID | Type | Significance | Blocks Next? |
-|----|------|-------------|-------------|
-| W1 | WORKSHOP | Foundational | No |
-| L1 | LAB | High | YES |
-| W2 | WORKSHOP | Architectural | YES |
-| L2 | LAB | High | YES |
-| L3 | LAB | Medium-High | YES |
-| W3 | WORKSHOP | Critical | YES |
-| L4 | LAB | High | YES |
-| W4 | WORKSHOP | Strategic | No |
-| C1 | CAPSTONE | Summative | No |
-
 ## Prerequisite Materials
 
-All participants should complete the [Project Manifest Template](./PROJECT_MANIFEST_TEMPLATE.md) before starting. The manifest covers:
-- Tech stack and project structure
-- Task inputs (what each agent stage receives)
-- Services to connect (GitHub, Jira, cloud providers, etc.)
-- Success criteria (per-feature and factory-level)
-- Review standards and release criteria
+Before starting the curriculum, write a **Project Overview** for the software project you'll build your factory around. Use [`PROJECT_OVERVIEW_TEMPLATE.md`](./PROJECT_OVERVIEW_TEMPLATE.md) as the starting point — it's a loosely structured brief covering user needs, tech stack, constraints, and potential integrations.
 
-The reference project ([Fired Up Pizza](../reference-project/fired-up-pizza/)) has a completed manifest as an example.
+The overview is what *you* write. The structured [`PROJECT_MANIFEST_TEMPLATE.md`](./PROJECT_MANIFEST_TEMPLATE.md) — a skeleton every factory agent reads — is generated from your overview by your local coding agent during L1. Don't hand-fill the manifest yourself.
+
+The reference project ([Fired Up Pizza](../reference-project/fired-up-pizza/)) has both:
+- [`docs/PROJECT_OVERVIEW.md`](../reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md) — the kind of brief you should arrive with
+- [`docs/PROJECT_MANIFEST.md`](../reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md) — what your agent will generate from it

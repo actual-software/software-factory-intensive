@@ -50,9 +50,9 @@ Enforced by orchestrator + feedback rules (W3/W4)
 
 Before you write your own card, skim the finished equivalent in the reference project:
 
-- [`reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md`](../../../reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md) — the declarative context every agent reads
+- [`reference-project/fired-up-pizza/workflow-card.md`](../../../reference-project/fired-up-pizza/workflow-card.md) — a completed `workflow-card.md` for the Fired Up Pizza project
 
-Your `workflow-card.md` is a pre-cursor to this. It's smaller, still human-focused, and lives in your *project* repo (not the city). In L1 you'll evolve it into agent instructions (`CLAUDE.md` / `AGENTS.md`) that target the `dev-agent` Gas City configuration.
+That card is exactly what this session asks you to produce for your own project — same four sections, project-specific content. Your `workflow-card.md` lives in your *project* repo (not the city). In L1 you'll evolve it into agent instructions (`CLAUDE.md` / `AGENTS.md`) that target the `dev-agent` Gas City configuration.
 
 ---
 
@@ -163,8 +163,6 @@ Read your `workflow-card.md` back to yourself as if you were a stranger who know
 
 For every section, find the first sentence or bullet that would force you to stop and ask a question. Rewrite it to be unambiguous. Iterate until each section reads as a self-contained, executable instruction.
 
-If you have a peer available, swap cards and have them apply the same test — but the card must stand on its own without that.
-
 ---
 
 ## Step 4: Commit the Card (~5 min)
@@ -196,47 +194,24 @@ Skim [`packs/planner/prompts/planner.md`](../../../packs/planner/prompts/planner
 
 ---
 
-## Recommended Prompts
+## Using Your Local Agent for This Session
 
-### Drafting Your Card
+Rather than providing drafting prompts inline, every session ships with a sister `PROMPT.md` file: [`curriculum/workshops/W1/PROMPT.md`](./PROMPT.md). Paste it into Claude Code (or your preferred CLI coding agent) at the start of the session. It knows how to walk you through these steps, pull context from your Project Overview, and keep your card concrete.
 
-```
-I'm writing a workflow-card.md that encodes how I use an AI coding assistant.
-Here are my answers to three discovery questions:
-1. Recent frustration: [paste answer]
-2. What I did about it: [paste answer]
-3. How I provide context: [paste answer]
-
-My project: [1-sentence description + tech stack]
-
-Help me write the four sections (Prompt Template, Context Reset Rule,
-Iteration Loop, Decision Checkpoint) using concrete values from my project.
-Every bullet must reference a real file path, command, or ticket ID.
-```
-
-### Stress-Testing Your Card
-
-```
-Here is my draft workflow-card.md: [paste]
-
-Act as a stranger who knows my tech stack but not my codebase.
-For each section, tell me one concrete question you'd still need
-to ask to act on that section. If your question is answered
-elsewhere in the card, say so. If not, suggest the sentence to add.
-```
+If you want to work without the facilitation prompt, the four quality-bar items above are sufficient guidance on their own.
 
 ---
 
 ## Industry Context: Why "Individual Workflow" Comes First
 
-The W1 → W2 → L1 order is intentional and evidence-based:
+The W1 → W2 → L1 order is intentional and evidence-based. A few sources worth skimming:
 
-- **GitHub's "Research: The AI-Native Developer" (2024)** found that developers who reported "a written personal protocol" for AI-assisted coding were 3.2× more likely to sustain productivity gains past 90 days. Developers with no written protocol regressed to pre-AI velocity within weeks.
-- **Stanford's CRFM study on AI coding tools** identified *context re-establishment* as the largest hidden cost — developers spend 20–40% of their AI-tool time re-explaining the same context to fresh sessions. Your Context Reset Rule is the mitigation.
-- **Anthropic's "Best practices for agentic coding"** recommends that every agent-assisted workflow start with (1) a written spec, (2) a named iteration loop, and (3) explicit decision boundaries. Those are exactly the four sections of your workflow card.
-- **Cognition's Devin post-mortems** on failed runs overwhelmingly trace back to missing decision boundaries — the agent made an architectural call that a human would have vetoed. Your Decision Checkpoint section is the guard rail.
+- [**GitHub — "Does AI actually boost developer productivity? The evidence says yes."**](https://github.blog/news-insights/research/does-ai-actually-boost-developer-productivity-the-evidence-says-yes/) — surveys and experiments consistently find that developers who work deliberately with AI (written rules, named workflows) sustain productivity gains, while ad-hoc users regress.
+- [**Stanford CRFM — "Holistic Evaluation of Language Models"**](https://crfm.stanford.edu/helm/latest/) — when evaluating LLM-driven coding, context handling is repeatedly the dominant variable. Your Context Reset Rule is the mitigation developers apply in practice.
+- [**Anthropic — "Claude Code: Best practices for agentic coding"**](https://www.anthropic.com/engineering/claude-code-best-practices) — recommends starting every agent-assisted workflow with (1) a written spec, (2) a named iteration loop, and (3) explicit decision boundaries. Those are exactly the four sections of your workflow card.
+- [**Cognition — "Don't Build Multi-Agents"**](https://cognition.ai/blog/dont-build-multi-agents) — post-mortems on failed autonomous runs overwhelmingly trace back to missing decision boundaries. Your Decision Checkpoint section is the guard rail.
 
-If you find yourself thinking "is this overkill for a single-agent workflow?", the answer is: every one of these studies is about single agents. Scaling to six multiplies the cost of missing the discipline.
+If you find yourself thinking "is this overkill for a single-agent workflow?", the answer is: every one of these sources is about single agents. Scaling to six multiplies the cost of missing the discipline.
 
 ---
 
@@ -259,7 +234,7 @@ If you notice yourself thinking "I'll just dash off a quick prompt without the t
 
 - [ ] `workflow-card.md` committed to your project repo with all 4 sections filled in
 - [ ] Every section references something concrete (path / command / ticket)
-- [ ] A peer partner has confirmed they could follow the card
+- [ ] You can re-read the card as a stranger to the codebase and not have to stop to ask a question
 - [ ] You can state in one sentence what your Context Reset Rule is
 
 ---
