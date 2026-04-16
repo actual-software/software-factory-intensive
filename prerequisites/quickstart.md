@@ -31,6 +31,19 @@ mkdir -p ~/Projects/factory/baseline/base-project
 ```bash
 pushd ~/Projects/factory/baseline/base-project
 git init
+git add -A && git commit -m "initial" 
+```
+
+```bash
+# 1. Init git if needed
+cd ~/Projects/factory/baseline/base-project
+git init && git add -A && git commit -m "initial"
+
+# 2. Init beads on gc's dolt server (get the port from the city)
+port=$(cat ~/Projects/factory/baseline/base-gc-factory/.beads/dolt-server.port) bd init --server --non-interactive --skip-hooks --skip-agents -p bgf --server-port "$port"
+
+# 3. Register custom types
+bd config set types.custom "molecule,convoy,message,event,gate,merge-request,agent,role,rig,session,spec"
 ```
 
 #### Setup Factory
@@ -65,11 +78,20 @@ Installed launchd service: /Users/david_miura_actual_ai/Library/LaunchAgents/com
 
 ```bash
 pushd ~/Projects/factory/baseline/base-gc-factory
-cp ~/Projects/actual-software/software-factory-intensive/packs/city.toml .
+cp ~/Projects/actual-software/software-factory-intensive/prerequisites/city.toml .
 rsync -av ~/Projects/actual-software/software-factory-intensive/packs/ packs/actual/
 
 gc service restart
 gc status
+gc doctor --fix
+```
+
+```bash
+pushd ~/Projects/factory/baseline/base-project
+git init
+chmod 700 ~/Projects/factory/baseline/base-project/.beads
+chmod 700 ~/Projects/factory/baseline/base-gc-factory/.beads
+pushd ~/Projects/factory/baseline/base-gc-factory
 gc doctor
 ```
 
