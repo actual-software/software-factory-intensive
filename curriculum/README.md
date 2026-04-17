@@ -26,14 +26,12 @@ Full factory run. All six agents run end-to-end on a new feature, driven entirel
 
 ## Session Structure
 
-Each session directory contains a single `README.md` — the walkthrough — with an **Agent Facilitation Guide** section near the top. The facilitation guide is what you'd previously find in a separate `PROMPT.md`; it now lives inline so an agent asked to walk a participant through the session has the guide in the same file as the steps themselves.
+Each session directory contains a single `README.md` — the walkthrough — with **Agent Guide** callouts interleaved alongside the participant steps. The callouts are what you'd previously find in a separate `PROMPT.md`; they now live inline next to the steps they apply to, so an agent walking a participant through the session gets the right guidance at the right moment.
 
-The Agent Facilitation Guide in each README includes:
-- Guiding questions the agent should ask the participant at specific steps
-- Core concepts the participant must be able to articulate before moving on
-- Project-type tailoring (React, API, infra, mobile, etc.)
-- Config discipline checkpoints the agent should flag immediately
-- An exit-criteria check before the session is declared complete
+Each README includes:
+- A short preamble at the top telling an agent to look for `> **Agent Guide:** …` callouts.
+- Inline Agent Guide callouts at pivotal steps — guiding questions to ask, config-discipline anti-patterns to flag.
+- A **Concept Check** block just before the Exit Criteria, listing the core ideas the participant must articulate before moving to the next session.
 
 ## Progression
 

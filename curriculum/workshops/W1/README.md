@@ -22,37 +22,7 @@ Writing a workflow card feels like overkill the first time. It isn't. Every bull
 
 ---
 
-## Agent Facilitation Guide
-
-If a participant has asked you — as an AI coding agent — to walk them through this workshop, use the guide below. It is **additive to the steps in this README**: the participant still does the work. Your job is to introduce each step, prompt reflection at pivotal moments, verify the exit criteria, and make sure the participant can articulate the core concepts in their own words before moving to L1.
-
-Start by reading `docs/PROJECT_MANIFEST.md` so every example you pick matches the participant's tech stack and conventions. Then walk the README one section at a time: introduce the step, ask the matching question below, verify the output, move on.
-
-**Ask the participant as you reach each step.** Wait for their answer before proceeding — the answers feed directly into the card they are writing.
-
-- *Before Step 1:* Recall a recent AI coding session that frustrated you. What specifically went wrong? Push past "the agent was dumb" to the fact that wasn't in any file the agent read.
-- *Before Step 2.1:* What fields do you already include in every prompt you write? Dictate them as a list before you draft the template — the template is the structural form of what you're already doing.
-- *During Step 2.2:* Name one observable trigger that would cause you to start a fresh session. If they say "when it feels confused," push for a measurable trigger (message count, consecutive gate failures).
-- *During Step 2.3:* What does your current flow do when a quality gate fails? If the answer is "I re-prompt," that's the anti-pattern this card is replacing — make sure they see that.
-- *During Step 2.4:* Name three decisions you keep for yourself and three you delegate. If either list has fewer than three, sit with it longer.
-- *During Step 3:* Read your card aloud as a stranger to the codebase. What's the first question you'd still have to ask? Keep iterating until that question comes up empty.
-
-**Before the participant commits the card and moves to L1, prompt them to explain — in their own words, without re-reading the README — each of these.** If they can't, revisit the matching section.
-
-- Why the card has four sections and not eight. (L1's `CLAUDE.md` uses the same shape; every extra section is noise the agent reads on every run.)
-- Why "specific" means surviving a noun substitution in place. (Bullets that tolerate substitution refer to nothing concrete.)
-- Why step 5 of the Iteration Loop — the gate-failure branch — is the single most important step. (It's the moment ad-hoc prompting sneaks in.)
-- Why the card is per-project and not universal. (A universal card is a collection of principles; only concrete artifacts are executable.)
-- Why the card is committed to a branch and not kept in a scratch file. (Config persists; chat and scratch don't.)
-
-Even if the answer is "the README said X because Y," hearing the participant articulate it cements the concept for L1 and beyond.
-
-**Config discipline checkpoints.** Flag immediately if you see either of these:
-
-- The participant is writing principles instead of observations. A principle ("I try to be specific") can't be encoded in a config file; an observation ("I paste the current file's full contents") can.
-- The participant asks you to "just fix the card." Push back — their hand on the keyboard is the point, and you'll rob them of the muscle memory this workshop is trying to build.
-
-**Before declaring the session complete,** walk through the **Exit Criteria** at the bottom of this README with the participant. Every checkbox must be met. If any is in doubt, stay in the session and close the gap — L1 builds directly on the card produced here.
+> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by opening `docs/PROJECT_MANIFEST.md` so every example matches the participant's tech stack.
 
 ---
 
@@ -130,6 +100,8 @@ For the rest of this document, when you see "the Cart Total feature," substitute
 Before you can write rules, you need to know which rules. The Discovery Questions surface the anti-patterns you're already living with. Keep answers specific — *file paths, commit ranges, ticket IDs.* Vague answers fail this step.
 
 ### Step 1.1: Capture a recent frustrating session (~3 min)
+
+> **Agent Guide:** Before the participant writes anything, ask: "What specifically went wrong in that session?" Push past "the agent was dumb" to the fact that lived in their head but wasn't in any file the agent read. That fact is the seed of their first rule.
 
 Think of a recent AI coding session that frustrated you. Write down, in your scratch doc:
 
@@ -226,6 +198,8 @@ Now fill in each section in order.
 
 ### Step 2.1: Write the Prompt Template (~5 min)
 
+> **Agent Guide:** Before the participant drafts anything, ask them to dictate the fields they already include in every prompt. The template is the structural form of what they already do — not a new theory to invent.
+
 The Prompt Template section answers: **what fields are in every prompt I send to the agent?**
 
 This is structural — it names the *fields*, not the values. For the Cart Total feature, a prompt instantiated from the template looks like this:
@@ -295,6 +269,8 @@ Compare this to the prompt you *would* have written without a template — proba
 
 ### Step 2.2: Write the Context Reset Rule (~5 min)
 
+> **Agent Guide:** Ask the participant to name one *observable* reset trigger. If they say "when it feels confused," push for something measurable — message count, consecutive gate failures, scope switch — so the trigger can be enforced, not just felt.
+
 The Context Reset Rule section answers: **when do I throw away the current session and start fresh?**
 
 Most people's current reset rule is "never" — they keep piling onto the same session until Claude starts contradicting itself. That's context pollution. The cost of a polluted session is always higher than the cost of re-establishing context in a new session.
@@ -321,6 +297,8 @@ Notice the negative rule at the end: "I do *not* reset between small slices." Ne
 **Pitfall:** Triggers that depend on you noticing something ("when the agent starts sounding confused") are weak. Replace them with triggers that can be measured ("after 2 consecutive failing lint runs").
 
 ### Step 2.3: Write the Iteration Loop (~5 min)
+
+> **Agent Guide:** Ask the participant what their current flow does when a quality gate fails. If the honest answer is "I re-prompt the chat," stop — that's the anti-pattern this card is replacing, and the gate-failure branch (step 5 below) is where the card does its most important work.
 
 The Iteration Loop section answers: **what steps does the agent go through, from receiving a task to merging the result?**
 
@@ -397,6 +375,8 @@ When you write your own Iteration Loop, make sure step 5 is unambiguous about th
 
 ### Step 2.4: Write the Decision Checkpoint (~5 min)
 
+> **Agent Guide:** Ask the participant to name three decisions they keep for themselves and three they delegate to the agent. If either list has fewer than three, sit with it longer — a sparse "agent decides" list often means the participant hasn't tried letting the agent decide anything yet, and the card will reflect that.
+
 The Decision Checkpoint section answers: **which decisions do I keep for myself, and which does the agent own?**
 
 Two lists. No ambiguity. Every decision the team will hit in the next six months should fall clearly into one bucket.
@@ -453,6 +433,8 @@ If your project matches multiple rows, pull constraints from each.
 ---
 
 ## Step 3: Self-Review the Card (~15 min)
+
+> **Agent Guide:** Have the participant read their card aloud as a stranger to the codebase. After each section, ask: "What's the first question you'd still have to ask?" Keep iterating until that question comes up empty. If the participant asks you to "just fix the card," push back — their hand on the keyboard is the point.
 
 Read your `workflow-card.md` back to yourself as if you were a stranger who knows your tech stack but not your codebase. Ask:
 
@@ -570,7 +552,7 @@ If any of that feels abstract right now, good. It's meant to. Come back to this 
 
 ## Using Your Local Agent for This Session
 
-If you want to work with an AI agent during this session, point it at this README and ask it to walk you through step-by-step. The **Agent Facilitation Guide** near the top of this file tells the agent how to facilitate — the guiding questions to ask, the concepts to verify, and the config discipline to watch for.
+If you want to work with an AI agent during this session, point it at this README and ask it to walk you through step-by-step. Look for the short **Agent Guide** preamble near the top and the inline `> **Agent Guide:** …` callouts at pivotal steps — they tell the agent which guiding questions to ask, which concepts to verify, and which config-discipline anti-patterns to flag.
 
 If you'd rather work solo, the four quality-bar items above are sufficient guidance on their own. Many participants find it easier to write the first draft alone and then ask the local agent to critique it for specificity — which is itself a tiny instance of the Iteration Loop you're designing.
 
@@ -724,6 +706,18 @@ When you review your own output, check:
 | My Iteration Loop has 12 steps | You're including steps that belong in `CLAUDE.md` (the agent's process) rather than your own (the human's process). The Loop section describes what happens between slinging work and merging it — not the internal steps the agent takes. Cut to 5–7. |
 | I don't know which commands to put in the Iteration Loop because my project doesn't have tests yet | Put in the commands you'd run if you had tests (`npm test`), plus a note that tests are aspirational. Then add "set up test infrastructure" to your backlog. A card that acknowledges a gap is stronger than a card that silently omits it. |
 | I have two projects and want one card to cover both | Don't. Write two cards. The whole point is project-specific discipline — a card that averages two projects will be useless for both. |
+
+---
+
+## Concept Check (before moving to L1)
+
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. Even if the answer is "the README said X because Y," hearing them articulate it cements the concept for L1. If they can't explain a bullet, revisit the matching section before the Exit Criteria check.
+
+- Why the card has four sections and not eight. (L1's `CLAUDE.md` uses the same shape; every extra section is noise the agent reads on every run.)
+- Why "specific" means surviving a noun substitution in place. (Bullets that tolerate substitution refer to nothing concrete.)
+- Why step 5 of the Iteration Loop — the gate-failure branch — is the single most important step. (It's the moment ad-hoc prompting sneaks in.)
+- Why the card is per-project and not universal. (A universal card is a collection of principles; only concrete artifacts are executable.)
+- Why the card is committed to a branch and not kept in a scratch file. (Config persists; chat and scratch don't.)
 
 ---
 

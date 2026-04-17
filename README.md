@@ -124,9 +124,9 @@ software-factory-intensive/
 │   ├── README.md
 │   ├── PROJECT_OVERVIEW_TEMPLATE.md # Loose-structure project brief (you fill in)
 │   ├── PROJECT_MANIFEST_TEMPLATE.md # Structural skeleton (agent-generated in L1)
-│   ├── workshops/W1..W4/            # Each has a README.md with an Agent Facilitation Guide inline
-│   ├── labs/L1..L4/                 # Each has a README.md with an Agent Facilitation Guide inline
-│   └── capstone/C1/                 # README.md with an Agent Facilitation Guide inline
+│   ├── workshops/W1..W4/            # README.md per session, with inline Agent Guide callouts
+│   ├── labs/L1..L4/                 # README.md per session, with inline Agent Guide callouts
+│   └── capstone/C1/                 # README.md with inline Agent Guide callouts
 │
 ├── packs/                           # Shipped Gas City agent packs — use as-is or copy + customise
 │   ├── README.md                    # Pack authoring + persona mapping
