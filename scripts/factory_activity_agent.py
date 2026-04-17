@@ -25,6 +25,35 @@ ACTIVITY_MAP = {
     "B1": ("baseline", "baseline_b1"),
 }
 
+# Maps category to the singular uppercase prefix used in GUIDE filenames.
+# e.g. "workshops" -> "WORKSHOP", so W2 -> WORKSHOP_2_GUIDE.md
+CATEGORY_GUIDE_PREFIX = {
+    "workshops": "WORKSHOP",
+    "labs": "LAB",
+    "capstone": "CAPSTONE",
+    "baseline": "BASELINE",
+}
+
+
+def find_guide(activity):
+    """Find the GUIDE.md file for an activity. Returns (Path, content) or (None, None)."""
+    category, _ = ACTIVITY_MAP[activity]
+    prefix = CATEGORY_GUIDE_PREFIX.get(category)
+    if not prefix:
+        return None, None
+    # Extract the number from the activity (e.g. "W2" -> "2", "L3" -> "3")
+    number = activity[1:]
+    guide_name = f"{prefix}_{number}_GUIDE.md"
+    guide_path = SFI_DIR / "activities" / category / activity / guide_name
+    if guide_path.exists():
+        return guide_path, guide_path.read_text()
+    # Fallback: glob for any *GUIDE*.md in the activity directory
+    activity_dir = SFI_DIR / "activities" / category / activity
+    guides = list(activity_dir.glob("*GUIDE*"))
+    if guides:
+        return guides[0], guides[0].read_text()
+    return None, None
+
 
 def run(cmd, cwd=None, *, dry_run=False, check=True, input_text=None, shell=False):
     """Run a command, or print it in dry-run mode."""
@@ -51,6 +80,478 @@ def resolve_paths(activity):
     factory_dir = slug_dir / f"{alias_lower}-gc-factory"
     packs_src = SFI_DIR / "activities" / category / activity / "gascity" / "step_0" / "packs"
     return category, slug, alias_lower, project_dir, factory_dir, packs_src
+
+
+def generate_readme(activity, alias_lower, guide_filename, guide_content=None):
+    """Generate the README.md content with self-help prompts."""
+    category, slug = ACTIVITY_MAP[activity]
+    project_name = f"{alias_lower}-project"
+    factory_name = f"{alias_lower}-gc-factory"
+
+    # Extract the activity title from the GUIDE's first heading
+    activity_title = f"{activity} Activity"
+    if guide_content:
+        for line in guide_content.splitlines():
+            line = line.strip()
+            if line.startswith("# "):
+                activity_title = line.lstrip("# ").strip()
+                break
+
+    guide_line = ""
+    if guide_filename:
+        guide_line = f"- **[{guide_filename}]({guide_filename})** — Complete activity guide with deliverables and instructions\n"
+
+    return f"""# {project_name}
+
+> **{activity_title}** — Software Factory Intensive
+
+This is the project workspace for **{activity_title}**. It is managed by a Gas City
+factory (`{factory_name}`) with AI agents that plan, design, build, review, and validate work.
+
+{guide_line}
+## Directory Structure
+
+```
+{slug}/
+├── {project_name}/          # This repo — your working project
+│   ├── README.md            # This file
+│   ├── .gitignore           # Standard ignores
+│   ├── .beads/              # Beads issue tracker database
+│   └── .claude/             # Claude Code agent configuration
+└── {factory_name}/          # Gas City factory workspace
+    ├── city.toml            # Factory configuration
+    └── packs/actual/        # Agent packs (planner, architect, builder, etc.)
+```
+
+## Next Steps
+
+### Check factory status
+```bash
+gc status --city ~/Projects/factory/{slug}/{factory_name}
+```
+
+### See what agents are available
+```bash
+gc status
+```
+
+### Route work to an agent
+```bash
+gc sling {project_name}/architect "Describe the task here"
+gc sling {project_name}/planner "Break down this feature into tasks"
+gc sling {project_name}/builder "Implement the login page"
+```
+
+### Open the dashboard
+```bash
+gc dashboard serve --city ~/Projects/factory/{slug}/{factory_name}
+# Then open http://localhost:8080
+```
+
+### List available formulas
+```bash
+gc formula list
+gc formula show <name>
+gc formula cook <name>
+```
+
+### Check and manage work items
+```bash
+bd ready              # Show tasks ready to work on
+bd list               # List all issues
+bd list --status=in_progress  # See active work
+bd show <id>          # View issue details
+bd stats              # Project statistics
+```
+
+---
+
+## Self-Help: Copy-Paste Prompts
+
+Every task below shows two ways to do it:
+- **LLM prompt** — paste into Claude Code or any agent with the factory-activity-agent skill
+- **CLI command** — run directly in your terminal to learn the underlying tools
+
+---
+
+### Status & Navigation
+
+**Check all factory statuses**
+
+LLM prompt:
+```
+/factory-activity-agent status
+```
+CLI command:
+```bash
+gc status --city ~/Projects/factory/{slug}/{factory_name}
+```
+
+**List all installed activities**
+
+LLM prompt:
+```
+/factory-activity-agent list
+```
+CLI command:
+```bash
+bash skills/factory-activity-agent/scripts/status.sh --list
+```
+
+**Check which agents are running in this factory**
+
+LLM prompt:
+```
+Use factory-activity-agent skill to show me the status of {activity}
+```
+CLI command:
+```bash
+gc status --city ~/Projects/factory/{slug}/{factory_name}
+```
+
+**List all registered cities**
+
+LLM prompt:
+```
+What gc cities are registered?
+```
+CLI command:
+```bash
+gc cities
+```
+
+**View the event log for this factory**
+
+LLM prompt:
+```
+Show me the gc event log for {activity}
+```
+CLI command:
+```bash
+gc events --city ~/Projects/factory/{slug}/{factory_name}
+```
+
+---
+
+### Diagnostics & Recovery
+
+**Run full environment diagnostic**
+
+LLM prompt:
+```
+/factory-activity-agent doctor
+```
+CLI command:
+```bash
+gc doctor --fix --city ~/Projects/factory/{slug}/{factory_name}
+```
+
+**Run comprehensive environment check (gc, python, bd, cities, packs)**
+
+LLM prompt:
+```
+Run the factory-activity-agent diagnose script and tell me if anything is broken
+```
+CLI command:
+```bash
+bash skills/factory-activity-agent/scripts/diagnose.sh
+```
+
+**Factory won't start — check config**
+
+LLM prompt:
+```
+My {activity} factory won't start. Diagnose and fix it.
+```
+CLI command:
+```bash
+gc config --city ~/Projects/factory/{slug}/{factory_name}
+gc doctor --fix --city ~/Projects/factory/{slug}/{factory_name}
+```
+
+**Restart the gc supervisor service**
+
+LLM prompt:
+```
+Restart the gc supervisor service for all factories
+```
+CLI command:
+```bash
+gc service restart
+```
+
+**Stop and restart all agents in this factory**
+
+LLM prompt:
+```
+Stop and restart all agents in my {activity} factory
+```
+CLI command:
+```bash
+gc stop --city ~/Projects/factory/{slug}/{factory_name}
+gc start --city ~/Projects/factory/{slug}/{factory_name}
+```
+
+**Dashboard won't start (port 8080 in use)**
+
+LLM prompt:
+```
+The gc dashboard won't start on port 8080. Find what's using it and fix it.
+```
+CLI command:
+```bash
+lsof -i :8080
+kill <PID>
+gc dashboard serve --city ~/Projects/factory/{slug}/{factory_name}
+```
+
+---
+
+### Beads Issue Tracker
+
+**See what work is ready**
+
+LLM prompt:
+```
+What beads issues are ready to work on in {activity}?
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name} && bd ready
+```
+
+**List all issues**
+
+LLM prompt:
+```
+Show me all beads issues for {activity}
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name} && bd list
+```
+
+**Check active work in progress**
+
+LLM prompt:
+```
+What work is currently in progress in {activity}?
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name} && bd list --status=in_progress
+```
+
+**View issue details**
+
+LLM prompt:
+```
+Show me the details of beads issue <id>
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name} && bd show <id>
+```
+
+**Project statistics**
+
+LLM prompt:
+```
+Show me beads stats for {activity}
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name} && bd stats
+```
+
+**Beads database seems broken — diagnose**
+
+LLM prompt:
+```
+The beads database in {activity} seems broken. Diagnose and fix it.
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name} && bd doctor
+```
+
+**Sync beads with remote**
+
+LLM prompt:
+```
+Sync beads for {activity} with the remote
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name} && bd dolt pull && bd dolt push
+```
+
+**Find stale or orphaned issues**
+
+LLM prompt:
+```
+Find stale and orphaned beads issues in {activity}
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name} && bd stale && bd orphans
+```
+
+**Search for an issue by keyword**
+
+LLM prompt:
+```
+Search beads for "keyword" in {activity}
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name} && bd search "keyword"
+```
+
+**View blocked issues and their dependencies**
+
+LLM prompt:
+```
+What issues are blocked in {activity} and why?
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name} && bd blocked
+```
+
+---
+
+### Routing Work to Agents
+
+**Send work to the architect**
+
+LLM prompt:
+```
+/factory-activity-agent sling {activity} architect "Design the architecture for {activity_title}"
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name}
+gc sling {project_name}/architect "Design the architecture for {activity_title}"
+```
+
+**Send work to the planner**
+
+LLM prompt:
+```
+/factory-activity-agent sling {activity} planner "Break down {activity_title} into implementation tasks"
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name}
+gc sling {project_name}/planner "Break down {activity_title} into implementation tasks"
+```
+
+**Send work to the builder**
+
+LLM prompt:
+```
+/factory-activity-agent sling {activity} builder "Implement the next ready task for {activity_title}"
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name}
+gc sling {project_name}/builder "Implement the next ready task for {activity_title}"
+```
+
+**Send work to the reviewer**
+
+LLM prompt:
+```
+/factory-activity-agent sling {activity} reviewer "Review the latest changes for {activity_title}"
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name}
+gc sling {project_name}/reviewer "Review the latest changes for {activity_title}"
+```
+
+**List and nudge running sessions**
+
+LLM prompt:
+```
+List all gc sessions and nudge the stuck one
+```
+CLI command:
+```bash
+gc session list --city ~/Projects/factory/{slug}/{factory_name}
+gc session nudge <id> "Are you still working on this?"
+```
+
+---
+
+### Formulas & Automation
+
+**List available formulas**
+
+LLM prompt:
+```
+What gc formulas are available in {activity}?
+```
+CLI command:
+```bash
+gc formula list --city ~/Projects/factory/{slug}/{factory_name}
+```
+
+**Show formula details**
+
+LLM prompt:
+```
+Show me the details of formula <name>
+```
+CLI command:
+```bash
+gc formula show <name> --city ~/Projects/factory/{slug}/{factory_name}
+```
+
+**Run a formula**
+
+LLM prompt:
+```
+Cook the formula <name> in {activity}
+```
+CLI command:
+```bash
+gc formula cook <name> --city ~/Projects/factory/{slug}/{factory_name}
+```
+
+---
+
+### Reinstall or Reset
+
+**Delete and reinstall this activity (DESTRUCTIVE — removes all files)**
+
+LLM prompt:
+```
+/factory-activity-agent delete {activity}
+/factory-activity-agent install {activity}
+```
+CLI command:
+```bash
+bash skills/factory-activity-agent/scripts/delete.sh {activity}
+bash skills/factory-activity-agent/scripts/install.sh {activity}
+```
+
+---
+
+### Troubleshooting Quick Reference
+
+| Symptom | LLM Prompt | CLI Fix |
+|---------|-----------|---------|
+| `gc: command not found` | `Is gc installed? Run diagnostics.` | `brew install gastownhall/gascity/gascity` |
+| `gc doctor` shows failures | `/factory-activity-agent doctor` | `gc doctor --fix` |
+| Dashboard won't start | `The gc dashboard won't start. Fix it.` | `lsof -i :8080 && kill <PID>` |
+| `gc sling` hangs | `My sling to {activity} architect is hanging. Diagnose.` | `gc status` then `gc doctor` |
+| Factory won't start | `My {activity} factory won't start. Fix it.` | `gc config` then `gc service restart` |
+| Beads sync issues | `Sync beads for {activity} with remote` | `bd dolt pull && bd dolt push` |
+| Agent not responding | `Restart all agents in {activity}` | `gc stop && gc start` |
+| Need command reference | `Show me the gc command reference from the factory-activity-agent skill` | `gc --help` |
+"""
 
 
 def install(activity, dry_run=False):
@@ -181,14 +682,37 @@ def install(activity, dry_run=False):
         )
     print("\n  Dashboard: http://localhost:8080")
 
-    # --- Step 8: Verify suggestion ---
+    # --- Step 8: Copy GUIDE.md, generate README.md, and sling setup task ---
+    print("\n##### Inject Activity Guide")
+    guide_path, guide_content = find_guide(activity)
+    guide_filename = None
+    if guide_content and not dry_run:
+        guide_filename = guide_path.name
+        guide_dest = project_dir / guide_filename
+        guide_dest.write_text(guide_content)
+        print(f"  Copied {guide_filename} -> {guide_dest}")
+    elif guide_content and dry_run:
+        guide_filename = guide_path.name
+        print(f"[dry-run] Copy {guide_path} -> {project_dir / guide_filename}")
+    else:
+        print(f"  Warning: No GUIDE.md found for {activity}, skipping guide injection")
+
+    print("\n##### Generate README.md")
+    readme_content = generate_readme(activity, alias_lower, guide_filename, guide_content)
+    if dry_run:
+        print(f"[dry-run] Write README.md to {project_dir / 'README.md'}")
+    else:
+        (project_dir / "README.md").write_text(readme_content)
+        print(f"  Wrote README.md -> {project_dir / 'README.md'}")
+
     sling_prompt = (
         "Set up this project: "
         "1) Add a .gitignore with canonical best-practice defaults "
         "(OS files, editor files, language build artifacts, env files, node_modules, __pycache__, .DS_Store, etc). "
-        "2) Add a README.md that describes this as the "
-        f"{alias_lower}-project workspace for the {activity} activity in the Software Factory Intensive, "
-        "and include a Next Steps section with instructions to explore the factory agents."
+        "2) A README.md already exists in the project root. Do NOT overwrite or replace it. "
+        "Read it and if any section is incomplete or could use project-specific details "
+        "(e.g. the Directory Structure section after files are created), "
+        "update those sections in place. Preserve all existing content."
     )
     print("\n##### Sling Setup Task")
     run(
