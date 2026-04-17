@@ -23,6 +23,46 @@ If you skipped an earlier lab or a prompt edit breaks the pack, point `includes`
 
 ---
 
+## Agent Facilitation Guide
+
+If a participant has asked you — as an AI coding agent — to walk them through this lab, use the guide below. It is **additive to the steps in this README**: the participant still does the work. Your job is to introduce each step, prompt reflection at pivotal moments, verify the exit criteria, and make sure the participant can articulate how the Designer → Builder handoff differs from L2's Planner → Architect handoff before moving to L4.
+
+Start by reading `my-factory/PROJECT_MANIFEST.md` so your suggestions about component structure, testing framework, and matching components are grounded in the participant's actual code. Then walk the README one step at a time: introduce, ask, execute together, verify.
+
+**Ask the participant as you reach each step:**
+
+- *Before slinging the Designer:* What component structure does your project use — flat `src/components/`, feature-based folders, something else? The Designer needs to tell the Builder exactly where the new file goes.
+- *Before slinging the Designer:* What existing component most closely matches the feature you're building? Naming a reference file anchors the Designer's output to your real conventions.
+- *After the Designer runs:* Does the spec have props, state, interactions, edge cases, AND a `Location` path? If any is missing, that's a prompt gap — fix `packs/designer/prompts/designer.md.tmpl` before moving on.
+- *Before slinging the Builder:* What testing framework does your project use? The Builder needs to know Jest vs. Vitest vs. pytest vs. Go test — wrong framework means wrong tests.
+- *After the Builder runs:* Do the tests pass? If not, where are you fixing it — in `packs/builder/prompts/builder.md.tmpl` or by editing code by hand? The answer has to be the prompt template.
+- *Track the sling count:* How many times did you sling the Builder to reach passing? The target is ≤3 — if you hit 4+, one of your rules is fighting an existing convention.
+
+**Before the participant moves to L4, prompt them to explain — in their own words, without re-reading — each of these.** If they can't, revisit the matching section.
+
+- Why the Designer writes a spec before the Builder writes code. (The spec is the cheapest place to iterate; code is the most expensive.)
+- Why the spec names an exact `Location` path. (Without it, the Builder invents a path — usually the wrong one.)
+- Why the Builder's failing test is a prompt bug, not a code bug. (Manual edits die with the bead; prompt edits persist.)
+- What a spec produces for a project that has no UI. (API contracts, interface definitions, schema — the shape differs, the contract does not.)
+- Why the Designer doesn't write tests. (Test design is a Builder concern, informed by spec edge cases.)
+
+**Project-type tailoring.** Pull from these patterns based on the participant's stack:
+
+- **React + TypeScript:** Require the Designer prompt to emit TypeScript interface definitions for all props and Tailwind class names in the layout section.
+- **Python backend:** The Designer produces API endpoint specs (method, path, request/response schema) rather than UI component specs.
+- **Go services:** The Designer emits interface definitions; the Builder prompt enforces error-return conventions, not exceptions.
+- **Mobile (React Native/Flutter):** The Designer produces screen specs with navigation flows, not web component layouts.
+
+**Config discipline checkpoints.** Flag immediately if you see these:
+
+- The participant edits code by hand to make tests pass after a Builder sling. Stop them — that fix is invisible to the next bead. Roll back, update the Builder prompt, re-sling.
+- The participant slings the Builder without a spec in place. The spec is the contract; without it, you're back to L1's vanilla `dev-agent`.
+- The participant over-specifies the Designer's output. The Designer should reference existing patterns, not re-invent them.
+
+**Before declaring the session complete,** walk through the **Exit Criteria** at the bottom of this README with the participant. `design/<slug>-spec.md` must be committed, the Location-path implementation must exist, and at least two test cases from the work package must pass. Zero manual code edits.
+
+---
+
 ## Architecture Diagram
 
 ```

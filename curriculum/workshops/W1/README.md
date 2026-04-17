@@ -22,6 +22,40 @@ Writing a workflow card feels like overkill the first time. It isn't. Every bull
 
 ---
 
+## Agent Facilitation Guide
+
+If a participant has asked you — as an AI coding agent — to walk them through this workshop, use the guide below. It is **additive to the steps in this README**: the participant still does the work. Your job is to introduce each step, prompt reflection at pivotal moments, verify the exit criteria, and make sure the participant can articulate the core concepts in their own words before moving to L1.
+
+Start by reading `docs/PROJECT_MANIFEST.md` so every example you pick matches the participant's tech stack and conventions. Then walk the README one section at a time: introduce the step, ask the matching question below, verify the output, move on.
+
+**Ask the participant as you reach each step.** Wait for their answer before proceeding — the answers feed directly into the card they are writing.
+
+- *Before Step 1:* Recall a recent AI coding session that frustrated you. What specifically went wrong? Push past "the agent was dumb" to the fact that wasn't in any file the agent read.
+- *Before Step 2.1:* What fields do you already include in every prompt you write? Dictate them as a list before you draft the template — the template is the structural form of what you're already doing.
+- *During Step 2.2:* Name one observable trigger that would cause you to start a fresh session. If they say "when it feels confused," push for a measurable trigger (message count, consecutive gate failures).
+- *During Step 2.3:* What does your current flow do when a quality gate fails? If the answer is "I re-prompt," that's the anti-pattern this card is replacing — make sure they see that.
+- *During Step 2.4:* Name three decisions you keep for yourself and three you delegate. If either list has fewer than three, sit with it longer.
+- *During Step 3:* Read your card aloud as a stranger to the codebase. What's the first question you'd still have to ask? Keep iterating until that question comes up empty.
+
+**Before the participant commits the card and moves to L1, prompt them to explain — in their own words, without re-reading the README — each of these.** If they can't, revisit the matching section.
+
+- Why the card has four sections and not eight. (L1's `CLAUDE.md` uses the same shape; every extra section is noise the agent reads on every run.)
+- Why "specific" means surviving a noun substitution in place. (Bullets that tolerate substitution refer to nothing concrete.)
+- Why step 5 of the Iteration Loop — the gate-failure branch — is the single most important step. (It's the moment ad-hoc prompting sneaks in.)
+- Why the card is per-project and not universal. (A universal card is a collection of principles; only concrete artifacts are executable.)
+- Why the card is committed to a branch and not kept in a scratch file. (Config persists; chat and scratch don't.)
+
+Even if the answer is "the README said X because Y," hearing the participant articulate it cements the concept for L1 and beyond.
+
+**Config discipline checkpoints.** Flag immediately if you see either of these:
+
+- The participant is writing principles instead of observations. A principle ("I try to be specific") can't be encoded in a config file; an observation ("I paste the current file's full contents") can.
+- The participant asks you to "just fix the card." Push back — their hand on the keyboard is the point, and you'll rob them of the muscle memory this workshop is trying to build.
+
+**Before declaring the session complete,** walk through the **Exit Criteria** at the bottom of this README with the participant. Every checkbox must be met. If any is in doubt, stay in the session and close the gap — L1 builds directly on the card produced here.
+
+---
+
 ## What You'll Build
 
 ```
@@ -536,9 +570,9 @@ If any of that feels abstract right now, good. It's meant to. Come back to this 
 
 ## Using Your Local Agent for This Session
 
-Rather than providing drafting prompts inline, every session ships with a sister `PROMPT.md` file: [`curriculum/workshops/W1/PROMPT.md`](./PROMPT.md). Paste it into Claude Code (or your preferred CLI coding agent) at the start of the session. It knows how to walk you through these steps, pull context from your Project Overview, and keep your card concrete.
+If you want to work with an AI agent during this session, point it at this README and ask it to walk you through step-by-step. The **Agent Facilitation Guide** near the top of this file tells the agent how to facilitate — the guiding questions to ask, the concepts to verify, and the config discipline to watch for.
 
-If you want to work without the facilitation prompt, the four quality-bar items above are sufficient guidance on their own. Many participants find it easier to write the first draft alone and then ask the local agent to critique it for specificity — which is itself a tiny instance of the Iteration Loop you're designing.
+If you'd rather work solo, the four quality-bar items above are sufficient guidance on their own. Many participants find it easier to write the first draft alone and then ask the local agent to critique it for specificity — which is itself a tiny instance of the Iteration Loop you're designing.
 
 ---
 
@@ -689,7 +723,6 @@ When you review your own output, check:
 | I can't decide if my Context Reset Rule should include "at the start of each day" | It shouldn't — that's a schedule, not a trigger. Reset triggers describe the state of the session, not the clock. If you want a daily refresh, put that in `CLAUDE.md` later as an agent lifecycle rule. |
 | My Iteration Loop has 12 steps | You're including steps that belong in `CLAUDE.md` (the agent's process) rather than your own (the human's process). The Loop section describes what happens between slinging work and merging it — not the internal steps the agent takes. Cut to 5–7. |
 | I don't know which commands to put in the Iteration Loop because my project doesn't have tests yet | Put in the commands you'd run if you had tests (`npm test`), plus a note that tests are aspirational. Then add "set up test infrastructure" to your backlog. A card that acknowledges a gap is stronger than a card that silently omits it. |
-| The PROMPT.md sister file seems to duplicate the README | It does, intentionally. The README is the written guide; PROMPT.md is the facilitator script for your local agent. You can use either or both. They cover the same steps at different levels of prescription. |
 | I have two projects and want one card to cover both | Don't. Write two cards. The whole point is project-specific discipline — a card that averages two projects will be useless for both. |
 
 ---
@@ -797,7 +830,6 @@ No `gc` commands this session. No `bd` commands. No agent slinging. The only cer
 | Branch | `workflow-card` (in your project repo) | Feature branch for the card commit, treating the card as PR-worthy code |
 | Commit | `docs: add AI workflow card (W1)` | Single commit adding the file — the audit trail for the card's origin |
 | Reference card | `reference-project/fired-up-pizza/workflow-card.md` | The finished example you pattern-matched against |
-| PROMPT.md (sister file) | `curriculum/workshops/W1/PROMPT.md` | Optional facilitator prompt to paste into Claude Code while drafting |
 
 ---
 

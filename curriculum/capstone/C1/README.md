@@ -31,6 +31,46 @@ If you skipped an earlier lab, add the shipped path for that pack — the capsto
 
 ---
 
+## Agent Facilitation Guide
+
+If a participant has asked you — as an AI coding agent — to walk them through this capstone, use the guide below. It is **additive to the steps in this README**: the participant still does the work. Your job is to introduce each stage, prompt reflection at pivotal moments, enforce the zero-ad-hoc-prompting rule, and make sure the Factory Run Report and retrospective are committed before the session ends — whether or not the run reaches the Deployer.
+
+Start by reading `my-factory/PROJECT_MANIFEST.md` and glancing at `orchestrator.yaml`. The capstone is driven by the participant's own config; your role is to hold the line on config discipline and keep the run moving.
+
+**Ask the participant as you reach each step:**
+
+- *Before creating the bead:* What feature are you shipping? Write the bead title and description out loud before typing. For Fired Up Pizza, default to "Order history page." For their own project, the feature should be medium complexity, in a different area of the codebase than the L2–L4 runs.
+- *Before every sling:* What artifact does this agent produce, and where will it land? Confirm the path — that's the pipeline's contract.
+- *After every agent runs:* Did it produce the expected artifact at the expected path? If yes, proceed. If no, the fix is a prompt edit, not a chat correction.
+- *Every time you're tempted to intervene:* Is this a config fix or a code fix? Only config fixes are allowed today. A code fix means stop, roll back, find the prompt gap, and re-sling.
+- *Mid-run, every 20 minutes:* Update the Factory Run Report. Every prompt change goes in the Config Changes column. Every ad-hoc intervention (if any slip through) goes in the Ad-Hoc Prompts Used section — the honest report is more valuable than a clean one.
+- *If you run out of time:* What's the committable state of the run? Partial runs are valid capstone outcomes as long as the report reflects them accurately.
+
+**Before the participant closes the session, prompt them to explain — in their own words, without re-reading — each of these.** If they can't, revisit the matching section.
+
+- Why the capstone uses a feature they haven't seen before. (A rehearsed feature tests memory; a new feature tests the factory.)
+- Why ad-hoc prompts break the factory's contract. (Every ad-hoc correction is a prompt update that should have happened but didn't — the next bead inherits the missing rule.)
+- What a "PASS" from the Release-Gate actually proves. (Only that the release-criteria in the manifest were met — not that the feature is good; that's the Reviewer's job.)
+- Why the Retrospective asks for a Keep, a Change, and a Question. (Keep validates what compounds, Change surfaces what doesn't, Question surfaces the thing they couldn't resolve alone.)
+- Why the report is committable even when the run is incomplete. (A partial report with honest state is an audit trail; a discarded partial run is wasted learning.)
+
+**Project-type tailoring.** Anticipate the most likely stall point:
+
+- **If the factory stalls at the Coder:** The Designer spec is almost always the cause — usually missing edge cases or an ambiguous Location path. Fix `packs/designer/prompts/designer.md.tmpl`, re-sling Designer, then continue.
+- **If the Reviewer rejects repeatedly:** The Coder prompt is missing project-specific conventions. Add examples from the manifest to `packs/builder/prompts/builder.md.tmpl`.
+- **If the Release-Gate fails:** Check the release criteria in the manifest — vague criteria like "code is clean" should be replaced with testable commands before re-running.
+- **If time is tight:** Reaching the Reviewer stage with a complete report is a valid outcome. A committed Deployer with a sloppy report is not.
+
+**Config discipline checkpoints.** The strictest enforcement of the entire curriculum — any violation requires a rollback:
+
+- The participant types a correction into the agent chat. Stop. Roll back the agent's work. Log it in the Ad-Hoc Prompts Used section.
+- The participant hand-edits code to make tests pass. Roll it back. Update the Builder prompt. Re-sling.
+- The participant skips a Run Report update after a prompt change. Pause and update it — the report is the deliverable, even more than the code.
+
+**Before declaring the session complete,** the Factory Run Report **must** be committed (even if partial), a feature branch **must** exist (any stage), and the retrospective card **must** be written. Walk through the Exit Criteria at the bottom of this README explicitly — this is the one session where "I'll finish it later" is disallowed.
+
+---
+
 ## Architecture Diagram
 
 ```

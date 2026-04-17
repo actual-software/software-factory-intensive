@@ -16,6 +16,45 @@ Pack naming: references to *Coder* and *Deployer* in this README map to the ship
 
 ---
 
+## Agent Facilitation Guide
+
+If a participant has asked you — as an AI coding agent — to walk them through this workshop, use the guide below. It is **additive to the steps in this README**: the participant still does the work. Your job is to introduce each coordination pattern, prompt reflection at pivotal moments, verify the exit criteria, and make sure the participant can articulate *why* each gate and fan-out lives where it does before moving to L4.
+
+Start by re-reading the participant's W2 wiring diagram. Every orchestrator decision they make here should be grounded in that pipeline — if the diagram is missing, pause and have them produce a quick version before continuing.
+
+**Ask the participant as you reach each step:**
+
+- *Before drafting the orchestrator:* Which two stages in your pipeline can run in parallel? They must touch disjoint files and neither can depend on the other's output. If no pair qualifies, say so and move on — invented parallelism is worse than no parallelism.
+- *Before the human gate decision:* What is the single riskiest stage transition in your pipeline — the one where a bad handoff is hardest to reverse? That's where the human gate belongs.
+- *Before writing the gate justification:* What concrete risk does this gate prevent? Write it as a specific failure mode, not a category ("an untested migration reaches production," not "quality issues").
+- *Before writing the removal condition:* Under what observable condition would you remove this gate? If the answer is "never," the gate is probably fear-based — push for a measurable exit.
+- *At the `on_reject` step:* When the Reviewer rejects, which upstream agent picks up the bead? Name the exact stage and explain why it's that one.
+
+**Before the participant moves to L4, prompt them to explain — in their own words, without re-reading — each of these.** If they can't, revisit the matching section.
+
+- The three coordination patterns (sequential, parallel fan-out, human gate) and when each is the right choice.
+- Why the human gate is framed with a *removal condition*, not just a location. (Gates are temporary scaffolding; without an exit condition, they calcify.)
+- How the orchestrator knows when a stage is "done." (It reads the produced artifact path — artifacts are the contract, not chat messages.)
+- Why `on_reject` loops back to a specific stage instead of starting over. (Re-running the Planner on a Reviewer rejection wastes the work already produced.)
+- Why the orchestrator lives in a yaml file and not a script. (Declarative config is inspectable and versionable; imperative code rots.)
+
+**Project-type tailoring.** Match the participant's project to the right orchestration shape:
+
+- **Microservices:** Fan out per-service coders in parallel, then add a coordination gate before cross-service integration.
+- **Data pipelines:** The gate often goes *before* the Architect — data model changes are harder to reverse than deploys.
+- **Client-facing APIs:** Add a human gate before any endpoint that changes the public API contract.
+- **Internal tools:** You may skip the human gate entirely if the blast radius is small.
+
+**Config discipline checkpoints.** Flag immediately if you see these:
+
+- A human gate without a removal condition. That's a permanent speed tax, not a safety check.
+- A stage that depends on another stage's *chat output* rather than its file artifact. Rewrite the dependency to reference the file.
+- Parallelism that shares write targets. Two agents editing `src/` concurrently is a conflict waiting to happen — force sequencing.
+
+**Before declaring the session complete,** walk through the **Exit Criteria** at the bottom of this README with the participant. `orchestrator.yaml`, the gate justification, and the updated wiring diagram must all be committed. Every gate must have a concrete risk + a removal condition.
+
+---
+
 ## Architecture Diagram
 
 ```

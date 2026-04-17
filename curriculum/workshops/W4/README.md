@@ -16,6 +16,45 @@ Pack naming: references to *Coder* and *Deployer* in this README map to the ship
 
 ---
 
+## Agent Facilitation Guide
+
+If a participant has asked you — as an AI coding agent — to walk them through this workshop, use the guide below. It is **additive to the steps in this README**: the participant still does the work. Your job is to introduce each feedback rule, prompt reflection at pivotal moments, verify the exit criteria, and make sure the participant can articulate which loops are safe to automate and which must escalate before moving to C1.
+
+Start by skimming any existing `review-reports/`, `release-gates/`, and `DECISIONS.md` from the participant's L2–L4 runs. Real signals from their own factory produce much better feedback rules than hypothetical ones — if those directories are empty, fall back to the reference project.
+
+**Ask the participant as you reach each step:**
+
+- *Before listing signals:* Which review finding or test failure recurred across multiple beads? Recurrence is the key — one-off problems don't justify automation.
+- *For each candidate rule:* What's the signal, what's the threshold, what config file is the target, and what's the specific change the rule makes? If any of the four is vague, the rule will never fire correctly.
+- *Before encoding a rule:* Is this rule safe to apply automatically, or does it need human review? Default to human review unless the rule is purely additive and trivially reversible.
+- *For every rule:* What's the harm case? What happens if the signal fires for the wrong reason and the rule ships a bad prompt update? If you can't name the harm, you can't name the mitigation.
+- *Before committing:* Which rule are you encoding into an actual prompt today, and why did you pick that one over the others?
+
+**Before the participant moves to C1, prompt them to explain — in their own words, without re-reading — each of these.** If they can't, revisit the matching section.
+
+- The Signal → Target → Action structure and why all three are required for a rule to be operational.
+- Why every automated rule needs a kill switch and a harm case. (Automation compounds — so do its mistakes.)
+- Why feedback rules edit *prompts* rather than code. (The code is a symptom; the prompt is the cause.)
+- The difference between a feedback rule and a one-off fix. (Rules have thresholds and repeat; fixes happen once.)
+- Why the factory that never updates itself degrades. (Every unfixed recurring issue is a signal that compounding costs you're paying instead of capturing.)
+
+**Project-type tailoring.** Match the participant's project to the right signal sources:
+
+- **Test-heavy projects:** Track test failure categories. "Missing null check" appearing three times is a Coder prompt update.
+- **CI/CD-driven projects:** Track build failures. "Type error" appearing frequently means the Designer spec needs a TypeScript interface requirement.
+- **User-data projects:** Track security findings. "Unsanitized input" warrants a hard rule in the Coder prompt.
+- **Early-stage projects:** Focus on spec-completeness signals — Planner and Designer prompts are where value compounds fastest.
+
+**Config discipline checkpoints.** Flag immediately if you see these:
+
+- A rule that fires on a single occurrence. That's not a feedback rule — it's a one-off patch. Push for a threshold (two, three, five occurrences).
+- A rule without a harm case. Rules without harm cases ship without kill switches — they're the automations that eventually burn you.
+- A rule that modifies code instead of a prompt. That's a manual fix dressed up as automation.
+
+**Before declaring the session complete,** walk through the **Exit Criteria** at the bottom of this README. Three or more signals mapped, at least one rule encoded into a real prompt, two harm cases documented, and a feedback-loop diagram committed.
+
+---
+
 ## Architecture Diagram
 
 ```

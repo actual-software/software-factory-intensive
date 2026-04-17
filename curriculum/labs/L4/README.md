@@ -23,6 +23,45 @@ If a prompt edit breaks the pack, swap `includes` back to the shipped `../packs/
 
 ---
 
+## Agent Facilitation Guide
+
+If a participant has asked you — as an AI coding agent — to walk them through this lab, use the guide below. It is **additive to the steps in this README**: the participant still does the work. Your job is to introduce each step, prompt reflection at pivotal moments, verify the exit criteria, and — most importantly — enforce the strictest config-discipline rule of the curriculum: **review findings are fixed by editing the Builder prompt, never by editing code.**
+
+Start by reading `my-factory/PROJECT_MANIFEST.md`, especially the Review Standards and Release Criteria sections — the Reviewer and Release-Gate agents read those sections as their rubric. If those sections are weak, flag it now; weak standards produce weak reviews.
+
+**Ask the participant as you reach each step:**
+
+- *Before slinging the Reviewer:* Which review criteria in your manifest matter most for this feature? What should the Reviewer catch that a linter can't? Name it — that's the check the Reviewer will be judged against.
+- *After the Reviewer runs:* Read the review report. What's the highest-severity finding? Don't move on until the participant can state it in one sentence.
+- *Before the fix:* You are about to fix this finding by editing `packs/builder/prompts/builder.md.tmpl`. You will not touch the code. Confirm this out loud before starting.
+- *Before slinging the Release-Gate:* Are your release criteria testable? Every criterion should produce PASS/FAIL evidence, not an opinion. "Code is clean" fails this test; "`npm run lint` exits 0" passes.
+- *After the Release-Gate runs:* Does every criterion in `release-gates/<slug>-gate.md` have PASS/FAIL evidence? Any opinion-based judgments are a prompt gap in the Release-Gate template.
+
+**Before the participant moves to W4, prompt them to explain — in their own words, without re-reading — each of these.** If they can't, revisit the matching section.
+
+- Why review findings are fixed by editing the Builder prompt, not the code. (A manual fix solves this bead; a prompt edit prevents the next hundred.)
+- The difference between a Reviewer and a linter. (Linters enforce syntax and style; Reviewers enforce spec compliance and project-specific conventions a linter can't express.)
+- What makes a release gate "binary." (A single command produces a clean PASS or FAIL with evidence — no "mostly ready" or "looks good.")
+- Why the full pipeline is driven by `orchestrator.yaml` (W3) and not by ad-hoc slings. (Declarative config is auditable, reproducible, and edit-once-run-many.)
+- What evidence the Release-Gate should attach to each PASS/FAIL. (Command output, test results, artifact paths — not prose.)
+
+**Project-type tailoring.** Match the participant's project:
+
+- **Security-sensitive projects:** Update the Reviewer prompt to check for the OWASP Top 10 items relevant to your stack.
+- **Production-deploying projects:** The Release-Gate prompt should include deployment-specific checks (health endpoints, rollback plan, feature flags).
+- **Pre-launch projects:** The Release-Gate can focus on "merge to main" readiness instead of production deployment.
+- **CI-heavy projects:** The Release-Gate prompt can reference CI check results instead of re-running tests locally.
+
+**Config discipline checkpoints.** The strictest of the curriculum — flag any of these immediately and require a rollback:
+
+- The participant edits code by hand to fix a Reviewer finding. Roll it back. Update `packs/builder/prompts/builder.md.tmpl` with the missing rule. Re-sling the Builder.
+- The participant writes a Release-Gate result as an opinion ("looks good"). Reject it. Force a binary PASS/FAIL with evidence.
+- The participant slings the Reviewer without a Builder artifact. Stop — the Reviewer has no contract without the Coder's output.
+
+**Before declaring the session complete,** walk through the **Exit Criteria** at the bottom of this README with the participant. A `review-reports/<slug>-review.md` and a `release-gates/<slug>-gate.md` must be committed. At least one finding must be resolved via a Builder prompt edit — verify by showing `git log packs/builder/prompts/`. Ad-hoc slings not allowed; the pipeline should be driven by `orchestrator.yaml`.
+
+---
+
 ## Architecture Diagram
 
 ```

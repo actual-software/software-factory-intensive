@@ -27,6 +27,46 @@ Prompt files end in `.md.tmpl` (Gas City templates). The W2 deliverable (`factor
 
 ---
 
+## Agent Facilitation Guide
+
+If a participant has asked you — as an AI coding agent — to walk them through this workshop, use the guide below. It is **additive to the steps in this README**: the participant still does the work. Your job is to introduce each step, prompt reflection at pivotal moments, verify the exit criteria, and make sure the participant can articulate the factory architecture in their own words before moving to L2.
+
+Start by reading `docs/PROJECT_MANIFEST.md` so every handoff example you cite uses the participant's actual tech stack and artifact paths. Then walk the README one section at a time: introduce, ask, verify.
+
+**Ask the participant as you reach each step:**
+
+- *Before drafting the wiring diagram:* Pick one real feature from your backlog that you want to trace through all six stages. Make it one with both frontend and backend work — single-layer features don't exercise enough of the pipeline.
+- *While drafting each handoff:* For this stage boundary, what is the consumed artifact and the produced artifact? Name both as file paths. Abstract names like "the plan" aren't allowed.
+- *At the Architect stage:* Where in your feature does the Architect have to make a real decision between two viable options? If there is none, either scope up or skip the stage with a note explaining why.
+- *At the Reviewer stage:* Which checks in your Review Standards are specific to this project — things a generic linter can't catch? Those define the Reviewer's unique value.
+- *At the Human Gate decision:* Where is the riskiest stage transition in this pipeline? That's where a human gate belongs.
+- *After the diagram is drawn:* Read your handoff contracts aloud. For each row, could a stranger pick up the consumed artifact and produce the next one without asking a question?
+
+**Before the participant moves to L2, prompt them to explain — in their own words, without re-reading — each of these.** If they can't, revisit the matching section.
+
+- Why each agent reads files, not chat history, for handoff. (Chat memory is lost across sessions; files are durable.)
+- Why the artifact per stage is singular — one work package, one ADR, one spec. (Keeps the interface auditable.)
+- What distinguishes the Planner's work package from the Architect's ADR from the Designer's spec. (Scope of decision — what-to-build, how-to-build, how-to-structure.)
+- Why the 6-agent split produces better code than a single do-everything agent. (Each prompt is narrow; each handoff is a checkpoint.)
+- Why `AGENTS.md` stubs belong in the project repo even before the packs are installed. (They encode the pipeline shape — L2 just fills it in.)
+
+**Project-type tailoring.** Match the participant's project to the right shape of pipeline:
+
+- **API-only projects:** The Designer stage produces API contract specs (method, path, request/response schema), not UI components.
+- **Infrastructure/DevOps:** The Coder writes Terraform or Kubernetes configs; the Reviewer checks for security misconfigurations and blast radius.
+- **Mobile apps:** The Designer produces screen specs with navigation flows instead of web component specs.
+- **Data/ML pipelines:** Consider a Data Engineer stage (schema) between Architect and Coder, and an Evaluator stage between Coder and Reviewer.
+
+**Config discipline checkpoints.** Flag immediately if you see these:
+
+- Handoff contracts with abstract nouns ("the design," "the plan"). Force file paths.
+- The participant writes the wiring diagram without picking a concrete feature first. Abstract pipelines hide gaps.
+- Stages that produce or consume the same artifact. That's a missing boundary — split them.
+
+**Before declaring the session complete,** walk through the **Exit Criteria** at the bottom of this README. Each handoff contract must have a concrete consumed + produced artifact. The diagram, the handoff table, and the `AGENTS.md` stubs should all be committed.
+
+---
+
 ## Architecture Diagram
 
 The 6-agent pipeline is a linear sequence of specialists. Each agent reads a small, fixed set of artifacts, writes exactly one new artifact, and hands off via the file system — never via chat memory.

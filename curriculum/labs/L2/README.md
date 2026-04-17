@@ -25,6 +25,46 @@ If a pack edit breaks your factory, swap back to the shipped `../packs/<name>` p
 
 ---
 
+## Agent Facilitation Guide
+
+If a participant has asked you — as an AI coding agent — to walk them through this lab, use the guide below. It is **additive to the steps in this README**: the participant still does the work. Your job is to introduce each step, prompt reflection at pivotal moments, verify the exit criteria, and make sure the participant can articulate what each pack-based agent is doing — and why it's different from the vanilla `dev-agent` they built in L1 — before moving to L3.
+
+Start by reading `my-factory/PROJECT_MANIFEST.md` so the feature you suggest slinging (and the architectural trade-offs you surface) match the participant's stack. Then walk the README one step at a time: introduce, ask, execute together, verify.
+
+**Ask the participant as you reach each step:**
+
+- *Before slinging the Planner:* Which feature will you plan? For their own project, pick something medium-complexity with both frontend and backend work. For Fired Up Pizza, default to "Loyalty points system." Refuse trivial features — they won't exercise the Architect.
+- *Before reading the work package:* What architectural constraints from your manifest apply to this feature? Those constraints are what the Architect will have to honor.
+- *Before slinging the Architect:* What trade-off does this feature force? Every ADR needs at least two options with pros/cons. If you can't name two, the feature doesn't need an ADR — scope up.
+- *After the Planner runs:* Does the work package have goal + stories + AC + dependencies? If a section is weak, is the fix a better bead description or a stronger prompt? Name which.
+- *After the Architect runs:* Does the ADR reference the work package by path? If not, that's a prompt gap — the Architect isn't wiring the pipeline.
+- *Before re-running:* If an agent produced wrong output, where are you fixing it — in the prompt template or in chat? The answer has to be the prompt template.
+
+**Before the participant moves to L3, prompt them to explain — in their own words, without re-reading — each of these.** If they can't, revisit the matching section.
+
+- The difference between a vanilla `dev-agent` (L1) and a packaged agent (L2). (Packs add role-specific prompts and I/O contracts; vanilla agents only read `CLAUDE.md`.)
+- Why the Planner and Architect are separate agents instead of one "analyst." (Each has a distinct input contract, distinct output artifact, and distinct failure mode.)
+- Why ADRs reference work packages by path instead of summarizing them inline. (Summaries rot; paths stay correct as the file evolves.)
+- Why the fix for a bad Planner output is a `packs/planner/prompts/planner.md.tmpl` edit, not a chat correction. (Prompt edits persist across every future sling; chat corrections vanish.)
+- What a "good" work package includes that a vague feature request doesn't. (Explicit ACs, named dependencies, a goal that frames the stories.)
+
+**Project-type tailoring.** Match the participant's stack to the right focus for the Architect:
+
+- **API-first projects:** The Architect's trade-offs should be about endpoint design, auth strategy, and data modeling.
+- **Frontend-heavy projects:** The Architect should weigh state management, component hierarchy, and API contract shape.
+- **Infrastructure projects:** The Architect should focus on resource topology, IAM policies, and blast radius.
+- **Jira/Linear users:** The bead can be created via `bd jira sync --pull` instead of manual `bd create`.
+
+**Config discipline checkpoints.** Flag immediately if you see these:
+
+- The participant types a correction into `gc watch` when the Planner's output is wrong. Stop them — the prompt template is the only surface that persists.
+- The participant edits the work package by hand to fix what the agent got wrong. Same problem — the agent will make the same mistake on the next bead.
+- The participant slings the same bead to both agents in parallel. Sequential first — the Architect needs the Planner's artifact as input.
+
+**Before declaring the session complete,** walk through the **Exit Criteria** at the bottom of this README with the participant. `work-packages/<slug>.md` and `docs/adr/0001-<slug>.md` must both be committed and cross-referenced. Ask: how many prompt-template edits did each agent need? That count is what you'll aim to reduce in L3.
+
+---
+
 ## Architecture Diagram
 
 ```

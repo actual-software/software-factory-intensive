@@ -1,6 +1,6 @@
 # Curriculum Guide
 
-This directory contains the guided steps and facilitation prompts for each session of the Software Factory Intensive. Each session's `README.md` is a self-paced walkthrough — commands, code snippets, and insights — that a participant follows independently.
+This directory contains the guided steps for each session of the Software Factory Intensive. Each session's `README.md` is a self-paced walkthrough — commands, code snippets, and insights — that a participant follows independently. Every README also includes an **Agent Facilitation Guide** near the top: if a participant asks an AI coding agent to walk them through the session, the guide tells the agent how to ask guiding questions, verify understanding at pivotal steps, and enforce the session's exit criteria — additive to the step-by-step instructions, not a replacement.
 
 ## Session Types
 
@@ -26,18 +26,14 @@ Full factory run. All six agents run end-to-end on a new feature, driven entirel
 
 ## Session Structure
 
-Each session directory contains:
+Each session directory contains a single `README.md` — the walkthrough — with an **Agent Facilitation Guide** section near the top. The facilitation guide is what you'd previously find in a separate `PROMPT.md`; it now lives inline so an agent asked to walk a participant through the session has the guide in the same file as the steps themselves.
 
-| File | Purpose |
-|------|---------|
-| `README.md` | Walkthrough — goal, estimated duration, guided steps, exit criteria |
-| `PROMPT.md` | Facilitation prompt — paste into your AI assistant to guide the session |
-
-The PROMPT.md includes:
-- Discovery questions to surface project-specific decisions
-- Concrete build steps with Gas City commands
-- Suggestions tailored to different project types (React, API, infra, mobile, etc.)
-- Config discipline checkpoints
+The Agent Facilitation Guide in each README includes:
+- Guiding questions the agent should ask the participant at specific steps
+- Core concepts the participant must be able to articulate before moving on
+- Project-type tailoring (React, API, infra, mobile, etc.)
+- Config discipline checkpoints the agent should flag immediately
+- An exit-criteria check before the session is declared complete
 
 ## Progression
 

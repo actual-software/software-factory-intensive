@@ -130,13 +130,13 @@ software-factory-intensive/
 │   └── capstone/
 │       └── C1/README.md             # Run report + retrospective
 │
-├── curriculum/                      # Self-paced session walkthroughs and facilitation prompts
+├── curriculum/                      # Self-paced session walkthroughs
 │   ├── README.md
 │   ├── PROJECT_OVERVIEW_TEMPLATE.md # Loose-structure project brief (you fill in)
 │   ├── PROJECT_MANIFEST_TEMPLATE.md # Structural skeleton (agent-generated in L1)
-│   ├── workshops/W1..W4/            # Each has README.md + PROMPT.md
-│   ├── labs/L1..L4/                 # Each has README.md + PROMPT.md
-│   └── capstone/C1/                 # README.md + PROMPT.md
+│   ├── workshops/W1..W4/            # Each has a README.md with an Agent Facilitation Guide inline
+│   ├── labs/L1..L4/                 # Each has a README.md with an Agent Facilitation Guide inline
+│   └── capstone/C1/                 # README.md with an Agent Facilitation Guide inline
 │
 ├── packs/                           # Shipped Gas City agent packs — use as-is or copy + customise
 │   ├── README.md                    # Pack authoring + persona mapping

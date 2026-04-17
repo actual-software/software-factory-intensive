@@ -10,6 +10,49 @@
 
 ---
 
+## Agent Facilitation Guide
+
+If a participant has asked you — as an AI coding agent — to walk them through this lab, use the guide below. It is **additive to the steps in this README**: the participant still does the work. Your job is to introduce each step, prompt reflection at pivotal moments, verify the exit criteria, and make sure the participant can articulate why each piece of config exists before moving to L2.
+
+Start by reading `docs/PROJECT_MANIFEST.md` so you can tailor command examples (quality gates, testing framework, component conventions) to the participant's stack. Then walk the README one step at a time: introduce, ask, execute together, verify.
+
+**Ask the participant as you reach each step:**
+
+- *Before Step 1:* What project are you registering as the rig? Confirm it has a filled-in `docs/PROJECT_MANIFEST.md` and a tiny backlog item you could hand-code in 15–30 minutes.
+- *Before Step 4:* Which three to five commands decide that your project's code is shippable? Those become the Quality Gates section, verbatim.
+- *Before Step 4:* What decisions should the agent never make on its own (dependencies, schema, API contracts)? Those go into Project Context as hard rules.
+- *Before Step 5:* Pick one user story you could hand-code in under 30 minutes. Push back if the participant picks something architectural — the first sling is a calibration run, not a hero play.
+- *Before Step 6:* Read the bead description aloud. If any acceptance criterion could be re-interpreted, tighten it before slinging.
+- *After Step 7.4:* Did the agent commit? If yes, skim the diff before running gates — sometimes the problem is obvious.
+- *During Step 8.4 (iterate):* What rule was missing from `CLAUDE.md` that let the agent fail this way? Name it in one sentence before editing — that sentence becomes the new rule.
+
+**Before the participant moves to L2, prompt them to explain — in their own words, without re-reading — each of these.** If they can't, revisit the matching section.
+
+- Why `CLAUDE.md` is the only surface they edit when the agent misbehaves, and why chat corrections die with the session.
+- Why they `git reset --hard HEAD~1` and re-sling rather than asking the agent to fix its own mistake.
+- Why imperatives (`NEVER`, `Run \`npm test\``) out-weigh hedges (`prefer`, `try to`) in the agent's prompt.
+- What the Quality Gates section does for the agent that a human-readable `CONTRIBUTING.md` can't.
+- What a passing first sling should look like in the event stream (file reads → plan comment → edits → gate commands → commit → idle).
+
+Even if the answer is "the README said X because Y," hearing the participant articulate it cements the concept for L2 and beyond.
+
+**Project-type tailoring.** Match the participant's stack to the right rules — pull concrete bullets from the *Suggestions Based on Project Type* patterns rather than writing generic rules:
+
+- **React/TypeScript:** "Follow existing component patterns in `src/components`. Use Tailwind classes. Co-locate tests."
+- **Backend API:** "All endpoints follow REST conventions. Validate inputs. Return structured JSON errors."
+- **Python:** "Use type hints. Follow existing patterns. Run `pytest` before committing."
+- **Monorepo:** "Only modify files within the `<package-name>` workspace."
+
+**Config discipline checkpoints.** Flag these immediately if you see them:
+
+- The participant starts typing corrections into the `gc watch` window. Stop them — the correction is invisible to the next sling.
+- The participant asks you to edit `CLAUDE.md` for them. Push back — their hand on the keyboard is the point.
+- The participant hits a failure and skips `git reset --hard HEAD~1` before re-slinging. The second agent will inherit the first agent's mess.
+
+**Before declaring the session complete,** walk through the **Exit Criteria** at the bottom of this README with the participant. L1 blocks L2 — do not let them move on with an unchecked box. Also ask: how many slings did it take, and what rule did they add on each iteration? Those are the answers they'll bring into L2 and re-use across every future agent.
+
+---
+
 ## Architecture Diagram
 
 ```
