@@ -1,5 +1,5 @@
 ---
-name: factory_activity_agent
+name: factory-activity-agent
 description: >-
   Install, delete, and operate Gas City factory setups for Software Factory
   Intensive curriculum activities (W1-W4, L1-L4, C1). Wraps
@@ -11,7 +11,7 @@ description: >-
 argument-hint: "[install|delete|status|doctor|sling|dashboard|list] [activity]"
 ---
 
-# factory_activity_agent
+# factory-activity-agent
 
 Manage Gas City factory environments for the Software Factory Intensive curriculum.
 
@@ -34,12 +34,12 @@ Manage Gas City factory environments for the Software Factory Intensive curricul
 Pre-flight checks, then calls the Python installer:
 
 ```bash
-bash skills/factory_activity_agent/scripts/install.sh <activity> [--dry-run]
+bash skills/factory-activity-agent/scripts/install.sh <activity> [--dry-run]
 ```
 
 Or directly:
 ```bash
-python3 scripts/factory_activity_agent.py install <activity> [--mode dry-run]
+python3 scripts/factory-activity-agent.py install <activity> [--mode dry-run]
 ```
 
 Activities: `W1`, `W2`, `W3`, `W4`, `L1`, `L2`, `L3`, `L4`, `C1`
@@ -49,12 +49,12 @@ Activities: `W1`, `W2`, `W3`, `W4`, `L1`, `L2`, `L3`, `L4`, `C1`
 Stops the factory, unregisters it, and removes all directories:
 
 ```bash
-bash skills/factory_activity_agent/scripts/delete.sh <activity> [--dry-run]
+bash skills/factory-activity-agent/scripts/delete.sh <activity> [--dry-run]
 ```
 
 Or directly:
 ```bash
-python3 scripts/factory_activity_agent.py delete <activity> [--mode dry-run]
+python3 scripts/factory-activity-agent.py delete <activity> [--mode dry-run]
 ```
 
 ### status
@@ -62,7 +62,7 @@ python3 scripts/factory_activity_agent.py delete <activity> [--mode dry-run]
 Show all registered cities and their agent status:
 
 ```bash
-bash skills/factory_activity_agent/scripts/status.sh
+bash skills/factory-activity-agent/scripts/status.sh
 ```
 
 ### doctor
@@ -70,7 +70,7 @@ bash skills/factory_activity_agent/scripts/status.sh
 Run gc diagnostics with auto-fix:
 
 ```bash
-bash skills/factory_activity_agent/scripts/doctor.sh
+bash skills/factory-activity-agent/scripts/doctor.sh
 ```
 
 ### sling
@@ -101,7 +101,7 @@ gc dashboard serve --city ~/Projects/factory/<slug>/<alias>-gc-factory
 Show all activities and whether they are currently installed:
 
 ```bash
-bash skills/factory_activity_agent/scripts/status.sh --list
+bash skills/factory-activity-agent/scripts/status.sh --list
 ```
 
 ## Installation
@@ -122,21 +122,21 @@ bash skills/factory_activity_agent/scripts/status.sh --list
 
 ```bash
 # Option 1: Symlink into user-level skills (available in all projects)
-ln -s "$(pwd)/skills/factory_activity_agent" ~/.claude/skills/factory_activity_agent
+ln -s "$(pwd)/skills/factory-activity-agent" ~/.claude/skills/factory-activity-agent
 
 # Option 2: Symlink into project-level skills (this project only)
 mkdir -p .claude/skills
-ln -s "$(pwd)/skills/factory_activity_agent" .claude/skills/factory_activity_agent
+ln -s "$(pwd)/skills/factory-activity-agent" .claude/skills/factory-activity-agent
 
 # Option 3: Copy into user-level skills
-cp -r skills/factory_activity_agent ~/.claude/skills/factory_activity_agent
+cp -r skills/factory-activity-agent ~/.claude/skills/factory-activity-agent
 ```
 
 ### For Codex
 
 ```bash
 mkdir -p ~/.codex/skills
-cp -r skills/factory_activity_agent ~/.codex/skills/factory_activity_agent
+cp -r skills/factory-activity-agent ~/.codex/skills/factory-activity-agent
 ```
 
 ### For Gas City pack integration
@@ -144,14 +144,14 @@ cp -r skills/factory_activity_agent ~/.codex/skills/factory_activity_agent
 Ship inside a pack overlay so agents get the skill automatically:
 
 ```bash
-cp -r skills/factory_activity_agent packs/<pack>/overlays/default/.claude/skills/factory_activity_agent
+cp -r skills/factory-activity-agent packs/<pack>/overlays/default/.claude/skills/factory-activity-agent
 ```
 
 ### Verify
 
 After installing, the skill should appear in Claude Code's skill list. Test with:
 ```
-/factory_activity_agent list
+/factory-activity-agent list
 ```
 
 ## Activity Map
@@ -198,12 +198,12 @@ What `install` creates under `~/Projects/factory/`:
 1. **Pre-flight** — verify `gc` and `python3` are on PATH
 2. **Dry-run** — preview what will happen:
    ```bash
-   python3 scripts/factory_activity_agent.py install W2 --mode dry-run
+   python3 scripts/factory-activity-agent.py install W2 --mode dry-run
    ```
 3. **Confirm** — review the dry-run output with the user
 4. **Execute** — run the install:
    ```bash
-   python3 scripts/factory_activity_agent.py install W2
+   python3 scripts/factory-activity-agent.py install W2
    ```
 5. **Verify** — check the factory is running:
    ```bash
@@ -222,7 +222,7 @@ Dashboard available at http://localhost:8080 after install.
 1. **Pre-flight** — confirm with user (this removes all files)
 2. **Execute**:
    ```bash
-   python3 scripts/factory_activity_agent.py delete W2
+   python3 scripts/factory-activity-agent.py delete W2
    ```
 3. **Verify** — confirm directories are removed and factory is unregistered:
    ```bash
@@ -240,7 +240,7 @@ gc cities
 gc status --city ~/Projects/factory/workshop_w2/w2-gc-factory
 
 # Check all factories at once
-bash skills/factory_activity_agent/scripts/status.sh
+bash skills/factory-activity-agent/scripts/status.sh
 ```
 
 ## gc CLI Quick Reference (v0.14.1)
@@ -334,7 +334,7 @@ brew install gascity@0.14.1
 Run a full environment check:
 
 ```bash
-bash skills/factory_activity_agent/scripts/diagnose.sh
+bash skills/factory-activity-agent/scripts/diagnose.sh
 ```
 
 Checks: gc binary + version, python3, bd, registered cities, factory directories, agent authentication.
