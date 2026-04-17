@@ -82,9 +82,11 @@ pushd ~/Projects/factory/baseline/base-gc-factory
 gc rig add <full_path>/Projects/factory/baseline/base-project
 ```
 
+Update city.toml with the includes as in this example:
+
 ```bash
 [[rigs]]
-name = "w2-project"
+name = "base-project"
 path = "<full_path/Projects/factory/baseline/base-project"
 includes = ["packs/actual/all"]
 ```
