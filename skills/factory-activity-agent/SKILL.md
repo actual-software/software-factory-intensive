@@ -39,7 +39,7 @@ bash skills/factory-activity-agent/scripts/install.sh <activity> [--dry-run]
 
 Or directly:
 ```bash
-python3 scripts/factory-activity-agent.py install <activity> [--mode dry-run]
+python3 scripts/factory_activity_agent.py install <activity> [--mode dry-run]
 ```
 
 Activities: `W1`, `W2`, `W3`, `W4`, `L1`, `L2`, `L3`, `L4`, `C1`
@@ -54,7 +54,7 @@ bash skills/factory-activity-agent/scripts/delete.sh <activity> [--dry-run]
 
 Or directly:
 ```bash
-python3 scripts/factory-activity-agent.py delete <activity> [--mode dry-run]
+python3 scripts/factory_activity_agent.py delete <activity> [--mode dry-run]
 ```
 
 ### status
@@ -198,22 +198,18 @@ What `install` creates under `~/Projects/factory/`:
 1. **Pre-flight** — verify `gc` and `python3` are on PATH
 2. **Dry-run** — preview what will happen:
    ```bash
-   python3 scripts/factory-activity-agent.py install W2 --mode dry-run
+   python3 scripts/factory_activity_agent.py install W2 --mode dry-run
    ```
 3. **Confirm** — review the dry-run output with the user
 4. **Execute** — run the install:
    ```bash
-   python3 scripts/factory-activity-agent.py install W2
+   python3 scripts/factory_activity_agent.py install W2
    ```
-5. **Verify** — check the factory is running:
+5. **Verify** — check the factory is running and the setup task was slung:
    ```bash
    gc status --city ~/Projects/factory/workshop_w2/w2-gc-factory
    ```
-6. **Test sling** — route a test prompt to an agent:
-   ```bash
-   cd ~/Projects/factory/workshop_w2/w2-project
-   gc sling w2-project/architect "Create a script that prints hello world"
-   ```
+   The install automatically slings a setup task to the architect agent to create `.gitignore` and `README.md`.
 
 Dashboard available at http://localhost:8080 after install.
 
@@ -222,7 +218,7 @@ Dashboard available at http://localhost:8080 after install.
 1. **Pre-flight** — confirm with user (this removes all files)
 2. **Execute**:
    ```bash
-   python3 scripts/factory-activity-agent.py delete W2
+   python3 scripts/factory_activity_agent.py delete W2
    ```
 3. **Verify** — confirm directories are removed and factory is unregistered:
    ```bash

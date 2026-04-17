@@ -31,6 +31,14 @@ which gc
 gc version
 ```
 
+### Script Setup Factory - baseline
+
+```bash
+bash ~/Projects/actual-software/software-factory-intensive/prerequisites/setup_baseline_factory.sh
+```
+
+### Manual Setup Factory - Baseline
+
 #### Setup Factory - baseline
 
 ##### Init Factory and Project

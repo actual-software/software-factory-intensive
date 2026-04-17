@@ -22,6 +22,7 @@ ACTIVITY_MAP = {
     "L3": ("labs", "lab_l3"),
     "L4": ("labs", "lab_l4"),
     "C1": ("capstone", "capstone_c1"),
+    "B1": ("baseline", "baseline_b1"),
 }
 
 
@@ -65,22 +66,27 @@ def install(activity, dry_run=False):
         print(f"Error: No city.toml template at {city_toml_src}")
         sys.exit(1)
 
+    # Check if this activity is already installed
+    already_installed = (
+        not dry_run
+        and factory_dir.exists()
+        and (factory_dir / "city.toml").exists()
+        and (project_dir / ".git").exists()
+    )
+    if already_installed:
+        print(f"\nActivity {activity} is already installed at {factory_dir.parent}")
+        print("  Skipping install to preserve user modifications.")
+        print(f"  To reinstall, first run: python3 {__file__} delete {activity}")
+        return
+
     # --- Step 1: Init Factory and Project ---
     print("\n##### Init Factory and Project")
     run(["mkdir", "-p", str(project_dir)], dry_run=dry_run)
-
-    if not dry_run and (project_dir / ".git").exists():
-        print(f"    Project repo already initialized at {project_dir}, skipping git init.")
-    else:
-        run(["git", "init"], cwd=str(project_dir), dry_run=dry_run)
-
-    if not dry_run and factory_dir.exists():
-        print(f"    Factory directory already exists at {factory_dir}, skipping gc init.")
-    else:
-        run(
-            f'echo "3" | gc init {factory_dir}',
-            dry_run=dry_run, shell=True,
-        )
+    run(["git", "init"], cwd=str(project_dir), dry_run=dry_run)
+    run(
+        f'echo "3" | gc init {factory_dir}',
+        dry_run=dry_run, shell=True,
+    )
 
     # --- Step 2: Configure Factory ---
     print("\n##### Configure Factory")
@@ -176,9 +182,19 @@ def install(activity, dry_run=False):
     print("\n  Dashboard: http://localhost:8080")
 
     # --- Step 8: Verify suggestion ---
-    print("\n##### Verify Factory")
-    print(f"  Run this to verify:")
-    print(f'  cd {project_dir} && gc sling {alias_lower}-project/architect "Create a script that prints hello world"')
+    sling_prompt = (
+        "Set up this project: "
+        "1) Add a .gitignore with canonical best-practice defaults "
+        "(OS files, editor files, language build artifacts, env files, node_modules, __pycache__, .DS_Store, etc). "
+        "2) Add a README.md that describes this as the "
+        f"{alias_lower}-project workspace for the {activity} activity in the Software Factory Intensive, "
+        "and include a Next Steps section with instructions to explore the factory agents."
+    )
+    print("\n##### Sling Setup Task")
+    run(
+        ["gc", "sling", f"{alias_lower}-project/architect", sling_prompt],
+        cwd=str(project_dir), dry_run=dry_run, check=False,
+    )
 
 
 def delete(activity, dry_run=False):
