@@ -16,6 +16,7 @@ ACTIVITY_MAP=(
     "L3:labs:lab_l3:l3"
     "L4:labs:lab_l4:l4"
     "C1:capstone:capstone_c1:c1"
+    "B1:baseline:baseline_b1:b1"
 )
 
 echo "=== Gas City Factory Status ==="

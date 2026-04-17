@@ -10,7 +10,7 @@ REAL_SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || realpath "$0
 SFI_DIR="$(cd "$REAL_SCRIPT_DIR/../../.." && pwd)"
 AGENT_SCRIPT="$SFI_DIR/scripts/factory_activity_agent.py"
 
-VALID_ACTIVITIES="W1 W2 W3 W4 L1 L2 L3 L4 C1"
+VALID_ACTIVITIES="W1 W2 W3 W4 L1 L2 L3 L4 C1 B1"
 
 usage() {
     echo "Usage: $0 <activity> [--dry-run]"

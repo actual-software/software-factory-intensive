@@ -31,28 +31,28 @@ Manage Gas City factory environments for the Software Factory Intensive curricul
 
 ### install
 
-Pre-flight checks, then calls the Python installer:
+Pre-flight checks, then calls the Python installer. **Always run from the SFI repo root:**
 
 ```bash
 bash skills/factory-activity-agent/scripts/install.sh <activity> [--dry-run]
 ```
 
-Or directly:
+Or directly (must be in the SFI repo root):
 ```bash
 python3 scripts/factory_activity_agent.py install <activity> [--mode dry-run]
 ```
 
-Activities: `W1`, `W2`, `W3`, `W4`, `L1`, `L2`, `L3`, `L4`, `C1`
+Activities: `W1`, `W2`, `W3`, `W4`, `L1`, `L2`, `L3`, `L4`, `C1`, `B1`
 
 ### delete
 
-Stops the factory, unregisters it, and removes all directories:
+Stops the factory, unregisters it, and removes all directories. **Always run from the SFI repo root:**
 
 ```bash
 bash skills/factory-activity-agent/scripts/delete.sh <activity> [--dry-run]
 ```
 
-Or directly:
+Or directly (must be in the SFI repo root):
 ```bash
 python3 scripts/factory_activity_agent.py delete <activity> [--mode dry-run]
 ```
@@ -167,6 +167,7 @@ After installing, the skill should appear in Claude Code's skill list. Test with
 | L3 | labs | `lab_l3` | `~/Projects/factory/lab_l3/l3-project` | `~/Projects/factory/lab_l3/l3-gc-factory` |
 | L4 | labs | `lab_l4` | `~/Projects/factory/lab_l4/l4-project` | `~/Projects/factory/lab_l4/l4-gc-factory` |
 | C1 | capstone | `capstone_c1` | `~/Projects/factory/capstone_c1/c1-project` | `~/Projects/factory/capstone_c1/c1-gc-factory` |
+| B1 | baseline | `baseline_b1` | `~/Projects/factory/baseline_b1/b1-project` | `~/Projects/factory/baseline_b1/b1-gc-factory` |
 
 Pack sources for each activity: `activities/<category>/<activity>/gascity/step_0/packs/`
 

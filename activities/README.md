@@ -4,6 +4,7 @@ This directory is where you do your work for each session of the Software Factor
 
 | Tree | What goes here |
 |------|----------------|
+| `baseline/B1/` | Baseline factory setup — GasCity install + first factory |
 | `workshops/W1..W4/` | Deliverables from each workshop (design docs, config files, feedback-loop notes) |
 | `labs/L1..L4/` | Deliverables from each lab plus any customised pack copies |
 | `capstone/C1/` | Capstone run report and retrospective |
@@ -40,6 +41,7 @@ You lose the customisation but keep a working factory, and you can retry the cus
 
 | Session | Folder | Key deliverable |
 |---------|--------|-----------------|
+| B1 | [`baseline/B1/`](baseline/B1/) | Baseline factory setup — GasCity install + working factory |
 | W1 | [`workshops/W1/`](workshops/W1/) | Workflow card — single-agent workflow discipline |
 | W2 | [`workshops/W2/`](workshops/W2/) | Factory wiring — per-agent table + integration points |
 | W3 | [`workshops/W3/`](workshops/W3/) | `orchestrator.yaml` + gate justification doc |

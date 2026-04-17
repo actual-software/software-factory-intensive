@@ -79,6 +79,7 @@ if [[ -d "$FACTORY_ROOT" ]]; then
         "W1:workshop_w1:w1" "W2:workshop_w2:w2" "W3:workshop_w3:w3" "W4:workshop_w4:w4"
         "L1:lab_l1:l1" "L2:lab_l2:l2" "L3:lab_l3:l3" "L4:lab_l4:l4"
         "C1:capstone_c1:c1"
+        "B1:baseline_b1:b1"
     )
     for entry in "${ACTIVITY_SLUGS[@]}"; do
         IFS=: read -r activity slug alias <<< "$entry"
@@ -101,11 +102,12 @@ fi
 
 # Section 7: Activity packs
 section "Activity Packs (source)"
-for activity in W1 W2 W3 W4 L1 L2 L3 L4 C1; do
+for activity in W1 W2 W3 W4 L1 L2 L3 L4 C1 B1; do
     case "$activity" in
         W*) category="workshops" ;;
         L*) category="labs" ;;
         C*) category="capstone" ;;
+        B*) category="baseline" ;;
     esac
     packs_dir="$SFI_DIR/activities/$category/$activity/gascity/step_0/packs"
     if [[ -d "$packs_dir" ]]; then
