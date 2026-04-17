@@ -23,6 +23,10 @@ If you skipped an earlier lab or a prompt edit breaks the pack, point `includes`
 
 ---
 
+> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by opening `my-factory/PROJECT_MANIFEST.md` so suggestions about component structure, testing framework, and matching existing components are grounded in the participant's actual code.
+
+---
+
 ## Architecture Diagram
 
 ```
@@ -458,6 +462,8 @@ git commit -m "chore(coder): customize coder prompt with project quality gates"
 
 ## Part 3: Create and Run the Designer (~20 min)
 
+> **Agent Guide:** Before slinging, ask the participant two questions: (1) what component structure does your project use — flat, feature-based, something else? The Designer needs to tell the Builder exactly where the new file goes. (2) Which existing component most closely matches this feature? Naming a reference file anchors the Designer's output to real conventions.
+
 The Designer's inputs are the work package and ADR from L2. You'll chain a new bead after the Architect bead from L2 and sling it to the Designer.
 
 ### Step 1: Create the Designer Bead
@@ -540,6 +546,8 @@ bd show my-factory-design123     # bead status
 Typical runtime: 2–4 minutes.
 
 ### Step 4: Review the Spec
+
+> **Agent Guide:** After the Designer runs, verify the spec has props, state, interactions, edge cases, AND a `Location` path. If any is missing, that's a prompt gap — fix `packs/designer/prompts/designer.md.tmpl` before slinging the Builder. Also watch for over-specification: if the Designer is re-inventing patterns the codebase already has, push it to reference existing files instead.
 
 ```bash
 cd ~/path/to/your-repo
@@ -649,6 +657,8 @@ bd close my-factory-design123 --comment "Component spec committed: design/loyalt
 ---
 
 ## Part 4: Create and Run the Coder (~25 min)
+
+> **Agent Guide:** Before slinging, ask the participant what testing framework the project uses — Jest, Vitest, pytest, Go test, etc. Wrong framework means wrong tests. Also track the sling count: target is ≤3 to passing. If the participant hits 4+, one of their rules is fighting an existing convention — pause and reconcile before they spin.
 
 The Coder's inputs are the spec you just produced plus the original work package (for test cases) and ADR (for technical constraints).
 
@@ -782,6 +792,8 @@ bd close my-factory-impl456 --comment "Implementation committed on feature branc
 ---
 
 ## Part 5: Run Tests & Iterate Via Config (~10 min)
+
+> **Agent Guide:** This is the strictest part of the session. Stop the participant the moment they reach for the editor to hand-fix failing code — that fix is invisible to the next bead. Roll back, update `packs/builder/prompts/builder.md.tmpl`, re-sling. Also flag if they sling the Builder without a spec in place: without the spec there's no contract, and they've regressed to L1's vanilla `dev-agent`.
 
 This is the core discipline section. Quality gate failures happen — the fix is *never* to edit code by hand, and *never* to paste corrections into the Coder's tmux session. The fix is always a prompt edit followed by a re-sling.
 
@@ -971,6 +983,18 @@ When you review your own output, check:
 - **Test Coverage** — At least 2 test cases from the work package pass. Test descriptions reference the work package's Story (e.g. "Story 2: shows 0 points for a new customer").
 - **Quality Gates Green** — `npm run typecheck`, `npm run lint`, `npm test` all exit zero (or the equivalents for your stack).
 - **Config Discipline** — Every iteration was a prompt-file diff plus a re-sling. Zero ad-hoc chat corrections. Zero manual code edits.
+
+---
+
+## Concept Check (before moving to L4)
+
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
+
+- Why the Designer writes a spec before the Builder writes code. (The spec is the cheapest place to iterate; code is the most expensive.)
+- Why the spec names an exact `Location` path. (Without it, the Builder invents a path — usually the wrong one.)
+- Why the Builder's failing test is a prompt bug, not a code bug. (Manual edits die with the bead; prompt edits persist.)
+- What a spec produces for a project that has no UI. (API contracts, interface definitions, schema — the shape differs, the contract does not.)
+- Why the Designer doesn't write tests. (Test design is a Builder concern, informed by spec edge cases.)
 
 ---
 

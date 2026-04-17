@@ -1,6 +1,6 @@
 # Curriculum Guide
 
-This directory contains the guided steps and facilitation prompts for each session of the Software Factory Intensive. Each session's `README.md` is a self-paced walkthrough — commands, code snippets, and insights — that a participant follows independently.
+This directory contains the guided steps for each session of the Software Factory Intensive. Each session's `README.md` is a self-paced walkthrough — commands, code snippets, and insights — that a participant follows independently. Every README also includes an **Agent Facilitation Guide** near the top: if a participant asks an AI coding agent to walk them through the session, the guide tells the agent how to ask guiding questions, verify understanding at pivotal steps, and enforce the session's exit criteria — additive to the step-by-step instructions, not a replacement.
 
 ## Session Types
 
@@ -26,18 +26,12 @@ Full factory run. All six agents run end-to-end on a new feature, driven entirel
 
 ## Session Structure
 
-Each session directory contains:
+Each session directory contains a single `README.md` — the walkthrough — with **Agent Guide** callouts interleaved alongside the participant steps. The callouts are what you'd previously find in a separate `PROMPT.md`; they now live inline next to the steps they apply to, so an agent walking a participant through the session gets the right guidance at the right moment.
 
-| File | Purpose |
-|------|---------|
-| `README.md` | Walkthrough — goal, estimated duration, guided steps, exit criteria |
-| `PROMPT.md` | Facilitation prompt — paste into your AI assistant to guide the session |
-
-The PROMPT.md includes:
-- Discovery questions to surface project-specific decisions
-- Concrete build steps with Gas City commands
-- Suggestions tailored to different project types (React, API, infra, mobile, etc.)
-- Config discipline checkpoints
+Each README includes:
+- A short preamble at the top telling an agent to look for `> **Agent Guide:** …` callouts.
+- Inline Agent Guide callouts at pivotal steps — guiding questions to ask, config-discipline anti-patterns to flag.
+- A **Concept Check** block just before the Exit Criteria, listing the core ideas the participant must articulate before moving to the next session.
 
 ## Progression
 
@@ -57,7 +51,7 @@ Each session builds on the previous. Exit criteria gates determine whether you'r
 
 ## Prerequisite Materials
 
-Before starting the curriculum, write a **Project Overview** for the software project you'll build your factory around. Use [`PROJECT_OVERVIEW_TEMPLATE.md`](./PROJECT_OVERVIEW_TEMPLATE.md) as the starting point — it's a loosely structured brief covering user needs, tech stack, constraints, and potential integrations.
+Before starting the curriculum, write a **Project Overview** for the software project you'll build your factory around. Use [`PROJECT_OVERVIEW_TEMPLATE.md`](./PROJECT_OVERVIEW_TEMPLATE.md) as the starting point — it's a short five-section brief (what it does, goals, scope, users, domain context). Keep it terse; the manifest is where structure goes.
 
 The overview is what *you* write. The structured [`PROJECT_MANIFEST_TEMPLATE.md`](./PROJECT_MANIFEST_TEMPLATE.md) — a skeleton every factory agent reads — is generated from your overview by your local coding agent during L1. Don't hand-fill the manifest yourself.
 

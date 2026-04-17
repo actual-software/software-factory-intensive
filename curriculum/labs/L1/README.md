@@ -10,6 +10,10 @@
 
 ---
 
+> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by opening `docs/PROJECT_MANIFEST.md` so command examples (quality gates, testing framework, component conventions) match the participant's stack.
+
+---
+
 ## Architecture Diagram
 
 ```
@@ -136,6 +140,8 @@ And the skeleton you'll start from:
 ---
 
 ## Step 1: Initialize Your City and Register Your Rig (~10 min)
+
+> **Agent Guide:** Before starting, confirm the participant has (a) a filled-in `docs/PROJECT_MANIFEST.md` in their project repo and (b) a tiny backlog item they could hand-code in 15–30 minutes. If either is missing, pause and fix that first — the first sling is a calibration run, not a hero play.
 
 Your "city" is the workspace where all agents and beads live. Your "rig" is the project repo the agent will work in. A city can host many rigs; a rig is always a git repo.
 
@@ -357,6 +363,8 @@ For L1, you don't need any of those. The four fields you have are enough.
 
 ## Step 4: Write Your `CLAUDE.md` (~15 min)
 
+> **Agent Guide:** Before drafting anything, ask the participant two questions: (1) which three-to-five commands decide that their project's code is shippable — those become the Quality Gates section verbatim; and (2) which decisions the agent should never make on its own (dependencies, schema, API contracts) — those become hard rules in Project Context.
+
 This is the step that matters most. `CLAUDE.md` is the agent's entire personality — everything it knows about your project's conventions, iteration style, and quality bar lives here. Every edit you make between slings is an edit to this file.
 
 ### Step 4.1: Copy the Skeleton
@@ -482,6 +490,8 @@ The only exception is per-bead context — "implement this specific feature, not
 
 ## Step 5: Pick a Small Test Story (~5 min)
 
+> **Agent Guide:** Push back if the participant picks something architectural or sweeping. The goal is a story they could hand-code in under 30 minutes, touching fewer than five files — small enough to sling three times if needed.
+
 Choose one story from your backlog that you could manually code in 15–30 minutes. Smaller is better — your first sling is a calibration run, not a hero play. You want the feedback loop short so you can iterate on `CLAUDE.md` multiple times before running out of time.
 
 If you don't have a backlog yet, borrow from Fired Up Pizza's tickets file:
@@ -524,6 +534,8 @@ You'll discover this yourself in Step 8. Don't front-run the fix — see the fai
 ---
 
 ## Step 6: Create a Bead for the Story (~5 min)
+
+> **Agent Guide:** Have the participant read the bead description aloud before creating it. If any acceptance criterion could be reinterpreted, tighten it now — ambiguity in the bead is ambiguity in the sling.
 
 A bead is a work item in Gas City. It has a title, a markdown description, a status, and an optional dependency chain. The description is the first thing the agent reads when you sling the bead to it.
 
@@ -665,6 +677,8 @@ Proceed to Step 9.
 
 ### Step 8.4: If Gates Fail or Output Is Wrong
 
+> **Agent Guide:** Before the participant edits `CLAUDE.md`, have them name the missing rule in one sentence — that sentence becomes the new rule. Flag two anti-patterns the moment you see them: (a) typing corrections into the `gc watch` window (invisible to the next sling), and (b) skipping `git reset --hard HEAD~1` before re-slinging (the second agent inherits the first agent's mess).
+
 **Do not type into chat. Do not fix the code manually.** Instead:
 
 1. **Identify the missing rule.** Be specific: "The agent used inline styles — that's not forbidden in `CLAUDE.md`." "The agent skipped tests — the Quality Gates section doesn't require them explicitly enough." "The agent forgot the empty-cart AC — the Iteration Rule doesn't enumerate ACs as tests."
@@ -789,6 +803,18 @@ Practical implications:
 - **Name commands verbatim.** "Run tests" is weaker than "Run `npm test`". The second one gives the agent a directly executable instruction.
 - **Use structured lists for sequences.** A numbered Iteration Rule is followed step-by-step; a paragraph describing the process is sometimes followed, sometimes skipped.
 - **Re-state critical rules in the relevant section.** If "never edit main" is a Project Context rule *and* the first step of the Iteration Rule, the agent is twice as likely to remember it.
+
+---
+
+## Concept Check (before moving to L2)
+
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check. Also ask: how many slings did it take, and what rule did they add on each iteration? Those answers carry into L2.
+
+- Why `CLAUDE.md` is the only surface they edit when the agent misbehaves, and why chat corrections die with the session.
+- Why they `git reset --hard HEAD~1` and re-sling rather than asking the agent to fix its own mistake.
+- Why imperatives (`NEVER`, `Run \`npm test\``) out-weigh hedges (`prefer`, `try to`) in the agent's prompt.
+- What the Quality Gates section does for the agent that a human-readable `CONTRIBUTING.md` can't.
+- What a passing first sling should look like in the event stream (file reads → plan comment → edits → gate commands → commit → idle).
 
 ---
 

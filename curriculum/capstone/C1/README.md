@@ -31,6 +31,10 @@ If you skipped an earlier lab, add the shipped path for that pack — the capsto
 
 ---
 
+> **Agent Guide** — If an AI coding agent is guiding you through this capstone, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. This is the one session where "I'll finish it later" is disallowed — the Factory Run Report, feature branch, and retrospective **must** be committed before the session ends, whether or not the run reaches the Deployer. An agent reading this README should start by opening `my-factory/PROJECT_MANIFEST.md` and glancing at `orchestrator.yaml`; the capstone is driven by the participant's own config.
+
+---
+
 ## Architecture Diagram
 
 ```
@@ -195,6 +199,8 @@ Below is the full run, broken into six agent-stage sub-steps plus a pre-run setu
 
 ### Step 0: Pre-Run Setup (~5 min)
 
+> **Agent Guide:** Before typing anything, have the participant say the feature, the bead title, and the description out loud. For their own project, push for medium complexity in a *different area of the codebase* than the L2–L4 runs — a rehearsed feature tests memory, a new feature tests the factory. Also open the run report in a split pane now; it's updated live, not at the end.
+
 Create the feature bead and start the live run report.
 
 ```bash
@@ -253,6 +259,8 @@ gc session list         # refresh as needed
 ```
 
 ### Step 1: Planner (~10 min)
+
+> **Agent Guide:** Before every sling in this run, ask: "What artifact does this agent produce, and where will it land?" The participant should name the path — that's the pipeline's contract. If they can't name it, open the pack's prompt template together and read the Output section before slinging.
 
 **Command:**
 
@@ -366,6 +374,8 @@ Close the Designer bead.
 
 ### Step 4: Coder (~20 min)
 
+> **Agent Guide:** This is where the factory most commonly stalls. If the Coder fails, the Designer spec is almost always the cause — missing edge cases or an ambiguous Location path. Fix `packs/designer/prompts/designer.md.tmpl`, re-sling Designer, then Coder. Also: every single time the participant is tempted to hand-edit code to make tests pass, stop them. Roll it back. Update the Builder prompt. Re-sling. No exceptions in the capstone.
+
 **Command:**
 
 ```bash
@@ -477,6 +487,8 @@ gc watch devops
 Close the Deployer bead.
 
 ### Step 7: Close the Run (~5 min)
+
+> **Agent Guide:** Do not let the participant skip this step, even if time is tight and the run is partial. A partial report with honest state is an audit trail; a discarded partial run is wasted learning. The report, feature branch, and retrospective must all be committed before the session ends.
 
 Regardless of how far you got:
 
@@ -900,6 +912,18 @@ The Architect is extending or overriding a baseline — which is allowed by L2's
 ### 12. Factory stalls because a prompt-file edit has a syntax error
 
 Prompts aren't compiled, so "syntax" means markdown or whitespace. Most common: indentation of a list item in the Quality Gate section that makes the model misinterpret what's required vs. optional. Always re-read your own edits as if the agent were reading them. If an edit introduces ambiguity, fix the edit — don't layer another edit on top.
+
+---
+
+## Concept Check (before closing the capstone)
+
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
+
+- Why the capstone uses a feature they haven't seen before. (A rehearsed feature tests memory; a new feature tests the factory.)
+- Why ad-hoc prompts break the factory's contract. (Every ad-hoc correction is a prompt update that should have happened but didn't — the next bead inherits the missing rule.)
+- What a "PASS" from the Release-Gate actually proves. (Only that the release-criteria in the manifest were met — not that the feature is good; that's the Reviewer's job.)
+- Why the Retrospective asks for a Keep, a Change, and a Question. (Keep validates what compounds, Change surfaces what doesn't, Question surfaces the thing they couldn't resolve alone.)
+- Why the report is committable even when the run is incomplete. (A partial report with honest state is an audit trail; a discarded partial run is wasted learning.)
 
 ---
 

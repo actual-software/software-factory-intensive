@@ -27,6 +27,10 @@ Prompt files end in `.md.tmpl` (Gas City templates). The W2 deliverable (`factor
 
 ---
 
+> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by opening `docs/PROJECT_MANIFEST.md` so every handoff example uses the participant's actual tech stack and artifact paths.
+
+---
+
 ## Architecture Diagram
 
 The 6-agent pipeline is a linear sequence of specialists. Each agent reads a small, fixed set of artifacts, writes exactly one new artifact, and hands off via the file system — never via chat memory.
@@ -585,6 +589,8 @@ Now you design your own factory. You'll fill in the same pipeline shape, but wit
 
 ### Step 1: Pick Your Feature
 
+> **Agent Guide:** Push the participant to pick a feature with both frontend and backend work — single-layer features don't exercise enough of the pipeline. If they can't name a real architectural question the feature raises, pick a different feature; the Architect stage exists to answer real trade-offs, not rubber-stamp.
+
 Write one sentence describing a feature you'll trace through all six stages. Keep it small (implementable in ~2 hours of real coding) and make sure it has at least one open architectural question.
 
 ```markdown
@@ -600,6 +606,8 @@ For Fired Up Pizza: *"Add a loyalty points system where customers earn 1 point p
 **What's happening here:** The architectural question is what distinguishes a feature needing the full 6-agent pipeline from one that could skip the Architect. If you can't identify a real decision, pick a different feature — you'll be bored by L2.
 
 ### Step 2: Draft the Per-Agent Table
+
+> **Agent Guide:** For each row, insist on a file path for "what it produces" — abstract names like "the plan" or "the design" aren't allowed. Also flag duplicate artifacts: if two stages produce or consume the same file, that's a missing boundary, split them.
 
 Paste this template into your editor and fill in each row. This *is* your design deliverable — keep it terse.
 
@@ -686,6 +694,8 @@ If you're running without an Architect, you've effectively asked the Designer to
 ---
 
 ## Part 4: Define Handoff Contracts (~10 min)
+
+> **Agent Guide:** As the participant reads each handoff row, ask: "Could a stranger pick up the consumed artifact and produce the next one without asking a question?" If not, the fields list is incomplete. For the Reviewer handoff specifically, ask which checks are specific to this project — things a generic linter can't catch. Those define the Reviewer's unique value.
 
 The 6 agents are connected by 5 handoffs. Each handoff is a **contract**: Agent A produces a specific artifact; Agent B reads it as authoritative and is not allowed to relitigate.
 
@@ -945,6 +955,18 @@ If the Coder is deciding where to store data or which API pattern to use, you sh
 ### Issue 10: "Not sure how `actual adr-bot` fits with my own ADRs"
 
 Tailored ADRs (in `CLAUDE.md`) are baselines. Hand-written ADRs (in `docs/adr/`) are feature-specific decisions. The Architect reads baselines first, then writes a feature ADR only if the decision isn't already covered or needs a local override. Think of `CLAUDE.md` as ADR-seed-\* and `docs/adr/` as ADR-NNNN.
+
+---
+
+## Concept Check (before moving to L2)
+
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
+
+- Why each agent reads files, not chat history, for handoff. (Chat memory is lost across sessions; files are durable.)
+- Why the artifact per stage is singular — one work package, one ADR, one spec. (Keeps the interface auditable.)
+- What distinguishes the Planner's work package from the Architect's ADR from the Designer's spec. (Scope of decision — what-to-build, how-to-build, how-to-structure.)
+- Why the 6-agent split produces better code than a single do-everything agent. (Each prompt is narrow; each handoff is a checkpoint.)
+- Why `AGENTS.md` stubs belong in the project repo even before the packs are installed. (They encode the pipeline shape — L2 just fills it in.)
 
 ---
 

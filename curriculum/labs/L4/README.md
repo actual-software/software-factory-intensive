@@ -23,6 +23,10 @@ If a prompt edit breaks the pack, swap `includes` back to the shipped `../packs/
 
 ---
 
+> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. This is the strictest session for config discipline: **review findings are fixed by editing the Builder prompt, never by editing code**. An agent reading this README should start by opening `my-factory/PROJECT_MANIFEST.md` — especially the Review Standards and Release Criteria sections — since the Reviewer and Release-Gate agents read those as their rubric.
+
+---
+
 ## Architecture Diagram
 
 ```
@@ -385,6 +389,8 @@ git commit -m "chore(city): declare reviewer + deployer agents"
 
 ## Part 3: Sling to the Reviewer (~15 min)
 
+> **Agent Guide:** Before the participant slings, ask: "Which criteria in your Review Standards matter most for this feature? What should the Reviewer catch that a linter can't?" Naming those out loud anchors what "a good review" means for this bead. Also: do not let the participant sling the Reviewer without a Builder artifact — the Reviewer has no contract without the Coder's output.
+
 ### Step 1: Create the Reviewer Bead
 
 ```bash
@@ -462,6 +468,8 @@ bd show my-factory-r1r2r3        # bead progress
 Wait until the Reviewer returns to `idle` in `gc status`. This typically takes 3–8 minutes depending on the size of the Coder's diff.
 
 ### Step 4: Examine the Review Report
+
+> **Agent Guide:** Ask the participant: "What's the highest-severity finding?" Don't move on until they can state it in one sentence. Then — before any fix — have them confirm out loud: "I will fix this by editing `packs/builder/prompts/builder.md.tmpl`. I will not touch the code." This verbal checkpoint is where most participants break discipline; catching it before the fix starts is easier than rolling back after.
 
 ```bash
 cd ~/path/to/your-repo
@@ -548,6 +556,8 @@ If any rule fails: **do not edit the review report by hand.** Edit `packs/review
 ---
 
 ## Part 4: Fix Via Config (Critical Step — ~20 min)
+
+> **Agent Guide:** This is the strictest enforcement of the entire curriculum. The instant the participant opens the Coder's output files to hand-fix a finding, stop them, roll the edit back, and redirect them to `packs/builder/prompts/builder.md.tmpl`. No exceptions. If they argue "just this once," that's exactly the habit the workshop is trying to break.
 
 This is the crux of L4. The Reviewer has produced findings. A developer's instinct is to open the Coder's output files and fix them directly. **Do not do this.** The whole point of a factory is that improvements persist as agent config, not as one-off manual edits. If you hand-fix the code today, the next feature will have the same bug tomorrow.
 
@@ -708,6 +718,8 @@ Every finding you resolve via config is a systemic improvement — the next feat
 
 ## Part 5: Sling to the Deployer (~10 min)
 
+> **Agent Guide:** Before slinging, ask the participant to read their release criteria aloud. Every criterion should be testable — produce PASS/FAIL evidence, not an opinion. "Code is clean" fails this test; "`npm run lint` exits 0" passes. If any criterion is opinion-based, that's a prompt gap in the manifest's Release Criteria section — fix it before slinging.
+
 Once the review report returns `APPROVE` (or returns `REQUEST_CHANGES` with only findings you've deliberately deferred and documented), the feature is ready for release gate evaluation.
 
 ### Step 1: Create the Deployer Bead
@@ -777,6 +789,8 @@ The Deployer should:
 Wait until the Deployer returns to `idle`. This typically takes 2–5 minutes.
 
 ### Step 4: Examine the Release Gate Record
+
+> **Agent Guide:** Check every row: does each criterion have PASS/FAIL with evidence (command output, test results, artifact paths), or does it read like an opinion? Any "looks good" verdict is a prompt gap in the Release-Gate template — fix it before the session ends. A gate whose output is opinions is not a gate.
 
 ```bash
 cd ~/path/to/your-repo
@@ -1049,6 +1063,18 @@ When you review your own output, check:
 - **Binary Gate Results** — Every row in the Release Gate's Criteria table is `PASS` or `FAIL` — nothing in between. No "mostly", "partially", "needs attention", "looks good".
 - **Evidence Density** — Every PASS row cites a specific artifact: commit SHA, file path, test-runner output, or `git status` line. No opinions.
 - **Config Discipline** — At least one reviewer finding was resolved by editing a prompt file (Coder, Designer, or Reviewer itself). Zero review findings were resolved by hand-editing `src/`.
+
+---
+
+## Concept Check (before moving to W4)
+
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section. Also verify by running `git log packs/builder/prompts/` that at least one finding was resolved via a Builder prompt edit, not a code edit.
+
+- Why review findings are fixed by editing the Builder prompt, not the code. (A manual fix solves this bead; a prompt edit prevents the next hundred.)
+- The difference between a Reviewer and a linter. (Linters enforce syntax and style; Reviewers enforce spec compliance and project-specific conventions a linter can't express.)
+- What makes a release gate "binary." (A single command produces a clean PASS or FAIL with evidence — no "mostly ready" or "looks good.")
+- Why the full pipeline is driven by `orchestrator.yaml` (W3) and not by ad-hoc slings. (Declarative config is auditable, reproducible, and edit-once-run-many.)
+- What evidence the Release-Gate should attach to each PASS/FAIL. (Command output, test results, artifact paths — not prose.)
 
 ---
 

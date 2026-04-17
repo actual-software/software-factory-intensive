@@ -16,6 +16,10 @@ Pack naming: references to *Coder* and *Deployer* in this README map to the ship
 
 ---
 
+> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by re-reading the participant's W2 wiring diagram; every orchestrator decision should be grounded in that pipeline, and if the diagram is missing, pause and have the participant produce a quick version first.
+
+---
+
 ## Architecture Diagram
 
 ```
@@ -411,6 +415,8 @@ touch orchestrator.yaml
 
 ### Step 2: Write the Full Pipeline
 
+> **Agent Guide:** As the participant writes each stage, flag two anti-patterns the moment you see them: (a) parallelism where both branches write to the same directory — force sequencing, two agents editing `src/` concurrently is a conflict waiting to happen; (b) stages that depend on another stage's chat output rather than its file artifact — rewrite to reference the file. Also ask where in their pipeline two stages could genuinely run in parallel (disjoint files, no mutual dependency); if no pair qualifies, say so and skip the fan-out — invented parallelism is worse than no parallelism.
+
 Open `orchestrator.yaml` and write your six-stage pipeline. Work in three passes, adding one concept at a time so that each intermediate version is independently verifiable.
 
 #### Pass A: Sequential chain only (no gates, no remediation)
@@ -577,6 +583,8 @@ gates:
 - `gates:` at the bottom declares approval metadata that the `gate: human` stages reference. Keep a justification doc per gate — empty justification = theatrical gate.
 
 ### Step 3: Write the Gate Justification Doc
+
+> **Agent Guide:** Ask the participant two questions before they write: (1) what concrete risk does this gate prevent? Force a specific failure mode, not a category ("an untested migration reaches production," not "quality issues"). (2) Under what observable condition would they remove this gate? If the answer is "never," the gate is fear-based — push for a measurable exit condition.
 
 Any stage with `gate: human` needs a justification committed alongside. Create `docs/gates/approve_deploy.md`:
 
@@ -820,6 +828,18 @@ design/*-spec.md, src/**, review-reports/*.md, release-gates/*.md.
 
 Do not invent fields not used in the curriculum's examples.
 ```
+
+---
+
+## Concept Check (before moving to L4)
+
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
+
+- The three coordination patterns (sequential, parallel fan-out, human gate) and when each is the right choice.
+- Why the human gate is framed with a *removal condition*, not just a location. (Gates are temporary scaffolding; without an exit condition, they calcify.)
+- How the orchestrator knows when a stage is "done." (It reads the produced artifact path — artifacts are the contract, not chat messages.)
+- Why `on_reject` loops back to a specific stage instead of starting over. (Re-running the Planner on a Reviewer rejection wastes the work already produced.)
+- Why the orchestrator lives in a yaml file and not a script. (Declarative config is inspectable and versionable; imperative code rots.)
 
 ---
 

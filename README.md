@@ -10,45 +10,36 @@ Hands-on, project-based workshop to learn how to build a software factory — a 
 
 ---
 
+## Community & Support
+
+Stuck on a step, want to share what you've built, or looking to collaborate with other participants? Join the **Actual AI User Community** Slack:
+
+- **Join the community slack:** [actualaiusercommunity.slack.com](https://join.slack.com/t/actualaiusercommunity/shared_invite/zt-3vibgzapf-ywx0Db29mZ4lhtQJGzZfGQ)
+- **Real-time help:** once you're in, join [#sfi-help-desk](https://actualaiusercommunity.slack.com/archives/C0ATHDM0NUD) for live support on the curriculum.
+
+---
+
 ## Before You Arrive
 
-### 1. Software Project Overview
+### 1. Confirm Machine Requirements
 
-You should bring a real software project to build your factory around. Before starting the curriculum, write a **Project Overview** for it — a loosely structured document answering the questions below. (Don't fill in the structured `my-factory/PROJECT_MANIFEST.md` yet — your local coding agent generates that from your overview during L1.)
+- **Operating System**: MacOS and Linux are ready to go as-is. Windows users: please install [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (Windows Subsystem for Linux) and run everything from inside the WSL shell.
+- **CLI Coding Agents**: You’ll need at least one CLI coding agent installed. Having more than one gives you broader capabilities and redundancy.
+  - **Recommended**: Claude Code Max (20x) or Codex Pro (20x), or equivalent
+  - **Minimum**: Claude Code Max or Codex Pro (standard tier), or equivalent
+  - **Alternatives**: Gemini CLI, OpenCode (compatibility not guaranteed)
 
-A complete overview covers:
+### 2. Software Project Overview
 
-- **User needs** — what does this software do, and for whom?
-- **Size, type, languages, resource constraints** — is it a new project or an existing codebase? Which languages and frameworks? Any limits on memory, runtime, or platform?
-- **Potential SDLC service integrations** — which external services is this factory likely to touch (Vercel, Jira, Linear, AWS, Grafana, GitHub, etc.)?
+You should bring a real software project to build your factory around. Before starting the curriculum, write a **Project Overview** for it using [`curriculum/PROJECT_OVERVIEW_TEMPLATE.md`](./PROJECT_OVERVIEW_TEMPLATE.md) — a loosely structured document that answers a few questions about the project. Your local coding agent will generate the Project Manifest and Software Factory Manifest from this document. You can see [`reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md`](reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md) for a completed example.
 
-Use [`curriculum/PROJECT_OVERVIEW_TEMPLATE.md`](curriculum/PROJECT_OVERVIEW_TEMPLATE.md) as a starting point. See [`reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md`](reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md) for a completed example.
+### 3. Gas City Installation
 
-### 2. Library Dependencies
+Refer to the Gas City [Installation Guide](https://github.com/gastownhall/gascity/blob/main/docs/getting-started/installation.md) for the full dependency list and platform-specific notes.
 
-Install Gas City and the tools it depends on. See [`installation.md`](installation.md) for the full dependency list and platform-specific notes.
+### 4. Gas City Quickstart
 
-- **Gas City**: `brew install gastownhall/gascity/gascity`
-- **Supporting tools**: `git`, `tmux`, `jq`, `dolt` — typically installed automatically alongside Gas City on macOS
-
-### 3. CLI Coding Agents
-
-You need at least one CLI coding agent installed and authenticated. Additional agents give you broader capabilities and redundancy (different models have different strengths).
-
-- **Recommended**: Claude Code Max 20×, Codex Pro 20×, or similar paid tiers
-- **Minimum**: Claude Code Max, Codex Pro, or similar
-- **Others may work** (no compatibility guarantees):
-  - Gemini CLI
-  - OpenCode
-  - GitHub Copilot
-  - Cursor
-
-For the current list of supported providers and their configuration keys, see Gas City's provider registry: [`internal/config/provider.go#L203-L209`](https://github.com/gastownhall/gascity/blob/73f09ddd78fed9b90e0589b324255c36d030eb46/internal/config/provider.go#L203-L209).
-
-### 4. Operating System
-
-- **macOS / Linux**: works as-is
-- **Windows**: install [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) first; run everything from inside the WSL shell
+Follow the [Quickstart Guide](prerequisites/quickstart.md) to install Gas City and create a new workspace. This will help you understand the basics of the Gas City CLI before you start the workshop.
 
 ---
 
@@ -113,7 +104,6 @@ software-factory-intensive/
 ├── my-factory/                      # Your Gas City workspace (top-level city.toml lives here)
 │   ├── city.toml                    # Workspace config — add pack includes as you progress
 │   ├── README.md                    # Quickstart: register workspace, add rig, wire packs
-│   └── PROJECT_MANIFEST.md          # Manifest template (filled in during L1)
 │
 ├── activities/                      # Where you place per-session deliverables + pack customisations
 │   ├── README.md                    # Session layout + additive/independent model
@@ -130,13 +120,13 @@ software-factory-intensive/
 │   └── capstone/
 │       └── C1/README.md             # Run report + retrospective
 │
-├── curriculum/                      # Self-paced session walkthroughs and facilitation prompts
+├── curriculum/                      # Self-paced session walkthroughs
 │   ├── README.md
 │   ├── PROJECT_OVERVIEW_TEMPLATE.md # Loose-structure project brief (you fill in)
 │   ├── PROJECT_MANIFEST_TEMPLATE.md # Structural skeleton (agent-generated in L1)
-│   ├── workshops/W1..W4/            # Each has README.md + PROMPT.md
-│   ├── labs/L1..L4/                 # Each has README.md + PROMPT.md
-│   └── capstone/C1/                 # README.md + PROMPT.md
+│   ├── workshops/W1..W4/            # README.md per session, with inline Agent Guide callouts
+│   ├── labs/L1..L4/                 # README.md per session, with inline Agent Guide callouts
+│   └── capstone/C1/                 # README.md with inline Agent Guide callouts
 │
 ├── packs/                           # Shipped Gas City agent packs — use as-is or copy + customise
 │   ├── README.md                    # Pack authoring + persona mapping
@@ -159,46 +149,6 @@ software-factory-intensive/
 
 ---
 
-## Integrations
+## Next Steps
 
-The [`packs/workshop/`](packs/workshop/) pack provides pre-configured integrations for external services your factory can connect to. Include it alongside your agent packs to get:
-
-- **Issue tracker sync** — Jira, Linear, GitHub Issues, GitLab Issues, Azure DevOps, Notion (via `bd` native sync with periodic orders)
-- **Observability** — Sentry, DataDog, PostHog, Grafana (via MCP servers giving agents direct tool access)
-- **Cloud providers** — AWS, GCP, Azure (validated via CLI auth)
-- **Communication** — Slack, Discord (via MCP servers)
-
-```bash
-# From my-factory/, add the workshop integrations pack to city.toml includes:
-#   includes = [..., "../packs/workshop"]
-
-# Copy the env template and fill in your credentials
-cp ../packs/workshop/env.example .env
-
-# Validate connections
-gc doctor
-```
-
-Only configure the integrations your project actually uses. See [`packs/workshop/README.md`](packs/workshop/README.md) for the full list and setup details.
-
----
-
-## Getting Started
-
-```bash
-# Clone the repo (it already contains a ready-to-use workspace at my-factory/)
-git clone https://github.com/actual-software/software-factory-intensive.git
-cd software-factory-intensive
-
-# Register my-factory/ with the Gas City supervisor
-cd my-factory
-gc register .
-
-# Add your project as a rig (agents added incrementally in labs)
-gc rig add ../../path/to/your-project
-
-# Your first agent pack gets added to my-factory/city.toml in L2:
-#   includes = ["../packs/planner", "../packs/architect"]
-```
-
-See [`my-factory/README.md`](my-factory/README.md) for the full workspace quickstart, [`activities/README.md`](activities/README.md) for the per-session deliverable layout, or the [curriculum README](curriculum/README.md) for session structure. Jump to [W1](curriculum/workshops/W1/) to start.
+Ready to get started? Jump to [W1](curriculum/workshops/W1/) to start.
