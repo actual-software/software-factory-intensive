@@ -53,7 +53,7 @@ Each session builds on the previous. Exit criteria gates determine whether you'r
 
 ## Prerequisite Materials
 
-Before starting the curriculum, write a **Project Overview** for the software project you'll build your factory around. Use [`PROJECT_OVERVIEW_TEMPLATE.md`](./PROJECT_OVERVIEW_TEMPLATE.md) as the starting point — it's a loosely structured brief covering user needs, tech stack, constraints, and potential integrations.
+Before starting the curriculum, write a **Project Overview** for the software project you'll build your factory around. Use [`PROJECT_OVERVIEW_TEMPLATE.md`](./PROJECT_OVERVIEW_TEMPLATE.md) as the starting point — it's a short five-section brief (what it does, goals, scope, users, domain context). Keep it terse; the manifest is where structure goes.
 
 The overview is what *you* write. The structured [`PROJECT_MANIFEST_TEMPLATE.md`](./PROJECT_MANIFEST_TEMPLATE.md) — a skeleton every factory agent reads — is generated from your overview by your local coding agent during L1. Don't hand-fill the manifest yourself.
 
