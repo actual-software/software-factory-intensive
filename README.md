@@ -10,6 +10,15 @@ Hands-on, project-based workshop to learn how to build a software factory — a 
 
 ---
 
+## Community & Support
+
+Stuck on a step, want to share what you've built, or looking to collaborate with other participants? Join the **Actual AI User Community** Slack:
+
+- **Join the workspace:** [actualaiusercommunity.slack.com](https://join.slack.com/t/actualaiusercommunity/shared_invite/zt-3vibgzapf-ywx0Db29mZ4lhtQJGzZfGQ)
+- **Real-time help:** once you're in, join [#sfi-help-desk](https://actualaiusercommunity.slack.com/archives/C0ATHDM0NUD) for live support on the curriculum.
+
+---
+
 ## Before You Arrive
 
 ### 1. Software Project Overview
