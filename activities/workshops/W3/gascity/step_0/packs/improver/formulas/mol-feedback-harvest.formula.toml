@@ -21,6 +21,10 @@ default = "24h"
 description = "Directory for daily feedback summaries"
 default = "docs/feedback"
 
+[vars.skip_adr_sync]
+description = "Set to 'true' to skip the actual-adr-sync step (useful in rigs without the actual CLI installed)"
+default = "false"
+
 [[steps]]
 id = "collect"
 title = "Collect runtime signals from the project application"
@@ -133,9 +137,73 @@ Append to the summary file under a `## Proposed beads` section.
 """
 
 [[steps]]
+id = "actual-adr-sync"
+title = "Sync ADRs to CLAUDE.md/AGENTS.md via the actual skill"
+needs = ["propose"]
+description = """
+Run `actual adr-bot` to sync the rig's CLAUDE.md/AGENTS.md with its
+ADRs after proposing feedback-driven improvements. Uses `--no-tailor`
+to avoid spawning an AI subprocess inside the agent session. **DO NOT
+skip this step because you think it needs an interactive terminal —
+it does NOT when `--force --no-tui` are passed. You MUST actually run
+the command.**
+
+**Skip this step ONLY if `{{skip_adr_sync}}` is "true".**
+
+**1. Change to the rig root and check the `actual` binary:**
+```bash
+cd "$RIG_ROOT"
+if ! command -v actual >/dev/null 2>&1; then
+    bd update $ROOT_ID --notes "<existing notes>
+adr_sync: skipped — actual CLI not installed"
+    exit 0
+fi
+```
+
+**2. Check the git tree is clean:**
+```bash
+if [ -n "$(git status --porcelain)" ]; then
+    bd update $ROOT_ID --notes "<existing notes>
+adr_sync: skipped — dirty worktree"
+    exit 0
+fi
+```
+
+**3. Dry-run:**
+```bash
+actual adr-bot --dry-run --full --force --no-tui --no-tailor
+```
+Read the diff carefully. Is it small and sensible? Or is it a large
+divergence from an unrelated ADR drift?
+
+**4a. Small, sensible diff → commit it:**
+```bash
+actual adr-bot --force --no-tui --no-tailor
+actual status
+git add CLAUDE.md AGENTS.md
+git commit -m "actual-improver: sync ADRs after feedback harvest"
+```
+
+**4b. Large divergence → file a divergence bead and STOP:**
+```bash
+DIVERGENCE_ID=$(bd create \\
+    --title "ADR divergence: feedback harvest" \\
+    --label source:actual-improver \\
+    --label type:divergence \\
+    --notes "Dry-run diff was non-trivial. Review manually." \\
+    --json | jq -r '.id')
+bd dep add $ROOT_ID --blocked-by $DIVERGENCE_ID
+```
+Record `adr_sync: divergence_filed` in the root bead notes.
+
+**Exit criteria:** Either ADRs committed, sync skipped with a
+documented reason, or a divergence bead filed.
+"""
+
+[[steps]]
 id = "file-beads"
 title = "Create the beads, close the source needs-improve beads, mail"
-needs = ["propose"]
+needs = ["actual-adr-sync"]
 description = """
 **1. Create each drafted bead and route to the right agent:**
 ```bash

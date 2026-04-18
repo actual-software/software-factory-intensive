@@ -59,8 +59,9 @@ The agent voices are anchored to the built-in personas from
 
 ## The actual-skill integration
 
-Three packs — **architect**, **pm**, **builder** — vendor the
-upstream [actual-software/actual-skill](https://github.com/actual-software/actual-skill)
+Five packs — **architect**, **designer**, **improver**, **pm**,
+**builder** — vendor the upstream
+[actual-software/actual-skill](https://github.com/actual-software/actual-skill)
 Claude Code companion for the `actual` CLI
 (ADR-powered CLAUDE.md/AGENTS.md generator). The skill sits under
 each pack's `overlays/default/.claude/skills/actual/` and is picked
@@ -70,19 +71,30 @@ To re-vendor after upstream releases a new version:
 
 ```bash
 cd examples/actual/architect && ./scripts/sync-actual-skill.sh
+cd examples/actual/designer  && ./scripts/sync-actual-skill.sh
+cd examples/actual/improver  && ./scripts/sync-actual-skill.sh
 cd examples/actual/pm        && ./scripts/sync-actual-skill.sh
 cd examples/actual/builder   && ./scripts/sync-actual-skill.sh
 ```
 
-The three packs use the skill slightly differently:
+The five packs use the skill slightly differently:
 
-- **architect** runs `actual adr-bot --dry-run --full` to keep ADRs
-  and generated rules in sync
+- **architect** runs `actual adr-bot --force --no-tui --no-tailor`
+  to keep ADRs and generated rules in sync after architecture work
+- **designer** runs `actual adr-bot --force --no-tui --no-tailor`
+  to sync ADRs after completing design cycles
+- **improver** runs `actual adr-bot --force --no-tui --no-tailor`
+  to sync ADRs after feedback harvest cycles
 - **pm** reads `CLAUDE.md` / `AGENTS.md` for architectural
   context when breaking down work
 - **builder** runs `actual status` before coding to verify the rig
   is not in ADR drift (and hands the work back to the architect if
   it is)
+
+**Note:** The `--no-tailor` flag is required in agent environments
+because the default `claude-cli` runner hangs when spawned inside
+an existing Claude Code session. If `ANTHROPIC_API_KEY` is available,
+agents can use `--runner anthropic-api` instead for tailored output.
 
 ## The tracker → beads bridge (pm only)
 

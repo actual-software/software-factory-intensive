@@ -86,16 +86,16 @@ touching any ADR workflow.** The canonical way you synchronize the
 rig's rules with its ADRs is:
 
 ```bash
-cd "$RIG_ROOT"                                    # from Rig root in footer
-actual adr-bot --dry-run --full --force --no-tui  # preview
-actual adr-bot --force --no-tui                    # commit them
-actual status                                      # verify sync
+cd "$RIG_ROOT"                                                # from Rig root in footer
+actual adr-bot --dry-run --full --force --no-tui --no-tailor  # preview
+actual adr-bot --force --no-tui --no-tailor                    # commit them
+actual status                                                  # verify sync
 ```
 
-**IMPORTANT:** Always pass `--force --no-tui` — these flags make
-`actual adr-bot` work in non-interactive agent sessions. Without them
-it will fail with a TerminalIOError. You MUST run this command, not
-skip it.
+**IMPORTANT:** Always pass `--force --no-tui --no-tailor` — these
+flags make `actual adr-bot` work in non-interactive agent sessions.
+The `--no-tailor` flag skips the AI subprocess (which hangs inside
+agent sessions). You MUST run this command, not skip it.
 
 ## Work loop
 

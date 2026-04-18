@@ -164,10 +164,11 @@ title = "Sync ADRs to CLAUDE.md/AGENTS.md via the actual skill"
 needs = ["design"]
 description = """
 Run `actual adr-bot` to sync the rig's CLAUDE.md/AGENTS.md with its
-ADRs. The `--force --no-tui` flags make it work in non-interactive
-agent environments. **DO NOT skip this step because you think it
-needs an interactive terminal — it does NOT when `--force --no-tui`
-are passed. You MUST actually run the command.**
+ADRs. Uses `--no-tailor` to avoid spawning an AI subprocess inside
+the agent session (the default `claude-cli` runner hangs when called
+from within a Claude Code session). **DO NOT skip this step because
+you think it needs an interactive terminal — it does NOT when
+`--force --no-tui` are passed. You MUST actually run the command.**
 
 **Skip this step ONLY if `{{skip_adr_sync}}` is "true".**
 
@@ -195,7 +196,7 @@ fi
 
 **3. Dry-run:**
 ```bash
-actual adr-bot --dry-run --full --force --no-tui
+actual adr-bot --dry-run --full --force --no-tui --no-tailor
 ```
 Read the diff carefully. Is it small and sensible (e.g., one added
 rule matching the current topic)? Or is it a large divergence from an
@@ -203,7 +204,7 @@ unrelated ADR drift?
 
 **4a. Small, sensible diff → commit it:**
 ```bash
-actual adr-bot --force --no-tui
+actual adr-bot --force --no-tui --no-tailor
 actual status
 git add CLAUDE.md AGENTS.md docs/adr docs/rules
 git commit -m "actual-architect: sync ADRs for {{topic}}"
