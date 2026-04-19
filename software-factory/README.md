@@ -66,6 +66,8 @@ Feature Request → Planner → Architect → Designer → Coder → Reviewer �
 | **Reviewer** | `packs/reviewer` | Reviews code against specs and standards |
 | **Deployer** | `packs/deployer` | Evaluates release gates and deploys functional software |
 
+The agents hand work off via **labels on beads**, not durable markdown docs. A bead walks the factory by being re-labeled at each stage: `needs-plan` → `needs-architecture` → `needs-design` → `ready-to-build` → `needs-review` → `ready-to-ship` → closed. Each agent watches the queue for the label aimed at it and re-labels the bead for the next stage. See [`LABELED_BEADS.md`](LABELED_BEADS.md) for the canonical reference — this is foundation material for every workshop and lab.
+
 ## Core Principle: Config Over Prompting
 
 The single most important discipline this workshop teaches: **change agent behavior through config, not through ad-hoc prompting.**
