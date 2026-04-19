@@ -63,8 +63,10 @@ Feature Request → Planner → Architect → Designer → Coder → Reviewer �
 | **Architect** | `packs/architect` | Makes technical decisions, produces ADRs |
 | **Designer** | `packs/designer` | Creates component/module specs and documentation |
 | **Coder** | `packs/coder` | Implements code from specs |
-| **Reviewer** | `packs/reviewer` | Reviews code against specs and standards |
+| **Reviewer** | `packs/reviewer` | Reviews code against specs and standards; verifies acceptance-criteria coverage |
 | **Deployer** | `packs/deployer` | Evaluates release gates and deploys functional software |
+
+W4 introduces an **optional 7th agent**, the **Improver** (`packs/improver`), for continuous-improvement loops that feed runtime signals back into the factory. It is not part of the essential 6 — the factory runs end-to-end without it.
 
 The agents hand work off via **labels on beads**, not durable markdown docs. A bead walks the factory by being re-labeled at each stage: `needs-plan` → `needs-architecture` → `needs-design` → `ready-to-build` → `needs-review` → `ready-to-ship` → closed. Each agent watches the queue for the label aimed at it and re-labels the bead for the next stage. See [`LABELED_BEADS.md`](LABELED_BEADS.md) for the canonical reference — this is foundation material for every workshop and lab.
 
@@ -109,7 +111,8 @@ software-factory-intensive/
 │   ├── planner/                     # Added in L2
 │   ├── reviewer/                    # Added in L4
 │   ├── deployer/                    # Added in L4
-│   └── all/                         # Composition pack bundling all 6 agents
+│   ├── improver/                    # Optional 7th — introduced in W4
+│   └── all/                         # Composition pack bundling the 6 essentials
 ├── reference-project/               # Pizza restaurant web app with complete 6-agent factory 
 ├── scripts/                         # Scripts for the curriculum
 ├── PROJECT_MANIFEST_TEMPLATE.md     # Template for the project manifest (agent-generated in orientation)
