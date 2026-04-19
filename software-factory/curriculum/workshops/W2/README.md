@@ -304,63 +304,113 @@ If your L1 prerequisites check runs `ls docs/FACTORY_READY.md` and `grep -c '\[x
 
 ### Issue 1: The individual-AI agent produced a manifest with invented entities
 
+<details>
+<summary>Solution</summary>
+
 **Cause:** The Project Overview was vague, so the agent filled in plausible-but-wrong defaults for Domain Model.
 
 **Fix:** Edit the Overview to name real entities first. Re-run the manifest generation prompt. Don't try to hand-patch the manifest — it'll drift from the overview and the next manifest refresh will overwrite you anyway.
 
+</details>
+
 ### Issue 2: `claude -p` returns auth errors
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Expired session, or you installed Claude Code after your token was issued.
 
 **Fix:** `claude auth login`. If that fails, delete the credentials file under `~/.claude/` and re-auth.
 
+</details>
+
 ### Issue 3: Global `CLAUDE.md` rules will block the factory
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Your global `~/.claude/CLAUDE.md` has rules like "always confirm before `git commit`" or "never run shell commands without asking," which the factory's autonomous agents will trip over.
 
 **Fix:** Either (a) move those rules into a project-scoped `CLAUDE.md` in a different repo, or (b) comment them out for the duration of the workshop and restore after. The factory can't operate with a confirmation step between every action.
 
+</details>
+
 ### Issue 4: My repo is on a feature branch that isn't mergeable
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Mid-refactor, merge conflicts with main, work-in-progress that isn't ready to show agents.
 
 **Fix:** Create a W2-specific branch off a clean SHA and run the factory there. `git switch -c factory-prep && git reset --hard <clean-sha>`. The factory branches from wherever the rig is; you want that wherever to be clean.
 
+</details>
+
 ### Issue 5: `docs/PROJECT_MANIFEST.md` is huge (>300 lines)
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Your project is big, and the manifest faithfully captures all of it.
 
 **Fix:** It's fine to be long, but prune the **Domain Model** and **Tech Stack** sections to the 10–15 core entities / libraries the factory will actually touch. Agents read the manifest on every wake; an oversize manifest slows every agent down.
 
+</details>
+
 ### Issue 6: I don't have a Project Overview and didn't bring one
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Missed the pre-workshop prep.
 
 **Fix:** Use the next 8 minutes to write a one-page Overview from scratch using the template. Lean on the five sections literally — don't freestyle. Then proceed to Step 3.
 
+</details>
+
 ### Issue 7: The provider CLI works interactively but the factory will probably spawn it differently
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Factory sessions run in a non-interactive shell; some CLIs behave differently than in your terminal.
 
 **Fix:** Confirm the non-interactive path works: `echo "say hi" | claude -p` (or `codex exec` for Codex). This is the path L1 will exercise. If interactive works but `-p` fails, your CLI is misconfigured for headless use — fix it now.
 
+</details>
+
 ### Issue 8: My repo doesn't have `docs/` yet
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Small project, never needed a docs directory.
 
 **Fix:** `mkdir -p docs` and commit. The factory expects `docs/PROJECT_MANIFEST.md` at that path specifically — don't relocate it.
 
+</details>
+
 ### Issue 9: I want to use my IDE's AI (not Claude Code / Codex CLI)
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Hoping an IDE extension (Cursor, Continue, etc.) will play the role of the agent runner.
 
 **Fix:** For the workshop, use a CLI runner — the factory spawns CLI processes per agent and IDE extensions aren't addressable that way. Once the factory works, you can absolutely keep your IDE AI for other purposes.
 
+</details>
+
 ### Issue 10: Manifest template says "generated in L1"; L1 says "completed in W2" — which is right?
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Slight drift between the template's old note and the current session flow.
 
 **Fix:** Trust the session flow: W2 generates the manifest, L1 consumes it. (The template will be refreshed in a follow-up bead; the generation step belongs where you do it with an individual AI, and L1 is where you run the factory on what W2 produced.)
+
+</details>
 
 ---
 

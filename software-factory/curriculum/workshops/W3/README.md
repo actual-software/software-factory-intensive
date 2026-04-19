@@ -363,18 +363,115 @@ This is the same Config Over Prompting discipline W2 introduced, specialized to 
 
 ## Common Issues & Solutions
 
-| Issue | Symptom | Fix |
-|---|---|---|
-| **Mail stuck in inbox** | `gc mail inbox` shows messages but the recipient never acts on them | Recipient's prompt template doesn't include `gc prime` on startup (or `gc mail inbox` explicitly). Edit the pack's prompt, not the current session. |
-| **Hook fires on every tool call** | `SessionStart` hook actually runs on something broader | Check the `matcher` regex; `.*` is "all". Narrow it to the specific event if you only want certain triggers. |
-| **Order never wakes the agent** | Bead is labelled, minutes pass, no session | (1) `gc order list` — is your order registered? (2) `check` condition — run it manually at the shell, does it succeed? (3) `pool` — does it match a pool in `city.toml`? |
-| **Nudge ignored** | Message sent, session shows no sign of receiving it | Session wasn't running, or the session was mid-tool-call and hadn't returned to the model yet. Confirm with `gc session list` (active column) before nudging. |
-| **Agent overwrites a file another agent was editing** | Two sessions race on `docs/PROJECT_MANIFEST.md` | Files aren't protected by the primitives — add a bead `blocks` edge (`bd dep add child blocks parent`) so one agent can't run while another holds the file. |
-| **Coordination rule works but doesn't survive reinstall** | Works in this session, missing after `factory-activity-agent delete && install` | You edited a live-session overlay, not the pack source. Always edit under `packs/<name>/...`, not under `~/Projects/factory/.../packs/actual/<name>/...` which is a copy. |
-| **Mail subject collisions** | Two agents both send `-s "review found issue"` and recipient can't tell them apart | Subject convention: `<scope>:<action>` — e.g. `adr:revisit-needed` or `coder:ac-unclear`. Namespace by subsystem, not by sender (sender is in metadata). |
-| **`session_live` hook runs on every keystroke** | Hook is too chatty | `session_live` fires on session activity; use it sparingly. Prefer `session_start` for one-shot boot checks and `session_stop` for end-of-work actions like `bd dolt push`. |
-| **Nudge appears to do nothing, then agent changes behavior 10 min later** | Agent was mid-turn; the nudge landed in the next conversation turn | Normal. Nudges aren't interrupts; they're messages that land at the next turn boundary. |
-| **Hook writes to stdout, no one reads it** | Hook is firing but you can't see it | Redirect hook output to a file (e.g., `bash scripts/doctor.sh 2>&1 >> .gc/logs/doctor.log`) and `tail -f` it during development. |
+### Issue 1: Mail stuck in inbox
+
+<details>
+<summary>Solution</summary>
+
+**Symptom:** `gc mail inbox` shows messages but the recipient never acts on them.
+
+**Fix:** Recipient's prompt template doesn't include `gc prime` on startup (or `gc mail inbox` explicitly). Edit the pack's prompt, not the current session.
+
+</details>
+
+### Issue 2: Hook fires on every tool call
+
+<details>
+<summary>Solution</summary>
+
+**Symptom:** `SessionStart` hook actually runs on something broader.
+
+**Fix:** Check the `matcher` regex; `.*` is "all". Narrow it to the specific event if you only want certain triggers.
+
+</details>
+
+### Issue 3: Order never wakes the agent
+
+<details>
+<summary>Solution</summary>
+
+**Symptom:** Bead is labelled, minutes pass, no session.
+
+**Fix:** (1) `gc order list` — is your order registered? (2) `check` condition — run it manually at the shell, does it succeed? (3) `pool` — does it match a pool in `city.toml`?
+
+</details>
+
+### Issue 4: Nudge ignored
+
+<details>
+<summary>Solution</summary>
+
+**Symptom:** Message sent, session shows no sign of receiving it.
+
+**Fix:** Session wasn't running, or the session was mid-tool-call and hadn't returned to the model yet. Confirm with `gc session list` (active column) before nudging.
+
+</details>
+
+### Issue 5: Agent overwrites a file another agent was editing
+
+<details>
+<summary>Solution</summary>
+
+**Symptom:** Two sessions race on `docs/PROJECT_MANIFEST.md`.
+
+**Fix:** Files aren't protected by the primitives — add a bead `blocks` edge (`bd dep add child blocks parent`) so one agent can't run while another holds the file.
+
+</details>
+
+### Issue 6: Coordination rule works but doesn't survive reinstall
+
+<details>
+<summary>Solution</summary>
+
+**Symptom:** Works in this session, missing after `factory-activity-agent delete && install`.
+
+**Fix:** You edited a live-session overlay, not the pack source. Always edit under `packs/<name>/...`, not under `~/Projects/factory/.../packs/actual/<name>/...` which is a copy.
+
+</details>
+
+### Issue 7: Mail subject collisions
+
+<details>
+<summary>Solution</summary>
+
+**Symptom:** Two agents both send `-s "review found issue"` and recipient can't tell them apart.
+
+**Fix:** Subject convention: `<scope>:<action>` — e.g. `adr:revisit-needed` or `coder:ac-unclear`. Namespace by subsystem, not by sender (sender is in metadata).
+
+</details>
+
+### Issue 8: `session_live` hook runs on every keystroke
+
+<details>
+<summary>Solution</summary>
+
+**Symptom:** Hook is too chatty.
+
+**Fix:** `session_live` fires on session activity; use it sparingly. Prefer `session_start` for one-shot boot checks and `session_stop` for end-of-work actions like `bd dolt push`.
+
+</details>
+
+### Issue 9: Nudge appears to do nothing, then agent changes behavior 10 min later
+
+<details>
+<summary>Solution</summary>
+
+**Symptom:** Agent was mid-turn; the nudge landed in the next conversation turn.
+
+**Fix:** Normal. Nudges aren't interrupts; they're messages that land at the next turn boundary.
+
+</details>
+
+### Issue 10: Hook writes to stdout, no one reads it
+
+<details>
+<summary>Solution</summary>
+
+**Symptom:** Hook is firing but you can't see it.
+
+**Fix:** Redirect hook output to a file (e.g., `bash scripts/doctor.sh 2>&1 >> .gc/logs/doctor.log`) and `tail -f` it during development.
+
+</details>
 
 ---
 

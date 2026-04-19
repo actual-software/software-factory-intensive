@@ -427,15 +427,15 @@ gc start
 
 ---
 
-## Inline Insight: Why Labels (Not Markdowns) Carry State
-
-Earlier iterations of this curriculum passed context between agents via long-lived markdown files — `SPEC.md`, `PLAN.md`, `REVIEW.md` and so on. That design forced every agent to know every doc path and every section contract; two beads in flight couldn't be distinguished without parsing the docs' internal state; handoffs were implicit.
-
-Labels fix all of that. A bead is the unit of work; its labels are its state; `bd ready --label X` is a natural queue per agent. The factory becomes a state machine whose edges are label transitions, and the coordination surface shrinks to the six-word label vocabulary.
-
-If you catch yourself writing a `SPEC.md` or `DESIGN.md` to "pass between agents" in a later lab, that's a signal to stop — whatever you were about to write into the doc belongs on the bead (as a comment, a checkbox item, or a new child bead). The label already tells the next agent what to do next.
-
-See [`../../../LABELED_BEADS.md`](../../../LABELED_BEADS.md#why-labels-replaced-durable-markdowns) for the longer version of this argument.
+> **Inline Insight: Why Labels (Not Markdowns) Carry State**
+>
+> Earlier iterations of this curriculum passed context between agents via long-lived markdown files — `SPEC.md`, `PLAN.md`, `REVIEW.md` and so on. That design forced every agent to know every doc path and every section contract; two beads in flight couldn't be distinguished without parsing the docs' internal state; handoffs were implicit.
+>
+> Labels fix all of that. A bead is the unit of work; its labels are its state; `bd ready --label X` is a natural queue per agent. The factory becomes a state machine whose edges are label transitions, and the coordination surface shrinks to the six-word label vocabulary.
+>
+> If you catch yourself writing a `SPEC.md` or `DESIGN.md` to "pass between agents" in a later lab, that's a signal to stop — whatever you were about to write into the doc belongs on the bead (as a comment, a checkbox item, or a new child bead). The label already tells the next agent what to do next.
+>
+> See [`../../../LABELED_BEADS.md`](../../../LABELED_BEADS.md#why-labels-replaced-durable-markdowns) for the longer version of this argument.
 
 ---
 
@@ -508,29 +508,77 @@ bd create "Add a 'Clear cart' button" --label needs-plan
 
 ## Common Issues & Solutions
 
-### Issue: `factory-activity-agent install L1` fails on "Activity L1 has no gascity packs"
+### Issue 1: `factory-activity-agent install L1` fails on "Activity L1 has no gascity packs"
+
+<details>
+<summary>Solution</summary>
+
 **Fix:** the installer couldn't find the pack source tree. Verify you're running from `software-factory/` (the repo's software-factory subdir, where `factory-activity-agent/` lives). If the directory is missing entirely, re-sync your repo (`git pull`).
 
-### Issue: `gc rig add` reports "path does not exist"
+</details>
+
+### Issue 2: `gc rig add` reports "path does not exist"
+
+<details>
+<summary>Solution</summary>
+
 **Fix:** you passed a relative path that didn't resolve. Use the absolute path to your project: `gc rig add "$(realpath ~/path/to/your-project)"`.
 
-### Issue: Dashboard shows agents but the event stream is silent
+</details>
+
+### Issue 3: Dashboard shows agents but the event stream is silent
+
+<details>
+<summary>Solution</summary>
+
 **Fix:** events are emitted only during active sessions. Sling work (create a labeled bead) and events will flow. If they don't, `tail -f ~/Projects/factory/lab_l1/l1-gc-factory/events.jsonl` directly.
 
-### Issue: Bead stuck on `needs-plan` with no Planner activity
+</details>
+
+### Issue 4: Bead stuck on `needs-plan` with no Planner activity
+
+<details>
+<summary>Solution</summary>
+
 **Fix:** the Planner's order gate isn't matching the label. `gc config --city ~/Projects/factory/lab_l1/l1-gc-factory` → verify the Planner's order points at `needs-plan`. Almost always the stub-project-rig rather than your-project-rig is receiving the label; remove the stub or tag your bead to the right rig.
 
-### Issue: Coder commits to `main` instead of a feature branch
+</details>
+
+### Issue 5: Coder commits to `main` instead of a feature branch
+
+<details>
+<summary>Solution</summary>
+
 **Fix:** the shipped Coder pack should default to a feature branch. If it committed to main, the pack's `coder.md.tmpl` is missing the branch rule. Do NOT fix this by chat-correcting — edit the template and re-sling. This is the single most important config-discipline rep of the lab.
 
-### Issue: You caught yourself typing into a `gc watch` session
+</details>
+
+### Issue 6: You caught yourself typing into a `gc watch` session
+
+<details>
+<summary>Solution</summary>
+
 **Fix:** stop immediately. The correction is invisible to the next sling and to every other agent. Close the watch tab, translate your correction into a change on the relevant pack's prompt template or on the bead description, re-label to re-trigger the agent.
 
-### Issue: `bash factory-activity-agent/scripts/doctor.sh` fails with "Port 8080 already in use"
+</details>
+
+### Issue 7: `bash factory-activity-agent/scripts/doctor.sh` fails with "Port 8080 already in use"
+
+<details>
+<summary>Solution</summary>
+
 **Fix:** a previous dashboard is still running. `lsof -i :8080` to find the PID, `kill <pid>`, re-run.
 
-### Issue: Two factories running simultaneously confuse the supervisor
+</details>
+
+### Issue 8: Two factories running simultaneously confuse the supervisor
+
+<details>
+<summary>Solution</summary>
+
 **Fix:** run `gc cities` to list all registered factories. Stop the one you don't need (`gc stop --city <path>`) or delete it with `factory-activity-agent delete <activity>`.
+
+</details>
 
 ---
 

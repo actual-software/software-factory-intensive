@@ -686,27 +686,27 @@ At least **one** agent output in your run must be resolved via a prompt or formu
 
 ---
 
-## Inline Insight: Why the Planner Can Hand Back to the Architect
+> **Inline Insight: Why the Planner Can Hand Back to the Architect**
+>
+> Most factories conceive of the pipeline as a straight line: Planner → Architect → Designer → Coder → Reviewer → Deployer. In practice, the most common real-world *re-route* is the Planner discovering mid-decompose that a goal needs architectural guardrails it doesn't have. The shipped planner formula makes this re-route a first-class path: the `clarify` step is explicitly allowed to remove `needs-plan`, add `needs-architecture`, and exit before `decompose` ever runs.
+>
+> That's why the architecture diagram at the top of this README has a loop back. It's not a graceful degradation — it's the expected happy path for any feature that touches rules the architect hasn't written yet. If your planner never triggers drift across a full session's worth of features, that's a signal the drift check is too lenient, not that your features are unusually straightforward.
 
-Most factories conceive of the pipeline as a straight line: Planner → Architect → Designer → Coder → Reviewer → Deployer. In practice, the most common real-world *re-route* is the Planner discovering mid-decompose that a goal needs architectural guardrails it doesn't have. The shipped planner formula makes this re-route a first-class path: the `clarify` step is explicitly allowed to remove `needs-plan`, add `needs-architecture`, and exit before `decompose` ever runs.
+> **Inline Insight: Why the Architect Writes Both `docs/architecture/` and `docs/rules/`**
+>
+> The design doc (`docs/architecture/<topic>.md`) captures the *full decision* — stack choices, schema, API, trade-offs, alternatives considered. It's long and narrative, meant for the human who has to extend or overturn the decision later.
+>
+> The rule file (`docs/rules/<topic>.md`) captures the *single enforceable constraint* the decision produces — "every query must be tenant-scoped," "every endpoint taking userId must verify req.user.id," etc. It's short, with an explicit "How to apply" section, and is read by the planner's drift check and the reviewer's spec check on every run.
+>
+> Both matter, for different readers. The design doc is how the architect's *reasoning* persists. The rule file is how the architect's *decision* enforces itself across the factory's future runs without anyone re-reading the reasoning.
 
-That's why the architecture diagram at the top of this README has a loop back. It's not a graceful degradation — it's the expected happy path for any feature that touches rules the architect hasn't written yet. If your planner never triggers drift across a full session's worth of features, that's a signal the drift check is too lenient, not that your features are unusually straightforward.
-
-## Inline Insight: Why the Architect Writes Both `docs/architecture/` and `docs/rules/`
-
-The design doc (`docs/architecture/<topic>.md`) captures the *full decision* — stack choices, schema, API, trade-offs, alternatives considered. It's long and narrative, meant for the human who has to extend or overturn the decision later.
-
-The rule file (`docs/rules/<topic>.md`) captures the *single enforceable constraint* the decision produces — "every query must be tenant-scoped," "every endpoint taking userId must verify req.user.id," etc. It's short, with an explicit "How to apply" section, and is read by the planner's drift check and the reviewer's spec check on every run.
-
-Both matter, for different readers. The design doc is how the architect's *reasoning* persists. The rule file is how the architect's *decision* enforces itself across the factory's future runs without anyone re-reading the reasoning.
-
-## Inline Insight: Why `actual adr-bot` Runs Inside the Architect Formula
-
-You could hand-run `actual adr-bot` after every architect invocation and keep the rig's `CLAUDE.md` / `AGENTS.md` in sync. You could, but you won't — nobody does that reliably, and the moment it lapses, the coder and reviewer start reading stale guardrails.
-
-The architect's `actual-adr-sync` step makes the sync a mandatory output of any architectural review. The cost is one formula step and a `--force --no-tui` invocation; the benefit is that `CLAUDE.md` is always as fresh as the most recent ADR, because the agent that wrote the ADR also ran the sync in the same session.
-
-If your rig doesn't have `actual` installed, the step skips gracefully (check the formula — it exits 0 with a documented reason). You lose auto-sync but nothing else.
+> **Inline Insight: Why `actual adr-bot` Runs Inside the Architect Formula**
+>
+> You could hand-run `actual adr-bot` after every architect invocation and keep the rig's `CLAUDE.md` / `AGENTS.md` in sync. You could, but you won't — nobody does that reliably, and the moment it lapses, the coder and reviewer start reading stale guardrails.
+>
+> The architect's `actual-adr-sync` step makes the sync a mandatory output of any architectural review. The cost is one formula step and a `--force --no-tui` invocation; the benefit is that `CLAUDE.md` is always as fresh as the most recent ADR, because the agent that wrote the ADR also ran the sync in the same session.
+>
+> If your rig doesn't have `actual` installed, the step skips gracefully (check the formula — it exits 0 with a documented reason). You lose auto-sync but nothing else.
 
 ---
 
@@ -714,51 +714,91 @@ If your rig doesn't have `actual` installed, the step skips gracefully (check th
 
 ### Issue 1: Planner never wakes after you label a bead `needs-plan`
 
+<details>
+<summary>Solution</summary>
+
 **Cause:** The order gate either can't find `bd`, or the label syntax on the bead doesn't match. `bd ready --label=needs-plan --limit=1` on the command line returns nothing.
 
 **Fix:** Run `bd ready --label=needs-plan --limit=1` manually. If it returns a result but the agent still doesn't wake, `gc doctor` will show the `check-planner` script failing — usually a missing binary. If the command returns nothing, double-check `bd label list <bead-id>` — a trailing space or case mismatch prevents matching.
 
+</details>
+
 ### Issue 2: Planner produces zero children
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Either the goal bead is ambiguous enough that the planner filed a `needs-info` clarification bead and paused, or the decompose step crashed silently.
 
 **Fix:** `bd list --label needs-info` to see any clarification beads. If none, check `gc events --follow` for errors during `decompose`. Common culprit: your goal has fewer than 2 sentences of body, and the planner couldn't identify distinct work items. Flesh out the goal bead and re-label `needs-plan`.
 
+</details>
+
 ### Issue 3: Planner decomposed without triggering drift, but should have
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Your Part 2 Step 3 drift check is too lenient or wasn't committed.
 
 **Fix:** `git log my-factory/packs/planner/formulas/` — is the commit there? If yes, `grep -n drift my-factory/packs/planner/formulas/mol-plan-breakdown.formula.toml` to confirm the rule is present. Add concrete keyword triggers (Scenario B above) if the original rule was too abstract.
 
+</details>
+
 ### Issue 4: Architect never wakes after a `needs-architecture` bead appears
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Same family as Issue 1, but for the architect's order gate.
 
 **Fix:** `bd ready --label=needs-architecture --limit=1`. `gc doctor` for the `check-architect` script. The most common distinct failure is that the architect requires the `actual` CLI in its doctor check; if `actual` isn't installed, the check can pass-with-warning (shipped default) or fail (if the check is strict). Install it or mark the check optional.
 
+</details>
+
 ### Issue 5: `actual adr-bot` fails inside the architect with `TerminalIOError`
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The formula isn't passing `--force --no-tui`, or someone removed those flags during customisation.
 
 **Fix:** `grep -n 'actual adr-bot' my-factory/packs/architect/formulas/mol-architect-review.formula.toml` — every invocation must include `--force --no-tui`. Without them, `actual` expects an interactive terminal and crashes the agent session. The shipped formula has it right; don't strip the flags.
 
+</details>
+
 ### Issue 6: Architect filed a divergence bead and stopped
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The `actual-adr-sync` step saw a large, unrelated diff in the dry-run and refused to commit it. This is a safety default — it would rather stop than ship a bulk rewrite of unrelated ADRs.
 
 **Fix:** `bd list --label type:divergence` to find the bead. Either (a) run `actual adr-bot --dry-run --full --force --no-tui` manually, review the diff, and commit it if it's actually desired; or (b) narrow the sync to a subset of ADRs. Resolve the divergence bead and the architect can finish its run.
 
+</details>
+
 ### Issue 7: Children inherit wrong labels
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The planner's `decompose` step defaulted to `ready-to-build` for everything, including UI work that should have been `needs-design`.
 
 **Fix:** Tighten the decompose step's routing rules (Part 2, Step 2). Add concrete signals (file extensions, module names, manifest sections) that should force `needs-design`. Re-run; watch the children label correctly.
 
+</details>
+
 ### Issue 8: You hand-edited `docs/plans/<slug>.md` and the next planner run re-wrote it
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The planner's `dep-graph` step rewrites `docs/plans/<slug>.md` every run. Hand-edits between runs get clobbered — by design.
 
 **Fix:** Don't hand-edit plan artifacts. If the plan is wrong, the prompt or formula is wrong; fix that and re-run. If you need to record side context, add it to the bead's notes, not the plan file.
+
+</details>
 
 ---
 

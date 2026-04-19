@@ -670,25 +670,25 @@ At least **one** finding in your run must be resolved via a prompt or formula ed
 
 ---
 
-## Inline Insight: Why the Designer Doesn't Author Tests
+> **Inline Insight: Why the Designer Doesn't Author Tests**
+>
+> In the shipped factory the designer's work loop ends at a wireframe + a11y audit. Tests are authored by the coder, alongside the implementation. That split exists because design and test design draw on different expertise — a UX designer knows the contrast ratio and the focus order; a generalist engineer knows the test framework, the existing test doubles, and the typical flakiness modes in your suite.
+>
+> Merging the two would produce weaker outputs in both directions. A designer writing Jest assertions from inside the wireframe loses contact with the user; a coder doing a11y from scratch duplicates the designer's a11y audit. The split keeps each agent focused on the artefact it produces best, and the bead's acceptance criteria are the contract that keeps them aligned — the designer's wireframe must cover every AC, and the coder's tests must reference every AC.
 
-In the shipped factory the designer's work loop ends at a wireframe + a11y audit. Tests are authored by the coder, alongside the implementation. That split exists because design and test design draw on different expertise — a UX designer knows the contrast ratio and the focus order; a generalist engineer knows the test framework, the existing test doubles, and the typical flakiness modes in your suite.
+> **Inline Insight: Why the Coder Runs `actual-adr-check` Before Writing Code**
+>
+> The coder's second formula step is `actual-adr-check`: run `actual status`, verify CLAUDE.md / AGENTS.md match the rig's ADRs, and hand back to the architect on drift. It looks like ceremony until you imagine the alternative.
+>
+> Without the check, the coder reads a CLAUDE.md that says "all queries use the ORM" — but the most recent ADR (that didn't sync) just replaced the ORM with hand-written SQL. The coder dutifully writes ORM code against the new schema; the reviewer bounces it; the coder rewrites it; the bead cycles. The fix isn't a better prompt — it's a gate that refuses to start work until the rules the coder will read are the rules the architect actually decided. That's what `actual-adr-check` enforces, and it's why it runs *before* the plan step, not after.
+>
+> If your rig doesn't have `actual` installed, the step skips gracefully (records `adr_check: skipped — actual CLI not installed` in bead notes). You lose the check but nothing else crashes.
 
-Merging the two would produce weaker outputs in both directions. A designer writing Jest assertions from inside the wireframe loses contact with the user; a coder doing a11y from scratch duplicates the designer's a11y audit. The split keeps each agent focused on the artefact it produces best, and the bead's acceptance criteria are the contract that keeps them aligned — the designer's wireframe must cover every AC, and the coder's tests must reference every AC.
-
-## Inline Insight: Why the Coder Runs `actual-adr-check` Before Writing Code
-
-The coder's second formula step is `actual-adr-check`: run `actual status`, verify CLAUDE.md / AGENTS.md match the rig's ADRs, and hand back to the architect on drift. It looks like ceremony until you imagine the alternative.
-
-Without the check, the coder reads a CLAUDE.md that says "all queries use the ORM" — but the most recent ADR (that didn't sync) just replaced the ORM with hand-written SQL. The coder dutifully writes ORM code against the new schema; the reviewer bounces it; the coder rewrites it; the bead cycles. The fix isn't a better prompt — it's a gate that refuses to start work until the rules the coder will read are the rules the architect actually decided. That's what `actual-adr-check` enforces, and it's why it runs *before* the plan step, not after.
-
-If your rig doesn't have `actual` installed, the step skips gracefully (records `adr_check: skipped — actual CLI not installed` in bead notes). You lose the check but nothing else crashes.
-
-## Inline Insight: Why the Bead Closes at the Coder's Handoff, Not at the Reviewer's
-
-The coder's handoff step runs `bd close $ROOT_ID`. At first glance that seems premature — the code hasn't been reviewed or shipped yet. The reason is that `bd close` unblocks downstream dependencies in the bead graph. Other beads waiting on this one (e.g. a follow-up feature that depends on the points ledger existing) become ready as soon as the coder's implementation is committed — not after the reviewer eventually passes.
-
-The reviewer's job (L4) is to decide whether the committed code is safe to ship. That decision produces a `ready-to-ship` label or a `ready-to-build` bounce — both of which can happen on a *closed* bead via `bd update --add-label`. The label is the routing signal; the close state is the dependency-graph signal. Conflating them would force every blocked feature to wait for review — slowing the factory by the review time on every predecessor.
+> **Inline Insight: Why the Bead Closes at the Coder's Handoff, Not at the Reviewer's**
+>
+> The coder's handoff step runs `bd close $ROOT_ID`. At first glance that seems premature — the code hasn't been reviewed or shipped yet. The reason is that `bd close` unblocks downstream dependencies in the bead graph. Other beads waiting on this one (e.g. a follow-up feature that depends on the points ledger existing) become ready as soon as the coder's implementation is committed — not after the reviewer eventually passes.
+>
+> The reviewer's job (L4) is to decide whether the committed code is safe to ship. That decision produces a `ready-to-ship` label or a `ready-to-build` bounce — both of which can happen on a *closed* bead via `bd update --add-label`. The label is the routing signal; the close state is the dependency-graph signal. Conflating them would force every blocked feature to wait for review — slowing the factory by the review time on every predecessor.
 
 ---
 
@@ -696,69 +696,124 @@ The reviewer's job (L4) is to decide whether the committed code is safe to ship.
 
 ### Issue 1: Designer never wakes after a bead gets `needs-design`
 
+<details>
+<summary>Solution</summary>
+
 **Cause:** Same family as L2's Issue 1. Either `bd` isn't on PATH for the order gate, or the label on the bead doesn't match exactly.
 
 **Fix:** Run `bd ready --label=needs-design --limit=1` manually. If it returns a result but the designer doesn't wake, `gc doctor` will show the `check-designer` script failing. If it returns nothing, `bd label list <bead-id>` — watch for trailing spaces, case mismatches, or typos.
 
+</details>
+
 ### Issue 2: Designer relabels to `needs-plan` instead of `ready-to-build`
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** You skipped Part 2 Step 1 (aligning the handoff label). The shipped formula hands back to the planner by default.
 
 **Fix:** Apply the Part 2 Step 1 diff in `mol-design-cycle.formula.toml`. Remove `needs-plan` from the stuck bead and add `ready-to-build`; the coder picks it up on the next poll.
 
+</details>
+
 ### Issue 3: Designer produces a wireframe without an a11y section
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The `a11y-check` step crashed or exited early. Usually a missing template variable (`{{slug}}`) that made the file path invalid.
 
 **Fix:** `gc events --follow` during the next run. Look for an error in the a11y-check step. Fix the template variable or fall back to setting it explicitly on the invocation (`bd update $ROOT_ID --notes 'slug: loyalty-points-badge'`) before re-labeling.
 
+</details>
+
 ### Issue 4: Coder never wakes after the designer's handoff
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Either the designer didn't actually add `ready-to-build` (see Issue 2), or the coder's order gate is failing.
 
 **Fix:** `bd ready --label=ready-to-build --limit=1` manually. If it returns the bead but the coder is missing from `gc status`, `gc doctor` will name the failing check.
 
+</details>
+
 ### Issue 5: Coder commits code that doesn't implement the design's a11y notes
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The coder read the design artifact but the a11y section wasn't load-bearing enough in its prompt/formula to translate into test cases.
 
 **Fix:** Add a rule in the coder's `implement` step: "Before writing any component file, list every bullet in the design's Accessibility section and write at least one test per bullet (focus, ARIA, contrast, keyboard nav, screen-reader labels, live regions)." Re-run the walk.
 
+</details>
+
 ### Issue 6: `actual status` fails inside the coder with `TerminalIOError`
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The formula isn't passing `--force --no-tui`, or the CLI is trying to open an interactive pane inside a tmux session that has no TTY.
 
 **Fix:** `grep -n 'actual status' my-factory/packs/coder/formulas/mol-code-from-spec.formula.toml` — verify the invocation. The shipped formula's invocation is safe for non-interactive use; if you customised it and added prompts, remove them.
 
+</details>
+
 ### Issue 7: Coder hand-edits files outside the plan, commit fails
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The `handoff` step stages specific paths from `impl_plan` but the coder wrote to other files too — the commit either succeeds with unwanted changes or fails on `git add <missing-file>`.
 
 **Fix:** Strengthen the `implement` step's guardrail: "Never modify files outside the scope implied by the plan" is too abstract. Replace with: "Before making a change, check that the file path is listed in `impl_plan`. If it isn't, either update `impl_plan` or don't make the change." Revert and re-run.
 
+</details>
+
 ### Issue 8: Self-test step passes locally but fails CI
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** `test_cmd` is narrower than CI's invocation — e.g. the coder ran `npm test` but CI runs `npm run typecheck && npm run lint && npm test`.
 
 **Fix:** Update `test_cmd` in the formula's `[vars]` block to match CI verbatim (Part 3 Step 1). A green `self-test` should be a hard predictor of a green CI.
 
+</details>
+
 ### Issue 9: Designer's output duplicates components that already exist
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The intake step's "survey existing components" guidance is too vague — the designer proposed new components without checking for reuse.
 
 **Fix:** Tighten intake: "Run `rg -l 'export (default )?(function|const) [A-Z]' src/components/` and list every existing component by name. For each new component the wireframe proposes, justify explicitly why no existing component covers the use case." Commit and re-run.
 
+</details>
+
 ### Issue 10: Bead flips between `ready-to-build` and `needs-review` repeatedly
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The coder self-tests green, hands off to review, the reviewer (L4) bounces it, the coder re-runs, bounces again. This is the signal-from-L4 loop you're meant to act on — but the fix is in the coder's prompt, not in re-running.
 
 **Fix:** Read the reviewer's notes on the bead (`bd show <bead-id>`). Translate the finding into a coder prompt or formula rule (see Scenario B in Part 5). Only then re-run. Looping the coder without a prompt edit is the anti-pattern this workshop tries to break.
 
+</details>
+
 ### Issue 11: Coder closes the bead but never commits
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The `handoff` step's git add / git commit logic silently fails (e.g. no files in the scope), but the close + relabel run anyway.
 
 **Fix:** Guard the handoff: "If `git diff --cached --name-only` is empty after staging, abort — do not close the bead. Instead, record `handoff: blocked — no changes to commit` in notes and exit non-zero." Commit the formula edit; the next failure is explicit.
+
+</details>
 
 ---
 

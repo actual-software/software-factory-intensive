@@ -550,25 +550,25 @@ Every handoff between those agents is a label flip on a bead. Every finding is a
 
 ---
 
-## Inline Insight: Why the Capstone Uses a Feature You Haven't Seen Before
+> **Inline Insight: Why the Capstone Uses a Feature You Haven't Seen Before**
+>
+> L2 through L4 used the loyalty-points thread. That thread taught you the primitives — how a `needs-plan` bead becomes a design, how a design becomes code, how code becomes a release. But because you watched each stage iteratively on the same feature, it's easy to leave the labs with a factory that works on *the loyalty feature* and not for *arbitrary features*.
+>
+> The capstone feature deliberately lives in a different slice of your codebase. Order history is a **read-path feature** (lookups, indexing, empty states) where loyalty points was a **write-path feature** (mutations, ledgers, consistency). If your factory runs cleanly on both, you've validated that the configuration generalises. If it stumbles, the stumble location tells you exactly which agent's prompt has a write-path-only assumption baked in. That signal is more valuable than a successful run on the same feature would have been.
 
-L2 through L4 used the loyalty-points thread. That thread taught you the primitives — how a `needs-plan` bead becomes a design, how a design becomes code, how code becomes a release. But because you watched each stage iteratively on the same feature, it's easy to leave the labs with a factory that works on *the loyalty feature* and not for *arbitrary features*.
+> **Inline Insight: Why Partial Completion Still Teaches You What You Need**
+>
+> You might not reach the deployer in 90 minutes. This is not a failure condition — it's the most common outcome on a first capstone run, and the run record is calibrated to reward it.
+>
+> The value of the capstone is in the *signal it generates*, not the *stages it completes*. A run that stalls at the coder because the designer spec was under-specified tells you more about your factory than a run that ships to production on luck. The stall point is the exact coordinate of the weakest link.
+>
+> Commit what you have. If you finished planner + designer + coder and the reviewer is still bouncing at T+85, mark the record `PARTIAL — stalled at reviewer request-changes loop`, note why in the retrospective's *Change* bullet, and commit. Next week you run again; the stall moves downstream. Three runs in, you'll be hitting the deployer reliably. The only wrong outcome is an uncommitted run — those erase themselves from memory inside 48 hours.
 
-The capstone feature deliberately lives in a different slice of your codebase. Order history is a **read-path feature** (lookups, indexing, empty states) where loyalty points was a **write-path feature** (mutations, ledgers, consistency). If your factory runs cleanly on both, you've validated that the configuration generalises. If it stumbles, the stumble location tells you exactly which agent's prompt has a write-path-only assumption baked in. That signal is more valuable than a successful run on the same feature would have been.
-
-## Inline Insight: Why Partial Completion Still Teaches You What You Need
-
-You might not reach the deployer in 90 minutes. This is not a failure condition — it's the most common outcome on a first capstone run, and the run record is calibrated to reward it.
-
-The value of the capstone is in the *signal it generates*, not the *stages it completes*. A run that stalls at the coder because the designer spec was under-specified tells you more about your factory than a run that ships to production on luck. The stall point is the exact coordinate of the weakest link.
-
-Commit what you have. If you finished planner + designer + coder and the reviewer is still bouncing at T+85, mark the record `PARTIAL — stalled at reviewer request-changes loop`, note why in the retrospective's *Change* bullet, and commit. Next week you run again; the stall moves downstream. Three runs in, you'll be hitting the deployer reliably. The only wrong outcome is an uncommitted run — those erase themselves from memory inside 48 hours.
-
-## Inline Insight: Why You Don't Type `gc sling` During the Capstone
-
-In L2–L4 you sometimes slung agents manually to test a specific prompt edit. That was training. The capstone is the first session where the factory *is supposed to run itself*, with order gates waking agents on their own labels and no human in the dispatch loop.
-
-If you catch yourself typing `gc sling <agent> <bead>` during the capstone, stop and ask why. The two legitimate reasons: (a) the order gate is broken and you're debugging it (check `gc doctor`); (b) you need a surgical re-run of one step after a pack edit and you don't want to wait for the next poll. Any other reason is a Rule 1 violation dressed up in CLI form — you're overriding the factory's contract to satisfy an impatience the factory is supposed to eliminate.
+> **Inline Insight: Why You Don't Type `gc sling` During the Capstone**
+>
+> In L2–L4 you sometimes slung agents manually to test a specific prompt edit. That was training. The capstone is the first session where the factory *is supposed to run itself*, with order gates waking agents on their own labels and no human in the dispatch loop.
+>
+> If you catch yourself typing `gc sling <agent> <bead>` during the capstone, stop and ask why. The two legitimate reasons: (a) the order gate is broken and you're debugging it (check `gc doctor`); (b) you need a surgical re-run of one step after a pack edit and you don't want to wait for the next poll. Any other reason is a Rule 1 violation dressed up in CLI form — you're overriding the factory's contract to satisfy an impatience the factory is supposed to eliminate.
 
 ---
 
@@ -576,51 +576,91 @@ If you catch yourself typing `gc sling <agent> <bead>` during the capstone, stop
 
 ### Issue 1: A bead sits on a label and no agent wakes
 
+<details>
+<summary>Solution</summary>
+
 **Cause:** Either the label on the bead doesn't match what the agent's order gate polls, or the agent isn't running.
 
 **Fix:** `bd ready --label=<the-label> --limit=1` — if it returns the bead, the order-gate condition is met; check `gc doctor` for the agent's `check-<agent>` script. If it returns nothing, `bd label list <bead-id>` — watch for trailing spaces, case mismatches, or a label typo. Labels are case-sensitive.
 
+</details>
+
 ### Issue 2: Reviewer keeps bouncing the bead on the same finding
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** You're hand-fixing the code, or the pack edit you did doesn't actually address the finding.
 
 **Fix:** `git log my-factory/packs/coder my-factory/packs/reviewer` for the duration of the bounces. If there are zero commits matching the finding, you hand-fixed. If there's one commit, read it — does it make the rule explicit, or is it still interpretable? Make the edit literal (see L4 Scenario C for the pattern).
 
+</details>
+
 ### Issue 3: Deployer sets `version_after` = `version_before`
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The coder's commit message didn't follow conventional-commits (`feat:` / `fix:` / `chore:`), so the version-bump step had no signal.
 
 **Fix:** Tighten the coder prompt to require conventional-commits (see L4 Issue 5). Re-arm the coder with `ready-to-build`; the next commit will bump correctly.
 
+</details>
+
 ### Issue 4: Rollback plan says "Data migrations to reverse: unknown"
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The deployer couldn't confidently enumerate migration state. This is a safety-first default — the formula prefers "unknown" over a plan it can't verify.
 
 **Fix:** Add a project-specific hint to `packs/deployer/prompts/deployer.md.tmpl`: "Migrations live in `db/migrations/*.sql`. Diff HEAD vs. the previous tag to list new migrations." Re-arm with `ready-to-ship`.
 
+</details>
+
 ### Issue 5: `actual-adr-check` aborts the coder run with "drift"
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** CLAUDE.md / AGENTS.md are out of sync with `docs/adr/` — an ADR changed but the sync never ran.
 
 **Fix:** `cd ~/path/to/your-repo && actual adr-bot sync` (see L2 Part 2 Step 1). Then re-arm the coder with `ready-to-build`. The coder's next run sees consistent state and proceeds.
 
+</details>
+
 ### Issue 6: Improver proposes a bead that would loosen a tailored ADR
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The improver is doing its job — classifying a signal — but the proposal conflicts with a baseline the architect committed to. This is expected; it's exactly why every improver proposal goes through a human gate.
 
 **Fix:** Close the proposed bead with a reason: `bd close <bead-id> --reason "conflicts with tailored ADR <path>; escalate via new architecture bead if still needed"`. A rejected proposal is the gate working, not a failure.
 
+</details>
+
 ### Issue 7: Planner produces zero child beads
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The feature is smaller than the planner's threshold for decomposition, or the bead description was too thin to plan against.
 
 **Fix:** If the feature is genuinely atomic, relabel the bead directly to the first non-planner label it needs (`needs-design` or `ready-to-build`) and note the skip in the run record's *Human interventions* table. If the description is thin, add to the notes (`bd update --notes "..."`) and re-arm with `needs-plan`.
 
+</details>
+
 ### Issue 8: Mail sent between agents sits unread
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Agents read their mail during specific formula steps (usually `intake`). An agent in cooldown or mid-run won't check mail until the next intake.
 
 **Fix:** `gc nudge <agent>` wakes the target agent explicitly. If it still doesn't read mail, check that the formula's `intake` step includes a `gc mail inbox --agent <self>` call — the shipped formulas do; a customisation may have dropped it.
+
+</details>
 
 ---
 

@@ -549,25 +549,25 @@ At least **one** reviewer finding in your run must be resolved via a prompt or f
 
 ---
 
-## Inline Insight: Why Labels Beat Durable Markdowns
+> **Inline Insight: Why Labels Beat Durable Markdowns**
+>
+> Earlier factory iterations passed context between agents via long-lived markdown docs (`review-reports/<slug>-review.md`, `release-gates/<slug>-gate.md`). That worked for a linear single-threaded flow but collapsed as the factory grew: two beads in different stages couldn't be distinguished without parsing the doc's internal state; two agents writing the same file collided; agents didn't know when they were "up" without scanning docs for cues.
+>
+> Labels fix all of that. A bead is one unit of work; its labels are its state; `bd ready --label <name>` is a natural queue per agent. The coordination surface shrinks from "every agent knows every doc path and every section contract" to "every agent knows its one inbound label and its one outbound label." Findings still exist — they just live in the bead's notes rather than a separate file — and the *label* carries the routing signal.
+>
+> See [`LABELED_BEADS.md`](../../../LABELED_BEADS.md) for the canonical six-label contract.
 
-Earlier factory iterations passed context between agents via long-lived markdown docs (`review-reports/<slug>-review.md`, `release-gates/<slug>-gate.md`). That worked for a linear single-threaded flow but collapsed as the factory grew: two beads in different stages couldn't be distinguished without parsing the doc's internal state; two agents writing the same file collided; agents didn't know when they were "up" without scanning docs for cues.
+> **Inline Insight: Why the Reviewer Owns AC Coverage**
+>
+> In the 6+1 factory there is no separate `validator` agent. Acceptance-criteria verification got folded into the reviewer because separating them produced a worse factory in practice: a standalone validator either duplicated the reviewer's intake step (reading the diff, running the suite) or it ran first and sat idle while the reviewer re-read the same files. Merging the two meant one pass over the code, four personas' worth of lens (engineering manager + principal engineer + security engineer + QA engineer), and one verdict.
+>
+> The tradeoff: a single agent that does too much drifts toward being lenient on any one axis. The countermeasure is the reviewer's quality gate — the verdict rule in `mol-code-review.formula.toml` is the same four rules regardless of whether the failure came from a style issue or a missing AC test. Pass means *all four*; any one fails means request-changes. Stricter-by-construction beats having a separate agent you'd have to coordinate with.
 
-Labels fix all of that. A bead is one unit of work; its labels are its state; `bd ready --label <name>` is a natural queue per agent. The coordination surface shrinks from "every agent knows every doc path and every section contract" to "every agent knows its one inbound label and its one outbound label." Findings still exist — they just live in the bead's notes rather than a separate file — and the *label* carries the routing signal.
-
-See [`LABELED_BEADS.md`](../../../LABELED_BEADS.md) for the canonical six-label contract.
-
-## Inline Insight: Why the Reviewer Owns AC Coverage
-
-In the 6+1 factory there is no separate `validator` agent. Acceptance-criteria verification got folded into the reviewer because separating them produced a worse factory in practice: a standalone validator either duplicated the reviewer's intake step (reading the diff, running the suite) or it ran first and sat idle while the reviewer re-read the same files. Merging the two meant one pass over the code, four personas' worth of lens (engineering manager + principal engineer + security engineer + QA engineer), and one verdict.
-
-The tradeoff: a single agent that does too much drifts toward being lenient on any one axis. The countermeasure is the reviewer's quality gate — the verdict rule in `mol-code-review.formula.toml` is the same four rules regardless of whether the failure came from a style issue or a missing AC test. Pass means *all four*; any one fails means request-changes. Stricter-by-construction beats having a separate agent you'd have to coordinate with.
-
-## Inline Insight: Why the Deployer Writes a Rollback Plan Before Shipping
-
-Mol-deployer's step 6 (`rollback-plan`) runs *before* the deploy trigger, not after. That ordering is deliberate: if you wait until after a deploy to write the rollback plan, you are writing it under pressure from whatever incident is unfolding, and you are writing it without the benefit of having just seen which tag/command/flag changed. By the time you need the rollback, you've lost the context.
-
-Writing the plan at tag-time — while everything is still fresh — forces the deployer to articulate the rollback in terms of artifacts that already exist (the previous tag, the migration files, the feature-flag names) instead of narrating what you'd *do* in a hypothetical incident. This is also why `needs-improve` is a separate bead created at this step: the production watch is somebody else's job (the optional Improver), and the deployer's responsibility ends once the rollback plan is recorded.
+> **Inline Insight: Why the Deployer Writes a Rollback Plan Before Shipping**
+>
+> Mol-deployer's step 6 (`rollback-plan`) runs *before* the deploy trigger, not after. That ordering is deliberate: if you wait until after a deploy to write the rollback plan, you are writing it under pressure from whatever incident is unfolding, and you are writing it without the benefit of having just seen which tag/command/flag changed. By the time you need the rollback, you've lost the context.
+>
+> Writing the plan at tag-time — while everything is still fresh — forces the deployer to articulate the rollback in terms of artifacts that already exist (the previous tag, the migration files, the feature-flag names) instead of narrating what you'd *do* in a hypothetical incident. This is also why `needs-improve` is a separate bead created at this step: the production watch is somebody else's job (the optional Improver), and the deployer's responsibility ends once the rollback plan is recorded.
 
 ---
 
@@ -575,51 +575,91 @@ Writing the plan at tag-time — while everything is still fresh — forces the 
 
 ### Issue 1: Reviewer never wakes after you label a bead `needs-review`
 
+<details>
+<summary>Solution</summary>
+
 **Cause:** The order gate either can't find `bd`, or the label syntax on the bead doesn't match. `bd ready --label=needs-review --limit=1` on the command line returns nothing.
 
 **Fix:** Run `bd ready --label=needs-review --limit=1` manually. If it returns a result but the agent still doesn't wake, `gc doctor` will show the `check-reviewer` script failing — usually a missing binary. If the command returns nothing, double-check `bd label list <bead-id>` — a trailing space or the label being case-mismatched prevents matching.
 
+</details>
+
 ### Issue 2: Reviewer verdict is `pass` but the diff is obviously broken
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Either the reviewer's `docs/rules/*.md` didn't get read (empty directory in the rig), or the finding you'd expect isn't covered by the formula's security step.
 
 **Fix:** `ls docs/rules/` in the rig — should list at least one `.md`. Then grep the finding keyword in `mol-code-review.formula.toml` — if it's not mentioned, add it to the security step (Scenario C above).
 
+</details>
+
 ### Issue 3: Reviewer keeps flipping the bead back to `ready-to-build`
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The coder is regenerating the same bug because the coder prompt wasn't updated — you fixed the symptom, not the rule.
 
 **Fix:** Every reviewer `request-changes` should result in at least one commit to `packs/coder/prompts/coder.md.tmpl` (or the formula). Check `git log my-factory/packs/coder/`; if it shows no recent commits matching your findings, you're hand-editing code that the coder will overwrite next round.
 
+</details>
+
 ### Issue 4: Deployer fails at the `checks` step with `blocked by: <other-bead>`
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Some other bead is labelled `blocker` and depends on the one you're shipping.
 
 **Fix:** `bd dep blockers <bead-id>` shows the list. Either close the blockers first, or remove the `blocker` label if it was a false positive. The deployer is intentionally strict here — shipping past an open blocker is a category of production incident.
 
+</details>
+
 ### Issue 5: Deployer sets `version_after` = `version_before`
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The version bump logic in the `version` step didn't see a `feat`, `fix`, or `breaking` signal. Usually the coder's commit didn't follow conventional-commits format.
 
 **Fix:** Two options. (a) Tighten the coder prompt to require conventional-commits format (`chore:` vs `feat:` vs `fix:`) — this is a pure config fix. (b) Hard-default the version bump in `mol-deployer.formula.toml` step 4 to `patch` when the commit type is unrecognised, rather than no-bump. Either fix is a config edit; don't re-tag by hand.
 
+</details>
+
 ### Issue 6: Rollback plan says "Data migrations to reverse: unknown"
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The deployer couldn't confidently enumerate migration state. This is a safety-first default — it would rather say "unknown" than commit to a plan it can't verify.
 
 **Fix:** Add a project-specific hint to the deployer prompt: "Migrations live in `db/migrations/*.sql`. Compare HEAD vs the previous tag to list any new migrations." Then the deployer has a place to look.
 
+</details>
+
 ### Issue 7: `needs-improve` bead was created but no improver is wired
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** You didn't install the improver pack — that's fine. It is the **optional 7th** agent (see [`packs/README.md`](../../../packs/README.md)), introduced in W4, and the factory runs end-to-end without it.
 
 **Fix:** No fix needed in L4. The `needs-improve` bead will sit idle until a future session adds the improver. If it clutters `bd ready`, filter your queries (`--label-not needs-improve`).
 
+</details>
+
 ### Issue 8: You hand-edited code and the reviewer re-approved
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** You broke the lab's core discipline. The code edit works for this bead; the next bead will re-introduce the bug.
 
 **Fix:** Revert the hand-edit (`git checkout -- <file>`) and go back to Scenarios A/B/C above. The only *durable* fix is a prompt or formula edit.
+
+</details>
 
 ---
 

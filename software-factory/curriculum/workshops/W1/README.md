@@ -377,17 +377,17 @@ gc events --follow                 # stream label transitions + session lifecycl
 
 ---
 
-## Inline Insight: Why the Factory Runs on Labels, Not Prompts
-
-This session is your first experience of the thing the rest of the workshop is trying to make durable: **a multi-agent system that advances without a human in the keyboard loop.** The magic is not in any single agent's prompt — every pack's prompt is a few hundred lines of plain Markdown. The magic is in the *coordination contract*: each agent watches for exactly one inbound label and sets exactly one outbound label when done.
-
-That contract is what makes the factory operable overnight, with no one at the terminal. It's also what makes it comprehensible — the entire pipeline is six label transitions; there is no hidden state in somebody's scratchpad that you'd have to read to follow along.
+> **Inline Insight: Why the Factory Runs on Labels, Not Prompts**
+>
+> This session is your first experience of the thing the rest of the workshop is trying to make durable: **a multi-agent system that advances without a human in the keyboard loop.** The magic is not in any single agent's prompt — every pack's prompt is a few hundred lines of plain Markdown. The magic is in the *coordination contract*: each agent watches for exactly one inbound label and sets exactly one outbound label when done.
+>
+> That contract is what makes the factory operable overnight, with no one at the terminal. It's also what makes it comprehensible — the entire pipeline is six label transitions; there is no hidden state in somebody's scratchpad that you'd have to read to follow along.
 
 ---
 
-## Inline Insight: Why Participants Don't Write Code This Session
-
-A reasonable thing to want on your first hands-on is to type *something* — to feel productive. W1 deliberately denies that. The whole point is that **the factory types for you**: you place a ticket, the agents take it from there. If you find yourself wanting to "just open `src/menu/MenuPage.tsx` and tweak that one line," notice the feeling — it's the exact habit the workshop exists to unbuild. The place for your customization is the agent packs in L2–L4, not the source code in `src/`. W1 is where you see that the customization location has moved.
+> **Inline Insight: Why Participants Don't Write Code This Session**
+>
+> A reasonable thing to want on your first hands-on is to type *something* — to feel productive. W1 deliberately denies that. The whole point is that **the factory types for you**: you place a ticket, the agents take it from there. If you find yourself wanting to "just open `src/menu/MenuPage.tsx` and tweak that one line," notice the feeling — it's the exact habit the workshop exists to unbuild. The place for your customization is the agent packs in L2–L4, not the source code in `src/`. W1 is where you see that the customization location has moved.
 
 ---
 
@@ -395,17 +395,30 @@ A reasonable thing to want on your first hands-on is to type *something* — to 
 
 ### Issue 1: `/factory-activity-agent list` isn't recognized by Claude Code
 
+<details>
+<summary>Solution</summary>
+
 **Cause:** The symlink at `~/.claude/skills/factory-activity-agent` didn't resolve, or Claude Code hasn't rescanned the skills directory.
 
 **Fix:** Re-check `ls -l ~/.claude/skills/factory-activity-agent` — it should show a working symlink into the repo. Restart Claude Code. If still missing, copy the directory in instead of symlinking (`cp -r software-factory/factory-activity-agent ~/.claude/skills/factory-activity-agent`).
 
+</details>
+
 ### Issue 2: `gc rig add` fails with a missing `.gc/...` file (e.g. `gc-beads-bd`)
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The factory directory has `city.toml` but **`gc init` was never run**, so `.gc/` was never created.
 
 **Fix:** From the factory directory, `gc init --file city.toml .`, then retry `gc rig add`. If `gc init --file` conflicts with an existing `city.toml`, use the merge workaround in Step 3.
 
+</details>
+
 ### Issue 3: `gc rig add` reports "path does not exist"
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** You passed a relative path from a directory where the rig isn't reachable, or the absolute path typo'd.
 
@@ -416,25 +429,45 @@ cd ~/Projects/actual-software/software-factory-intensive/software-factory/refere
 gc rig add "$(pwd)"
 ```
 
+</details>
+
 ### Issue 4: `gc start` succeeds but `gc status` shows all six agents as dead / red
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The `includes` path in `city.toml` still points at `/abs/path/to/...` (you forgot to substitute), or the provider (`claude` vs `codex`) doesn't match what you have installed.
 
 **Fix:** `cat city.toml` and confirm the include resolves (`ls` on the path prints the `pack.toml`). If it does, re-check `provider = ...` matches a CLI on your PATH, then `gc restart`.
 
+</details>
+
 ### Issue 5: Planner doesn't wake after `bd label add <id> needs-plan`
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Either the order gate isn't registered, or the label you added isn't exactly `needs-plan` (capitalization matters; trailing spaces matter).
 
 **Fix:** `bd label list <id>` — does it show `needs-plan` exactly? Then `gc order list` — is the Planner's intake order present? If neither surfaces a problem, `gc doctor --fix`. Common sneaky cause: the factory was started before you registered the rig; restart with `gc restart`.
 
+</details>
+
 ### Issue 6: Two agents race on the same file in the rig
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Parallel children of FUP-1 both landed in `ready-to-build` and two Coder sessions picked them up simultaneously — both are editing `src/menu/`.
 
 **Fix:** This is rare with a fresh factory. When it happens, the later write wins and the earlier session errors out. Close the stray bead (`bd close <id> --reason "duplicate"`) and re-label the kept one. The real fix — serializing concurrent work via bead dependencies — is introduced in W3 (coordination primitives); for W1 just note the behavior.
 
+</details>
+
 ### Issue 7: Dashboard shows the bead stuck on `ready-to-build` and no Coder session starts
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The rig's `package.json` is missing dependencies the Coder needs to run tests (`npm ci` has never been run), so the Coder errors out instantly on boot. This happens on a freshly-cloned repo.
 
@@ -447,23 +480,40 @@ npm ci
 
 Then `gc restart` to pick up the change.
 
+</details>
+
 ### Issue 8: `gc dashboard serve` fails with "address already in use"
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Another factory (probably from a previous session) has a dashboard on :8080.
 
 **Fix:** `lsof -i :8080` to find the process; kill it; retry. Or `gc dashboard serve --port 8081` if you want both running.
 
+</details>
+
 ### Issue 9: The Reviewer keeps returning `request-changes` and the Coder re-cycles
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** The Coder is regenerating the same issue because the shipped coder prompt is generic. That's expected — customizing the coder for your project is L3's entire job; you'll see the fix-via-config discipline land then.
 
 **Fix (for W1 specifically):** nothing. Let it cycle. The point of this session is to see the pipeline move, not to produce merge-ready code. If it cycles more than three times on the same finding, stop the factory (`gc stop`) and call a facilitator over — the failure mode might be worth walking the room through.
 
+</details>
+
 ### Issue 10: `import-tickets.sh` printed warnings like "failed to create FUP-2"
+
+<details>
+<summary>Solution</summary>
 
 **Cause:** Your `bd` database already has beads with matching titles from a previous workshop run.
 
 **Fix:** Either clear the prior state (`bd list` + close or delete duplicates) or continue — the script is idempotent-ish; duplicates just don't get re-imported. `bd list` should still show at least FUP-1 through FUP-6 once.
+
+</details>
 
 ---
 
@@ -503,5 +553,3 @@ Before leaving this workshop, verify all of these:
 **W2** turns the lens inward: *how* do the agents do their job? You'll trace a feature bead through the six packs, read each agent's prompt template + formula, and start building the mental model you'll need in L1/L2 when the packs become *your* configuration to edit. If you can, re-read the `needs-plan` through `ready-to-ship` cycle on the dashboard once before W2 starts — the pattern will be fresher.
 
 **L1** is where the factory becomes *yours*. You'll register your own project as the rig, point the six shipped packs at it, and watch the same cycle you just saw run against *your* codebase's first feature bead.
-
-Between now and W2: leave the factory running if you can (it's idle, not costly). If the dashboard is open, keep it open. Part of the workshop's intent is that towards the end of the curriculum you stop noticing the dashboard because the factory running is just the ambient state.
