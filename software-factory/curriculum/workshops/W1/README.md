@@ -17,13 +17,9 @@
 * **Fired-Up Pizza pack (what you install into your factory):** `software-factory/packs/fired-up-pizza/` — a composite pack bundling the six agents, plus a doctor check for the reference scaffold and a `tickets.md` importer.
 * **Factory workspace (created during this session):** `~/Projects/factory/fired-up-pizza/fup-gc-factory/` — the Gas City `city.toml` + workspace that runs the agents. Every `gc` command below is run from that directory unless otherwise noted.
 
-Nothing in this session is edited in `software-factory/` itself. You install a skill, stand up a factory outside the repo, point it at the shipped reference project, and watch.
+Nothing in this session is edited in `software-factory-intensive/` itself. You install a skill, stand up a factory outside the repo, point it at the shipped reference project, and watch.
 
 **Canonical reference:** before you install anything, read [`software-factory/LABELED_BEADS.md`](../../../LABELED_BEADS.md) — it is the authoritative doc for the six labels that drive the factory's handoffs. Every "why did the agent wake now?" question this session surfaces is answered there. Keep it open in a tab.
-
----
-
-> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still run the commands yourself. W1 is the session where participants first *see* the factory move; resist the urge to type prompts or `gc sling` commands to speed things up. Every handoff in this session is supposed to happen on a label flip alone. If the agent tries to skip the wait, stop it and check `gc status` / `bd label list <id>` to confirm the pipeline is moving on its own.
 
 ---
 
@@ -37,15 +33,15 @@ Nothing in this session is edited in `software-factory/` itself. You install a s
 │  Planner        (consumes needs-plan)                    │
 │    decomposes → sets needs-architecture / needs-design / │
 │                 ready-to-build on children               │
-└────────────┬─────────────────────────────────────────────┘
-             │
-             ▼  needs-architecture        needs-design
+└─────────────┬──────────────────────────────┬─────────────┘
+              │                              │
+              ▼ needs-architecture           ▼ needs-design
    ┌──────────────────────┐        ┌────────────────────┐
-   │  Architect            │        │  Designer          │
-   │  writes ADR;          │        │  writes spec;      │
-   │  flips → needs-plan   │        │  flips →           │
-   │         or            │        │  ready-to-build    │
-   │  ready-to-build       │        │                    │
+   │  Architect           │        │  Designer          │
+   │  writes ADR;         │        │  writes spec;      │
+   │  flips → needs-plan  │        │  flips →           │
+   │         or           │        │  ready-to-build    │
+   │  ready-to-build      │        │                    │
    └──────────┬───────────┘        └─────────┬──────────┘
               │                              │
               └──────────┬───────────────────┘
@@ -71,32 +67,25 @@ Nothing in this session is edited in `software-factory/` itself. You install a s
               └─────────────────────────┘
 ```
 
-Every transition is a **label flip on the same bead**. No agent writes a durable markdown to hand off to the next. No `gc sling` is run by hand after the initial `needs-plan` label. That is the paradigm — see [`LABELED_BEADS.md`](../../../LABELED_BEADS.md) for the full contract.
+Every transition is a **label flip on the same bead**. No `gc sling` is run by hand after the initial `needs-plan` label.
 
 ---
 
 ## Prerequisites
 
-Verify each row before starting. If a row fails, fix it before Part 0 — otherwise you'll lose demo time debugging setup.
-
 | Prerequisite | How to verify | If it's missing |
 |--------------|---------------|-----------------|
-| `gc` CLI pinned to v0.14.1 | `gc version` prints `gascity 0.14.1` | Install the pinned version: see `curriculum-agent/SKILL.md` → *Prerequisites* for the `brew tap-new` + `brew extract` recipe |
-| `bd` (beads) CLI on PATH | `bd --version` exits 0 | `bd` ships with `gc`; if missing, `gc doctor --fix` will install it, or follow the beads install docs |
-| Python 3.8+ on PATH | `python3 --version` ≥ 3.8 | `brew install python@3.12` (macOS) or your platform's package manager |
 | `software-factory-intensive` repo cloned locally | `ls ~/Projects/actual-software/software-factory-intensive/software-factory/packs/fired-up-pizza/README.md` exists | `git clone git@github.com:actual-software/software-factory-intensive.git ~/Projects/actual-software/software-factory-intensive` |
-| Claude Code (or Codex) installed | `which claude` (or `codex`) returns a path | See the [top-level README](../../../../README.md) — "Before You Arrive" — for supported CLI coding agents |
+
 | `~/Projects/factory/` exists and is writable | `mkdir -p ~/Projects/factory && ls -ld ~/Projects/factory` | `mkdir -p ~/Projects/factory` |
 
 **If any row fails in the room**, flag it to David — do not spend more than 2 minutes debugging on your own. Getting the factory moving is the point of this session, not debugging installs.
 
 ---
 
-## Part 0: Read the Labeled-Beads Protocol (~5 min)
+## Part 1: Read the Labeled-Beads Protocol (~5 min)
 
-Every question W1 raises — *"why did the Architect wake?" "why did the bead move to `ready-to-build`?" "what does the Coder look at to know it's up?"* — is answered in one short doc. Read it before installing anything, so the rest of the session lands on a foundation.
-
-Open [`software-factory/LABELED_BEADS.md`](../../../LABELED_BEADS.md) and skim:
+Every question W1 raises — *"why did the Architect wake?" "why did the bead move to `ready-to-build`?" "what does the Coder look at to know it's up?"* — is answered in [`software-factory/LABELED_BEADS.md`](../../../LABELED_BEADS.md). Read it before installing anything.
 
 1. The **six canonical labels** table (`needs-architecture`, `needs-plan`, `needs-design`, `ready-to-build`, `needs-review`, `ready-to-ship`).
 2. The **example lifecycle** walkthrough — the single worked example of a bead walking the factory.
@@ -104,27 +93,27 @@ Open [`software-factory/LABELED_BEADS.md`](../../../LABELED_BEADS.md) and skim:
 
 Do not try to memorize. You should come away able to name, for any label, (a) who adds it and (b) who consumes it. Everything you see this session is an instance of that protocol.
 
-> **Inline Insight: Labels are the contract.** Earlier versions of this factory coordinated agents via long-lived markdown documents (`SPEC.md`, `ARCHITECTURE.md`, per-stage hand-off files). That worked single-threaded and fell apart as soon as two beads were in flight. Labels fix it: each bead is one unit of work; its labels are its state; `bd ready --label <x>` is the natural per-agent queue. See `LABELED_BEADS.md` §"Why labels replaced durable markdowns" for the full rationale.
+> **Inline Insight: Bead labels are not the only coordination method possible.** Labels on beads are one coordination method, but there are other coordination patterns you'll learn about in W3. That said, they make it very clear which agent is working on which bead, and which bead is ready for which agent.
 
 ---
 
-## Part 1: Install the `curriculum-agent` Skill (~10 min)
+## Part 2: Install the `curriculum-agent` Skill (~10 min)
 
 The **curriculum-agent** is the tooling you'll use across every W/L session for setup, teardown, status, and diagnosis. Install it once now; every session after this assumes it is on your path.
 
-### Step 1: Symlink the skill into Claude Code
+### Step 1: Symlink the skill into your coding agent's skills directory
 
-The curriculum-agent lives in the repo at `software-factory/curriculum-agent/`. Symlink it into your Claude Code skills directory so the slash command is available anywhere:
+The curriculum-agent lives in the repo at `software-factory/curriculum-agent/`. Symlink it into your coding agent's skills directory so the slash command is available anywhere:
 
 ```bash
-cd ~/Projects/actual-software/software-factory-intensive
-mkdir -p ~/.claude/skills
-ln -sfn "$(pwd)/software-factory/curriculum-agent" ~/.claude/skills/curriculum-agent
+// Claude Code
+ln -sfn "$(pwd)/software-factory-intensive/software-factory/curriculum-agent" ~/.claude/skills/curriculum-agent
+
+// Codex
+ln -sfn "$(pwd)/software-factory-intensive/software-factory/curriculum-agent" ~/.codex/skills/curriculum-agent
 ```
 
-If you're using Codex instead of Claude Code, swap `~/.claude/skills` for `~/.codex/skills` — same shape. Full install options (project-level symlink, copy, pack overlay) are in [`curriculum-agent/SKILL.md`](../../../curriculum-agent/SKILL.md) → *Installation*.
-
-**Verify.** In Claude Code (or Codex) run:
+Now, in your coding agent run:
 
 ```
 /curriculum-agent list
@@ -139,13 +128,11 @@ The curriculum-agent is a wrapper over `gc` + Python scaffolding. You only need 
 #### `install` — stand up a factory for a curriculum activity
 
 ```bash
-# Run from the SFI repo root
+# Runs the following command from the SFI repo root
 bash software-factory/curriculum-agent/scripts/install.sh <activity> [--dry-run]
 ```
 
 The wrapper validates the activity name, pre-flight-checks `gc` and `python3`, then delegates to `scripts/curriculum_agent.py install <activity>`. Always run a `--dry-run` first if you're unsure what it's about to do — the dry-run prints every command without executing.
-
-> **Note — fired-up-pizza install route is in flight.** The `install` verb today knows the workshop/lab activities (`W1`–`W4`, `L1`–`L5`). A dedicated `fired-up-pizza` activity is being wired up in a follow-up bead (F4 — `sfi-9iq`). Until that lands, you'll install the Fired-Up Pizza factory with the **manual stand-up** from [`packs/fired-up-pizza/README.md`](../../../packs/fired-up-pizza/README.md) — that's what Part 2 walks you through.
 
 #### `status` — see every registered factory + agent state
 
@@ -176,7 +163,7 @@ Serves `http://localhost:8080`. Shows the bead queue per label, live agent sessi
 You will run each of these four verbs at least once before lunch on Day 1 and on most Day-2 sessions. Three sanity checks to do right now before moving on:
 
 ```bash
-bash software-factory/curriculum-agent/scripts/install.sh W1 --dry-run   # preview — does not run
+bash software-factory/curriculum-agent/scripts/install.sh W2 --dry-run   # preview — does not run
 bash software-factory/curriculum-agent/scripts/status.sh                 # nothing installed yet; still prints the frame
 bash software-factory/curriculum-agent/scripts/doctor.sh                 # confirms gc / python / bd are green
 ```
@@ -208,7 +195,7 @@ The factory configuration is a single file:
 cat > city.toml <<'TOML'
 [workspace]
 name = "fup-factory"
-provider = "claude"
+provider = "claude" # or "codex" if you use Codex instead. Other providers are also supported.
 includes = ["/abs/path/to/software-factory-intensive/software-factory/packs/fired-up-pizza"]
 
 [session]
@@ -219,20 +206,35 @@ TOML
 **Replace `/abs/path/to/software-factory-intensive` with your actual clone path.** The easy way:
 
 ```bash
-SFI="$(cd ~/Projects/actual-software/software-factory-intensive && pwd)"
-sed -i.bak "s|/abs/path/to/software-factory-intensive|$SFI|g" city.toml && rm city.toml.bak
-cat city.toml   # sanity-check the path
+SFI="$(cd ~/Projects/actual-software/software-factory-intensive && pwd)" && sed -i.bak "s|/abs/path/to/software-factory-intensive|$SFI|g" city.toml && rm city.toml.bak && cat city.toml   # sanity-check the path
 ```
 
-Using `provider = "claude"` points the factory at Claude Code for every agent session. If you installed Codex instead, swap to `provider = "codex"`.
+### Step 3: Initialize the factory runtime, then register the rig
 
-### Step 3: Register the reference project as the factory's rig
+`gc rig add` needs the Gas City workspace runtime under `.gc/` (bead store helpers, etc.). That runtime is created by **`gc init`**, not by creating `city.toml` alone. From your factory directory:
 
 ```bash
-gc rig add ~/Projects/actual-software/software-factory-intensive/software-factory/reference-project
+cd ~/Projects/factory/fired-up-pizza/fup-gc-factory
+gc init --file city.toml .
+```
+
+Then register the reference project as the rig. The optional `--prefix` namespaces bead IDs in the store (e.g. `rp` for "reference project"):
+
+```bash
+gc rig add ~/Projects/actual-software/software-factory-intensive/software-factory/reference-project --prefix rp
 ```
 
 A *rig* in Gas City is the project the agents work on. This command tells the supervisor "the agents' working directory is this path" — the Coder writes into `src/` there, the Architect writes ADRs into `docs/decisions/` there, and so on.
+
+**If `gc init --file` refuses because `city.toml` already exists:** move it aside, initialize with the interactive template, then merge your `[workspace]` block back in:
+
+```bash
+mv city.toml city.toml.bak
+gc init --provider claude . # or "codex" if you use Codex instead.
+# Restore: copy `[workspace]` (name, provider, includes) from city.toml.bak into the new city.toml, or merge carefully.
+```
+
+Then run `gc rig add` again from the factory directory as above.
 
 ### Step 4: Register and start the factory
 
@@ -411,7 +413,13 @@ A reasonable thing to want on your first hands-on is to type *something* — to 
 
 **Fix:** Re-check `ls -l ~/.claude/skills/curriculum-agent` — it should show a working symlink into the repo. Restart Claude Code. If still missing, copy the directory in instead of symlinking (`cp -r software-factory/curriculum-agent ~/.claude/skills/curriculum-agent`).
 
-### Issue 2: `gc rig add` reports "path does not exist"
+### Issue 2: `gc rig add` fails with a missing `.gc/...` file (e.g. `gc-beads-bd`)
+
+**Cause:** The factory directory has `city.toml` but **`gc init` was never run**, so `.gc/` was never created.
+
+**Fix:** From the factory directory, `gc init --file city.toml .`, then retry `gc rig add`. If `gc init --file` conflicts with an existing `city.toml`, use the merge workaround in Step 3.
+
+### Issue 3: `gc rig add` reports "path does not exist"
 
 **Cause:** You passed a relative path from a directory where the rig isn't reachable, or the absolute path typo'd.
 
@@ -422,25 +430,25 @@ cd ~/Projects/actual-software/software-factory-intensive/software-factory/refere
 gc rig add "$(pwd)"
 ```
 
-### Issue 3: `gc start` succeeds but `gc status` shows all six agents as dead / red
+### Issue 4: `gc start` succeeds but `gc status` shows all six agents as dead / red
 
 **Cause:** The `includes` path in `city.toml` still points at `/abs/path/to/...` (you forgot to substitute), or the provider (`claude` vs `codex`) doesn't match what you have installed.
 
 **Fix:** `cat city.toml` and confirm the include resolves (`ls` on the path prints the `pack.toml`). If it does, re-check `provider = ...` matches a CLI on your PATH, then `gc restart`.
 
-### Issue 4: Planner doesn't wake after `bd label add <id> needs-plan`
+### Issue 5: Planner doesn't wake after `bd label add <id> needs-plan`
 
 **Cause:** Either the order gate isn't registered, or the label you added isn't exactly `needs-plan` (capitalization matters; trailing spaces matter).
 
 **Fix:** `bd label list <id>` — does it show `needs-plan` exactly? Then `gc order list` — is the Planner's intake order present? If neither surfaces a problem, `gc doctor --fix`. Common sneaky cause: the factory was started before you registered the rig; restart with `gc restart`.
 
-### Issue 5: Two agents race on the same file in the rig
+### Issue 6: Two agents race on the same file in the rig
 
 **Cause:** Parallel children of FUP-1 both landed in `ready-to-build` and two Coder sessions picked them up simultaneously — both are editing `src/menu/`.
 
 **Fix:** This is rare with a fresh factory. When it happens, the later write wins and the earlier session errors out. Close the stray bead (`bd close <id> --reason "duplicate"`) and re-label the kept one. The real fix — serializing concurrent work via bead dependencies — is introduced in W3 (coordination primitives); for W1 just note the behavior.
 
-### Issue 6: Dashboard shows the bead stuck on `ready-to-build` and no Coder session starts
+### Issue 7: Dashboard shows the bead stuck on `ready-to-build` and no Coder session starts
 
 **Cause:** The rig's `package.json` is missing dependencies the Coder needs to run tests (`npm ci` has never been run), so the Coder errors out instantly on boot. This happens on a freshly-cloned repo.
 
@@ -453,19 +461,19 @@ npm ci
 
 Then `gc restart` to pick up the change.
 
-### Issue 7: `gc dashboard serve` fails with "address already in use"
+### Issue 8: `gc dashboard serve` fails with "address already in use"
 
 **Cause:** Another factory (probably from a previous session) has a dashboard on :8080.
 
 **Fix:** `lsof -i :8080` to find the process; kill it; retry. Or `gc dashboard serve --port 8081` if you want both running.
 
-### Issue 8: The Reviewer keeps returning `request-changes` and the Coder re-cycles
+### Issue 9: The Reviewer keeps returning `request-changes` and the Coder re-cycles
 
 **Cause:** The Coder is regenerating the same issue because the shipped coder prompt is generic. That's expected — customizing the coder for your project is L3's entire job; you'll see the fix-via-config discipline land then.
 
 **Fix (for W1 specifically):** nothing. Let it cycle. The point of this session is to see the pipeline move, not to produce merge-ready code. If it cycles more than three times on the same finding, stop the factory (`gc stop`) and call David over — the failure mode might be worth walking the room through.
 
-### Issue 9: `import-tickets.sh` printed warnings like "failed to create FUP-2"
+### Issue 10: `import-tickets.sh` printed warnings like "failed to create FUP-2"
 
 **Cause:** Your `bd` database already has beads with matching titles from a previous workshop run.
 
@@ -519,7 +527,8 @@ includes = ["$SFI/software-factory/packs/fired-up-pizza"]
 startup_timeout = "3m"
 TOML
 
-gc rig add "$SFI/software-factory/reference-project"
+gc init --file city.toml .
+gc rig add "$SFI/software-factory/reference-project" --prefix rp
 gc register .
 gc start
 bash "$SFI/software-factory/curriculum-agent/scripts/doctor.sh"
