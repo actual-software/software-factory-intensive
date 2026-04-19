@@ -1,79 +1,32 @@
 # W3 · Architect Multi-Agent Coordination
 
-> **Goal:** Learn how to orchestrate multiple agents working together in Gas City — understanding when agents run sequentially, where human gates fire, how state moves between agents via beads, and how to capture all of this in a single declarative `orchestrator.yaml` committed alongside your pack configs.
+> **Goal:** Learn the five coordination primitives that Gas City agents use to work together — **beads**, **mail**, **nudges**, **hooks**, and **files** — understand when each is the right tool, and add one new coordination method to your factory before you walk out of the session.
 
 | | |
 |---|---|
 | **Estimated duration** | ~45 minutes |
 | **Type** | WORKSHOP |
-| **Deliverable** | `orchestrator.yaml` draft + gate justification notes committed at `activities/workshops/W3/` |
+| **Deliverable** | One new coordination rule committed to your factory's config — an order, a hook, a mail trigger, or a shared-file convention — with a short note in `DECISIONS.md` explaining why you picked it |
 
 ---
 
 ## Session workspace note
 
-W3 is a design session — no pack is installed and `my-factory/city.toml` is not touched. Orchestrator + gate docs live at `../../../activities/workshops/W3/`.
+W3 edits the packs you installed in L1 — you are not installing new packs, and you are not creating a new activity folder. Every change lands in a `pack.toml`, an `order.toml`, a `settings.json`, or a prompt template under your factory's `packs/` tree. The W3 deliverable is a commit in your factory, not a markdown in `activities/`.
 
 ---
 
-> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by re-reading the participant's W2 wiring diagram; every orchestrator decision should be grounded in that pipeline, and if the diagram is missing, pause and have the participant produce a quick version first.
+> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by running `bd label list-all` on the participant's factory to see which labels already exist, and by skimming `software-factory/LABELED_BEADS.md` so every coordination suggestion is grounded in the canonical handoff protocol rather than reinvented each time.
 
 ---
 
-## Architecture Diagram
+## Why Coordination Is a Separate Workshop
 
-```
-                           ┌─────────────────────────────────┐
-                           │        ORCHESTRATOR              │
-                           │   (orchestrator.yaml rules)      │
-                           │                                  │
-                           │   • routes beads                 │
-                           │   • enforces depends_on          │
-                           │   • fires human gates            │
-                           │   • applies on_reject rules      │
-                           └───────────────┬─────────────────┘
-                                           │  dispatches
-                                           ▼
-      ┌────────────────────────────────────────────────────────────────┐
-      │                                                                  │
-      │  Feature Request (bead)                                          │
-      │        │                                                          │
-      │        ▼                                                          │
-      │  ┌───────────┐   WP      ┌────────────┐  ADR    ┌────────────┐   │
-      │  │ PLANNER   │ ────────► │ ARCHITECT  │───────► │ DESIGNER   │   │
-      │  │ (agent)   │           │ (agent)    │         │ (agent)    │   │
-      │  └───────────┘           └────────────┘         └─────┬──────┘   │
-      │                                                        │ spec    │
-      │                                                        ▼         │
-      │  ┌───────────┐  release  ┌────────────┐  report ┌────────────┐   │
-      │  │ DEPLOYER  │◄───────── │ REVIEWER   │◄──────  │  CODER     │   │
-      │  │ (agent)   │           │ (agent)    │  code   │ (agent)    │   │
-      │  └─────┬─────┘           └──────┬─────┘         └────────────┘   │
-      │        │                        │                                 │
-      │        │                        │  on_reject → loop back to Coder │
-      │        │                        └────────────────────────┐       │
-      │        ▼                                                  ▼       │
-      │   [HUMAN GATE]                                        bead state  │
-      │   approve_deploy                                      transitions │
-      │                                                                    │
-      └────────────────────────────────────────────────────────────────────┘
-                  │
-                  ▼
-           ┌─────────────┐
-           │ Production  │
-           └─────────────┘
+In L1 you installed six agents, each of which *can* do its own job: the Planner breaks down work, the Architect decides, the Coder writes code, and so on. Each agent's pack encodes *how* it works. What the packs deliberately do **not** encode is how the agents know when it's their turn, how they tell each other they're done, and how they surface trouble. That wiring is coordination — and getting it wrong is the single most common way multi-agent systems fall apart.
 
-Legend:
-  WP  = work-packages/<slug>.md          (Planner artifact)
-  ADR = docs/adr/NNNN-<slug>.md           (Architect artifact)
-  spec = design/<slug>-spec.md            (Designer artifact)
-  code = src/** + tests                   (Coder artifact)
-  report = review-reports/<slug>.md       (Reviewer artifact)
-  release = release-gates/<slug>.md       (Deployer artifact)
+Gas City has a deliberately small vocabulary for coordination. There are **five primitives**, and every real factory is composed of them. There is no sixth mechanism. If you find yourself wanting to pass something between agents that doesn't fit one of the five, stop and redesign: the pattern you're inventing will not hold up under operation.
 
-Arrows carry beads. Beads carry state. The orchestrator never touches code directly —
-it only moves beads between agents and fires gates.
-```
+The whole workshop takes about 45 minutes. You'll spend ~20 minutes touring the primitives, ~5 minutes on tradeoffs, and ~20 minutes adding one new coordination method to your factory and testing that it fires.
 
 ---
 
@@ -83,653 +36,328 @@ Before starting this workshop, verify each of these:
 
 | Prerequisite | How to verify | If it's missing |
 |-------------|---------------|-----------------|
-| W1 complete | You have a `workflow-card.md` in your repo | Skim the [W1 README](../W1/) — 10 min |
-| W2 complete | You have a wiring diagram with 6 agent roles and handoff contracts | Go back and complete [W2](../W2/) — the contracts are W3's input |
-| L1 complete | `ls ~/path/to/your-repo/CLAUDE.md` → file exists | Complete L1 first; W3 references `CLAUDE.md` conventions |
-| Project Manifest | `cat ~/path/to/your-repo/docs/PROJECT_MANIFEST.md` → filled in | Copy from `curriculum/PROJECT_MANIFEST_TEMPLATE.md` and fill in |
-| Skeleton scaffold | `ls ~/path/to/your-repo/work-packages/` → directory exists | `mkdir -p ../../path/to/your-repo/{work-packages,docs/adr,design,review-reports,release-gates,feedback-loops}` |
-| An editor open | You can edit YAML files comfortably | Any editor — this workshop produces a single `orchestrator.yaml` and a short markdown file |
+| W2 complete | You've shifted to the pack-based, Config-Over-Prompting mindset | Go back and complete W2 — W3 layers on top of that paradigm |
+| L1 complete | `ls ~/Projects/factory/lab_l1/l1-gc-factory/packs/actual/` → all six agent packs (planner, architect, designer, coder, reviewer, deployer) installed | Complete L1 first — W3 edits packs L1 installed on your project |
+| Factory registered and runnable | `gc status --city ~/Projects/factory/lab_l1/l1-gc-factory` runs cleanly | Re-run the L1 install step; if `gc doctor --fix` doesn't resolve it, flag to a facilitator |
+| Labeled-beads protocol read | You can name at least 3 of the 6 canonical labels from memory | Read [`software-factory/LABELED_BEADS.md`](../../../LABELED_BEADS.md) — 5 min |
+| `gc` CLI pinned to v0.14.1 | `gc version` prints `gascity 0.14.1` | `brew install gastownhall/gascity/gascity@0.14.1` — see `curriculum-agent/SKILL.md` |
+| Editor open on your factory's pack source | You can browse `~/Projects/factory/lab_l1/l1-gc-factory/packs/actual/` | `code ~/Projects/factory/lab_l1/l1-gc-factory/packs/actual/` |
 
-You do **not** need L2 complete to finish W3 — the output is a design artifact, not code. But W3 is where you decide how L2–L4's agents will chain together, so doing W3 *before* L2 gives you a roadmap; doing it *after* gives you a retrospective. Either is valid.
+You do **not** need L2, L3, or L4 complete. W3 runs right after L1: the factory is installed with shipped packs, and L2 (which starts customizing Planner + Architect in depth) comes next. Any coordination rule you add today is forward-compatible with the customizations L2–L4 layer on.
 
 ---
 
 ## The Running Example: Fired Up Pizza Loyalty Points
 
-Throughout this workshop, we continue threading the **Loyalty Points** feature for Fired Up Pizza — the same feature used in W2 and L2. This makes the coordination map concrete: we're not coordinating "some feature" in the abstract; we're deciding how a specific, realistic feature flows through six agents.
+We keep using the same Loyalty Points feature you saw run end-to-end in W1's reference factory, so every coordination example below lands on concrete file paths and bead IDs.
 
-If you're working against your own project, substitute your own feature — but use a feature that has:
+Concretely, imagine a feature bead titled **"Loyalty points — earn/redeem"** that will walk through your six-agent factory. At different points in the walk, each coordination primitive comes into play: the Architect emits an ADR and re-labels the bead, the Coder sometimes needs to reach the Architect out of band, a human occasionally needs to steer a live agent away from a bad path. Each primitive description below shows that moment concretely.
 
-- **At least one architectural decision** (so the Architect has something meaningful to do)
-- **At least one high-risk step** (so there's a plausible human gate)
-- **At least one step that could reasonably fail review** (so your `on_reject` loop is real, not theatrical)
-
-The Loyalty Points feature satisfies all three: the storage decision is a real architectural question, the schema migration is a high-risk step, and the points-calculation code is easy to get subtly wrong — making a reviewer rejection plausible.
+If you're working against your own project, substitute the first feature you plan to thread through your factory after W3 (you'll actually drive it through Planner + Architect in L2). A feature with *one* real architectural question and *one* plausible review finding gives every primitive something to demonstrate; a trivial feature does not.
 
 ---
 
-## Part 0: Read the Shipped Coordination Primitives (~5 min)
+## Part 0: Re-Read the Labeled Beads Protocol (~3 min)
 
-Before designing your own coordination, read what Gas City already ships. There are three primitives that your `orchestrator.yaml` composes.
+Labels on beads are the backbone of coordination. The other four primitives are **supplements**, not replacements. Before we inventory them, make sure the label protocol is fresh in your head.
 
-### Step 1: Open the sync-jira Order
+Open [`software-factory/LABELED_BEADS.md`](../../../LABELED_BEADS.md) and skim the "Six canonical labels" table. You should be able to answer, for each of the six labels:
 
-Orders are Gas City's built-in periodic trigger. Open this file end-to-end:
+1. Who adds it?
+2. Who consumes it?
+3. What does the consuming agent do with it?
 
-[`packs/workshop/orders/sync-jira/order.toml`](../../../packs/workshop/orders/sync-jira/order.toml)
+If any answer is fuzzy, re-read that row of the table before continuing. Every coordination choice you make in the rest of the workshop presumes you know which label routes to which agent.
+
+> **Inline Insight: Labels Are the Floor, Not the Ceiling**
+>
+> It is tempting to solve every coordination problem by adding labels. Resist this. Labels are for **routing state machines** — "this bead is now ready for stage X." They are poor at nuance ("I think the Reviewer might want to re-check this one") and at urgency ("please look at this before you close your session"). The four primitives below fill those gaps.
+
+---
+
+## Part 1: Inventory the Five Coordination Primitives (~20 min)
+
+Read all five descriptions end to end before picking one for the hands-on. Each primitive is ~3 minutes of reading.
+
+### Primitive 1 · Beads (with labels)
+
+**What it is.** A bead is the unit of work. Its labels are its routing state. An agent polls `bd ready --label <inbound>`; when the upstream agent re-labels a bead to that value, the downstream agent picks it up on its next poll.
+
+**Latency.** Seconds to a few minutes — the agent's poll interval determines the ceiling. The shipped planner polls every 60 seconds (`sleep 60 && bd ready --label=needs-plan`), and the shipped `planner-intake` order re-evaluates on every supervisor tick.
+
+**Durability.** Very high. Beads live in the beads database, are replicated with `bd dolt push`, and survive agent restarts, crashes, and session timeouts.
+
+**Visibility.** High — `bd list`, `bd ready`, and `bd label list-all` all inspect the state of every in-flight bead. The dashboard at `http://localhost:8080` visualizes the queue per label.
+
+**When to reach for it.** Any handoff that is part of the feature lifecycle. If the state is "work has reached stage X," use a label.
+
+**Example from the Loyalty Points feature.** The Architect finishes the ADR and runs `bd label remove <id> needs-architecture && bd label add <id> needs-plan`. The Planner's next poll picks it up.
+
+### Primitive 2 · Mail
+
+**What it is.** `gc mail send <recipient> -s <subject> -m <body>` delivers a persistent message to an agent's mailbox. The recipient reads it on startup (`gc prime`) or explicitly with `gc mail inbox`. Mail is one-to-one, named, and durable.
+
+**Latency.** Higher than beads — the recipient has to be primed or explicitly check its inbox. A running agent does not automatically receive mail mid-session; it picks up new mail on its next `gc prime` or on its next session start.
+
+**Durability.** High — mail is stored per-agent and survives restarts.
+
+**Visibility.** Medium — `gc mail inbox` shows the recipient's view; there is no global "all mail" feed. For shared visibility, use a bead instead.
+
+**When to reach for it.** Escalations, clarifications, and things that aren't "work to do" but are "information the recipient should see when they next wake up." When a Coder hits an acceptance-criterion gap the Planner needs to fix, `gc mail send planner -s "AC unclear on FUP-3" -m "Bullet 3 says 'show total' but doesn't specify rounding"` is the right shape. A bead with a `needs-info` label would also work, but mail is lighter — no queue discipline required.
+
+**Example from the Loyalty Points feature.** The Reviewer finds a schema problem that the Architect should resolve *before* the Coder iterates again. `gc mail send architect -s "Revisit points_ledger isolation level" -m "Current serializable isolation on points_ledger causes deadlocks under concurrent redeem+earn. See review-reports/loyalty-points-review.md:42."`
+
+**Shipped reference.** Every agent's prompt template tells it to call `gc prime` on startup; `gc prime` includes "check `gc mail inbox`." Mail delivery is already part of the workflow if your pack uses the shipped prompts.
+
+### Primitive 3 · Nudges
+
+**What it is.** `gc session nudge <session-id> "<message>"` injects a message into a **currently running** agent session. It's the only way to reach a live session that's in the middle of a work loop. One-to-one, targeted, ephemeral.
+
+**Latency.** Near-zero — the running session sees the message on its next interaction turn.
+
+**Durability.** None. If the session isn't running, the nudge is dropped. If the session restarts, the nudge is gone.
+
+**Visibility.** Low — only the recipient session sees it. `gc session list` shows who's running; past nudges are not persisted.
+
+**When to reach for it.** Urgent, in-session corrections that don't warrant a full bead state change. A humans-in-the-loop example: the Coder is still running and you realize you gave it the wrong acceptance criterion — `gc session nudge <coder-sid> "Stop. Reviewer caught that the rounding rule is cents-down, not half-up. Re-read the updated AC before committing."` catches it before the commit lands.
+
+**Example from the Loyalty Points feature.** The Planner is decomposing a bead into children; you realize mid-decomposition that one of the proposed children would duplicate existing bead FUP-17. `gc session nudge <planner-sid> "FUP-17 already covers the receipt-formatting subtask — skip it in your decomposition."`
+
+**Caution.** Nudges are a firehose for ad-hoc prompting. If you catch yourself nudging the same agent about the same class of mistake twice, that's a config-discipline problem: fix the pack's prompt (L2/L3 teach how) rather than keep re-nudging.
+
+### Primitive 4 · Hooks
+
+**What it is.** Claude Code hooks (configured in each pack's `overlays/default/.claude/settings.json`) and Gas City gates (`gate = "condition"` in an `order.toml`) are **declarative triggers**. They fire automatically when a condition is true or when a session reaches a lifecycle event — `session_start`, `session_live`, stop events — without requiring any agent or human to poll.
+
+**Latency.** Depends on the trigger:
+- **Claude Code hooks** fire at the session lifecycle events they're bound to (start, live, stop). Effectively immediate.
+- **Gas City order gates** (`gate = "condition"` or `gate = "cooldown"`) are evaluated on the supervisor tick — seconds to a minute.
+
+**Durability.** High for the trigger itself (it's committed config); outcomes are as durable as the action the hook runs.
+
+**Visibility.** Medium — `gc order list` shows the order-based hooks; `settings.json` per pack shows the Claude hooks. There is no global hook-firing log, but hooks that run commands can write to stdout/stderr or to a file.
+
+**When to reach for it.** Automation that has no human in the loop and no ambiguity. Common shapes:
+
+- **"When a session starts, always run the doctor."** A Claude Code `session_start` hook executes `bash scripts/doctor.sh` so every agent boots with a green env or fails loudly.
+- **"Every 5 minutes, sync external issues."** Already shipped — see `packs/workshop/orders/sync-jira/order.toml`. The `gate = "cooldown"` + `interval = "5m"` compose a declarative periodic trigger.
+- **"When a bead gets labelled `ready-to-ship`, spin up the Deployer."** Already shipped — see `packs/planner/formulas/orders/planner-intake/order.toml` for the pattern (a `gate = "condition"` order watches for a label and wakes the agent via a formula).
+- **"On session stop, push bead DB changes."** A Claude `session_stop` hook runs `bd dolt push` so work never strands locally.
+
+**Example from the Loyalty Points feature.** You add a `session_live` hook to the Coder that runs `npm run lint --silent || gc mail send coder -s 'lint failed' -m 'lint failed during session, fix before committing'` every N minutes. If the Coder's code starts drifting off-convention, the agent mails itself a reminder before it commits.
+
+**Shipped reference.** The existing `packs/planner/formulas/orders/planner-intake/order.toml` is the cleanest declarative-trigger example:
 
 ```toml
 [order]
-description = "Bidirectional Jira sync — pull new tickets, push status updates"
-gate = "cooldown"
-interval = "5m"
-exec = "bd jira sync || true"
+description = "Wake the planner when any bead is labelled needs-plan"
+formula = "mol-plan-breakdown"
+gate = "condition"
+check = "bd ready --label=needs-plan --limit=1 | grep -q ."
+pool = "planner"
 ```
 
-**What's happening here:** This declarative block says: "every 5 minutes, if the cooldown gate allows it, run `bd jira sync`." The `gate = "cooldown"` field is a coordination primitive — it prevents the order from firing faster than `interval`, even if something else triggers it. Your `orchestrator.yaml` borrows this `gate` concept for per-stage gates (e.g., `gate = "human"` for human approvals).
+Every line is config. Nothing is prompted. If the `check` returns true, the supervisor dispatches the Planner via the `mol-plan-breakdown` formula. Your hand-on could add one of these for a label you want to automate.
 
-### Step 2: Review the Bead Dependency Primitive
+### Primitive 5 · Files
 
-Gas City's `bd` CLI has a `--depends-on` flag:
+**What it is.** Artifacts committed to the shared rig directory — `docs/decisions/*.md`, `docs/designs/*.md`, `docs/plans/*.md`, source code, tests, `DECISIONS.md`. Files are the one place where durable content lives between agents; every other primitive above points *at* a file rather than carrying the content itself.
 
-```bash
-bd create "Architect decision" --depends-on plan-123 --id arch-456
-```
+**Latency.** Immediate — once committed, any agent that reads the file picks it up.
 
-**What's happening here:** The dependent bead stays in `blocked` state until `plan-123` closes. This is the coordination primitive for **sequential pipelines**. Orchestrator `depends_on` entries compile to exactly this — a chain of blocked beads that unblock in order.
+**Durability.** Maximum — files are version-controlled; git is the audit trail.
 
-### Step 3: Review the Approval Bead Primitive
+**Visibility.** Maximum — `git log`, `git blame`, `ls docs/decisions/`. Anyone can open the file in an editor.
 
-Gas City supports approval beads via `--requires-approval`:
+**When to reach for it.** Anything substantive. Decisions (ADRs), specs (design docs), accumulated knowledge (`PROJECT_MANIFEST.md`), rules (`CLAUDE.md`), and of course the source code itself. Every agent's prompt template names specific files under `docs/` that it reads as inputs and writes as outputs.
 
-```bash
-bd create "Deploy to prod" --requires-approval --assignee austin@actual.ai --id deploy-789
-```
+**Explicit rule.** Files are the **only** primitive for durable content. If an agent needs to pass more than a sentence to another agent, the right shape is: the upstream agent writes a file, commits it, updates the bead to point at the file, and re-labels. The downstream agent reads the bead, opens the file, acts on its contents. **Do not** stuff multi-paragraph context into a bead description, a mail body, or a nudge — those are pointers, not payloads.
 
-**What's happening here:** The bead enters `needs-approval` state and sits there until `bd approve deploy-789` is called. This is the primitive for **human gates**. Your orchestrator's `gate: human` entries compile to this.
-
-### Step 4: Internalize the Three-Primitive Rule
-
-These three primitives (periodic orders, dependent beads, approval beads) are **everything you have** for coordination. There is no fourth mechanism. If your design needs "agent re-invokes itself on failure" or "two agents share a variable in memory," you're outside the primitives — which means you should redesign, because those patterns will not compile to Gas City.
-
-### Step 5: Read the Existing Agent Packs Once More
-
-You read these in L2. Re-skim them now with coordination in mind, because each one declares a contract the orchestrator will rely on:
-
-- [`packs/planner/pack.toml`](../../../packs/planner/pack.toml) — `name = "planner"` is what `agent: planner` in your `orchestrator.yaml` will resolve to. `max_active_sessions = 1` means one bead at a time; the orchestrator will queue additional planner beads rather than run them concurrently.
-- [`packs/architect/pack.toml`](../../../packs/architect/pack.toml) — same shape. The `idle_timeout = "1h"` field determines how long the agent's tmux session lingers; longer timeouts reduce cold-start overhead for rapid stage transitions.
-- [`packs/designer/pack.toml`](../../../packs/designer/pack.toml), [`packs/coder/pack.toml`](../../../packs/coder/pack.toml), [`packs/reviewer/pack.toml`](../../../packs/reviewer/pack.toml), [`packs/deployer/pack.toml`](../../../packs/deployer/pack.toml) — the remaining four. You'll install the last two in L4, but the contracts are already defined.
-
-Your `orchestrator.yaml` should treat the `[[agent]].name` values in these files as the **only** valid values for the `agent:` field in a stage. If you write `agent: plannr` by typo, `gc orchestrate apply` will fail at load time, not at runtime — which is the behavior you want.
+**Example from the Loyalty Points feature.** The Architect writes `docs/decisions/0001-points-storage.md`. The bead's comment is one line: "Decision captured at docs/decisions/0001-points-storage.md; revisit if concurrent-update load exceeds 10 TPS." The Designer reads the file, not the bead comment.
 
 ---
 
-## The Three Core Coordination Concepts
+## Part 2: Tradeoffs — When to Reach for Which (~5 min)
 
-Your `orchestrator.yaml` will compose three coordination concepts, each mapped to one of the primitives you just read. We'll build up the file one concept at a time.
+Read the table below once, top to bottom. In the hands-on you'll pick one row to exercise.
+
+| Primitive | Best when... | Worst when... | Cognitive cost |
+|---|---|---|---|
+| **Beads (labels)** | State transition is part of the feature lifecycle; many agents need to see the queue | The state is ephemeral ("just this session"); urgency matters more than routing | Low — the six canonical labels are fixed vocabulary |
+| **Mail** | Out-of-band note to a specific agent, needs durability, doesn't require blocking | You need real-time interruption; recipient may not wake soon | Low — one command, clear recipient |
+| **Nudges** | Live session is drifting and needs correction *now* | Session isn't running; durability matters; same correction recurs | Medium — tempts you into ad-hoc prompting; easy to abuse |
+| **Hooks** | Fully-automatable condition, no human judgement, happens often enough to be worth the setup | Condition is subtle or requires reasoning; one-off cases | Higher — you are writing config that has to be right, and debugging requires tracing through supervisor logs or settings.json |
+| **Files** | Durable, substantive content; audit trail matters; multiple agents read same input | Content is small and disposable; writing a file is overkill for a single sentence | Low — everyone already knows how files work |
+
+### A quick decision sketch
+
+**"The Coder needs to know the Architect's decision."** → **File** (the ADR). The bead is just a pointer to the file.
+
+**"The Reviewer wants the Coder to redo the fix."** → **Bead** (re-label from `needs-review` back to `ready-to-build` with notes in the bead).
+
+**"The Planner is off-track and I need it to stop decomposing a bead the wrong way."** → **Nudge** (session is live; correction is immediate).
+
+**"The Architect should revisit a decision next time it wakes."** → **Mail** (no urgency; durable).
+
+**"Every 5 minutes, pull new Jira tickets into beads."** → **Hook** (declarative, periodic, no human).
 
 ---
 
-### Concept 1: Sequential Chaining (~5 min)
-
-**When:** Stage B cannot start until Stage A has produced its artifact. Order matters; output of Stage N is the input of Stage N+1.
-
-**Primitive used:** `bd create --depends-on`
-
-**Fired Up Pizza example:**
-
-```
-Planner writes work-packages/loyalty-points-system.md
-         ↓  (Architect cannot start without the work package)
-Architect writes docs/adr/0001-loyalty-points-storage.md
-         ↓  (Designer cannot start without the ADR)
-Designer writes design/loyalty-points-spec.md
-         ↓  (Coder cannot start without the design spec)
-Coder writes src/loyalty/ + tests
-```
-
-**Expressed in orchestrator.yaml:**
-
-```yaml
-pipeline:
-  stages:
-    - name: plan
-      agent: planner
-      produces: work-packages/*.md
-
-    - name: architect
-      agent: architect
-      needs: [plan]
-      produces: docs/adr/*.md
-
-    - name: design
-      agent: designer
-      needs: [architect]
-      produces: design/*-spec.md
-
-    - name: code
-      agent: coder
-      needs: [design]
-      produces: src/**
-```
-
-**What's happening here:** `needs: [plan]` means this stage's bead is created with `--depends-on <plan-bead-id>`. The orchestrator won't sling this stage's bead to its agent until the prerequisite bead closes. `produces:` is a glob that documents what artifact this stage creates — the orchestrator uses it to verify the agent actually wrote something before marking the stage complete.
-
-**Use sequential chaining when:**
-
-- The downstream agent reads the upstream agent's artifact as part of its inputs
-- Skipping an upstream stage would force the downstream agent to make decisions outside its scope (e.g., Coder guessing at architecture)
-- The order is semantic, not just historical — reversing it would produce wrong output
-
-**Do NOT use sequential chaining when:**
-
-- Stage B could start with partial information from Stage A (the dependency is incidental)
-- Two stages read the same upstream but don't read each other (those are candidates for parallel execution, a sibling pattern — but in W3 you will intentionally keep the pipeline linear; parallel fan-out is deferred until L4, where you'll have the full 6-agent runtime to test it safely)
-
-> **Inline Insight: The Linear Pipeline Is the Honest Default**
+> **Inline Insight: The Primitives Don't Stack Randomly**
 >
-> It's tempting to design a parallel-heavy coordination map to "save time." Resist this in W3. The six-agent factory's value is the *artifact trail*, not raw throughput. Every parallel fan-out adds a join point, and every join point is a place where state can desync between agents. Start linear. Add parallelism only once you have a working linear pipeline and a specific bottleneck you've observed — not guessed.
+> A well-run factory uses all five, but *not for the same purpose*. Beads carry state. Files carry content. Mail carries out-of-band notes. Nudges carry urgent corrections. Hooks carry automation. If you find yourself putting state in a file, or content in a nudge, stop — you're mixing layers, and the cost shows up later as "why did no one notice that the decision changed?" (Because it was only in a nudge, which disappeared when the session ended.)
 
 ---
 
-### Concept 2: Human Gates (~5 min)
+## Part 3: Hands-On — Add One Coordination Method (~15 min)
 
-**When:** The next stage has consequences that are hard or impossible to reverse, and no amount of agent improvement makes the decision safe to automate.
+You are going to pick **one** primitive you are not currently using (or not using fully) in your factory and wire it in with a declarative config change. This is where Config Over Prompting meets the road: your change lands in a `.toml`, `.json`, or `.md` file, is committed, and works the same way for every future bead without further prompting.
 
-**Primitive used:** `bd create --requires-approval`
+Pick one of the three worked examples below, or design your own in the same shape.
 
-**Fired Up Pizza example:** After the Reviewer approves the code, we **do not** automatically deploy to production. A human reviews the deploy-gate document, checks the database migration plan, and calls `bd approve` before the Deployer actually runs.
+### Option A — Add a mail escalation from Reviewer to Architect
 
-**Expressed in orchestrator.yaml:**
+**Scenario.** Your Reviewer will occasionally find issues that require an architectural re-visit (not "the Coder got it wrong" but "the ADR we wrote is incomplete or stale"). By default the Reviewer just rejects the bead back to `ready-to-build` and the problem never reaches the Architect. You want it to.
 
-```yaml
-pipeline:
-  stages:
-    # ... (plan, architect, design, code from Concept 1)
-
-    - name: review
-      agent: reviewer
-      needs: [code]
-      produces: review-reports/*.md
-      on_reject: code  # if reviewer rejects, loop back to coder
-
-    - name: deploy
-      agent: deployer
-      needs: [review]
-      gate: human            # pause until bd approve is called
-      approvers:
-        - austin@actual.ai
-      produces: release-gates/*.md
-```
-
-**What's happening here:** `gate: human` tells the orchestrator to create this stage's bead with `--requires-approval`. It sits in `needs-approval` state with the reviewer's report attached as context. An approver (you, in the solo case; a team lead or security reviewer in production) runs `bd approve <bead-id> --comment "reviewed migration plan, proceed"` and only then does the Deployer get to run.
-
-**Gate placement decision tree for the Loyalty Points feature:**
-
-| Stage transition | Worst-case if it runs unattended | Gate needed? |
-|---|---|---|
-| Planner → Architect | Bad work package leads to a bad ADR — caught later, easy to redo | No |
-| Architect → Designer | Bad ADR leads to a bad spec — caught later | No |
-| Designer → Coder | Bad spec leads to bad code — caught by Reviewer | No |
-| Coder → Reviewer | Reviewer is the check — no gate before the check | No |
-| Reviewer → Deployer | Unreviewed migration hits production, corrupts points balances, cannot rollback without customer-visible incident | **Yes** |
-| Deployer → Production | Same reason — covered by the same gate | (combined with above) |
-
-So for Loyalty Points, **exactly one human gate** is justified: before the Deployer.
-
-### The "while I was asleep" test
-
-For each candidate gate, ask yourself: *"If this step ran while I was asleep, what's the worst that could happen?"*
-
-Walk through the Loyalty Points feature stage by stage:
-
-| Step | While-I-was-asleep outcome | Acceptable? |
-|---|---|---|
-| Planner writes wrong work package | Architect or Designer catches it, re-sling with revised description | Yes, no gate |
-| Architect writes a weak ADR | Self-review catches it; worst case, spec gets re-drafted | Yes, no gate |
-| Designer writes a wrong spec | Coder or Reviewer catches it; feature branch, nothing in production | Yes, no gate |
-| Coder writes a subtle points-calculation bug | Reviewer catches it; if not, Deployer catches it in staging | Yes, no gate |
-| Reviewer incorrectly approves broken code | Automated deploy pushes broken points-ledger migration to prod; customers lose/gain wrong points; cannot rollback without data loss | **No — gate required** |
-
-This exercise is the single most important deliverable of Concept 2. **Write the answer down** — it becomes the gate justification doc you commit alongside `orchestrator.yaml`.
-
-### What makes a good gate
-
-**Good reasons for human gates:**
-
-- **High cost**: "This spins up 20 new servers / costs $N per month"
-- **Irreversible**: "This deletes customer data / runs a schema migration that drops a column"
-- **Requires taste**: "Choose between these 3 UX mockups" — agents can surface the tradeoffs but not make the call
-- **Compliance**: "Legal must review this contract change / public API surface change"
-
-**Bad reasons for human gates:**
-
-- **"Just to be safe"**: Adds friction without clear benefit. The factory runs slower and you start to ignore gates.
-- **Lack of trust in agents**: Fix the agent config instead. If the Reviewer keeps approving bad code, the Reviewer's prompt needs more specific quality rules — that's a config-discipline problem, not a gate problem.
-- **"We've always done it this way"**: Automation is the goal. A gate you don't have a written justification for is theater.
-- **Checking every step**: Defeats the purpose of a software factory. If you need to check every step, you don't trust the pipeline, and you should go back to W2 and re-examine the handoff contracts.
-
-> **Inline Insight: Gates Are for Risks Agents Can't See, Not Risks They Might Make**
->
-> A gate before the Reviewer because "the Coder might make a mistake" is the wrong shape. The Reviewer exists precisely to catch coder mistakes — that's an agent-level control, not a human-level control. A gate before the Deployer because "deployed code might corrupt the points ledger and we cannot rollback customer-visible state changes" is the right shape: the *consequence* is outside what any agent can see (it's business-state, not code-state).
-
----
-
-### Concept 3: Cross-Agent State (Beads as State) (~5 min)
-
-**When:** Stage B needs to know something that Stage A discovered. There is no shared memory, no global variable, no in-flight handshake. **All cross-agent state lives in beads, artifacts, or commits.**
-
-**Primitive used:** bead descriptions, bead comments, and committed artifacts (work packages, ADRs, specs, reports).
-
-**Fired Up Pizza example:** The Architect decides to use a separate `points_ledger` table (from L2). The Designer needs to know this to write the right spec. The Coder needs to know this to write the right schema. The Reviewer needs to know this to check the migration. How does the decision travel?
-
-**Answer:** Through the committed ADR. The Designer's bead description says "Read `docs/adr/0001-loyalty-points-storage.md` before writing the spec." The ADR is state, the bead is the pointer to that state, and the orchestrator's job is to make sure the pointer is correct.
-
-**Expressed in orchestrator.yaml:**
-
-```yaml
-pipeline:
-  stages:
-    - name: plan
-      agent: planner
-      produces: work-packages/*.md
-      bead_template: |
-        Feature request: {{feature_title}}
-        {{feature_description}}
-        Write the work package to work-packages/<slug>.md per your prompt.
-
-    - name: architect
-      agent: architect
-      needs: [plan]
-      produces: docs/adr/*.md
-      bead_template: |
-        Read the work package at {{plan.produced_path}}.
-        Read CLAUDE.md for tailored ADR baselines.
-        Produce an ADR at docs/adr/NNNN-<slug>.md.
-
-    - name: design
-      agent: designer
-      needs: [architect]
-      produces: design/*-spec.md
-      bead_template: |
-        Read {{plan.produced_path}} and {{architect.produced_path}}.
-        Produce a spec at design/<slug>-spec.md per your prompt.
-
-    - name: code
-      agent: coder
-      needs: [design]
-      produces: src/**
-      bead_template: |
-        Read {{design.produced_path}}, {{architect.produced_path}},
-        and {{plan.produced_path}}.
-        Implement per the spec. Do not make architectural decisions.
-```
-
-**What's happening here:** `bead_template` is a parameterized description for the bead the orchestrator creates when dispatching a stage. `{{plan.produced_path}}` is interpolated from the upstream stage's produced artifact. This is how state flows: the upstream stage produces a file, commits it, closes its bead; the orchestrator interpolates the file path into the downstream stage's bead description; the downstream agent reads the file.
-
-**Why this matters:** There is no magic "context injection." The Designer does not have a memory of the ADR — it re-reads the file each time. This is by design. It means you can re-run any stage independently by re-creating its bead, and you can debug a failure by reading the bead description plus the artifact paths it points to. Nothing is hidden.
-
-**The three kinds of cross-agent state:**
-
-1. **Artifact state** — files committed to the repo (work packages, ADRs, specs, code, review reports). Durable; survives agent restarts. This is where 95% of your state should live.
-2. **Bead state** — title, description, status, comments, `depends_on` relationships. Durable; managed by Gas City. Use this for *pointers to artifacts* and *stage metadata*, not for the artifacts themselves.
-3. **Session state** — what's in the agent's tmux session while it's running. **Ephemeral.** Do not rely on it. When the session times out (`idle_timeout = "1h"`), it's gone.
-
-If you find yourself wanting to pass something between agents that isn't a file or a bead field, stop. Either (a) make it a file, or (b) make it a bead comment. There is no third option.
-
-> **Inline Insight: No Hidden Handoffs**
->
-> Every state transition between agents should produce a file a human can open. If the Architect's decision only exists in the Designer's bead description, you've hidden a handoff — and when something goes wrong in week 6, you'll have no audit trail. This is why W2's handoff contracts specify *artifact paths*, not "the Designer will know about the decision." Your `orchestrator.yaml` should reference every handoff artifact by path, and if a stage has no artifact path, that stage is broken.
-
-### Worked Example: Tracing State Through the Loyalty Points Pipeline
-
-To make "beads as state" concrete, trace exactly how the Architect's storage decision travels from stage to stage in the Loyalty Points feature:
-
-1. **Architect stage runs.** The Architect agent reads the work package, decides on `points_ledger` table (Option 2 from L2), writes `docs/adr/0001-loyalty-points-storage.md`, commits it, closes its bead.
-2. **Orchestrator observes the close.** It reads the closed bead's `produced_path` field (set by the agent's Process step: "update the bead with the artifact path before closing").
-3. **Orchestrator creates the Designer bead.** It interpolates `{{architect.produced_path}}` = `docs/adr/0001-loyalty-points-storage.md` into the `bead_template`, producing a description like: "Read `work-packages/loyalty-points-system.md` and `docs/adr/0001-loyalty-points-storage.md`. Produce a spec at `design/loyalty-points-spec.md`."
-4. **Designer agent runs.** It opens both files (fresh — no memory of previous stages), reads the ADR, sees "decision: `points_ledger` table," writes a spec that conforms.
-5. **Designer closes its bead**, setting `produced_path` = `design/loyalty-points-spec.md`.
-6. **Orchestrator creates the Coder bead** with all three upstream paths. Coder reads all three, implements. And so on.
-
-Notice what is **not** happening:
-
-- There is no shared memory between the Architect and the Designer. They may run minutes or hours apart, in different tmux sessions.
-- There is no orchestration-level "decision object" — the decision is the committed ADR file, full stop.
-- There is no "pass arguments between agents." There are only bead descriptions, which point to files.
-
-If the Designer's spec contradicts the ADR, the bug is in the Designer's prompt (doesn't read the ADR carefully enough) or in the Coder's prompt (doesn't follow the spec). It is never a "state transmission" bug, because there is no state transmission channel to break.
-
----
-
-## Workshop Activity — Part 1: Draft Your orchestrator.yaml (~15 min)
-
-Now you compose the three concepts into a single file.
-
-### Step 1: Create the File
-
-```bash
-cd ~/path/to/your-repo
-touch orchestrator.yaml
-```
-
-### Step 2: Write the Full Pipeline
-
-> **Agent Guide:** As the participant writes each stage, flag two anti-patterns the moment you see them: (a) parallelism where both branches write to the same directory — force sequencing, two agents editing `src/` concurrently is a conflict waiting to happen; (b) stages that depend on another stage's chat output rather than its file artifact — rewrite to reference the file. Also ask where in their pipeline two stages could genuinely run in parallel (disjoint files, no mutual dependency); if no pair qualifies, say so and skip the fan-out — invented parallelism is worse than no parallelism.
-
-Open `orchestrator.yaml` and write your six-stage pipeline. Work in three passes, adding one concept at a time so that each intermediate version is independently verifiable.
-
-#### Pass A: Sequential chain only (no gates, no remediation)
-
-Start with just the four design-and-build stages and confirm the structure parses:
-
-```yaml
-version: 1
-
-pipeline:
-  name: feature-pipeline
-  trigger:
-    bead_label: feature-request
-
-  stages:
-    - name: plan
-      agent: planner
-      produces: work-packages/*.md
-
-    - name: architect
-      agent: architect
-      needs: [plan]
-      produces: docs/adr/*.md
-
-    - name: design
-      agent: designer
-      needs: [architect]
-      produces: design/*-spec.md
-
-    - name: code
-      agent: coder
-      needs: [design]
-      produces: src/**
-```
-
-**What's happening here:** Four stages, each waiting on the previous. No remediation, no gates, no human intervention. Save the file and run `python3 -c "import yaml; yaml.safe_load(open('orchestrator.yaml'))"` to confirm it parses.
-
-#### Pass B: Add review + remediation loop
-
-Now append the review stage with its `on_reject` loop:
-
-```yaml
-    - name: review
-      agent: reviewer
-      needs: [code]
-      produces: review-reports/*.md
-      on_reject: code
-      bead_template: |
-        Review the code produced against {{design.produced_path}}.
-        Write review-reports/<slug>.md with approve/request_changes verdict.
-```
-
-**What's happening here:** `on_reject: code` is the single most important field in the whole file. Without it, a Reviewer rejection dead-ends the pipeline — the feature is stuck, and a human has to manually re-sling the Coder. With it, the orchestrator automatically creates a new Coder bead with the review report attached, and the Coder iterates until the Reviewer approves (or until the retry budget is exhausted, which you'll wire up in L4).
-
-#### Pass C: Add the human gate + gate metadata
-
-Finally, append the deploy stage with its gate, and add the `gates:` block at the bottom:
-
-```yaml
-    - name: deploy
-      agent: deployer
-      needs: [review]
-      gate: human
-      approvers:
-        - austin@actual.ai
-      produces: release-gates/*.md
-
-gates:
-  - name: approve_deploy
-    required_for: [deploy]
-    approvers:
-      - austin@actual.ai
-    justification_doc: docs/gates/approve_deploy.md
-```
-
-**What's happening here:** The `gate: human` on the stage and the `gates:` entry at the bottom are redundant on purpose. The stage-level field tells the orchestrator *when* to pause; the top-level `gates:` entry is where approvers, escalation, and justification-doc references live centrally, so a reviewer can audit all gates by grepping the `gates:` block.
-
-#### The complete file
-
-Here is the full result — the target you should arrive at by the end of Pass C:
-
-```yaml
-# orchestrator.yaml — Fired Up Pizza factory coordination
-# Generated in W3; refined in L4.
-
-version: 1
-
-pipeline:
-  name: feature-pipeline
-  trigger:
-    bead_label: feature-request
-
-  stages:
-    - name: plan
-      agent: planner
-      produces: work-packages/*.md
-      bead_template: |
-        Feature request: {{feature_title}}
-        {{feature_description}}
-        Produce a work package at work-packages/<slug>.md per your prompt.
-
-    - name: architect
-      agent: architect
-      needs: [plan]
-      produces: docs/adr/*.md
-      bead_template: |
-        Read the work package at {{plan.produced_path}}.
-        Read CLAUDE.md for tailored ADR baselines.
-        Produce an ADR at docs/adr/NNNN-<slug>.md per MADR template.
-
-    - name: design
-      agent: designer
-      needs: [architect]
-      produces: design/*-spec.md
-      bead_template: |
-        Read {{plan.produced_path}} and {{architect.produced_path}}.
-        Produce a spec at design/<slug>-spec.md per your prompt.
-
-    - name: code
-      agent: coder
-      needs: [design]
-      produces: src/**
-      bead_template: |
-        Read {{design.produced_path}} (primary),
-        {{architect.produced_path}}, and {{plan.produced_path}}.
-        Implement per the spec. Run lint, tests, build before committing.
-
-    - name: review
-      agent: reviewer
-      needs: [code]
-      produces: review-reports/*.md
-      on_reject: code
-      bead_template: |
-        Review the code produced against {{design.produced_path}}.
-        Write review-reports/<slug>.md with approve/request_changes verdict.
-
-    - name: deploy
-      agent: deployer
-      needs: [review]
-      gate: human
-      approvers:
-        - austin@actual.ai
-      produces: release-gates/*.md
-      bead_template: |
-        Evaluate release readiness against {{review.produced_path}}.
-        Produce release-gates/<slug>.md.
-        Human approval required before production deploy.
-
-gates:
-  - name: approve_deploy
-    required_for: [deploy]
-    approvers:
-      - austin@actual.ai
-    justification_doc: docs/gates/approve_deploy.md
-```
-
-**What's happening here:** Read the file top to bottom:
-
-- `version: 1` is the schema version. Keep it at 1 for the duration of the curriculum.
-- `pipeline.name` is the identifier the orchestrator uses when logging. One pipeline per file is the simplest shape; you can have multiple (e.g., a `hotfix-pipeline`) but don't in W3.
-- `trigger.bead_label` is the label on a bead that kicks the pipeline off. When you create a bead with `bd create "..." --label feature-request`, the orchestrator picks it up and starts at the `plan` stage.
-- Each `stage` has: a name, an agent (matches the `[[agent]].name` in a pack's `pack.toml`), a `needs` list (compiles to `--depends-on`), a `produces` glob, an optional `gate`, and a `bead_template`.
-- `on_reject: code` in the `review` stage is the **remediation loop**: if the Reviewer's verdict is `request_changes`, the orchestrator opens a new `code` bead pointing back to the same feature. This is how the pipeline self-corrects without human intervention.
-- `gates:` at the bottom declares approval metadata that the `gate: human` stages reference. Keep a justification doc per gate — empty justification = theatrical gate.
-
-### Step 3: Write the Gate Justification Doc
-
-> **Agent Guide:** Ask the participant two questions before they write: (1) what concrete risk does this gate prevent? Force a specific failure mode, not a category ("an untested migration reaches production," not "quality issues"). (2) Under what observable condition would they remove this gate? If the answer is "never," the gate is fear-based — push for a measurable exit condition.
-
-Any stage with `gate: human` needs a justification committed alongside. Create `docs/gates/approve_deploy.md`:
+**What you change.** Edit `packs/reviewer/prompts/reviewer.md.tmpl` (the reviewer pack L1 already installed; you'll customize it in depth during L4). Add a paragraph to the **Handoff** section:
 
 ```markdown
-# Gate: approve_deploy
+### Architectural escalation
 
-## Stage
-Between `review` and `deploy` in the feature-pipeline.
+If your review finds that the ADR is incomplete, contradictory, or
+no longer matches reality — not just that the implementation is
+wrong — mail the architect with the evidence:
 
-## Risk Being Mitigated
-A schema migration for the points_ledger table is irreversible without
-customer-visible data loss. The Reviewer can verify the code compiles
-and tests pass, but cannot verify that production database state
-matches staging — a human must inspect the deploy-gate document
-(which includes the migration plan and rollback strategy) before
-the Deployer is allowed to run.
+    gc mail send architect \
+      -s "ADR revisit needed: <adr-slug>" \
+      -m "review-reports/<slug>.md:<line> — <one-sentence reason>"
 
-## Evidence This Gate Is Necessary
-- Dropping a points_ledger row in production loses real customer points,
-  which is indistinguishable from theft from the customer's perspective.
-- SQLite does not support `DROP COLUMN` without a table rebuild, so a
-  failed migration requires restore-from-backup, not simple rollback.
-- The Reviewer's acceptance criteria do not include database state
-  verification — that is explicitly out of scope for code review.
-
-## When This Gate Should Be Removed
-When ALL of the following are true:
-1. Automated rollback is in place (daily backups + tested restore path)
-2. Staging environment mirrors production schema exactly and runs the
-   same migration first
-3. The points_ledger ledger is append-only (no destructive writes),
-   making migrations additive rather than destructive
-4. Test coverage on the migration path exceeds 90%
-
-## Approvers
-- austin@actual.ai (primary)
-- team-lead@actual.ai (fallback, if primary is unavailable >24h)
+Then still re-label the bead back to `ready-to-build` with review
+notes so the Coder keeps moving. Mail is the escalation channel;
+the bead queue is the work channel.
 ```
 
-**What's happening here:** This document is the *receipt* for the gate. In six months, when a new engineer asks "why is there a manual approval step here, it slows us down," this doc is the answer. The **removal condition** is the most important section — it prevents the gate from becoming permanent infrastructure.
+**Why this is a coordination change and not a prompt tweak.** The Reviewer now has an explicit, reproducible rule for when to escalate to the Architect and what channel to use. It is not "I told Claude to escalate" — it is a two-sentence contract committed in the prompt. If you change your mind next month, you edit the prompt, not the chat.
 
-### Step 4: Validate Your YAML Parses
-
-Before committing, confirm the file is syntactically valid:
+**Validate.** From the Reviewer's agent directory, run:
 
 ```bash
-python3 -c "import yaml; yaml.safe_load(open('orchestrator.yaml'))" && echo OK
+gc mail send architect -s "test" -m "smoke"   # sends ok
+gc mail inbox --agent architect               # confirms delivery
 ```
 
-You should see `OK`. If you see a traceback, the YAML is malformed — usually an indentation mismatch under `stages:` or a missing colon after a key. Fix the line number the traceback points at.
+### Option B — Add a `session_start` hook that runs the doctor
 
-Also do a quick structural check:
+**Scenario.** You've had one too many sessions where the agent starts, tries to run `bd`, and discovers bd is not on PATH or the beads DB is stale. Today you catch this manually; you want the session to fail fast on boot.
+
+**What you change.** Edit `packs/coder/overlays/default/.claude/settings.json` (or whichever pack you're hardening). Add a `hooks` block:
+
+```json
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": { /* existing permissions stay the same */ },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          { "type": "command", "command": "bash scripts/doctor.sh" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Then create `scripts/doctor.sh` at the pack root (or the rig root) that runs `which bd && which gc && bd list --limit=1 > /dev/null`. Non-zero exit kills the session before it does any work.
+
+**Why this is coordination.** Every session now runs the same check on boot. You can swap the doctor script without touching any agent's prompt. Every agent inherits the rule by the same mechanism.
+
+**Validate.** Start a new Coder session:
 
 ```bash
-grep -c "^    - name:" orchestrator.yaml   # should print 6
-grep -c "gate: human" orchestrator.yaml    # should print >= 1
-grep -c "on_reject:" orchestrator.yaml     # should print >= 1
+gc session new coder
+gc session list   # confirm the session came up (or died on the doctor check)
 ```
 
-If any of these counts are zero, re-read the example above — you've likely dropped a whole section.
+### Option C — Add a new label-triggered order for a role you've added
 
-### Step 5: Commit
+**Scenario.** In L2 you added a custom "spec-writer" role to your factory (or any other custom agent your project needs). Right now, the only way to route work to it is to run `gc sling spec-writer "..."` manually. You want it to wake automatically whenever a bead gets a `needs-spec` label.
+
+**What you change.** Create `packs/spec-writer/formulas/orders/spec-writer-intake/order.toml`:
+
+```toml
+[order]
+description = "Wake the spec-writer when any bead is labelled needs-spec"
+formula = "mol-spec-write"
+gate = "condition"
+check = "bd ready --label=needs-spec --limit=1 | grep -q ."
+pool = "spec-writer"
+```
+
+And reference the new formula in your pack's formulas directory (model it on `packs/planner/formulas/mol-plan-breakdown.formula.toml`).
+
+**Why this is coordination.** The agent now wakes on a declarative condition. Anyone who labels a bead `needs-spec` — Planner, human, another agent — triggers the same wake path. There is no "who invoked gc sling" ambiguity.
+
+**Validate.** Label any bead `needs-spec` and watch for the spec-writer session to start:
 
 ```bash
-cd ~/path/to/your-repo
-git checkout -b w3-orchestrator
-git add orchestrator.yaml docs/gates/approve_deploy.md
-git commit -m "feat(orchestrator): draft feature-pipeline with deploy gate"
+bd label add <bead-id> needs-spec
+sleep 90   # one supervisor tick
+gc session list | grep spec-writer
 ```
 
-**Why commit now?** The `orchestrator.yaml` is the source of truth for coordination. In L4 you'll apply it (`gc orchestrate apply`) and the actual runtime behavior will be compared against this file. Committing it now means the diff of *intended* vs *actual* coordination is always in the git log.
+### Record your choice
 
-### Per-Stage Design Checklist
+Append a one-paragraph entry to `DECISIONS.md` in your project repo:
 
-Before you finalize the YAML, walk each stage against this checklist. It's the same rubric you'll apply in L4 when stages fail and you need to diagnose why.
+```markdown
+## 2026-04-21 · W3 coordination addition
 
-| Stage | Agent reads | Agent writes | Gate? | Remediation target |
-|---|---|---|---|---|
-| plan | bead description, `docs/PROJECT_MANIFEST.md` | `work-packages/<slug>.md` | No | (none — first stage; rejection means re-draft feature request and start over) |
-| architect | work package, `CLAUDE.md`, existing ADRs | `docs/adr/NNNN-<slug>.md` | No | (none — if ADR is weak, re-sling the Architect with a stronger bead description) |
-| design | work package, ADR, `CLAUDE.md` | `design/<slug>-spec.md` | No | (none — if spec is weak, re-sling the Designer) |
-| code | design spec, ADR, work package | `src/**`, tests | No | (covered by review's `on_reject`) |
-| review | code, tests, design spec | `review-reports/<slug>.md` | No | `code` (via `on_reject`) |
-| deploy | review report | `release-gates/<slug>.md`, tagged release | **Human** (`approve_deploy`) | (none — if deploy fails, investigate manually; rollback is outside the orchestrator) |
+Chose: <Option A / B / C / custom>
+Primitive: <mail / hook / bead-order / etc.>
+Rule committed at: <path to file you edited>
+Trigger/when it fires: <one sentence>
+Removal condition: <one sentence — what would make this rule unnecessary?>
+```
 
-If your row doesn't match this pattern for one of these stages, you've diverged — that's fine if you have a reason (write it in `DECISIONS.md`), but a divergence without a reason is usually a mistake.
+The removal condition keeps coordination from accreting forever. If you can't write one, treat that as a signal — maybe the rule is not load-bearing and you're adding it out of caution rather than need.
 
 ---
 
-## Workshop Activity — Part 2: Self-Review (~10 min)
+## Part 4: Verify the Rule Fires (~5 min)
 
-Re-read your `orchestrator.yaml` and answer three questions. Write the answers in a scratch file or your `DECISIONS.md` — they will inform L4.
+Every coordination rule you add has to be *observably firing* or it's not a coordination rule — it's a wish.
 
-### Question 1: Can any stage start before its declared dependencies finish?
+Pick the applicable verification for your option:
 
-Trace every `needs:` by hand. For each stage, list the files its `bead_template` references and confirm every one of those files is produced by a stage in its `needs` list (or by a prerequisite of a stage in its `needs` list).
+**For mail (Option A).** Create a dummy review report that mentions an ADR gap, run the Reviewer end-to-end on a test bead (or simulate by calling the mail command directly), then run `gc mail inbox --agent architect`. The mail should be there. Screenshot or paste the output into your W3 `DECISIONS.md` entry.
 
-For the Loyalty Points example:
+**For hooks (Option B).** Cold-start a new session; watch stdout for the doctor script output. If you want to prove the hook fires, deliberately break the check (rename `bd` temporarily) and confirm the session dies on boot with the doctor's error.
 
-| Stage | References | Comes from | Declared in `needs`? |
-|---|---|---|---|
-| plan | (none — trigger bead) | — | N/A |
-| architect | `{{plan.produced_path}}`, `CLAUDE.md` | plan stage, pre-existing | Yes |
-| design | `{{plan.produced_path}}`, `{{architect.produced_path}}` | plan (transitive), architect | Yes (architect transitively covers plan) |
-| code | `{{design.produced_path}}`, `{{architect.produced_path}}`, `{{plan.produced_path}}` | all three upstream | Yes (design transitively covers architect and plan) |
-| review | code produced artifact, `{{design.produced_path}}` | code, design | Yes (code transitively covers design) |
-| deploy | `{{review.produced_path}}` | review | Yes |
+**For orders (Option C).** Label a test bead with the trigger label; within one supervisor tick (~60s) the agent session should appear in `gc session list`. If it doesn't, check `gc order list` to confirm the order is registered, and re-run `gc doctor --fix`.
 
-If any row has "No" in the last column, your dependency graph is broken — fix the `needs:` entry before moving on.
+If the rule doesn't fire, the most common causes are (in order):
 
-### Question 2: Is every human gate justified?
+1. **Config file not picked up** — packs are re-read on `gc register` / `gc start`. Run `gc restart` after editing.
+2. **Typo in the condition string** — `bd ready --label=needs-spec` vs. `--label needs-spec` (spacing matters to the shell).
+3. **Pool not defined** — `pool = "spec-writer"` has to match a pool configured in `city.toml`.
+4. **Permissions deny the command in hooks** — Claude hooks run with the agent's permissions; your `scripts/doctor.sh` call must be allow-listed in `settings.json` under `permissions.allow`.
 
-Apply the "while I was asleep" test to each gate. If two of your five gates fail the test, they're theatrical, not protective — cut them.
+---
 
-In the Loyalty Points example there is exactly one gate (`approve_deploy`). Confirm:
-- Worst-case failure: unreviewed migration corrupts points data → not acceptable
-- Agent-level mitigation possible? No — agents cannot verify production DB state
-- Removal condition specified? Yes — see `docs/gates/approve_deploy.md`
+## Config Over Prompting — Applied to Coordination
 
-### Question 3: What happens if Stage B crashes mid-run?
+Every primitive you just learned except **nudges** is declarative:
 
-The orchestrator needs **at least one** of:
-- A named retry policy (e.g., "if the agent exits non-zero, re-sling the bead up to 3 times")
-- A state-reset step (e.g., "if the code stage fails, delete the partial artifact and re-create the bead")
-- An escalation rule (e.g., "if retries exhaust, change the bead assignee to the human operator and stop the pipeline")
+- Beads + labels live in the beads database; label transitions are one command.
+- Mail commands land in prompt templates, so they are committed config.
+- Hooks live in `settings.json` and `order.toml`; pure config.
+- Files are, by definition, committed artifacts.
 
-For W3, you only need to *identify* which of these you'll use. You'll implement it in L4. Write your choice in the `DECISIONS.md` scratch — e.g., "stage failures: re-sling up to 2 times; on the 3rd failure, assign the bead to me for manual review."
+Only **nudges** are ad-hoc — and that's the one primitive you should use with discipline. Every time you reach for a nudge, ask: *"If I had to do this again tomorrow, would I nudge again, or would I rather have a hook/mail/label do it for me?"* If the answer is the second one, the nudge is revealing a coordination gap. Close the gap via config.
 
-If any question yields "I hadn't thought about that," revise the config before moving on to L4.
-
-### Question 4 (bonus, no points): Does every stage's output have exactly one downstream consumer?
-
-This is a smell-check, not a hard rule. For each stage, ask: "which downstream stages read this artifact?" If a stage's artifact is read by zero downstream stages, the stage is dead weight — either the downstream stages need to add it to their `bead_template`, or the stage itself is unnecessary. If a stage's artifact is read by *many* downstream stages (more than two), you've created an implicit dependency fan-out that makes the pipeline brittle — changes to that artifact's format will ripple everywhere.
-
-In the Loyalty Points example:
-
-| Artifact | Read by | Smell |
-|---|---|---|
-| `work-packages/loyalty-points-system.md` | architect, designer (transitive via ADR), coder (transitive via spec) | Fine — direct readers are ~2, transitive reads are via intermediary artifacts |
-| `docs/adr/0001-loyalty-points-storage.md` | designer, coder | Fine |
-| `design/loyalty-points-spec.md` | coder, reviewer | Fine |
-| `review-reports/<slug>.md` | deployer, (and the `on_reject` loop back to coder) | Fine |
-| `release-gates/<slug>.md` | nobody downstream (end of pipeline) | Fine — terminal artifacts are expected |
-
-If your project's answer has a row with "nobody, but it's not terminal," cut that stage.
+This is the same Config Over Prompting discipline W2 introduced, specialized to inter-agent coordination. A factory that's coordinated via declared config + occasional nudges is operable overnight. A factory coordinated via nudges with occasional config is a workshop with extra steps.
 
 ---
 
@@ -737,109 +365,16 @@ If your project's answer has a row with "nobody, but it's not terminal," cut tha
 
 | Issue | Symptom | Fix |
 |---|---|---|
-| **Too many human gates** | Every stage requires approval; the factory can't run autonomously overnight | Apply the "while I was asleep" test. Cut any gate that doesn't answer "unacceptable" to the worst case. Aim for one gate, max two. |
-| **Missing dependency** | Coder starts before Designer finishes, produces code that doesn't match the spec | Explicit `needs:` in `orchestrator.yaml`. Trace Question 1 above. Check that every `{{upstream.produced_path}}` reference has a matching `needs:` entry. |
-| **No join point after a fan-out** | A downstream stage starts before all parallel stages finish, loses context from one of them | W3 intentionally keeps the pipeline linear. If you added parallel stages anyway, make the downstream stage's `needs:` list all parallel siblings, not just one. |
-| **Gate approver is a single person** | Pipeline blocks indefinitely when the approver is on vacation | Add a fallback approver to the `approvers:` list in `gates:`. Document the escalation path in the justification doc. |
-| **`bead_template` references a file the upstream stage doesn't produce** | Downstream agent reads a missing file, hallucinates its contents | Open each `bead_template`, list every path reference, cross-check against `produces:` globs upstream. Fix by adjusting either the template or the upstream produces. |
-| **No remediation loop on the review stage** | Reviewer rejects; the pipeline halts; you have to manually re-sling the Coder | Add `on_reject: code` to the `review` stage. The orchestrator auto-creates a new `code` bead with the review report attached. |
-| **Gate justification doc is empty / "just to be safe"** | Six months later, nobody remembers why this gate exists; it gets ignored and approved reflexively | Write the removal condition before you add the gate. If you can't write a removal condition, the gate is theater — remove it. |
-| **Orchestrator references an agent that isn't installed** | `gc orchestrate apply` errors with "unknown agent: reviewer" | Check `gc status` lists the agent. If not, you haven't installed that pack yet (Reviewer and Deployer come in L4). That's fine for W3 — the orchestrator is a design artifact at this point, not yet applied. |
-| **`produces:` glob is too loose** | Multiple files match; the orchestrator can't decide which is "the" artifact | Make the glob specific (e.g., `work-packages/loyalty-points-system.md` instead of `work-packages/*.md`) when you know the slug, or have the agent's prompt commit exactly one file per sling. |
-| **Gate approver = person who wrote the code** | You approve your own changes; the gate adds no safety | In the solo workshop case this is unavoidable — note it in the justification doc as "solo gate: approver and code author are the same for now; upgrade to two-approver when team grows." |
-| **`bead_template` interpolates a variable the orchestrator doesn't know** | Bead gets created with literal `{{foo.produced_path}}` in the description; agent sees the placeholder and may treat it as literal text | Valid variables are: `{{feature_title}}`, `{{feature_description}}`, and `{{<stage_name>.produced_path}}` where `<stage_name>` is a stage declared earlier in the pipeline. Nothing else is interpolated. Typos here fail silently at apply time. |
-| **Pipeline kicks off on every bead, including stale ones** | Old closed feature requests get re-run weekly | Constrain `trigger.bead_label` narrowly (e.g., `factory-intake` rather than a broad `bug`). Also ensure your issue-tracker sync order only labels *new* items, not historical ones — check the sync order config. |
-| **`needs:` list references a stage that doesn't exist** | `gc orchestrate apply` errors with "unknown stage: desgin" (typo of `design`) | The orchestrator validates stage names at apply time. Fix the typo. Prefer copy/paste over retyping stage names. |
-| **Remediation loop creates an infinite cycle** | `on_reject: code` → Coder fails → Reviewer rejects again → Coder again, forever | Add a retry budget in the `on_reject` target. Easiest pattern: once a stage's bead has been re-created N times for the same feature, stop and assign to a human. You'll implement this in L4; in W3 just note which stage has the loop so it's easy to find. |
-| **YAML treats `no` as boolean false** | A stage named `no-op` or a bead_template containing `no` on its own line becomes `false`, silently | Always quote stage names and free-form strings. Use `name: "plan"` with quotes if you want to be defensive. The `|` block-scalar form (used for `bead_template:`) avoids this for multi-line strings. |
-
----
-
-## Connection to Gas City
-
-Your `orchestrator.yaml` isn't aspirational — every field in it compiles to Gas City primitives that ship today:
-
-| Orchestrator field | Gas City primitive | File or command |
-|---|---|---|
-| `agent: planner` | `[[agent]]` block in a pack | [`packs/planner/pack.toml`](../../../packs/planner/pack.toml) — the `name = "planner"` line |
-| `needs: [plan]` | `bd create --depends-on` | Applied at runtime by the orchestrator when it creates the stage's bead |
-| `gate: human` + `approvers:` | `bd create --requires-approval --assignee` | Applied at runtime; the bead enters `needs-approval` state |
-| `on_reject: code` | Auto-creation of a new bead for the named stage when a verdict bead closes with `request_changes` | Applied at runtime by the orchestrator loop |
-| `trigger.bead_label` | Label filter on incoming beads (e.g., from `bd jira sync`) | Matches the label set by issue-tracker sync orders |
-| `bead_template` | The `--description` passed to `bd create` | Interpolated per-stage when the upstream bead closes |
-| `produces: *.md` | Artifact verification after the bead closes | The orchestrator checks `git log` for files matching the glob before marking the stage complete |
-
-**Where to look in the repo:**
-
-- [`packs/planner/pack.toml`](../../../packs/planner/pack.toml), [`packs/architect/pack.toml`](../../../packs/architect/pack.toml), [`packs/designer/pack.toml`](../../../packs/designer/pack.toml), [`packs/coder/pack.toml`](../../../packs/coder/pack.toml), [`packs/reviewer/pack.toml`](../../../packs/reviewer/pack.toml), [`packs/deployer/pack.toml`](../../../packs/deployer/pack.toml) — each defines one of the six agents referenced in your pipeline. Notice the `provider = "claude"` convention on `[[agent]]` blocks; other providers are supported, and the orchestrator is runner-agnostic.
-- [`packs/workshop/orders/sync-jira/order.toml`](../../../packs/workshop/orders/sync-jira/order.toml) — the shape of a declarative periodic trigger. Your `trigger.bead_label` works the same way: it watches for beads and kicks off the pipeline.
-- [`packs/workshop/orders/sync-linear/`](../../../packs/workshop/orders/sync-linear/), [`packs/workshop/orders/sync-github/`](../../../packs/workshop/orders/sync-github/), [`packs/workshop/orders/sync-gitlab/`](../../../packs/workshop/orders/sync-gitlab/) — same pattern, different issue trackers. Whichever tracker you use, feature requests enter the factory via one of these orders.
-- [`packs/workshop/pack.toml`](../../../packs/workshop/pack.toml) — the workshop pack's doctor checks. `gc doctor` runs these before you start; a broken issue-tracker connection is caught here, not at orchestration time.
-
-**The declarative form is the source of truth.** Commands like `gc orchestrate apply` just *apply* the YAML — they don't add behavior that isn't in the file. If a stage doesn't run, the YAML is wrong (or missing).
-
-> **Inline Insight: Config Discipline Extends to Orchestration**
->
-> L1 taught you to update `CLAUDE.md` instead of re-prompting. L2 taught you to update the pack's prompt file instead of editing the artifact directly. W3's rule is the same shape: **if the factory's coordination is wrong, update `orchestrator.yaml` and re-apply. Never hand-edit bead states or hand-sling agents out of order.** The moment you start manually coordinating, you've stopped running a factory and started running a workshop by hand — which defeats the whole point.
-
----
-
-## Recommended Prompts
-
-Use these with Claude Code if you want to accelerate the design work. They're not required — the manual path (read the concepts, write the YAML, self-review) works too.
-
-### When Designing Coordination
-
-```
-I'm building a software factory with 6 agents in Gas City: Planner,
-Architect, Designer, Coder, Reviewer, Deployer.
-
-My feature: [paste feature description]
-
-Using the three coordination concepts (sequential chaining, human
-gates, cross-agent state via beads/artifacts), help me determine:
-
-1. Which stages must run sequentially (Stage B reads Stage A's artifact)
-2. Where human gates belong (apply the "while I was asleep" test)
-3. What artifact flows through each handoff (be specific: filenames)
-
-For each human gate, write a one-sentence worst-case scenario that
-justifies the gate and a one-sentence condition under which the gate
-could be safely removed.
-```
-
-### When Writing orchestrator.yaml
-
-```
-I need an orchestrator.yaml for Gas City.
-
-My coordination decisions:
-- Stages (in order): plan, architect, design, code, review, deploy
-- Human gates: [list stages with gates, one per line]
-- Remediation: review rejects loop back to [stage name]
-
-Generate a complete orchestrator.yaml using Gas City's schema:
-- pipeline.stages[] with name, agent, needs, produces, bead_template
-- gates[] with name, required_for, approvers, justification_doc
-- on_reject links where appropriate
-
-Reference artifact paths like work-packages/<slug>.md, docs/adr/*.md,
-design/*-spec.md, src/**, review-reports/*.md, release-gates/*.md.
-
-Do not invent fields not used in the curriculum's examples.
-```
-
----
-
-## Concept Check (before moving to L4)
-
-> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
-
-- The three coordination patterns (sequential, parallel fan-out, human gate) and when each is the right choice.
-- Why the human gate is framed with a *removal condition*, not just a location. (Gates are temporary scaffolding; without an exit condition, they calcify.)
-- How the orchestrator knows when a stage is "done." (It reads the produced artifact path — artifacts are the contract, not chat messages.)
-- Why `on_reject` loops back to a specific stage instead of starting over. (Re-running the Planner on a Reviewer rejection wastes the work already produced.)
-- Why the orchestrator lives in a yaml file and not a script. (Declarative config is inspectable and versionable; imperative code rots.)
+| **Mail stuck in inbox** | `gc mail inbox` shows messages but the recipient never acts on them | Recipient's prompt template doesn't include `gc prime` on startup (or `gc mail inbox` explicitly). Edit the pack's prompt, not the current session. |
+| **Hook fires on every tool call** | `SessionStart` hook actually runs on something broader | Check the `matcher` regex; `.*` is "all". Narrow it to the specific event if you only want certain triggers. |
+| **Order never wakes the agent** | Bead is labelled, minutes pass, no session | (1) `gc order list` — is your order registered? (2) `check` condition — run it manually at the shell, does it succeed? (3) `pool` — does it match a pool in `city.toml`? |
+| **Nudge ignored** | Message sent, session shows no sign of receiving it | Session wasn't running, or the session was mid-tool-call and hadn't returned to the model yet. Confirm with `gc session list` (active column) before nudging. |
+| **Agent overwrites a file another agent was editing** | Two sessions race on `docs/PROJECT_MANIFEST.md` | Files aren't protected by the primitives — add a bead `blocks` edge (`bd dep add child blocks parent`) so one agent can't run while another holds the file. |
+| **Coordination rule works but doesn't survive reinstall** | Works in this session, missing after `curriculum-agent delete && install` | You edited a live-session overlay, not the pack source. Always edit under `packs/<name>/...`, not under `~/Projects/factory/.../packs/actual/<name>/...` which is a copy. |
+| **Mail subject collisions** | Two agents both send `-s "review found issue"` and recipient can't tell them apart | Subject convention: `<scope>:<action>` — e.g. `adr:revisit-needed` or `coder:ac-unclear`. Namespace by subsystem, not by sender (sender is in metadata). |
+| **`session_live` hook runs on every keystroke** | Hook is too chatty | `session_live` fires on session activity; use it sparingly. Prefer `session_start` for one-shot boot checks and `session_stop` for end-of-work actions like `bd dolt push`. |
+| **Nudge appears to do nothing, then agent changes behavior 10 min later** | Agent was mid-turn; the nudge landed in the next conversation turn | Normal. Nudges aren't interrupts; they're messages that land at the next turn boundary. |
+| **Hook writes to stdout, no one reads it** | Hook is firing but you can't see it | Redirect hook output to a file (e.g., `bash scripts/doctor.sh 2>&1 >> .gc/logs/doctor.log`) and `tail -f` it during development. |
 
 ---
 
@@ -847,17 +382,14 @@ Do not invent fields not used in the curriculum's examples.
 
 Before leaving this workshop, verify all of these:
 
-- [ ] `orchestrator.yaml` exists in your repo root with all 6 stages
-- [ ] Every stage has `agent`, `produces`, and (except `plan`) `needs`
-- [ ] At least one stage has `gate: human` with matching `approvers`
-- [ ] Every human gate has a justification doc at `docs/gates/<gate-name>.md` with a worst-case scenario AND a removal condition
-- [ ] At least one stage has `on_reject:` pointing to a prior stage (the remediation loop)
-- [ ] Self-review Question 1 (dependencies) traced by hand — no "No" rows
-- [ ] Self-review Question 2 (gate justification) — every gate survives the "while I was asleep" test
-- [ ] Self-review Question 3 (crash recovery) — named strategy written down
-- [ ] `orchestrator.yaml` + justification doc(s) committed on branch `w3-orchestrator`
+- [ ] You can name all five primitives (beads, mail, nudges, hooks, files) and state when you'd reach for each.
+- [ ] You picked **one** primitive that wasn't previously active in your factory and wired it in via config (not prompt corrections).
+- [ ] The config change is committed in the pack source — not in the live session copy.
+- [ ] You observed the rule firing: mail delivered, hook ran, order woke the agent, or the new file was read by its consumer.
+- [ ] `DECISIONS.md` has a W3 entry naming the rule, its trigger, and a removal condition.
+- [ ] `git status` is clean in the pack repo — your change is committed.
 
-**W3 blocks L4.** L4 is where you install the Reviewer and Deployer packs and run `gc orchestrate apply orchestrator.yaml` against the factory you've been building. Without a committed `orchestrator.yaml`, L4's first step fails.
+**W3 blocks L4.** L4 wires in the Reviewer and Deployer, and one of the options you may choose in L4 is to build on the coordination primitive you introduced here (e.g., extend Option A's escalation-mail to Deployer → Reviewer for deploy failures).
 
 ---
 
@@ -866,37 +398,46 @@ Before leaving this workshop, verify all of these:
 Every command you'd run during (or immediately after) this workshop:
 
 ```bash
-# PART 0 — Read shipped primitives (no commands; just read files)
-# - packs/workshop/orders/sync-jira/order.toml
-# - packs/planner/pack.toml (and siblings)
+# PART 0 — Read labeled-beads protocol
+# Open software-factory/LABELED_BEADS.md and skim
 
-# PART 1 — Draft orchestrator.yaml
-cd ~/path/to/your-repo
-git checkout -b w3-orchestrator
-# (edit orchestrator.yaml — follow the Loyalty Points example)
-# (edit docs/gates/approve_deploy.md — write the justification)
+# PART 1 — Inspect the five primitives in your factory
+bd label list-all                                # labels currently in use
+gc mail inbox                                    # your mayor inbox
+gc session list                                  # live sessions (for nudges)
+gc order list                                    # declarative triggers
+ls docs/decisions/ docs/plans/ docs/designs/     # file artifacts
 
-# Verify YAML parses (optional but recommended)
-python3 -c "import yaml; yaml.safe_load(open('orchestrator.yaml'))" && echo OK
+# PART 3 — Hands-on: pick one option
+
+# Option A: mail
+# (edit packs/reviewer/prompts/reviewer.md.tmpl)
+gc mail send architect -s "smoke" -m "test"
+gc mail inbox --agent architect
+
+# Option B: hooks
+# (edit packs/coder/overlays/default/.claude/settings.json)
+# (create scripts/doctor.sh)
+gc restart                                       # re-read settings
+gc session new coder
+gc session list
+
+# Option C: orders
+# (create packs/<agent>/formulas/orders/<agent>-intake/order.toml)
+gc restart
+bd label add <bead-id> needs-spec
+sleep 90 && gc session list | grep spec-writer
+
+# PART 4 — Verify firing
+gc order list                                    # is your order registered?
+tail -f .gc/logs/doctor.log                      # for hook-based rules
+gc mail inbox --agent <recipient>                # for mail-based rules
 
 # Commit
-git add orchestrator.yaml docs/gates/approve_deploy.md
-git commit -m "feat(orchestrator): draft feature-pipeline with deploy gate"
-
-# PART 2 — Self-review (no commands; trace the three questions by hand)
-
-# Verify readiness for L4
-ls orchestrator.yaml                                    # exists
-ls docs/gates/                                          # has at least one justification doc
-grep -c "^    - name:" orchestrator.yaml                # 6 stages
-grep -c "gate: human" orchestrator.yaml                 # at least 1
-
-# Push branch so L4 can resume from it
-git push -u origin w3-orchestrator
-
-# (Deferred until L4, for reference — do NOT run now)
-# gc orchestrate apply orchestrator.yaml
-# gc orchestrate status
+cd ~/Projects/factory/<slug>/<alias>-gc-factory/packs/actual/
+git add <path to edited pack>
+git commit -m "W3: add <coordination primitive> for <scenario>"
+git push
 ```
 
 ---
@@ -905,13 +446,9 @@ git push -u origin w3-orchestrator
 
 | Component | File | What It Does |
 |---|---|---|
-| Orchestrator spec | `orchestrator.yaml` | Declarative coordination rules for the whole factory: sequential chain, human gate, remediation loop |
-| Gate justification | `docs/gates/approve_deploy.md` | Receipt for the single human gate: worst-case risk + removal condition + approver list |
-| Self-review notes | `DECISIONS.md` (W3 entry) | Answers to the three self-review questions, informing L4 |
-| Branch | `w3-orchestrator` | Committed, pushed, ready for L4 to resume from |
-| Stage count | 6 | plan, architect, design, code, review, deploy |
-| Gate count | 1 (`approve_deploy`) | Before Deployer — schema migration irreversibility |
-| Remediation loop count | 1 (`review` → `code` via `on_reject`) | Reviewer rejections auto-create new Coder bead |
+| Coordination rule | `packs/<agent>/{prompts,overlays,formulas/orders}/...` | One new primitive wired into your factory |
+| Decision record | `DECISIONS.md` (W3 entry) | Rule, trigger, removal condition — future-you will thank you |
+| Primitive count used in your factory | ≥ 2 (was: beads + files; now: + one of mail/nudges/hooks, or a richer use of beads) | The factory now exercises multiple coordination layers |
 
 ---
 
@@ -919,13 +456,9 @@ git push -u origin w3-orchestrator
 
 In **L4**, you'll:
 
-- Install the Reviewer and Deployer packs (`packs/reviewer`, `packs/deployer`) so all six agents referenced in your `orchestrator.yaml` are live
-- Run `gc orchestrate apply orchestrator.yaml` to register the pipeline with Gas City
-- Trigger the full pipeline end-to-end with a single `bd create --label feature-request` call — the orchestrator will chain Planner through Deployer automatically, pausing only at your human gate
-- Observe the `on_reject` remediation loop in action when the Reviewer rejects a deliberately-broken implementation
-- Implement the crash-recovery strategy you chose in Self-Review Question 3
-- Compare the real runtime behavior against your `orchestrator.yaml` — any mismatch is either a config bug (update the YAML) or an orchestrator bug (open an issue upstream in Gas City)
+- Install the Reviewer and Deployer packs, completing the 6-agent pipeline
+- Watch your factory run the full Planner → … → Deployer path on a single feature
+- If you chose Option A today, see your Reviewer → Architect escalation fire on a real review finding
+- Optionally add a second coordination rule (the natural pairing for Option B is a `session_stop` hook that runs `bd dolt push`; for Option A, a symmetric Deployer → Reviewer mail on deploy-gate failure)
 
-**Bring to L4:** your committed `orchestrator.yaml`, the gate justification doc, and the three self-review answers. Between W3 and L4, revisit the "while I was asleep" test every time you add a stage or a gate — it's the single question that separates a real factory from a ceremony.
-
-Also in **W4**, you'll take what you've built here and add *feedback rules* to close the loop: when a deployed feature underperforms or produces incidents, how does that signal make it back into the pipeline to change future coordination? W3's `on_reject` is the simplest feedback rule; W4 generalizes it.
+**Bring to L4:** the coordination rule you committed today, your `DECISIONS.md` entry, and — most importantly — the habit of asking "is this a nudge or a config change?" before every inter-agent correction you make. That question is the difference between a factory you operate and one that operates itself.
