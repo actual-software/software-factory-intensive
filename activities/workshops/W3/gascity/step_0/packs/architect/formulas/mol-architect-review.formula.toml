@@ -298,10 +298,8 @@ bd close $ROOT_ID --reason "architecture complete, see docs/architecture/{{topic
 
 **3. The pm picks up work automatically:**
 ```bash
-# The needs-plan label triggers pm-intake order automatically.
-# Do NOT gc mail send — it creates duplicate sessions.
-# Wake any downstream agents whose beads just unblocked.
-sh packs/actual/all/scripts/wake-downstream.sh &
+# Mail the pm so it wakes and picks up the needs-plan beads.
+gc mail send pm "Handoff: rule {{topic}} published, child beads labelled needs-plan"
 ```
 
 **Exit criteria:** Root bead closed, at least one child bead created

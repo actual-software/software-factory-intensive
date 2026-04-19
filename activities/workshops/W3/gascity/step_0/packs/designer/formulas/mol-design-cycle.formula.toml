@@ -192,12 +192,8 @@ bd update $ROOT_ID \\
     --notes "<existing notes>
 design_artifact: docs/designs/{{slug}}.md"
 
-# The needs-plan label triggers pm-intake order automatically.
-# The pm will decompose the completed UX design into
-# implementation beads labelled ready-to-build.
-# Do NOT gc mail send — it creates duplicate sessions.
-# Wake any downstream agents whose beads just unblocked.
-sh packs/actual/all/scripts/wake-downstream.sh &
+# Mail the pm so it wakes and decomposes the completed design.
+gc mail send pm "Handoff: $ROOT_ID design complete at docs/designs/{{slug}}.md"
 ```
 
 **Exit criteria:** Bead relabelled `needs-plan`; pm picks up work via intake order.

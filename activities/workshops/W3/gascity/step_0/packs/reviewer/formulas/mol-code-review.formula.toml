@@ -162,10 +162,8 @@ bd update $ROOT_ID \\
     --notes "<existing notes>
 verdict: pass"
 
-# The ready-to-ship label triggers release-gate-intake order automatically.
-# Do NOT gc mail send — it creates duplicate sessions.
-# Wake downstream agents.
-sh packs/actual/all/scripts/wake-downstream.sh &
+# Mail the release-gate so it wakes and picks up the ready-to-ship bead.
+gc mail send release-gate "Handoff: $ROOT_ID passed review"
 ```
 
 **2b. On request-changes:**
@@ -180,10 +178,8 @@ bd update $ROOT_ID \\
 verdict: request-changes
 review_round: $(( $(bd show $ROOT_ID --json | jq -r '.notes' | grep -c '^review_round:' || echo 0) + 1 ))"
 
-# The ready-to-build label triggers builder-intake order automatically.
-# Do NOT gc mail send — it creates duplicate sessions.
-# Wake downstream agents.
-sh packs/actual/all/scripts/wake-downstream.sh &
+# Mail the builder so it wakes and picks up the request-changes bead.
+gc mail send builder "Review requested changes on $ROOT_ID"
 ```
 
 **Exit criteria:** Verdict recorded; bead relabelled to the right

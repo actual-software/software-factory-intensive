@@ -246,12 +246,16 @@ bd close $ROOT_ID --reason "plan complete: docs/plans/{{slug}}.md"
 **3. Downstream agents pick up work automatically via labels:**
 ```bash
 # The labels trigger the corresponding intake orders automatically:
-#   needs-design   → designer-intake
-#   needs-tests    → validator-intake
-#   ready-to-build → builder-intake
-# Do NOT gc mail send — it creates duplicate sessions.
-# Wake any downstream agents whose beads just unblocked.
-sh packs/actual/all/scripts/wake-downstream.sh &
+# Mail downstream agents that received work:
+if bd list --label needs-design --label plan:{{slug}} --limit=1 | grep -q .; then
+    gc mail send designer "Handoff: {{slug}} has design work"
+fi
+if bd list --label needs-tests --label plan:{{slug}} --limit=1 | grep -q .; then
+    gc mail send validator "Handoff: {{slug}} has test work"
+fi
+if bd list --label ready-to-build --label plan:{{slug}} --limit=1 | grep -q .; then
+    gc mail send builder "Handoff: {{slug}} has build work"
+fi
 ```
 
 **Exit criteria:** Root bead closed; plan file committed (if

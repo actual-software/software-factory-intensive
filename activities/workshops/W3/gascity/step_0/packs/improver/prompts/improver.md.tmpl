@@ -76,9 +76,11 @@ agent sessions). You MUST run this command, not skip it.
 ## Startup
 
 1. `gc prime`
-2. Check your hook for work — if the hook injected a `<work-items>`
+2. Check mail: `gc mail inbox` — if you have handoff notifications,
+   find the referenced work beads and process them.
+3. Check your hook for work — if the hook injected a `<work-items>`
    block, that IS your assignment. **YOU RUN IT.** No confirmation.
-3. If no hook injection, find work manually:
+4. If no hook injection, find work manually:
    ```bash
    # Tier 1: crash recovery — resume in-progress work
    bd list --assignee="$GC_SESSION_NAME" --status=in_progress

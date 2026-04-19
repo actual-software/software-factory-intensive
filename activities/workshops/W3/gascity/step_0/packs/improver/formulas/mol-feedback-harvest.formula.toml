@@ -205,35 +205,44 @@ id = "file-beads"
 title = "Create the beads, close the source needs-improve beads, mail"
 needs = ["actual-adr-sync"]
 description = """
-**1. Create each drafted bead and route to the right agent:**
+**1. Create each drafted bead with a routing label:**
 ```bash
 while read -r row; do
-    # Parse the draft row into title, target_agent, severity, body.
+    # Parse the draft row into title, upstream_label, severity, body.
     NEW_ID=$(bd create \\
         --title "<title>" \\
+        --label "<upstream-label>" \\
         --label "<severity>" \\
         --label "source:actual-improver" \\
         --notes "<body>" \\
         --json | jq -r '.id')
-    # Route to the right downstream agent via gc sling
-    gc sling <rig>/<target_agent> "$NEW_ID"
-    echo "filed and routed: $NEW_ID → <target_agent>"
+    echo "filed: $NEW_ID"
 done
 ```
 
-Agent routing map:
-- systemic/architectural → `gc sling <rig>/architect $NEW_ID`
-- new feature work → `gc sling <rig>/pm $NEW_ID`
-- UX paper cuts → `gc sling <rig>/designer $NEW_ID`
-- test gaps → `gc sling <rig>/validator $NEW_ID`
-- direct fixes → `gc sling <rig>/builder $NEW_ID`
-- audit concerns → `gc sling <rig>/reviewer $NEW_ID`
+Label routing map:
+- systemic/architectural → `--label needs-architecture`
+- new feature work → `--label needs-plan`
+- UX paper cuts → `--label needs-design`
+- test gaps → `--label needs-tests`
+- direct fixes → `--label ready-to-build`
+- audit concerns → `--label needs-review`
 
 **2. Close any source beads** that motivated this cycle:
 ```bash
 bd close <source-bead-id> --reason "feedback harvested $(date -u +%Y-%m-%d)"
 ```
 
-**Exit criteria:** Drafted beads exist and routed via gc sling;
-source beads closed.
+**3. Mail each downstream agent that received new work:**
+```bash
+for agent in architect pm designer validator builder reviewer; do
+    count=$(bd list --label=source:actual-improver --label=needs-$agent --limit=50 --json 2>/dev/null | jq 'length')
+    if [ "$count" -gt 0 ] 2>/dev/null; then
+        gc mail send "$agent" "Improver filed $count new $agent item(s) from today's harvest"
+    fi
+done
+```
+
+**Exit criteria:** Drafted beads exist with routing labels;
+source beads closed; downstream agents notified via mail.
 """
