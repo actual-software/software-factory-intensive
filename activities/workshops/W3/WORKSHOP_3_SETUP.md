@@ -40,8 +40,8 @@ Template [1]: 3
 
 ```bash
 pushd ~/Projects/factory/workshop_w3/w3-gc-factory
-cp ~/Projects/actual-software/software-factory-intensive/activites/workshops/W3/gascity/step_0/packs/city.toml ~/Projects/factory/workshop_w3/w3-gc-factory
-rsync -av ~/Projects/actual-software/software-factory-intensive/activites/workshops/W3/gascity/step_0/packs/ ~/Projects/factory/workshop_w3/w3-gc-factory/packs/actual/
+cp ~/Projects/actual-software/software-factory-intensive/activities/workshops/W3/gascity/step_0/packs/city.toml ~/Projects/factory/workshop_w3/w3-gc-factory
+rsync -av ~/Projects/actual-software/software-factory-intensive/activities/workshops/W3/gascity/step_0/packs/ ~/Projects/factory/workshop_w3/w3-gc-factory/packs/actual/
 ```
 
 ##### Register City

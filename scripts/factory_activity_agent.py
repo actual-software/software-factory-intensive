@@ -673,6 +673,12 @@ def install(activity, dry_run=False):
     run(["gc", "start"], cwd=str(factory_dir), dry_run=dry_run, check=False)
     run(["gc", "restart"], cwd=str(factory_dir), dry_run=dry_run, check=False)
 
+    # --- Step 5b: Sweep stale session beads ---
+    # After reinstall, orphaned session beads from a previous install
+    # block the reconciler from creating fresh sessions.
+    print("\n##### Sweep stale sessions")
+    close_stale_sessions(factory_dir, dry_run=dry_run)
+
     # --- Step 6: Patch convoy ---
     # Use gc bd to ensure gc manages the Dolt lifecycle (no rogue servers).
     # Must run after gc start so the Dolt server is available.
@@ -738,11 +744,47 @@ def install(activity, dry_run=False):
     )
 
 
+def close_stale_sessions(factory_dir, dry_run=False):
+    """Close all open session beads in the factory database.
+
+    After a delete/reinstall cycle, orphaned session beads block the
+    reconciler from creating fresh sessions.  Closing them lets the
+    reconciler spin up new ones on the next tick.
+    """
+    if dry_run:
+        print("[dry-run] Close all open session beads in factory database")
+        return
+    try:
+        result = subprocess.run(
+            ["gc", "bd", "list", "--type=session", "--status=open", "--json"],
+            cwd=str(factory_dir), capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode != 0 or not result.stdout.strip():
+            return
+        import json
+        beads = json.loads(result.stdout)
+        for bead in beads:
+            bid = bead.get("id", "")
+            if bid:
+                subprocess.run(
+                    ["gc", "bd", "close", bid, "--reason", "factory reinstall cleanup"],
+                    cwd=str(factory_dir), capture_output=True, text=True, timeout=10,
+                )
+                print(f"  Closed stale session {bid}")
+    except (subprocess.TimeoutExpired, json.JSONDecodeError, Exception) as e:
+        print(f"  Warning: could not sweep stale sessions: {e}")
+
+
 def delete(activity, dry_run=False):
     _, slug, _, _, factory_dir, _ = resolve_paths(activity)
     slug_dir = FACTORY_ROOT / slug
 
     print(f"\n##### Deleting activity {activity}")
+
+    # Close stale session beads before stopping — prevents orphaned
+    # sessions from blocking the reconciler on reinstall.
+    if factory_dir.exists() or dry_run:
+        close_stale_sessions(factory_dir, dry_run=dry_run)
 
     # Stop factory
     if factory_dir.exists() or dry_run:
