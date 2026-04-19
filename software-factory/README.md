@@ -37,6 +37,10 @@ You should bring a real software project to build your factory around. Before st
 
 Refer to the Gas City [Installation Guide](https://github.com/gastownhall/gascity/blob/main/docs/getting-started/installation.md) for the full dependency list and platform-specific notes.
 
+### 4. Python Installation
+
+[Python 3.8+](https://www.python.org/downloads/) is required to run the curriculum-agent. This makes the curriculum setup and teardown much easier.
+
 ---
 
 ## Why Gas City
@@ -104,15 +108,17 @@ software-factory-intensive/
 ├── curriculum-agent/                # Curriculum-agent skill to manage the curriculum
 ├── images/                          # Images for the curriculum
 ├── packs/                           # Packs containing agents and configurations for the curriculum
-│   ├── README.md                    # Quick reference for the packs
+│   ├── all/                         # Composite 6-agent factory
 │   ├── architect/                   # Added in L2
 │   ├── coder/                       # Added in L3
+│   ├── deployer/                    # Added in L4
 │   ├── designer/                    # Added in L3
+│   ├── fired-up-pizza/              # Demonstrated in W1
+│   ├── improver/                    # Optional 7th — introduced in W4
 │   ├── planner/                     # Added in L2
 │   ├── reviewer/                    # Added in L4
-│   ├── deployer/                    # Added in L4
-│   ├── improver/                    # Optional 7th — introduced in W4
-│   └── all/                         # Composition pack bundling the 6 essentials
+│   ├── workshop/                    # [Experimental] Plug-and-play integrations pack (Jira, Linear, GitHub, etc.)
+│   └── README.md
 ├── reference-project/               # Pizza restaurant web app with complete 6-agent factory 
 ├── scripts/                         # Scripts for the curriculum
 ├── PROJECT_MANIFEST_TEMPLATE.md     # Template for the project manifest (agent-generated in orientation)
@@ -129,17 +135,18 @@ software-factory-intensive/
 
 Every session ships a ready-to-use reference pack under `../packs/<agent>/`. The curriculum is designed so that **skipping a session does not break the pipeline** — you just include the shipped pack as-is instead of your own customised copy.
 
-Within a session you can customise a pack two ways:
+Within a session you can customise a pack with the following steps:
 
-1. **Copy it** — `cp -r ../../packs/<agent> packs/<agent>/` inside the session's activity folder, edit your copy, and point `../../my-factory/city.toml`'s `includes` at `../activities/<session>/packs/<agent>` instead of the shipped `../packs/<agent>`.
-2. **Leave it alone** — include the shipped pack directly and focus on the workshop's conceptual deliverables.
+1. **Copy it** — `cp -r ../../packs/<agent> packs/<agent>/` inside the session's activity folder
+2. **Edit your copy** — edit the prompt or formula to suit your project
+3. **Point `../../my-factory/city.toml`'s `includes`** at `../activities/<session>/packs/<agent>` instead of the shipped `../packs/<agent>`
 
-Either way, at the end of the session you **update `../my-factory/city.toml`** to reflect which packs the factory should run. Each session's README tells you the exact lines.
+At the end of the session you **update `../my-factory/city.toml`** to have your factory running with your customised packs. Each session's README tells you the exact lines.
 
 ### Typical session flow
 
 1. Open `../curriculum/<session>/README.md` and read the walkthrough.
-2. Work inside this session's folder (`activities/<session>/`). Most sessions ask for one or two markdown deliverables (a workflow card, a factory-wiring doc, an orchestrator.yaml, a feedback-loop note).
+2. Work inside this session's folder (`activities/<session>/`). Most sessions will modify some portion of your factory.
 3. For labs that deploy a new agent: copy the shipped pack into `activities/<session>/packs/<agent>/`, customise, and wire it into `../my-factory/city.toml`. (If you skip customisation, just wire the shipped `../packs/<agent>` path directly.)
 4. Run `gc service restart && gc doctor` from `../my-factory/` to reload the city.
 
