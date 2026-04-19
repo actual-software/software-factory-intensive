@@ -28,13 +28,13 @@ cp -r skills/factory-activity-agent ~/.codex/skills/factory-activity-agent
 #### Setup Project Manafest
 
 ```bash
-mkdir -p ~/Projects/factory/workshop_w3/w3-project/docs/
-cp ~/Projects/actual-software/software-factory-intensive/activities/workshops/W3/docs/PROJECT_MANIFEST.md ~/Projects/factory/workshop_w3/w3-project/docs/
-ls -al ~/Projects/factory/workshop_w3/w3-project/docs/
+mkdir -p ~/Projects/factory/workshop_w1/w1-project/docs/
+cp ~/Projects/actual-software/software-factory-intensive/activities/workshops/W3/docs/PROJECT_MANIFEST.md ~/Projects/factory/workshop_w1/w1-project/docs/
+ls -al ~/Projects/factory/workshop_w1/w1-project/docs/
 ```
 
 #### Send Task to Factory
 
 ```bash
-gc sling w3-project/planner "Create SPA nextjs for Fired Up Pizza an online pizza ordering application where customers can build custom pizzas, select a pickup or delivery time, and place orders — all within a single-page experience. No payment processing is required; all transactions are handled on-site at pickup/delivery."
+gc sling w1-project/planner "Create SPA nextjs for Fired Up Pizza an online pizza ordering application where customers can build custom pizzas, select a pickup or delivery time, and place orders — all within a single-page experience. No payment processing is required; all transactions are handled on-site at pickup/delivery."
 ```
