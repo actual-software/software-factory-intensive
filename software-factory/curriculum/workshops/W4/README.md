@@ -154,7 +154,7 @@ If phrasing is inconsistent or severity is absent, that's your first feedback ru
 
 ### Step 3: Skim the Factory Run Report Format
 
-You'll meet this file properly in C1, but the concept matters here: after every full factory run, the human writes (or generates) a short summary of what happened — which gates fired, which beads reopened, which findings recurred. Feedback rules read from those summaries too. For now, the artifacts in `review-reports/` and `release-gates/` are your Run Reports.
+You'll meet this file properly in L5, but the concept matters here: after every full factory run, the human writes (or generates) a short summary of what happened — which gates fired, which beads reopened, which findings recurred. Feedback rules read from those summaries too. For now, the artifacts in `review-reports/` and `release-gates/` are your Run Reports.
 
 **What's happening here:** A feedback rule is a deterministic response to a signal that already exists in the repo. If the signal isn't written down as a committed artifact, you can't write a rule against it. This is why L4's output (structured review reports, structured gate files) is the prerequisite for W4.
 
@@ -544,7 +544,7 @@ POST /api/orders returns 500 when cart total exceeds 20000 cents.
 3. Observe 500 response
 
 ## Trace
-grafana-prod trace abc123 (link to observability)
+grafana-prod trace abL523 (link to observability)
 
 ## User Impact
 One user report so far, but any high-ticket order will hit this.
@@ -661,7 +661,7 @@ git log --oneline --grep="feedback" -- feedback-loops/ packs/ docs/PROJECT_MANIF
 You should see at least four commits:
 
 ```
-abc1234 docs(feedback): mark reactive and aggregate rules as encoded
+abL5234 docs(feedback): mark reactive and aggregate rules as encoded
 def5678 feedback(external): record bug-to-bead external loop for order 500s
 9012345 feedback(manifest): add test timeout policy from aggregated gate failures
 fedcba9 feedback(coder): encode async error-handling rule from review pattern
@@ -839,7 +839,7 @@ Note: we never auto-commit config changes from a cron-driven order. The order's 
 
 ---
 
-## Concept Check (before moving to C1)
+## Concept Check (before moving to L5)
 
 > **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
 
@@ -862,19 +862,19 @@ Before leaving this workshop, verify all of these:
 - [ ] Commit log shows `feedback(...)` commits for every rule file and every applied change
 - [ ] A re-sling of an affected agent (Coder in the running example) produces output reflecting the encoded rule
 
-**W4 feeds C1.** The feedback rules you design here will run in the background during C1's end-to-end factory run. Any rule that fires during C1 will produce a visible diff in the project config, and you'll audit those diffs as part of the C1 retrospective. Without at least one encoded rule, C1 has nothing to audit.
+**W4 feeds L5.** The feedback rules you design here will run in the background during L5's end-to-end factory run. Any rule that fires during L5 will produce a visible diff in the project config, and you'll audit those diffs as part of the L5 retrospective. Without at least one encoded rule, L5 has nothing to audit.
 
 ---
 
 ## Next Steps
 
-In **C1 (Capstone)**, you'll run your complete factory end-to-end on a new feature, and the feedback loops you designed here will help the factory self-improve during the run:
+In **L5 (Capstone)**, you'll run your complete factory end-to-end on a new feature, and the feedback loops you designed here will help the factory self-improve during the run:
 
 - Every reactive rule you encoded will take effect on the first Coder run
 - Every aggregate rule you encoded will apply to the first Deployer run
-- Any external-loop-shaped signals during C1 (you file a bug against your own feature, for instance) will create a new bead and test the full external path
+- Any external-loop-shaped signals during L5 (you file a bug against your own feature, for instance) will create a new bead and test the full external path
 
-Bring to C1:
+Bring to L5:
 
 - `feedback-loops/factory-feedback.md` committed with at least 3 rows and 2 harm cases
 - At least one rule marked `ENCODED` with a real diff in the target config

@@ -1,0 +1,5 @@
+[order]
+description = "Bidirectional GitHub Issues sync"
+gate = "cooldown"
+interval = "5m"
+exec = "bd github sync || true"

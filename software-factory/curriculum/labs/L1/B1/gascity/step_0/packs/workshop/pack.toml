@@ -1,0 +1,61 @@
+[pack]
+name = "workshop"
+schema = 1
+version = "1.0.0"
+description = "Software Factory Intensive — pre-configured integrations for issue trackers, observability, cloud, and CI/CD"
+
+# ── Formulas & Orders ──────────────────────────────────────────────
+[formulas]
+dir = "formulas"
+
+# ── Doctor checks (validate integrations before the session) ──────
+[[doctor]]
+name = "check-core-tools"
+script = "doctor/check-core-tools.sh"
+description = "Verify core CLI tools are available"
+
+[[doctor]]
+name = "check-github"
+script = "doctor/check-github.sh"
+description = "Verify GitHub token and repo access"
+
+[[doctor]]
+name = "check-jira"
+script = "doctor/check-jira.sh"
+description = "Verify Jira credentials and project access"
+
+[[doctor]]
+name = "check-linear"
+script = "doctor/check-linear.sh"
+description = "Verify Linear API key and team access"
+
+[[doctor]]
+name = "check-gitlab"
+script = "doctor/check-gitlab.sh"
+description = "Verify GitLab token and project access"
+
+[[doctor]]
+name = "check-observability"
+script = "doctor/check-observability.sh"
+description = "Verify observability endpoints (Sentry, DataDog, PostHog)"
+
+[[doctor]]
+name = "check-cloud"
+script = "doctor/check-cloud.sh"
+description = "Verify cloud provider CLI authentication (AWS, GCP, Azure)"
+
+# ── CLI commands ──────────────────────────────────────────────────
+[[commands]]
+name = "status"
+description = "Show integration connection status"
+script = "commands/status.sh"
+
+[[commands]]
+name = "setup"
+description = "Interactive setup wizard for workshop integrations"
+script = "commands/setup.sh"
+
+[[commands]]
+name = "sync-all"
+description = "Run all configured issue tracker syncs"
+script = "commands/sync-all.sh"

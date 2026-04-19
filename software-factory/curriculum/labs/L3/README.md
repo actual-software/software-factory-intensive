@@ -753,7 +753,7 @@ You should see new commits at the top, e.g.:
 
 ```
 f4d3c2b feat(loyalty-points): add LoyaltyPointsBadge component with balance fetching
-b8a7c1d test(loyalty-points): add badge component tests for Story 2 acceptance
+b8a7L5d test(loyalty-points): add badge component tests for Story 2 acceptance
 3e5f6a9 chore(coder): customize coder prompt with project quality gates
 ... (earlier L2 commits)
 ```

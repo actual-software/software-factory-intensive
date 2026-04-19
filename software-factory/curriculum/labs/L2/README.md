@@ -696,7 +696,7 @@ You should see:
 Created bead: my-factory-d4e5f6
 ```
 
-**What's happening here:** The `--depends-on my-factory-a1b2c3` flag tells Gas City: "don't let anyone sling this bead until `my-factory-a1b2c3` is closed." Since you just closed the Planner bead, this dependency is already satisfied. In the capstone (C1), you'll use dependencies to create automatic sequential pipelines.
+**What's happening here:** The `--depends-on my-factory-a1b2c3` flag tells Gas City: "don't let anyone sling this bead until `my-factory-a1b2c3` is closed." Since you just closed the Planner bead, this dependency is already satisfied. In the capstone (L5), you'll use dependencies to create automatic sequential pipelines.
 
 Verify:
 

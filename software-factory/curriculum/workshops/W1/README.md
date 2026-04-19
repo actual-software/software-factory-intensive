@@ -844,6 +844,6 @@ After L1, the progression continues:
 - **L2** — install Planner + Architect. Each one gets its own six-section prompt, structurally identical to your four-section card.
 - **L3** — install Designer + Coder. Now four agents are reading your conventions; the card's Stack constraints field is the common spine.
 - **L4** — install Reviewer + Deployer. The Iteration Loop you wrote becomes the orchestrator's schedule.
-- **W3 / W4 / C1** — orchestrator, feedback loops, and capstone. The card hasn't gone anywhere; it's just been promoted from a document you read to a system you run.
+- **W3 / W4 / L5** — orchestrator, feedback loops, and capstone. The card hasn't gone anywhere; it's just been promoted from a document you read to a system you run.
 
 Every session from here builds on this one. Keep the card open in a tab.

@@ -1193,7 +1193,7 @@ After L4, your complete factory pipeline is:
 5. Reviewer — reviews code against spec + policy, produces structured findings
 6. Deployer — evaluates binary release criteria, produces a gate record
 
-You now have an end-to-end software factory. In the workshops (W2–W4) and capstone (C1), you'll:
+You now have an end-to-end software factory. In the workshops (W2–W4) and capstone (L5), you'll:
 
 - Tighten the orchestrator so beads advance between agents without manual slings
 - Add feedback loops so recurring findings become permanent prompt rules

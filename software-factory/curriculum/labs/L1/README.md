@@ -187,7 +187,7 @@ Re-initializing rig 'your-repo'...
 Rig re-initialized.
 ```
 
-**What's happening here:** The rig registration does three things: it records the rig's path in `city.toml`, it initializes a per-rig beads database so work items in this rig have stable IDs, and it generates routing metadata so agents in one rig can refer to artifacts in another. The two-letter `Prefix` (`yr` here) is how bead IDs are namespaced — you'll see bead IDs like `my-factory-abc123` shortly.
+**What's happening here:** The rig registration does three things: it records the rig's path in `city.toml`, it initializes a per-rig beads database so work items in this rig have stable IDs, and it generates routing metadata so agents in one rig can refer to artifacts in another. The two-letter `Prefix` (`yr` here) is how bead IDs are namespaced — you'll see bead IDs like `my-factory-abL523` shortly.
 
 ### Step 1.3: Verify the Rig Is Registered
 
@@ -563,7 +563,7 @@ EOF
 )"
 ```
 
-This returns a bead ID like `my-factory-abc123`. **Note the ID** — you'll use it for the next several steps.
+This returns a bead ID like `my-factory-abL523`. **Note the ID** — you'll use it for the next several steps.
 
 ### Step 6.2: Verify the Bead
 
@@ -575,7 +575,7 @@ You should see:
 
 ```
 ID              TITLE                                 STATUS   AGENT    CREATED
-my-factory-abc123  Implement: Show Order Total in Cart   open     --       just now
+my-factory-abL523  Implement: Show Order Total in Cart   open     --       just now
 ```
 
 **What's happening here:** The `HEREDOC` syntax (`<<'EOF'`) lets you pass a multi-line markdown description without escaping newlines or quotes. The quoted `'EOF'` disables shell variable expansion inside the description, so `$VAR` stays literal. `STATUS` is `open`; `AGENT` is empty because we haven't slung it yet.
@@ -599,14 +599,14 @@ The description you just passed has five subtle properties worth naming:
 ### Step 7.1: Sling
 
 ```bash
-gc sling dev-agent my-factory-abc123
+gc sling dev-agent my-factory-abL523
 ```
 
 Expected output:
 
 ```
-Slinging my-factory-abc123 → dev-agent
-Session started: dev-agent-abc123 (tmux)
+Slinging my-factory-abL523 → dev-agent
+Session started: dev-agent-abL523 (tmux)
 ```
 
 **What's happening here:** Gas City starts a tmux session, launches Claude Code inside your rig's working directory, loads `CLAUDE.md` as the system prompt, and hands the bead's description as the task. The agent is now autonomous — it will read, plan, implement, run quality gates, and commit without any further input from you.
@@ -626,7 +626,7 @@ In a second terminal, watch the event stream and status:
 ```bash
 gc events --follow       # Everything happening city-wide
 gc status                # Agent states
-bd show my-factory-abc123   # Bead progress
+bd show my-factory-abL523   # Bead progress
 ```
 
 **What's happening here:** `gc events --follow` is a city-wide event log — every file the agent reads, every command it runs, every tool call. `gc status` polls the agent state (`running` → `idle` when done). `bd show` shows the bead's description plus any comments the agent has posted (including, if your Iteration Rule works, the 3-line plan).
@@ -684,7 +684,7 @@ Proceed to Step 9.
 1. **Identify the missing rule.** Be specific: "The agent used inline styles — that's not forbidden in `CLAUDE.md`." "The agent skipped tests — the Quality Gates section doesn't require them explicitly enough." "The agent forgot the empty-cart AC — the Iteration Rule doesn't enumerate ACs as tests."
 2. **Edit `CLAUDE.md`** to add the missing rule in exact, testable terms. Imperatives only: "NEVER X" or "Before Y, do Z."
 3. **Reset the branch:** `git reset --hard HEAD~1`
-4. **Re-sling:** `gc sling dev-agent my-factory-abc123`
+4. **Re-sling:** `gc sling dev-agent my-factory-abL523`
 5. **Log the iteration** in `DECISIONS.md` (see Step 9).
 
 **What's happening here:** Each re-sling runs against a *new* `CLAUDE.md`, which means it's a new, cleaner agent configuration. `git reset --hard HEAD~1` wipes the agent's previous attempt so the re-slung agent starts from the same state it started from the first time. If you don't reset, the second sling has to figure out what to do with the first sling's half-finished work, which confuses it.
@@ -702,7 +702,7 @@ Proceed to Step 9.
 ```markdown
 # Decisions
 
-## 2026-04-21 · my-factory-abc123 · Show Order Total in Cart
+## 2026-04-21 · my-factory-abL523 · Show Order Total in Cart
 
 ### Context
 First L1 sling. dev-agent with baseline CLAUDE.md.
@@ -734,7 +734,7 @@ git push -u origin claude-md-setup
 ### Step 9.3: Close the Bead
 
 ```bash
-bd close my-factory-abc123 --comment "Feature shipped. CLAUDE.md updated with 2 new rules."
+bd close my-factory-abL523 --comment "Feature shipped. CLAUDE.md updated with 2 new rules."
 ```
 
 **What's happening here:** Closing the bead with a descriptive comment leaves a breadcrumb. When you (or an orchestrator agent in the capstone) later look at bead history, the comment tells you what actually shipped, not just that something did.
@@ -748,7 +748,7 @@ Fired Up Pizza is the reference project shipped with this repo. Look at:
 - [`reference-project/fired-up-pizza/tickets.md`](../../../reference-project/fired-up-pizza/tickets.md) — the backlog that *would* be slung to agents
 - [`reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md`](../../../reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md) — the manifest the agents read before every task
 
-The agent instructions file you just wrote is the starter form. By C1, you'll have added sections for six agents — or pushed those role-specific rules into per-agent `packs/*/prompts/*.md` files, like the reference does. That's the transition from "single-agent config" to "factory config."
+The agent instructions file you just wrote is the starter form. By L5, you'll have added sections for six agents — or pushed those role-specific rules into per-agent `packs/*/prompts/*.md` files, like the reference does. That's the transition from "single-agent config" to "factory config."
 
 ---
 
@@ -951,12 +951,12 @@ EOF
 bd list
 
 # SLING + WATCH (Step 7)
-gc sling dev-agent my-factory-abc123
+gc sling dev-agent my-factory-abL523
 gc watch dev-agent
 # In parallel terminals:
 gc events --follow
 gc status
-bd show my-factory-abc123
+bd show my-factory-abL523
 
 # VERIFY (Step 8)
 git log -5 --oneline
@@ -966,13 +966,13 @@ git diff HEAD~1
 # ITERATE on CLAUDE.md if gates fail (no code edits!)
 # Edit CLAUDE.md
 git reset --hard HEAD~1
-gc sling dev-agent my-factory-abc123
+gc sling dev-agent my-factory-abL523
 
 # CLOSE (Step 9)
 git add CLAUDE.md DECISIONS.md
 git commit -m "docs: update agent rules after first sling (L1)"
 git push -u origin claude-md-setup
-bd close my-factory-abc123 --comment "Feature shipped. CLAUDE.md updated."
+bd close my-factory-abL523 --comment "Feature shipped. CLAUDE.md updated."
 ```
 
 ---

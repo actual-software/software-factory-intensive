@@ -25,8 +25,8 @@ Stuck on a step, want to share what you've built, or looking to collaborate with
 
 - **Operating System**: MacOS and Linux are ready to go as-is. Windows users: please install [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (Windows Subsystem for Linux) and run everything from inside the WSL shell.
 - **CLI Coding Agents**: You’ll need at least one CLI coding agent installed. Having more than one gives you broader capabilities and redundancy.
-  - **Recommended**: Claude Code Max (20x) or Codex Pro (20x), or equivalent
-  - **Minimum**: Claude Code Max or Codex Pro (standard tier), or equivalent
+  - **Recommended**: Claude Code Max (20x) or Codex Pro (20x)
+  - **Minimum**: Claude Code Max or Codex Pro (standard tier)
   - **Alternatives**: Gemini CLI, OpenCode (compatibility not guaranteed)
 
 ### 2. Software Project Overview
@@ -37,10 +37,6 @@ You should bring a real software project to build your factory around. Before st
 
 Refer to the Gas City [Installation Guide](https://github.com/gastownhall/gascity/blob/main/docs/getting-started/installation.md) for the full dependency list and platform-specific notes.
 
-### 4. Gas City Quickstart
-
-Follow the [Quickstart Guide](prerequisites/quickstart.md) to install Gas City and create a new workspace. This will help you understand the basics of the Gas City CLI before you start the workshop.
-
 ---
 
 ## Why Gas City
@@ -49,26 +45,26 @@ This curriculum is built on top of [Gas City](https://github.com/gastownhall/gas
 
 We use Gas City here because the 6-agent factory is one instance of a much broader pattern. Once you've learned the primitives, you can swap out the specific agent roles and build pipelines for code review, research, data processing, ops automation — the framework doesn't care what the agents do. The goal of the workshop is to make these primitives internalized enough that you can design your own multi-agent systems after you leave.
 
-For the authoritative definitions of every Gas City term used across the curriculum (agent, pack, rig, bead, sling, order, route, formula, overlay, etc.), see the upstream glossary: [Gas City glossary](https://github.com/gastownhall/gascity/blob/main/engdocs/architecture/glossary.md). Skim it once before W1 and keep it open as a reference during the labs.
+For the authoritative definitions of every Gas City term used across the curriculum (agent, pack, rig, bead, sling, order, route, formula, overlay, etc.), see the glossary: [Gas City glossary](https://github.com/gastownhall/gascity/blob/main/engdocs/architecture/glossary.md). Skim it once before W1 and keep it open as a reference during the labs.
 
 ---
 
 ## The 6-Agent Software Factory
 
-Across 9 sessions you build a pipeline of six AI agents that turn a feature request into deployed code:
+Across 9 sessions you build a factory of six AI agents that turn feature requests into deployed code:
 
 ```
-Feature Request → Planner → Architect → Designer → Builder → Reviewer → Release-Gate → Done
+Feature Request → Planner → Architect → Designer → Coder → Reviewer → Deployer → Functional Software
 ```
 
 | Role (curriculum) | Shipped pack | What It Does |
-|-------------------|-------------|-------------|
+|-------------------|-------------|---------------------------------------|
 | **Planner** | `packs/planner` | Breaks features into structured work packages |
 | **Architect** | `packs/architect` | Makes technical decisions, produces ADRs |
-| **Designer** | `packs/designer` | Creates component/module specs |
-| **Builder** (Coder) | `packs/builder` | Implements code from specs |
+| **Designer** | `packs/designer` | Creates component/module specs and documentation |
+| **Coder** | `packs/coder` | Implements code from specs |
 | **Reviewer** | `packs/reviewer` | Reviews code against specs and standards |
-| **Release-Gate** (Deployer) | `packs/release-gate` | Evaluates release gates |
+| **Deployer** | `packs/deployer` | Evaluates release gates and deploys functional software |
 
 ## Core Principle: Config Over Prompting
 
@@ -82,15 +78,15 @@ When an agent produces wrong output, update its config file and re-run — don't
 
 | ID | Type | Estimated Duration | Title |
 |----|------|--------------------|-------|
-| [W1](curriculum/workshops/W1/) | WORKSHOP | ~60 min | Optimize the Individual AI Workflow |
-| [L1](curriculum/labs/L1/) | LAB | ~60 min | Build a Structured Development Loop |
-| [W2](curriculum/workshops/W2/) | WORKSHOP | ~45 min | Design the 6-Agent Software Factory |
-| [L2](curriculum/labs/L2/) | LAB | ~75 min | Deploy Planner + Architect Agents |
-| [L3](curriculum/labs/L3/) | LAB | ~75 min | Deploy Designer + Coder Agents |
-| [W3](curriculum/workshops/W3/) | WORKSHOP | ~45 min | Architect Multi-Agent Coordination |
-| [L4](curriculum/labs/L4/) | LAB | ~75 min | Deploy Reviewer + Deployer Agents |
-| [W4](curriculum/workshops/W4/) | WORKSHOP | ~45 min | Create Continuous Improvement Loops |
-| [C1](curriculum/capstone/C1/) | CAPSTONE | ~90 min | Run the Software Factory End-to-End |
+| [W1](curriculum/workshops/W1/) | Workshop | ~60 min | Run the 6-Agent Software Factory |
+| [W2](curriculum/workshops/W2/) | Workshop | ~45 min | From Individual AI Workflow to Software Factory Pipeline |
+| [L1](curriculum/labs/L1/) | Lab | ~60 min | Build a Structured Development Loop |
+| [W3](curriculum/workshops/W3/) | Workshop | ~45 min | Architect Multi-Agent Coordination |
+| [L2](curriculum/labs/L2/) | Lab | ~75 min | Deploy Planner + Architect Agents |
+| [L3](curriculum/labs/L3/) | Lab | ~75 min | Deploy Designer + Coder Agents |
+| [L4](curriculum/labs/L4/) | Lab | ~75 min | Deploy Reviewer + Deployer Agents |
+| [W4](curriculum/workshops/W4/) | Workshop | ~45 min | Create Continuous Improvement Loops |
+| [L5](curriculum/labs/L5/) | Lab | ~90 min | Run the Software Factory End-to-End |
 
 ---
 
@@ -98,54 +94,59 @@ When an agent produces wrong output, update its config file and re-run — don't
 
 ```
 software-factory-intensive/
-├── README.md                        # You are here
-├── installation.md                  # Dependency install guide
-│
-├── my-factory/                      # Your Gas City workspace (top-level city.toml lives here)
-│   ├── city.toml                    # Workspace config — add pack includes as you progress
-│   ├── README.md                    # Quickstart: register workspace, add rig, wire packs
-│
-├── activities/                      # Where you place per-session deliverables + pack customisations
-│   ├── README.md                    # Session layout + additive/independent model
-│   ├── workshops/
-│   │   ├── W1/README.md             # Workflow card
-│   │   ├── W2/README.md             # Factory wiring
-│   │   ├── W3/README.md             # orchestrator.yaml + gate justifications
-│   │   └── W4/README.md             # Feedback-loop rule files
-│   ├── labs/
-│   │   ├── L1/README.md             # CLAUDE.md + DECISIONS.md
-│   │   ├── L2/README.md             # Planner + Architect activity
-│   │   ├── L3/README.md             # Designer + Builder activity
-│   │   └── L4/README.md             # Reviewer + Release-Gate activity
-│   └── capstone/
-│       └── C1/README.md             # Run report + retrospective
-│
-├── curriculum/                      # Self-paced session walkthroughs
-│   ├── README.md
-│   ├── PROJECT_OVERVIEW_TEMPLATE.md # Loose-structure project brief (you fill in)
-│   ├── PROJECT_MANIFEST_TEMPLATE.md # Structural skeleton (agent-generated in L1)
-│   ├── workshops/W1..W4/            # README.md per session, with inline Agent Guide callouts
-│   ├── labs/L1..L4/                 # README.md per session, with inline Agent Guide callouts
-│   └── capstone/C1/                 # README.md with inline Agent Guide callouts
-│
-├── packs/                           # Shipped Gas City agent packs — use as-is or copy + customise
-│   ├── README.md                    # Pack authoring + persona mapping
-│   ├── city.toml                    # Sample workspace for standalone pack runs
-│   ├── planner/                     # Added in L2
+├── curriculum/
+│   ├── labs/L1..L5/                 # Participant-led, exploratory work sessions
+│   └── workshops/W1..W4/            # Instructor-led, structured sessions
+├── curriculum-agent/                # Curriculum-agent skill to manage the curriculum
+├── images/                          # Images for the curriculum
+├── packs/                           # Packs containing agents and configurations for the curriculum
+│   ├── README.md                    # Quick reference for the packs
 │   ├── architect/                   # Added in L2
+│   ├── coder/                       # Added in L3
 │   ├── designer/                    # Added in L3
-│   ├── builder/                     # Added in L3 (called "Coder" in the curriculum)
+│   ├── planner/                     # Added in L2
 │   ├── reviewer/                    # Added in L4
-│   ├── release-gate/                # Added in L4 (called "Deployer" in the curriculum)
-│   ├── validator/                   # Optional — writes failing tests from ACs
-│   ├── improver/                    # Optional — harvests feedback from runs
-│   ├── all/                         # Composition pack bundling all 8
-│   ├── fired-up-pizza/              # Composite pack for the reference project
-│   └── workshop/                    # Pre-configured integrations (Jira, Linear, GitHub, etc.)
-│
-└── reference-project/
-    └── fired-up-pizza/              # Working reference — complete 6-agent factory example
+│   ├── deployer/                    # Added in L4
+│   └── all/                         # Composition pack bundling all 6 agents
+├── reference-project/               # Pizza restaurant web app with complete 6-agent factory 
+├── scripts/                         # Scripts for the curriculum
+├── PROJECT_MANIFEST_TEMPLATE.md     # Template for the project manifest (agent-generated in orientation)
+├── PROJECT_OVERVIEW_TEMPLATE.md     # Template for the project overview (you fill in)
+├── README.md                        # You are here
+└── TROUBLESHOOTING.md               # Troubleshooting guide
 ```
+
+---
+
+## Curriculum Guide
+
+### The additive, independent model
+
+Every session ships a ready-to-use reference pack under `../packs/<agent>/`. The curriculum is designed so that **skipping a session does not break the pipeline** — you just include the shipped pack as-is instead of your own customised copy.
+
+Within a session you can customise a pack two ways:
+
+1. **Copy it** — `cp -r ../../packs/<agent> packs/<agent>/` inside the session's activity folder, edit your copy, and point `../../my-factory/city.toml`'s `includes` at `../activities/<session>/packs/<agent>` instead of the shipped `../packs/<agent>`.
+2. **Leave it alone** — include the shipped pack directly and focus on the workshop's conceptual deliverables.
+
+Either way, at the end of the session you **update `../my-factory/city.toml`** to reflect which packs the factory should run. Each session's README tells you the exact lines.
+
+### Typical session flow
+
+1. Open `../curriculum/<session>/README.md` and read the walkthrough.
+2. Work inside this session's folder (`activities/<session>/`). Most sessions ask for one or two markdown deliverables (a workflow card, a factory-wiring doc, an orchestrator.yaml, a feedback-loop note).
+3. For labs that deploy a new agent: copy the shipped pack into `activities/<session>/packs/<agent>/`, customise, and wire it into `../my-factory/city.toml`. (If you skip customisation, just wire the shipped `../packs/<agent>` path directly.)
+4. Run `gc service restart && gc doctor` from `../my-factory/` to reload the city.
+
+### Getting un-stuck
+
+If a session breaks your factory:
+
+1. `git checkout activities/<session>/packs/` to discard the customised pack copy.
+2. Edit `../my-factory/city.toml` so the include points at `../packs/<name>` (shipped) instead of `../activities/<session>/packs/<name>` (your copy).
+3. `gc service restart` from `my-factory/`.
+
+You lose the customisation but keep a working factory, and you can retry the customisation later.
 
 ---
 
@@ -154,26 +155,3 @@ software-factory-intensive/
 Ready to get started? Jump to [W1](curriculum/workshops/W1/) to start.
 
 ---
-
-# Start Here
-
-### For Claude Code
-
-```bash
-# Option 1: Symlink into user-level skills (available in all projects)
-ln -s "$(pwd)/skills/factory-activity-agent" ~/.claude/skills/factory-activity-agent
-
-# Option 2: Symlink into project-level skills (this project only)
-mkdir -p .claude/skills
-ln -s "$(pwd)/skills/factory-activity-agent" .claude/skills/factory-activity-agent
-
-# Option 3: Copy into user-level skills
-cp -r skills/factory-activity-agent ~/.claude/skills/factory-activity-agent
-```
-
-### For Codex
-
-```bash
-mkdir -p ~/.codex/skills
-cp -r skills/factory-activity-agent ~/.codex/skills/factory-activity-agent
-```

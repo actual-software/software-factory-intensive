@@ -906,7 +906,7 @@ Fired Up Pizza is the reference project — a complete, working example of a 6-a
 - [`reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md`](../../../reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md) — compare length and specificity to your own `docs/PROJECT_MANIFEST.md`. Note the Review Standards and Release Criteria sections — those are the Reviewer's and Deployer's input.
 - [`reference-project/fired-up-pizza/tickets.md`](../../../reference-project/fired-up-pizza/tickets.md) — the backlog that feeds the factory. Note how each ticket is written: single-sentence goal, explicit acceptance criteria, no implementation detail. Tickets become bead descriptions, which become Planner input.
 - [`reference-project/fired-up-pizza/workflow-card.md`](../../../reference-project/fired-up-pizza/workflow-card.md) — the workflow card that seeded Fired Up Pizza's agent instructions. Note the rules around prices in cents and TypeScript strict mode — those constrain every agent downstream.
-- [`packs/fired-up-pizza/pack.toml`](../../../packs/fired-up-pizza/pack.toml) — the *composite* pack that bundles all 6 agent packs. In C1 (the capstone), you install this one pack and get all 6 agents at once.
+- [`packs/fired-up-pizza/pack.toml`](../../../packs/fired-up-pizza/pack.toml) — the *composite* pack that bundles all 6 agent packs. In L5 (the capstone), you install this one pack and get all 6 agents at once.
 
 Ask yourself: *if I replaced `docs/PROJECT_MANIFEST.md` in Fired Up Pizza with mine, would the agent prompts still make sense?* If not, your manifest is under-specified — and that's exactly what Part 3 corrects.
 
