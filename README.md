@@ -75,7 +75,7 @@ For the authoritative definitions of every Gas City term used across the curricu
 Across 9 sessions you build a factory of six AI agents that turn feature requests into deployed code:
 
 ```
-Feature Request → Planner → Architect → Designer → Coder → Reviewer → Deployer → Functional Software
+Feature Request → Planner → Architect → Designer → Coder → Reviewer → Deployer → Functional Software → Improver
 ```
 
 | Role (curriculum) | Shipped pack | What It Does |
@@ -86,10 +86,7 @@ Feature Request → Planner → Architect → Designer → Coder → Reviewer �
 | **Coder** | `packs/coder` | Implements code from specs |
 | **Reviewer** | `packs/reviewer` | Reviews code against specs and standards; verifies acceptance-criteria coverage |
 | **Deployer** | `packs/deployer` | Evaluates release gates and deploys functional software |
-
-W4 introduces an **optional 7th agent**, the **Improver** (`packs/improver`), for continuous-improvement loops that feed runtime signals back into the factory. It is not part of the essential 6 — the factory runs end-to-end without it.
-
-The agents hand work off via **labels on beads** ([beads](https://github.com/gastownhall/beads) is a dependency-aware graph for issue tracking). A bead walks the factory by being re-labeled at each stage: `needs-plan` → `needs-architecture` → `needs-design` → `ready-to-build` → `needs-review` → `ready-to-ship` → closed. Each agent watches the queue for the label aimed at it and re-labels the bead for the next stage. See [`LABELED_BEADS.md`](LABELED_BEADS.md) for the canonical reference — this is foundation material for the workshops and labs.
+| **Improve** | `packs/improver` | Additional process to collect runtime signals and feed them back into the factory |
 
 ## Core Principle: Config Over Prompting
 
@@ -128,7 +125,7 @@ software-factory-intensive/
 │   ├── builder/                     # Added in L3
 │   ├── designer/                    # Added in L3
 │   ├── fired-up-pizza/              # Demonstrated in W1
-│   ├── improver/                    # Optional 7th — introduced in W4
+│   ├── improver/                    # Additional process in W4
 │   ├── planner/                     # Added in L2
 │   ├── release-gate/                # Added in L4
 │   ├── reviewer/                    # Added in L4
@@ -143,7 +140,7 @@ software-factory-intensive/
 ├── LABELED_BEADS.md                 # Label reference for beads handoff process
 ├── PROJECT_OVERVIEW_TEMPLATE.md     # Template for the project overview (you fill in)
 ├── README.md                        # You are here
-└── TROUBLESHOOTING.md               # Troubleshooting guide
+└── troubleshooting/                 # Topic-scoped troubleshooting guides (gas city, cli coding agents, beads, tmux)
 ```
 
 ---
@@ -156,4 +153,4 @@ Ready to get started? Jump to [W1](curriculum/workshops/W1/WORKSHOP_1_GUIDE.md) 
 
 ## Troubleshooting
 
-If you encounter any issues during the workshop, please refer to the [Troubleshooting Guide](TROUBLESHOOTING.md) for solutions.
+If you encounter any issues during the workshop, jump to the relevant guide under [`troubleshooting/`](troubleshooting/).

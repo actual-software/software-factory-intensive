@@ -16,8 +16,6 @@ Pack naming: references to *Coder* and *Deployer* in this README map to the ship
 
 ---
 
-> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by re-reading the participant's W2 wiring diagram; every orchestrator decision should be grounded in that pipeline, and if the diagram is missing, pause and have the participant produce a quick version first.
-
 ---
 
 ## Architecture Diagram
@@ -226,7 +224,7 @@ pipeline:
 - Stage B could start with partial information from Stage A (the dependency is incidental)
 - Two stages read the same upstream but don't read each other (those are candidates for parallel execution, a sibling pattern — but in W3 you will intentionally keep the pipeline linear; parallel fan-out is deferred until L4, where you'll have the full 6-agent runtime to test it safely)
 
-> **Inline Insight: The Linear Pipeline Is the Honest Default**
+> **Insight: The Linear Pipeline Is the Honest Default**
 >
 > It's tempting to design a parallel-heavy coordination map to "save time." Resist this in W3. The six-agent factory's value is the *artifact trail*, not raw throughput. Every parallel fan-out adds a join point, and every join point is a place where state can desync between agents. Start linear. Add parallelism only once you have a working linear pipeline and a specific bottleneck you've observed — not guessed.
 
@@ -309,7 +307,7 @@ This exercise is the single most important deliverable of Concept 2. **Write the
 - **"We've always done it this way"**: Automation is the goal. A gate you don't have a written justification for is theater.
 - **Checking every step**: Defeats the purpose of a software factory. If you need to check every step, you don't trust the pipeline, and you should go back to W2 and re-examine the handoff contracts.
 
-> **Inline Insight: Gates Are for Risks Agents Can't See, Not Risks They Might Make**
+> **Insight: Gates Are for Risks Agents Can't See, Not Risks They Might Make**
 >
 > A gate before the Reviewer because "the Coder might make a mistake" is the wrong shape. The Reviewer exists precisely to catch coder mistakes — that's an agent-level control, not a human-level control. A gate before the Deployer because "deployed code might corrupt the points ledger and we cannot rollback customer-visible state changes" is the right shape: the *consequence* is outside what any agent can see (it's business-state, not code-state).
 
@@ -377,10 +375,6 @@ pipeline:
 
 If you find yourself wanting to pass something between agents that isn't a file or a bead field, stop. Either (a) make it a file, or (b) make it a bead comment. There is no third option.
 
-> **Inline Insight: No Hidden Handoffs**
->
-> Every state transition between agents should produce a file a human can open. If the Architect's decision only exists in the Designer's bead description, you've hidden a handoff — and when something goes wrong in week 6, you'll have no audit trail. This is why W2's handoff contracts specify *artifact paths*, not "the Designer will know about the decision." Your `orchestrator.yaml` should reference every handoff artifact by path, and if a stage has no artifact path, that stage is broken.
-
 ### Worked Example: Tracing State Through the Loyalty Points Pipeline
 
 To make "beads as state" concrete, trace exactly how the Architect's storage decision travels from stage to stage in the Loyalty Points feature:
@@ -414,8 +408,6 @@ touch orchestrator.yaml
 ```
 
 ### Step 2: Write the Full Pipeline
-
-> **Agent Guide:** As the participant writes each stage, flag two anti-patterns the moment you see them: (a) parallelism where both branches write to the same directory — force sequencing, two agents editing `src/` concurrently is a conflict waiting to happen; (b) stages that depend on another stage's chat output rather than its file artifact — rewrite to reference the file. Also ask where in their pipeline two stages could genuinely run in parallel (disjoint files, no mutual dependency); if no pair qualifies, say so and skip the fan-out — invented parallelism is worse than no parallelism.
 
 Open `orchestrator.yaml` and write your six-stage pipeline. Work in three passes, adding one concept at a time so that each intermediate version is independently verifiable.
 
@@ -584,8 +576,6 @@ gates:
 
 ### Step 3: Write the Gate Justification Doc
 
-> **Agent Guide:** Ask the participant two questions before they write: (1) what concrete risk does this gate prevent? Force a specific failure mode, not a category ("an untested migration reaches production," not "quality issues"). (2) Under what observable condition would they remove this gate? If the answer is "never," the gate is fear-based — push for a measurable exit condition.
-
 Any stage with `gate: human` needs a justification committed alongside. Create `docs/gates/approve_deploy.md`:
 
 ```markdown
@@ -656,6 +646,10 @@ git commit -m "feat(orchestrator): draft feature-pipeline with deploy gate"
 ```
 
 **Why commit now?** The `orchestrator.yaml` is the source of truth for coordination. In L4 you'll apply it (`gc orchestrate apply`) and the actual runtime behavior will be compared against this file. Committing it now means the diff of *intended* vs *actual* coordination is always in the git log.
+
+> **Insight: A boring orchestrator is the only one that scales.**
+>
+> YAML. No click-through UI. No AI-generated DAG. Any engineer can read it; a broken stage is one `grep` away. Your pipeline logic is reviewable in a five-minute PR and greppable when it breaks. Transparency *is* the scaling mechanism — not a limitation of the tool.
 
 ### Per-Stage Design Checklist
 
@@ -832,8 +826,6 @@ Do not invent fields not used in the curriculum's examples.
 ---
 
 ## Concept Check (before moving to L4)
-
-> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
 
 - The three coordination patterns (sequential, parallel fan-out, human gate) and when each is the right choice.
 - Why the human gate is framed with a *removal condition*, not just a location. (Gates are temporary scaffolding; without an exit condition, they calcify.)
