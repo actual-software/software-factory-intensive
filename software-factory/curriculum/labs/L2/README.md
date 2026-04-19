@@ -13,7 +13,7 @@
 ## Session workspace note
 
 * **Pack locations (shipped):** `packs/planner/` and `packs/architect/` under the `software-factory/` tree. Prompt templates are `packs/<agent>/prompts/<agent>.md.tmpl` (the `.tmpl` suffix is the Gas City template extension). Formulas are `packs/<agent>/formulas/mol-<name>.formula.toml`.
-* **Gas City workspace:** `my-factory/` — this is where `city.toml` lives. Every `gc` command below is run from that folder unless otherwise noted. (If you installed the L1 factory under `~/Projects/factory/lab_l1/l1-gc-factory/` via `curriculum-agent install L1`, substitute that path — the lab steps are path-agnostic.)
+* **Gas City workspace:** `my-factory/` — this is where `city.toml` lives. Every `gc` command below is run from that folder unless otherwise noted. (If you installed the L1 factory under `~/Projects/factory/lab_l1/l1-gc-factory/` via `factory-activity-agent install L1`, substitute that path — the lab steps are path-agnostic.)
 * **Your deliverables this session:** `notes.md` plus customised pack copies. If your workshop uses an activity folder (`activities/labs/L2/`), put them there; otherwise keep your customised pack copies anywhere tracked by git.
 * **Wiring the packs:** at the end of the session, `my-factory/city.toml`'s `includes` should reach the `planner` and `architect` packs — either the shipped copies or your customised copies.
 
@@ -221,7 +221,7 @@ cp -rf ../software-factory/packs/planner packs/planner
 cp -rf ../software-factory/packs/architect packs/architect
 ```
 
-(Exact source path depends on your checkout — adjust to point at `packs/planner/` and `packs/architect/` in the software-factory tree. If you installed L1 via `curriculum-agent install L1`, the shipped packs also live under `~/Projects/factory/lab_l1/l1-gc-factory/packs/actual/{planner,architect}/` and you can copy from there.)
+(Exact source path depends on your checkout — adjust to point at `packs/planner/` and `packs/architect/` in the software-factory tree. If you installed L1 via `factory-activity-agent install L1`, the shipped packs also live under `~/Projects/factory/lab_l1/l1-gc-factory/packs/actual/{planner,architect}/` and you can copy from there.)
 
 ### Step 3: Add the includes
 

@@ -1,6 +1,0 @@
-[order]
-description = "Wake the coder when any bead is labelled ready-to-build"
-formula = "mol-code-from-spec"
-gate = "condition"
-check = "bd ready --label=ready-to-build --limit=1 | grep -q ."
-pool = "coder"

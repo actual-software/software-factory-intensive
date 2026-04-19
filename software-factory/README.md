@@ -29,17 +29,33 @@ Stuck on a step, want to share what you've built, or looking to collaborate with
   - **Minimum**: Claude Code Max or Codex Pro (standard tier)
   - **Alternatives**: Gemini CLI, OpenCode (compatibility not guaranteed)
 
-### 2. Software Project Overview
-
-You should bring a real software project to build your factory around. Before starting the curriculum, write a **Project Overview** for it using [`curriculum/PROJECT_OVERVIEW_TEMPLATE.md`](./PROJECT_OVERVIEW_TEMPLATE.md) — a loosely structured document that answers a few questions about the project. Your local coding agent will generate the Project Manifest and Software Factory Manifest from this document. You can see [`reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md`](reference-project/docs/PROJECT_OVERVIEW.md) for a completed example.
-
-### 3. Gas City Installation
+### 2. Gas City Installation
 
 Refer to the Gas City [Installation Guide](https://github.com/gastownhall/gascity/blob/main/docs/getting-started/installation.md) for the full dependency list and platform-specific notes.
 
-### 4. Python Installation
+**Note: Gas City is pinned to v0.14.1 for this curriculum.** Check your version: `gc version`
 
-[Python 3.8+](https://www.python.org/downloads/) is required to run the curriculum-agent. This makes the curriculum setup and teardown much easier.
+If your version differs, install the pinned version:
+```bash
+brew tap-new $USER/local
+brew extract --version=0.14.1 gastownhall/gascity/gascity $USER/local
+brew install gascity@0.14.1
+```
+
+### 3. Python Installation
+
+[Python 3.8+](https://www.python.org/downloads/) is required to run the factory-activity-agent script, which makes the curriculum setup and teardown much easier. You can check your Python version with `python3 --version`.
+
+### 4. Clone the `software-factory-intensive` repo
+
+Clone the `software-factory-intensive` repo locally into a new project directory (this specific path is important for the factory-activity-agent to work correctly):
+```bash
+git clone https://github.com/actual-software/software-factory-intensive.git ~/Projects/actual-software/software-factory-intensive
+```
+
+### 5. Software Project Overview
+
+You should bring a real software project to build your factory around. Before starting the curriculum, write a **Project Overview** for it using [`PROJECT_OVERVIEW_TEMPLATE.md`](PROJECT_OVERVIEW_TEMPLATE.md) — a loosely structured document that answers a few questions about the project. Your local coding agent will generate the Project Manifest and Software Factory Manifest from this document. You can see [`reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md`](reference-project/docs/PROJECT_OVERVIEW.md) for a completed example.
 
 ---
 
@@ -105,7 +121,7 @@ software-factory-intensive/
 ├── curriculum/
 │   ├── labs/L1..L5/                 # Participant-led, exploratory work sessions
 │   └── workshops/W1..W4/            # Instructor-led, structured sessions
-├── curriculum-agent/                # Curriculum-agent skill to manage the curriculum
+├── factory-activity-agent/                # factory-activity-agent skill to manage the curriculum
 ├── images/                          # Images for the curriculum
 ├── packs/                           # Packs containing agents and configurations for the curriculum
 │   ├── all/                         # Composite 6-agent factory

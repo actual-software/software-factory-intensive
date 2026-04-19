@@ -6,7 +6,7 @@
 |---|---|
 | **Estimated duration** | ~45 minutes |
 | **Type** | Workshop |
-| **Deliverable** | A factory-ready project workspace — clean repo, filled manifest, authenticated provider CLI, verified `gc` / `bd` / `curriculum-agent`, and `docs/FACTORY_READY.md` committed — that L1 can install the 6-agent factory against without extra scrambling |
+| **Deliverable** | A factory-ready project workspace — clean repo, filled manifest, authenticated provider CLI, verified `gc` / `bd` / `factory-activity-agent`, and `docs/FACTORY_READY.md` committed — that L1 can install the 6-agent factory against without extra scrambling |
 
 ---
 
@@ -22,7 +22,7 @@ W2 is not an activity you install. Nothing new lands in `~/Projects/factory/`. T
 **Canonical references** — keep both open in tabs:
 
 1. [`software-factory/LABELED_BEADS.md`](../../../LABELED_BEADS.md) — the handoff protocol that replaces chat memory and markdown docs.
-2. [`software-factory/curriculum-agent/SKILL.md`](../../../curriculum-agent/SKILL.md) — the skill you installed in W1; every lab from here on uses it.
+2. [`software-factory/factory-activity-agent/SKILL.md`](../../../factory-activity-agent/SKILL.md) — the skill you installed in W1; every lab from here on uses it.
 
 ---
 
@@ -32,7 +32,7 @@ W2 is not an activity you install. Nothing new lands in `~/Projects/factory/`. T
 
 ## Where This Workshop Sits
 
-In **W1** you installed the `curriculum-agent` skill and watched the Fired-Up Pizza reference factory move a feature bead through six agents without typing a single prompt after the initial `bd label add`. You have the mental picture: labels on a bead, agents waking on order-gate matches, artifacts landing in canonical locations.
+In **W1** you installed the `factory-activity-agent` skill and watched the Fired-Up Pizza reference factory move a feature bead through six agents without typing a single prompt after the initial `bd label add`. You have the mental picture: labels on a bead, agents waking on order-gate matches, artifacts landing in canonical locations.
 
 W2 takes you from "I've seen a factory run" to "I am preparing my project to host its own factory." The session is short, mostly discussion and setup, and the Big Reveal is subtle: **the factory only exists because the *inputs* to the factory (your manifest, your repo state, your tool auth) are in a shape the factory can operate on.** A sloppy manifest is why a factory stalls; a half-authenticated CLI is why an agent dies on startup. W2 is where you pay that debt before L1 installs anything.
 
@@ -113,8 +113,8 @@ This is the hands-on bulk of the session. You will work in your own repo, using 
 Everything you installed in W1 should still work. Quick re-verification:
 
 ```bash
-# curriculum-agent skill is resolved
-ls -l ~/.claude/skills/curriculum-agent         # (or ~/.codex/skills/curriculum-agent)
+# factory-activity-agent skill is resolved
+ls -l ~/.claude/skills/factory-activity-agent         # (or ~/.codex/skills/factory-activity-agent)
 
 # gc is on PATH at the curriculum-pinned version
 gc version                                       # expect: gascity 0.14.1
@@ -128,7 +128,7 @@ claude --version
 echo "say hi" | claude -p
 ```
 
-If any row fails, fix it now — no downstream step of W2 will succeed with a broken W1 baseline. See `curriculum-agent/SKILL.md` → *Prerequisites* for the pinned-version install recipe.
+If any row fails, fix it now — no downstream step of W2 will succeed with a broken W1 baseline. See `factory-activity-agent/SKILL.md` → *Prerequisites* for the pinned-version install recipe.
 
 > **Agent Guide:** If `claude -p` returns an auth error, walk the participant through `claude auth login` (or `codex login` for Codex). Do not proceed until the trivial prompt returns a non-empty response.
 
@@ -263,7 +263,7 @@ this file whenever your toolset changes materially.
 
 - [ ] `gc version` prints `gascity 0.14.1`
 - [ ] `bd --version` runs
-- [ ] `~/.claude/skills/curriculum-agent` (or Codex equivalent) resolves to the SFI repo
+- [ ] `~/.claude/skills/factory-activity-agent` (or Codex equivalent) resolves to the SFI repo
 - [ ] Provider CLI: <name + version>, authenticated against <account>
 - [ ] `echo "say hi" | <cli> -p` returns non-empty
 
@@ -374,7 +374,7 @@ Before leaving W2, verify all of these:
 - [ ] `echo "say hi" | claude -p` (or Codex equivalent) returns non-empty output.
 - [ ] `gc version` prints `gascity 0.14.1`.
 - [ ] `bd --version` runs cleanly.
-- [ ] `ls -l ~/.claude/skills/curriculum-agent` resolves to the SFI repo (Codex equivalent: `~/.codex/skills/`).
+- [ ] `ls -l ~/.claude/skills/factory-activity-agent` resolves to the SFI repo (Codex equivalent: `~/.codex/skills/`).
 - [ ] Your project repo's working tree is clean (or has only the three commits from this session).
 - [ ] You can name, from memory, the six canonical labels and which agent consumes each.
 - [ ] You agree, in your own words, that agent behavior changes via **pack config**, not chat.
@@ -405,7 +405,7 @@ cd ~/path/to/your-project
 # Verify W1 baseline
 gc version                                                   # gascity 0.14.1
 bd --version
-ls -l ~/.claude/skills/curriculum-agent                       # resolves to SFI repo
+ls -l ~/.claude/skills/factory-activity-agent                       # resolves to SFI repo
 echo "say hi" | claude -p                                     # non-empty response
 
 # Ensure Project Overview exists
@@ -445,14 +445,14 @@ No `gc sling`, no `bd create`, no pack edits this session — those all start in
 | Project Manifest | `docs/PROJECT_MANIFEST.md` | Every factory agent in L1–L4 |
 | Factory-ready checklist | `docs/FACTORY_READY.md` | L1 prerequisites check |
 | Provider CLI (authenticated) | your shell | Every agent spawn in L1–L4 |
-| `curriculum-agent` skill (from W1) | `~/.claude/skills/curriculum-agent` | Every lab install / doctor / status call |
+| `factory-activity-agent` skill (from W1) | `~/.claude/skills/factory-activity-agent` | Every lab install / doctor / status call |
 | Labeled-beads protocol (memorized) | [`LABELED_BEADS.md`](../../../LABELED_BEADS.md) | You, when reading agent behavior |
 
 ---
 
 ## Next Steps
 
-**L1 (next, 1:45pm Day 1)** — David installs the 6-agent factory on your project. The installer reads your repo, registers it as a rig, copies the shipped packs, and spins up all six agents. Your `docs/FACTORY_READY.md` is what L1's prerequisites check looks for; everything else you did in W2 (clean repo, manifest, auth) is what makes the install succeed on the first try instead of the third.
+**L1** — David installs the 6-agent factory on your project. The installer reads your repo, registers it as a rig, copies the shipped packs, and spins up all six agents. Your `docs/FACTORY_READY.md` is what L1's prerequisites check looks for; everything else you did in W2 (clean repo, manifest, auth) is what makes the install succeed on the first try instead of the third.
 
 **Bring to L1:**
 

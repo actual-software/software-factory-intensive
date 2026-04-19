@@ -32,7 +32,7 @@ if you want a continuous-improvement loop.
 ## Manual stand-up
 
 The canonical way to bring this factory up is the
-`curriculum-agent install` workflow once the fired-up-pizza install
+`factory-activity-agent install` workflow once the fired-up-pizza install
 route ships. Until then, or to inspect the pack interactively, you
 can stand it up directly with the `gc` CLI:
 

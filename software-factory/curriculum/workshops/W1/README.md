@@ -1,6 +1,6 @@
 # W1 · Run the 6-Agent Software Factory
 
-> **Goal:** Install the curriculum-agent tooling, stand up the Fired-Up Pizza reference factory on your machine, and watch a single feature bead walk through all six agents — `needs-plan` → `needs-architecture` → `needs-design` → `ready-to-build` → `needs-review` → `ready-to-ship` → closed — without a human typing a prompt at any stage.
+> **Goal:** Install the factory-activity-agent tooling, stand up the Fired-Up Pizza reference factory on your machine, and watch a single feature bead walk through all six agents — `needs-plan` → `needs-architecture` → `needs-design` → `ready-to-build` → `needs-review` → `ready-to-ship` → closed — without a human typing a prompt at any stage.
 
 | | |
 |---|---|
@@ -12,7 +12,7 @@
 
 ## Session workspace note
 
-* **Curriculum-agent source:** `software-factory/curriculum-agent/` — `SKILL.md` is the canonical entry point; `scripts/` hold the thin Bash wrappers (`install.sh`, `status.sh`, `doctor.sh`, `delete.sh`, `diagnose.sh`) that front the Python runner at `scripts/curriculum_agent.py`.
+* **factory-activity-agent source:** `software-factory/factory-activity-agent/` — `SKILL.md` is the canonical entry point; `scripts/` hold the thin Bash wrappers (`install.sh`, `status.sh`, `doctor.sh`, `delete.sh`, `diagnose.sh`) that front the Python runner at `scripts/factory_activity_agent.py`.
 * **Reference project (the "rig" the factory works on):** `software-factory/reference-project/` — a small React + TypeScript + SQLite pizza-restaurant app with `docs/PROJECT_MANIFEST.md`, `tickets.md` (initial backlog), and `package.json` already in place.
 * **Fired-Up Pizza pack (what you install into your factory):** `software-factory/packs/fired-up-pizza/` — a composite pack bundling the six agents, plus a doctor check for the reference scaffold and a `tickets.md` importer.
 * **Factory workspace (created during this session):** `~/Projects/factory/fired-up-pizza/fup-gc-factory/` — the Gas City `city.toml` + workspace that runs the agents. Every `gc` command below is run from that directory unless otherwise noted.
@@ -97,47 +97,47 @@ Do not try to memorize. You should come away able to name, for any label, (a) wh
 
 ---
 
-## Part 2: Install the `curriculum-agent` Skill (~10 min)
+## Part 2: Install the `factory-activity-agent` Skill (~10 min)
 
-The **curriculum-agent** is the tooling you'll use across every W/L session for setup, teardown, status, and diagnosis. Install it once now; every session after this assumes it is on your path.
+The **factory-activity-agent** is the tooling you'll use across every W/L session for setup, teardown, status, and diagnosis. Install it once now; every session after this assumes it is on your path.
 
 ### Step 1: Symlink the skill into your coding agent's skills directory
 
-The curriculum-agent lives in the repo at `software-factory/curriculum-agent/`. Symlink it into your coding agent's skills directory so the slash command is available anywhere:
+The factory-activity-agent lives in the repo at `software-factory/factory-activity-agent/`. Symlink it into your coding agent's skills directory so the slash command is available anywhere:
 
 ```bash
 // Claude Code
-ln -sfn "$(pwd)/software-factory-intensive/software-factory/curriculum-agent" ~/.claude/skills/curriculum-agent
+ln -sfn "$(pwd)/software-factory-intensive/software-factory/factory-activity-agent" ~/.claude/skills/factory-activity-agent
 
 // Codex
-ln -sfn "$(pwd)/software-factory-intensive/software-factory/curriculum-agent" ~/.codex/skills/curriculum-agent
+ln -sfn "$(pwd)/software-factory-intensive/software-factory/factory-activity-agent" ~/.codex/skills/factory-activity-agent
 ```
 
 Now, in your coding agent run:
 
 ```
-/curriculum-agent list
+/factory-activity-agent list
 ```
 
 You should see a table of activities (`W1`, `W2`, …, `L5`) with their install status. Every row will say `no` — nothing is installed yet. If the slash command isn't recognized, the symlink didn't resolve; re-check the path.
 
 ### Step 2: Learn the four commands you'll use this weekend
 
-The curriculum-agent is a wrapper over `gc` + Python scaffolding. You only need four verbs for W1, and you'll re-use them across every session after this.
+The factory-activity-agent is a wrapper over `gc` + Python scaffolding. You only need four verbs for W1, and you'll re-use them across every session after this.
 
 #### `install` — stand up a factory for a curriculum activity
 
 ```bash
 # Runs the following command from the SFI repo root
-bash software-factory/curriculum-agent/scripts/install.sh <activity> [--dry-run]
+bash software-factory/factory-activity-agent/scripts/install.sh <activity> [--dry-run]
 ```
 
-The wrapper validates the activity name, pre-flight-checks `gc` and `python3`, then delegates to `scripts/curriculum_agent.py install <activity>`. Always run a `--dry-run` first if you're unsure what it's about to do — the dry-run prints every command without executing.
+The wrapper validates the activity name, pre-flight-checks `gc` and `python3`, then delegates to `scripts/factory_activity_agent.py install <activity>`. Always run a `--dry-run` first if you're unsure what it's about to do — the dry-run prints every command without executing.
 
 #### `status` — see every registered factory + agent state
 
 ```bash
-bash software-factory/curriculum-agent/scripts/status.sh
+bash software-factory/factory-activity-agent/scripts/status.sh
 ```
 
 Prints: `gc version`, which activities have factory directories on disk, which cities are registered with the supervisor, and — for each installed factory — `gc status` output naming the running agents. First thing to run if anything looks off.
@@ -145,7 +145,7 @@ Prints: `gc version`, which activities have factory directories on disk, which c
 #### `doctor` — diagnose + optionally auto-fix
 
 ```bash
-bash software-factory/curriculum-agent/scripts/doctor.sh
+bash software-factory/factory-activity-agent/scripts/doctor.sh
 ```
 
 Wraps `gc doctor --fix` with the curriculum-specific checks (binary versions, auth state, registered rigs). Run it after any install; run it again whenever `gc status` shows a red agent.
@@ -160,12 +160,12 @@ Serves `http://localhost:8080`. Shows the bead queue per label, live agent sessi
 
 ### Step 3: Commit muscle memory
 
-You will run each of these four verbs at least once before lunch on Day 1 and on most Day-2 sessions. Three sanity checks to do right now before moving on:
+You will run each of these four verbs in many activities moving forward. Three sanity checks to do right now before moving on:
 
 ```bash
-bash software-factory/curriculum-agent/scripts/install.sh W2 --dry-run   # preview — does not run
-bash software-factory/curriculum-agent/scripts/status.sh                 # nothing installed yet; still prints the frame
-bash software-factory/curriculum-agent/scripts/doctor.sh                 # confirms gc / python / bd are green
+bash software-factory/factory-activity-agent/scripts/install.sh W2 --dry-run   # preview — does not run
+bash software-factory/factory-activity-agent/scripts/status.sh                 # nothing installed yet; still prints the frame
+bash software-factory/factory-activity-agent/scripts/doctor.sh                 # confirms gc / python / bd are green
 ```
 
 If all three print something reasonable, the tooling is ready. Move on.
@@ -248,7 +248,7 @@ gc start                                   # bring up all six agents
 ### Step 5: Verify with doctor + status
 
 ```bash
-bash ~/Projects/actual-software/software-factory-intensive/software-factory/curriculum-agent/scripts/doctor.sh
+bash ~/Projects/actual-software/software-factory-intensive/software-factory/factory-activity-agent/scripts/doctor.sh
 gc status --city ~/Projects/factory/fired-up-pizza/fup-gc-factory
 ```
 
@@ -353,7 +353,7 @@ You kept the dashboard open during Part 3; now use the last few minutes to inter
 
 Best for: realtime overview, grouped bead queue, which agent is working right now.
 
-Keep `http://localhost:8080` open whenever a factory is running. Eighty percent of "what's happening?" questions can be answered by glancing at it.
+Keep `http://localhost:8080` open whenever a factory is running.
 
 ### Surface 2 — the beads CLI
 
@@ -385,7 +385,7 @@ gc events --follow                 # stream label transitions + session lifecycl
 
 ### Anti-surface — never `gc sling` mid-flight
 
-`gc sling <rig>/<agent> "<prompt>"` *does* exist — you saw it in the `curriculum-agent` SKILL reference. Do not use it during W1 or any time the factory is supposed to be running autonomously. Slinging a prompt at an agent bypasses the order gate and the label contract; from that moment forward, the agent isn't reacting to labels, it's reacting to your prompt. Save slings for deliberate demos and debugging, not for "the Coder is slow, let me poke it."
+`gc sling <rig>/<agent> "<prompt>"` *does* exist — you saw it in the `factory-activity-agent` SKILL reference. Do not use it during W1 or any time the factory is supposed to be running autonomously. Slinging a prompt at an agent bypasses the order gate and the label contract; from that moment forward, the agent isn't reacting to labels, it's reacting to your prompt. Save slings for deliberate demos and debugging, not for "the Coder is slow, let me poke it."
 
 ---
 
@@ -394,8 +394,6 @@ gc events --follow                 # stream label transitions + session lifecycl
 This session is your first experience of the thing the rest of the workshop is trying to make durable: **a multi-agent system that advances without a human in the keyboard loop.** The magic is not in any single agent's prompt — every pack's prompt is a few hundred lines of plain Markdown. The magic is in the *coordination contract*: each agent watches for exactly one inbound label and sets exactly one outbound label when done.
 
 That contract is what makes the factory operable overnight, with no one at the terminal. It's also what makes it comprehensible — the entire pipeline is six label transitions; there is no hidden state in somebody's scratchpad that you'd have to read to follow along.
-
-The rest of Day 1 (W2, L1, W3, L2) is about how you customize the agents that run inside this contract for *your* project. The contract itself stays the same. You change the agents; the labels stay.
 
 ---
 
@@ -407,11 +405,11 @@ A reasonable thing to want on your first hands-on is to type *something* — to 
 
 ## Common Issues & Solutions
 
-### Issue 1: `/curriculum-agent list` isn't recognized by Claude Code
+### Issue 1: `/factory-activity-agent list` isn't recognized by Claude Code
 
-**Cause:** The symlink at `~/.claude/skills/curriculum-agent` didn't resolve, or Claude Code hasn't rescanned the skills directory.
+**Cause:** The symlink at `~/.claude/skills/factory-activity-agent` didn't resolve, or Claude Code hasn't rescanned the skills directory.
 
-**Fix:** Re-check `ls -l ~/.claude/skills/curriculum-agent` — it should show a working symlink into the repo. Restart Claude Code. If still missing, copy the directory in instead of symlinking (`cp -r software-factory/curriculum-agent ~/.claude/skills/curriculum-agent`).
+**Fix:** Re-check `ls -l ~/.claude/skills/factory-activity-agent` — it should show a working symlink into the repo. Restart Claude Code. If still missing, copy the directory in instead of symlinking (`cp -r software-factory/factory-activity-agent ~/.claude/skills/factory-activity-agent`).
 
 ### Issue 2: `gc rig add` fails with a missing `.gc/...` file (e.g. `gc-beads-bd`)
 
@@ -485,78 +483,14 @@ Then `gc restart` to pick up the change.
 
 Before leaving this workshop, verify all of these:
 
-- [ ] `~/.claude/skills/curriculum-agent` (or `~/.codex/skills/curriculum-agent`) resolves to the repo
-- [ ] `bash .../curriculum-agent/scripts/status.sh` prints a green `gc version` and lists your factory directory under *Installed Activities* / *Registered Cities*
+- [ ] `~/.claude/skills/factory-activity-agent` (or `~/.codex/skills/factory-activity-agent`) resolves to the repo
+- [ ] `bash .../factory-activity-agent/scripts/status.sh` prints a green `gc version` and lists your factory directory under *Installed Activities* / *Registered Cities*
 - [ ] `gc status --city ~/Projects/factory/fired-up-pizza/fup-gc-factory` shows six agents as running (idle or working — not dead)
 - [ ] The dashboard at `http://localhost:8080` loaded and showed at least one non-empty label column
 - [ ] At least one bead flipped through at minimum three distinct labels under your observation (`needs-plan` → `ready-to-build` → `needs-review` is the minimum chain)
 - [ ] You did not run `gc sling` manually after the initial `bd label add`
-- [ ] You can name, from memory, which label each of the six agents consumes as input
 
 **W1 is the foundation for everything that follows.** W2 (next) shifts you from "watching the reference factory run" to "understanding what the agents consume and emit so you can configure them for your own project." L1 installs the factory on your project. L2–L4 customize each agent pack.
-
----
-
-## Command Cheat Sheet
-
-```bash
-# PART 1 — install curriculum-agent skill
-cd ~/Projects/actual-software/software-factory-intensive
-mkdir -p ~/.claude/skills
-ln -sfn "$(pwd)/software-factory/curriculum-agent" ~/.claude/skills/curriculum-agent
-# Claude Code: /curriculum-agent list   (verify)
-
-# The four verbs you'll use across the workshop
-bash software-factory/curriculum-agent/scripts/install.sh <activity> [--dry-run]
-bash software-factory/curriculum-agent/scripts/status.sh
-bash software-factory/curriculum-agent/scripts/doctor.sh
-gc dashboard serve --city ~/Projects/factory/<slug>/<alias>-gc-factory
-
-# PART 2 — stand up Fired-Up Pizza factory (manual stand-up)
-mkdir -p ~/Projects/factory/fired-up-pizza/fup-gc-factory
-cd    ~/Projects/factory/fired-up-pizza/fup-gc-factory
-
-SFI="$(cd ~/Projects/actual-software/software-factory-intensive && pwd)"
-cat > city.toml <<TOML
-[workspace]
-name = "fup-factory"
-provider = "claude"
-includes = ["$SFI/software-factory/packs/fired-up-pizza"]
-
-[session]
-startup_timeout = "3m"
-TOML
-
-gc init --file city.toml .
-gc rig add "$SFI/software-factory/reference-project" --prefix rp
-gc register .
-gc start
-bash "$SFI/software-factory/curriculum-agent/scripts/doctor.sh"
-gc status --city ~/Projects/factory/fired-up-pizza/fup-gc-factory
-
-# Import backlog
-cd "$SFI/software-factory/reference-project"
-bash ../packs/fired-up-pizza/scripts/import-tickets.sh tickets.md
-bd list
-
-# PART 3 — walk a bead through the factory
-gc dashboard serve --city ~/Projects/factory/fired-up-pizza/fup-gc-factory &
-# open http://localhost:8080
-
-bd list | grep "Menu display"          # copy the id
-bd label add <id> needs-plan           # the only manual trigger this session
-
-# Monitor (run repeatedly during the demo)
-gc status
-bd label list <id>
-gc events --follow                     # in a second terminal
-gc session peek <rig>/<agent>          # peek at a specific agent
-
-# PART 3 (after close)
-bd show <id>
-git -C "$SFI/software-factory/reference-project" tag -l | tail -3
-bd list --label needs-improve          # optional-7th handoff handle
-```
 
 ---
 
@@ -564,10 +498,10 @@ bd list --label needs-improve          # optional-7th handoff handle
 
 | Component | Location | What It Does |
 |-----------|----------|--------------|
-| `curriculum-agent` skill | `~/.claude/skills/curriculum-agent` → `software-factory/curriculum-agent` | Slash command and Bash wrappers for `install` / `status` / `doctor` / `dashboard` / `delete` |
-| `install.sh` wrapper | `software-factory/curriculum-agent/scripts/install.sh` | Validates an activity, pre-flight-checks, delegates to `curriculum_agent.py` |
-| `status.sh` wrapper | `software-factory/curriculum-agent/scripts/status.sh` | Prints `gc version`, registered cities, and per-factory agent status |
-| `doctor.sh` wrapper | `software-factory/curriculum-agent/scripts/doctor.sh` | Runs `gc doctor --fix` and the curriculum's environment checks |
+| `factory-activity-agent` skill | `~/.claude/skills/factory-activity-agent` → `software-factory/factory-activity-agent` | Slash command and Bash wrappers for `install` / `status` / `doctor` / `dashboard` / `delete` |
+| `install.sh` wrapper | `software-factory/factory-activity-agent/scripts/install.sh` | Validates an activity, pre-flight-checks, delegates to `factory_activity_agent.py` |
+| `status.sh` wrapper | `software-factory/factory-activity-agent/scripts/status.sh` | Prints `gc version`, registered cities, and per-factory agent status |
+| `doctor.sh` wrapper | `software-factory/factory-activity-agent/scripts/doctor.sh` | Runs `gc doctor --fix` and the curriculum's environment checks |
 | Fired-Up Pizza factory workspace | `~/Projects/factory/fired-up-pizza/fup-gc-factory/` | Your live Gas City workspace — `city.toml`, registered rig, six running agents |
 | Reference project (the rig) | `software-factory/reference-project/` | React/TS/SQLite app the factory works on; ships `tickets.md`, `docs/PROJECT_MANIFEST.md`, `package.json` |
 | Fired-Up Pizza composite pack | `software-factory/packs/fired-up-pizza/` | Bundles the six agent packs + `check-project` doctor + `import-tickets.sh` |
@@ -578,8 +512,8 @@ bd list --label needs-improve          # optional-7th handoff handle
 
 ## Next Steps
 
-**W2 (next, 1:00pm Day 1)** turns the lens inward: *how* do the agents do their job? You'll trace a feature bead through the six packs, read each agent's prompt template + formula, and start building the mental model you'll need in L1/L2 when the packs become *your* configuration to edit. If you can, re-read the `needs-plan` through `ready-to-ship` cycle on the dashboard once before W2 starts — the pattern will be fresher.
+**W2** turns the lens inward: *how* do the agents do their job? You'll trace a feature bead through the six packs, read each agent's prompt template + formula, and start building the mental model you'll need in L1/L2 when the packs become *your* configuration to edit. If you can, re-read the `needs-plan` through `ready-to-ship` cycle on the dashboard once before W2 starts — the pattern will be fresher.
 
-**L1 (1:45pm Day 1)** is where the factory becomes *yours*. You'll register your own project as the rig, point the six shipped packs at it, and watch the same cycle you just saw run against *your* codebase's first feature bead.
+**L1** is where the factory becomes *yours*. You'll register your own project as the rig, point the six shipped packs at it, and watch the same cycle you just saw run against *your* codebase's first feature bead.
 
-Between now and W2: leave the factory running if you can (it's idle, not costly). If the dashboard is open, keep it open. Part of the workshop's intent is that by Day 2 afternoon you stop noticing the dashboard because the factory running is just the ambient state.
+Between now and W2: leave the factory running if you can (it's idle, not costly). If the dashboard is open, keep it open. Part of the workshop's intent is that towards the end of the curriculum you stop noticing the dashboard because the factory running is just the ambient state.

@@ -524,7 +524,7 @@ A capstone that ended with a partial run, one pack commit, and two committed doc
 
 ## What You Built (across L1–L5)
 
-If this is the last session you're doing in the workshop, take five minutes here to look at what lives on disk now. Every row below is something the factory did not have at the start of Day 1.
+Take five minutes here to look at what lives on disk now. Every row below is something the factory did not have at the start of the curriculum.
 
 | Layer | File / Location | What it is |
 |-------|-----------------|-----------|

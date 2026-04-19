@@ -76,7 +76,7 @@ Verify each of these before Step 1. Fixing a missing prereq mid-lab costs more t
 | `claude` (or another provider CLI) authenticated | `claude --version`; `claude` opens and answers a prompt | `claude auth login`. Codex/Cursor/Gemini also work — set `provider` in `city.toml` accordingly. |
 | Your project repo cloned, clean | `cd ~/path/to/your-project && git status` → clean working tree | Commit/stash pending work before L1; the factory will want to branch off a known state. |
 | A small user story | Something you could implement by hand in 15–30 minutes touching fewer than five files | If you don't have one, borrow from the reference: [`reference-project/fired-up-pizza/tickets.md`](../../../reference-project/fired-up-pizza/tickets.md). FUP-3 ("Shopping cart — running total") is the running example. |
-| `curriculum-agent` skill available | `/curriculum-agent list` inside Claude Code prints the activity table | See [`../../../curriculum-agent/SKILL.md`](../../../curriculum-agent/SKILL.md) for installation — one `ln -s` into `~/.claude/skills/`. |
+| `factory-activity-agent` skill available | `/factory-activity-agent list` inside Claude Code prints the activity table | See [`../../../factory-activity-agent/SKILL.md`](../../../factory-activity-agent/SKILL.md) for installation — one `ln -s` into `~/.claude/skills/`. |
 
 **Scope anchor.** This lab will install a new, L1-scoped factory at `~/Projects/factory/lab_l1/`. It does not touch the `my-factory/` workspace from earlier sessions or the Fired-Up Pizza factory from W1. The point is that you can stand up additional factories at will — one per project, one per experiment.
 
@@ -94,13 +94,13 @@ If you are working against your own project, substitute a comparably small story
 
 > **Agent Guide:** Before running `install`, confirm with the participant that their project repo is clean (no uncommitted work) and that `gc` v0.14.1 is on PATH. If either is off, the install will surface a confusing error later.
 
-`curriculum-agent` is the skill that manages per-activity factory setups for this curriculum. It wraps the raw `gc` + `bd` commands in a single idempotent verb per lifecycle step (install, status, doctor, delete). You will use it in every session from here forward.
+`factory-activity-agent` is the skill that manages per-activity factory setups for this curriculum. It wraps the raw `gc` + `bd` commands in a single idempotent verb per lifecycle step (install, status, doctor, delete). You will use it in every session from here forward.
 
 ### Step 1.1: Dry-run the install
 
 ```bash
 cd /path/to/software-factory-intensive/software-factory
-bash curriculum-agent/scripts/install.sh L1 --dry-run
+bash factory-activity-agent/scripts/install.sh L1 --dry-run
 ```
 
 **What's happening here:** `--dry-run` prints every command the installer would execute without running it. Skim the output — you should see: create `~/Projects/factory/lab_l1/`, initialize a sub-project at `l1-project/`, initialize a Gas City factory at `l1-gc-factory/`, copy the L1 packs into `l1-gc-factory/packs/actual/`, register the factory with the supervisor, and start the agents. If anything in the plan surprises you (e.g. a path you didn't expect), stop and ask — don't run the real install until you understand the plan.
@@ -108,7 +108,7 @@ bash curriculum-agent/scripts/install.sh L1 --dry-run
 ### Step 1.2: Execute the install
 
 ```bash
-bash curriculum-agent/scripts/install.sh L1
+bash factory-activity-agent/scripts/install.sh L1
 ```
 
 Expected output (truncated):
@@ -130,10 +130,10 @@ The pack source the installer copies from is the B1 baseline tree at [`B1/gascit
 ### Step 1.3: Confirm the factory is up
 
 ```bash
-bash curriculum-agent/scripts/status.sh
+bash factory-activity-agent/scripts/status.sh
 ```
 
-You should see `l1-gc-factory` listed as running, with one or more agents in the `running` state. If anything reports `failed`, run `bash curriculum-agent/scripts/doctor.sh` and fix what it surfaces before moving on. Most first-time failures are missing CLI auth (`claude auth login`) or a stale `gc` version.
+You should see `l1-gc-factory` listed as running, with one or more agents in the `running` state. If anything reports `failed`, run `bash factory-activity-agent/scripts/doctor.sh` and fix what it surfaces before moving on. Most first-time failures are missing CLI auth (`claude auth login`) or a stale `gc` version.
 
 ---
 
@@ -233,7 +233,7 @@ Two observability surfaces — the doctor and the dashboard — will save you su
 
 ```bash
 cd /path/to/software-factory-intensive/software-factory
-bash curriculum-agent/scripts/doctor.sh
+bash factory-activity-agent/scripts/doctor.sh
 ```
 
 **What's happening here:** `doctor` walks every check in every pack attached to your rigs and prints pass/fail for each. Green rows confirm tools, paths, auth, and pack config. Yellow warnings usually flag optional integrations (e.g. `LINEAR_API_KEY` not set) — safe to ignore if you are not using that integration. Red failures must be fixed before slinging.
@@ -246,7 +246,7 @@ gc dashboard serve --city ~/Projects/factory/lab_l1/l1-gc-factory
 
 Open http://localhost:8080 in a browser. You should see six agent rows (planner/architect/designer/coder/reviewer/deployer), a beads table (empty), and an event stream. Keep this tab open — it will update live while you walk the feature bead in Steps 5–6.
 
-> **Earlier-draft note:** prior L1 drafts introduced `gc init`, `gc register`, and a hand-written `[[agent]]` block for a single `dev-agent`. The new curriculum replaces that with `curriculum-agent install L1` and shipped packs. If you see stale references to `~/my-city` or `dev-agent` in your notes, mentally translate them to `~/Projects/factory/lab_l1/l1-gc-factory` and the six shipped agents.
+> **Earlier-draft note:** prior L1 drafts introduced `gc init`, `gc register`, and a hand-written `[[agent]]` block for a single `dev-agent`. The new curriculum replaces that with `factory-activity-agent install L1` and shipped packs. If you see stale references to `~/my-city` or `dev-agent` in your notes, mentally translate them to `~/Projects/factory/lab_l1/l1-gc-factory` and the six shipped agents.
 
 ---
 
@@ -419,7 +419,7 @@ If the factory gets into a state you can't reason about:
 
 ```bash
 gc stop
-bash /path/to/software-factory-intensive/software-factory/curriculum-agent/scripts/doctor.sh
+bash /path/to/software-factory-intensive/software-factory/factory-activity-agent/scripts/doctor.sh
 gc start
 ```
 
@@ -441,7 +441,7 @@ See [`../../../LABELED_BEADS.md`](../../../LABELED_BEADS.md#why-labels-replaced-
 
 ## Exit Criteria
 
-- [ ] `curriculum-agent install L1` succeeded; factory running at `~/Projects/factory/lab_l1/l1-gc-factory/`
+- [ ] `factory-activity-agent install L1` succeeded; factory running at `~/Projects/factory/lab_l1/l1-gc-factory/`
 - [ ] Your project is registered as a rig (`gc rig list` shows it)
 - [ ] `city.toml` includes `packs/actual/all` (or the six individual packs) for your rig
 - [ ] `gc status` shows all six agents running
@@ -460,7 +460,7 @@ See [`../../../LABELED_BEADS.md`](../../../LABELED_BEADS.md#why-labels-replaced-
 - **Zero chat corrections.** Re-read the event stream. If any event is you typing into a `gc watch` window, your habit needs another rep — not a bad thing, just name it.
 - **Labels, not markdowns.** No `SPEC.md` / `DESIGN.md` / `REVIEW.md` files were created by you or any agent during the walk. If any agent wrote a durable handoff doc, its pack config is misconfigured — flag it as L2 input.
 - **Dashboard-readable.** If you closed the event-stream terminal, could you still reconstruct what happened from the dashboard alone? If yes, the observability layer is doing its job.
-- **Reproducible.** `curriculum-agent delete L1 && curriculum-agent install L1` returns you to a working factory. If it doesn't, something was done by hand that belongs in config.
+- **Reproducible.** `factory-activity-agent delete L1 && factory-activity-agent install L1` returns you to a working factory. If it doesn't, something was done by hand that belongs in config.
 
 ---
 
@@ -508,8 +508,8 @@ bd create "Add a 'Clear cart' button" --label needs-plan
 
 ## Common Issues & Solutions
 
-### Issue: `curriculum-agent install L1` fails on "Activity L1 has no gascity packs"
-**Fix:** the installer couldn't find the pack source tree. Verify you're running from `software-factory/` (the repo's software-factory subdir, where `curriculum-agent/` lives). If the directory is missing entirely, re-sync your repo (`git pull`).
+### Issue: `factory-activity-agent install L1` fails on "Activity L1 has no gascity packs"
+**Fix:** the installer couldn't find the pack source tree. Verify you're running from `software-factory/` (the repo's software-factory subdir, where `factory-activity-agent/` lives). If the directory is missing entirely, re-sync your repo (`git pull`).
 
 ### Issue: `gc rig add` reports "path does not exist"
 **Fix:** you passed a relative path that didn't resolve. Use the absolute path to your project: `gc rig add "$(realpath ~/path/to/your-project)"`.
@@ -526,11 +526,11 @@ bd create "Add a 'Clear cart' button" --label needs-plan
 ### Issue: You caught yourself typing into a `gc watch` session
 **Fix:** stop immediately. The correction is invisible to the next sling and to every other agent. Close the watch tab, translate your correction into a change on the relevant pack's prompt template or on the bead description, re-label to re-trigger the agent.
 
-### Issue: `bash curriculum-agent/scripts/doctor.sh` fails with "Port 8080 already in use"
+### Issue: `bash factory-activity-agent/scripts/doctor.sh` fails with "Port 8080 already in use"
 **Fix:** a previous dashboard is still running. `lsof -i :8080` to find the PID, `kill <pid>`, re-run.
 
 ### Issue: Two factories running simultaneously confuse the supervisor
-**Fix:** run `gc cities` to list all registered factories. Stop the one you don't need (`gc stop --city <path>`) or delete it with `curriculum-agent delete <activity>`.
+**Fix:** run `gc cities` to list all registered factories. Stop the one you don't need (`gc stop --city <path>`) or delete it with `factory-activity-agent delete <activity>`.
 
 ---
 
@@ -540,9 +540,9 @@ bd create "Add a 'Clear cart' button" --label needs-plan
 # FROM software-factory/ ROOT
 
 # STEP 1 — Install the L1 factory
-bash curriculum-agent/scripts/install.sh L1 --dry-run
-bash curriculum-agent/scripts/install.sh L1
-bash curriculum-agent/scripts/status.sh
+bash factory-activity-agent/scripts/install.sh L1 --dry-run
+bash factory-activity-agent/scripts/install.sh L1
+bash factory-activity-agent/scripts/status.sh
 
 # STEP 2 — Register your project as the rig
 cd ~/Projects/factory/lab_l1/l1-gc-factory
@@ -552,7 +552,7 @@ gc service restart
 gc status
 
 # STEP 3 — Observability
-bash curriculum-agent/scripts/doctor.sh
+bash factory-activity-agent/scripts/doctor.sh
 gc dashboard serve --city ~/Projects/factory/lab_l1/l1-gc-factory
 # Open http://localhost:8080
 
@@ -567,11 +567,11 @@ watch -n 3 "bd show <bead-id> | head -20"
 
 # STEP 7 — Recovery
 gc stop
-bash curriculum-agent/scripts/doctor.sh
+bash factory-activity-agent/scripts/doctor.sh
 gc start
 
 # TEARDOWN (after the lab)
-bash curriculum-agent/scripts/delete.sh L1
+bash factory-activity-agent/scripts/delete.sh L1
 ```
 
 ---
@@ -595,7 +595,7 @@ bash curriculum-agent/scripts/delete.sh L1
 
 - Which of the six labels did the Planner add, and which did it consume?
 - Why did your bead (if it did) pass through `needs-architecture` — or why didn't it?
-- Where is the factory config stored, and where does `curriculum-agent install` copy the pack source from?
+- Where is the factory config stored, and where does `factory-activity-agent install` copy the pack source from?
 - When the Reviewer rejects a change, which label does it re-apply, and which agent picks the bead up next?
 - What's the difference between editing a pack's prompt template and typing a correction into `gc watch`?
 
@@ -605,4 +605,4 @@ bash curriculum-agent/scripts/delete.sh L1
 
 In **L2** you'll replace the shipped `planner` and `architect` packs with your customised copies. The topology — labeled beads, six agents — stays identical; you're only changing what each agent *does* when it claims a bead. If the L1 walk worked, L2's substitution is mechanically identical: copy the pack, edit the prompts, re-wire `city.toml`, watch a new bead walk.
 
-In **L3** and **L4** you'll do the same for Designer + Coder, then Reviewer + Deployer. By the end of Day 2 you own all six prompts, and the factory is no longer shipped — it's yours.
+In **L3** and **L4** you'll do the same for Designer + Coder, then Reviewer + Deployer. By the end of the curriculum you own all six prompts, and the factory is no longer shipped — it's yours.
