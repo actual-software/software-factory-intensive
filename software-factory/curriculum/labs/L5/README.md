@@ -1,929 +1,652 @@
-# L5 · Run the Software Factory End-to-End
+# L5 / C1 · Run the Software Factory End-to-End
 
-> **What you'll do:** Take a brand-new feature request (one you have not seen in any prior lab) and run it through all six agents of your factory — Planner → Architect → Designer → Coder → Reviewer → Deployer — driven entirely by the configuration you've built across W1–W4 and L1–L4. You will not type a single ad-hoc prompt. Every fix happens through a config edit. The deliverable is a committed feature branch, a completed Factory Run Report, and a retrospective card — even if you don't reach the Deployer in ~90 minutes.
+> **What you'll do:** Take a brand-new feature request — one your factory has never seen — and walk it through all six of the agents you customised across L2–L4, driven entirely by label flips on a single bead. The feature enters labelled `needs-plan` and leaves with either a closed bead and a tagged release, or a partial walk whose stall point is the most honest signal your factory will generate this week. W4 participants may have an Improver agent observing in the background. No ad-hoc prompts, no hand-edits in `src/` — every correction is a pack-prompt or formula edit on the agent that produced the fault.
 
 | | |
 |---|---|
 | **Estimated duration** | ~90 minutes |
-| **Type** | CAPSTONE |
-| **Deliverable** | Factory Run Report + committed feature branch (any stage) + retrospective card (all at `activities/labs/L5/`) |
+| **Type** | LAB / CAPSTONE |
+| **Deliverable** | One bead walked through the factory on labels alone (any distance counts), a `docs/factory-runs/<date>-<slug>.md` run record, and a Keep / Change / Question retrospective committed alongside it |
 
 ---
 
 ## Session workspace note
 
-Prompt templates are `packs/<name>/prompts/<name>.md.tmpl`. Commands use the pack names: `gc sling coder <bead>`, `gc sling deployer <bead>`.
+* **Pack locations (shipped):** `packs/planner/`, `packs/architect/`, `packs/designer/`, `packs/coder/`, `packs/reviewer/`, `packs/deployer/` — and, if W4 is done, `packs/improver/` — all under the `software-factory/` tree. Prompt templates are `packs/<agent>/prompts/<agent>.md.tmpl`; formulas are `packs/<agent>/formulas/mol-<name>.formula.toml`; order gates are `packs/<agent>/formulas/orders/<agent>-intake/order.toml`.
+* **Gas City workspace:** `my-factory/` — this is where `city.toml` lives. Every `gc` command below is run from that folder unless otherwise noted.
+* **Your deliverables this session:** `docs/factory-runs/<date>-<slug>.md` and `docs/retrospectives/<date>-capstone.md` inside your **project rig** (the repo the factory is building). Plus any pack-prompt / formula commits you make when recovering from stalls.
+* **No new pack work.** L5 doesn't customise any new packs — it runs the pipeline you already built. If a step stalls and the fix is a pack edit, that edit is a commit in `my-factory/packs/<agent>/`, same as every earlier lab.
 
-Before starting the run, verify all six packs are wired in `../../../my-factory/city.toml`:
-
-```toml
-includes = [
-    "../packs/planner",
-    "../packs/architect",
-    "../packs/designer",
-    "../packs/coder",
-    "../packs/reviewer",
-    "../packs/deployer",
-]
-```
-
-If you skipped an earlier lab, add the shipped path for that pack — the capstone still runs against the reference packs even without customisations. The run report + retrospective land at `../../../activities/labs/L5/`.
+**Canonical reference:** keep [`LABELED_BEADS.md`](../../../LABELED_BEADS.md) open in another tab for the entire session. The capstone is the first time you see *all six* labels flip on the same bead back-to-back. If you forget which agent consumes which label, that doc is the one-page answer.
 
 ---
 
-> **Agent Guide** — If an AI coding agent is guiding you through this capstone, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. This is the one session where "I'll finish it later" is disallowed — the Factory Run Report, feature branch, and retrospective **must** be committed before the session ends, whether or not the run reaches the Deployer. An agent reading this README should start by opening `my-factory/PROJECT_MANIFEST.md` and glancing at `orchestrator.yaml`; the capstone is driven by the participant's own config.
+> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. This is the one session where "I'll finish it later" is disallowed: the run record and the retrospective card must be committed before the session ends, whether or not the bead reaches the deployer. An agent reading this README should first run `gc doctor` and `bd list --label=needs-plan` in the participant's factory — the capstone runs against the participant's *real* packs and their *real* project manifest, not against a scripted example.
 
 ---
 
 ## Architecture Diagram
 
+The entire factory, compressed into one picture. Every arrow going *down* is a label flip on a bead (the routing signal). Every box is an agent woken by its order gate when the inbound label shows up on a `bd ready` query.
+
 ```
-                         ┌──────────────────────────────┐
-                         │    Feature Request (bead)     │
-                         │    — medium complexity —      │
-                         └───────────────┬──────────────┘
-                                         │
-                                         ▼
-   ┌───────────────────────────┐   ┌──────────────────┐
-   │  orchestrator.yaml         │──▶│   PLANNER AGENT   │──▶ work-packages/<slug>.md
-   │  (W3 coordination)         │   └────────┬─────────┘
-   │                            │            │ handoff: bead --depends-on
-   │  pipeline:                 │            ▼
-   │    - planner               │   ┌──────────────────┐
-   │    - architect             │──▶│ ARCHITECT AGENT   │──▶ docs/adr/NNNN-<slug>.md
-   │    - designer              │   └────────┬─────────┘
-   │    - coder                 │            │
-   │    - reviewer              │            ▼
-   │    - deployer              │   ┌──────────────────┐
-   │                            │──▶│ DESIGNER AGENT    │──▶ design/<slug>-spec.md
-   │  gates:                    │   └────────┬─────────┘
-   │    - architect: human      │            │
-   │    - deployer: human       │            ▼
-   │                            │   ┌──────────────────┐
-   └────────────┬───────────────┘──▶│   CODER AGENT     │──▶ src/... + feature branch
-                │                   └────────┬─────────┘
-                │                            │
-                │                            ▼
-                │                   ┌──────────────────┐
-                │                ──▶│ REVIEWER AGENT    │──▶ review-reports/<slug>-review.md
-                │                   └────────┬─────────┘
-                │                            │ human gate
-                │                            ▼
-                │                   ┌──────────────────┐
-                │                ──▶│ DEPLOYER AGENT    │──▶ release-gates/<slug>-gate.md
-                │                   └────────┬─────────┘
-                │                            │
-                ▼                            ▼
-        ┌────────────────────────────────────────────────┐
-        │  feedback-loops/run-analyzer.sh (W4)            │
-        │  observes runtime events, writes auto-guidance  │
-        │  back into CLAUDE.md + agent prompts            │
-        └────────────────────────────────────────────────┘
-                                 ▲
-                                 │ feeds back into every agent's next run
+           (human files a feature bead with --label needs-plan)
+                                 │
+                                 ▼  needs-plan
+               ┌────────────────────────────────┐
+               │        PLANNER AGENT            │
+               │  bd ready --label=needs-plan    │
+               │                                  │
+               │  writes docs/plans/<slug>.md     │
+               │  creates child beads labelled    │
+               │  needs-architecture /            │
+               │  needs-design /                  │
+               │  ready-to-build                  │
+               └────┬────────┬────────────┬──────┘
+                    │        │            │
+      needs-        │        │ needs-     │ ready-to-
+      architecture  │        │ design     │ build
+                    ▼        │            │
+   ┌────────────────────┐    │            │
+   │  ARCHITECT AGENT    │   │            │
+   │  bd ready           │   │            │
+   │   --label=needs-    │   │            │
+   │   architecture      │   │            │
+   │                     │   │            │
+   │  writes docs/       │   │            │
+   │  architecture +     │   │            │
+   │  docs/rules + syncs │   │            │
+   │  CLAUDE.md / AGENTS │   │            │
+   │  via actual adr-bot │   │            │
+   │                     │   │            │
+   │  relabels bead →    │   │            │
+   │  needs-plan (back)  │   │            │
+   └──────────┬──────────┘   │            │
+              │              │            │
+              └──→ planner runs again on the richer context ──┐
+                                 │                              │
+                                 ▼                              │
+                     (children flow outward)                    │
+                                 │                              │
+                    ┌────────────┴─────────────┐                │
+                    ▼                          ▼                │
+           ┌───────────────────┐      (ready-to-build path      │
+           │  DESIGNER AGENT    │       skips the designer)     │
+           │  bd ready          │               │               │
+           │   --label=needs-   │               │               │
+           │   design           │               │               │
+           │                    │               │               │
+           │  writes docs/      │               │               │
+           │  designs/<slug>.md │               │               │
+           │                    │               │               │
+           │  relabels →        │               │               │
+           │  ready-to-build    │               │               │
+           └──────────┬─────────┘               │               │
+                      │                         │               │
+                      └──────────┬──────────────┘               │
+                                 │                              │
+                                 ▼  ready-to-build              │
+               ┌────────────────────────────────┐               │
+               │          CODER AGENT            │               │
+               │  bd ready --label=ready-to-     │               │
+               │          build                  │               │
+               │                                  │               │
+               │  writes code + tests on a        │               │
+               │  feature branch                  │               │
+               │                                  │               │
+               │  relabels → needs-review         │               │
+               └───────────────┬──────────────────┘               │
+                               │                                  │
+                               ▼  needs-review                    │
+               ┌────────────────────────────────┐                 │
+               │        REVIEWER AGENT           │                 │
+               │  bd ready --label=needs-review  │                 │
+               │                                  │                 │
+               │  writes findings + verdict into  │                 │
+               │  bead notes                      │                 │
+               └───────────┬────────┬──────────────┘               │
+                    pass   │        │ request-changes              │
+                           ▼        ▼                              │
+                   ready-to-ship    ready-to-build ───→ back to coder
+                           │
+                           ▼  ready-to-ship
+               ┌────────────────────────────────┐
+               │        DEPLOYER AGENT           │
+               │  bd ready --label=ready-to-ship │
+               │                                  │
+               │  runs checks → smoke → version   │
+               │  → tag → rollback-plan          │
+               │                                  │
+               │  closes root bead,               │
+               │  emits needs-improve bead        │
+               └───────────────┬──────────────────┘
+                               │
+                               ▼  needs-improve (optional)
+                  ┌────────────────────────────┐
+                  │     IMPROVER AGENT (W4)     │
+                  │  wakes on 24h cooldown or   │
+                  │  manual harvest.            │
+                  │  reads bead notes, mail,    │
+                  │  deploy gates.              │
+                  │  writes docs/feedback/      │
+                  │  <date>.md; files new       │
+                  │  labelled beads for humans  │
+                  │  to accept or reject.       │
+                  └────────────────────────────┘
 ```
 
-Every arrow going *down* is a handoff artifact on disk. Every arrow going *up* is a feedback signal that changes config. The factory is complete when both axes are wired and a bead entering at the top produces a release gate at the bottom without you typing into any agent session.
+There are no SPEC.md / ARCHITECTURE.md / REVIEW.md documents being passed between agents. Every handoff is a label flip on the same bead; every finding / plan / verdict / rollback plan lives in that bead's notes. The artifacts written to the project rig (`docs/plans/`, `docs/architecture/`, `docs/designs/`, `docs/releases/`) are for humans and downstream agents to **read**, not to route on. See [`LABELED_BEADS.md`](../../../LABELED_BEADS.md) for why the factory runs this way.
 
 ---
 
 ## Prerequisites
 
-Before starting the capstone, verify each row. If any row fails, fix it *before* creating the feature bead — the capstone cannot surface useful signal if the factory is misconfigured at the start.
+Before starting the capstone, verify each row. If any row fails, fix it *before* filing the feature bead — a misconfigured factory at T+0 produces garbage signal that makes the retrospective useless.
 
 | Prerequisite | How to verify | If it's missing |
 |-------------|---------------|-----------------|
-| L1 complete | `ls ~/path/to/your-repo/CLAUDE.md` → file exists with project context | Go back and complete L1 |
-| L2 complete | `gc status` shows `planner` and `architect` as idle agents | Complete L2 (Part 1 + Part 2 install flow) |
-| L3 complete | `gc status` also shows `designer` and `coder`; prior work package + ADR committed | Complete L3 |
-| L4 complete | `gc status` also shows `reviewer` and `devops`; prior PR has a review report | Complete L4 |
-| All 6 agents declared in `city.toml` | `grep -c '^\[\[agent\]\]' my-factory/city.toml` → returns 6 (or more if you kept `dev-agent`) | Re-run `gc rig add --include` for any missing pack |
-| Project manifest is tight | `cat ~/path/to/your-repo/docs/PROJECT_MANIFEST.md` — Review Standards and Release Criteria sections have explicit, testable rules (not "code should be clean") | Tighten before starting — vague manifests produce vague agent output |
-| Orchestrator present (optional but recommended) | `cat my-factory/orchestrator.yaml` shows the 6-stage pipeline from W3 | You can run manually (slinging each stage by hand); note this in the report's "Config Discipline" row |
-| At least one feedback loop encoded | `ls ~/path/to/your-repo/feedback-loops/rules/` → at least one `*.sh` rule | Go back to W4 Part 2 and write one rule |
-| `CLAUDE.md` has tailored industry ADRs (optional) | `grep -i "tailored" ~/path/to/your-repo/CLAUDE.md` returns results | Run `actual adr-bot` (see L2 Part 2 Step 1) |
-| `packs/workshop/` integrations installed (optional) | `gc rig list` shows the workshop pack | L1 walkthrough covers install — without it, ticket sync and observability signals are absent but the run still works |
-| Clean working tree | `git status` in your project repo is clean | Commit or stash before starting |
+| Gas City running | `gc status` shows your city and all agents present | `gc service start` from `my-factory/` |
+| All six packs wired | `gc doctor` green for `planner`, `architect`, `designer`, `coder`, `reviewer`, `deployer` | If a pack is failing, swap back to the shipped path in `city.toml` and `gc service restart` — shipped always passes `gc doctor`. The capstone works against shipped packs; it works *better* with your customised ones. |
+| Project manifest tight | `cat ~/path/to/your-repo/docs/PROJECT_MANIFEST.md` — the tech stack, review standards, and release criteria sections have testable rules, not "code should be clean" | Tighten before starting. The planner and architect read it as their primary context; the reviewer reads the standards section as its rubric; the deployer reads the release-criteria section for its gate checks. Vague manifest → vague factory. |
+| `docs/rules/` populated | `ls ~/path/to/your-repo/docs/rules/` returns at least one `.md` | If empty, either re-run the L2 architect on a seed bead or `echo "# Project rules" > docs/rules/baseline.md` — designer, coder, and reviewer all read this directory. |
+| Tailored ADRs synced | `actual status` in your project rig shows CLAUDE.md / AGENTS.md consistent with `docs/adr/` | Re-run `actual adr-bot` (see L2 Part 2). If the `actual` CLI isn't installed the check is skipped gracefully; the capstone still runs but the coder won't refuse on drift. |
+| Clean working tree | `git -C ~/path/to/your-repo status` clean; `git -C my-factory status` clean | Commit or stash pending work. A dirty tree when the coder opens a feature branch invites merge headaches you don't want to debug under a 90-minute clock. |
+| Optional: improver wired | `gc doctor` green for `improver` and `bd list --label=needs-improve --status=open` has at least one bead left over from L4 | Not required. If W4 was skipped, the Improver simply isn't part of the run. Note this in the run record under *Prior-session deviations*. |
 
-**What "all six agents declared" means in practice.** Your `city.toml` should have a block for each agent like this (the exact shape doesn't matter, but every agent must resolve from an installed pack):
+**What "all six packs wired" means in practice.** Your `my-factory/city.toml` reaches every pack the factory needs, whether you point at shipped or customised copies:
 
 ```toml
-[[agent]]
-name = "planner"
-dir = "your-repo-name"
-provider = "claude"          # other providers (codex, cursor, gemini, etc.) are also supported
-idle_timeout = "1h"
-role = "planner"
-
-[[agent]]
-name = "architect"
-dir = "your-repo-name"
-provider = "claude"          # other providers (codex, cursor, gemini, etc.) are also supported
-idle_timeout = "1h"
-role = "architect"
-
-# ... and so on for designer, coder, reviewer, devops
+includes = [
+    # shipped or customised — same contract either way
+    "../software-factory/packs/planner",    # or "packs/planner" if you copied locally
+    "../software-factory/packs/architect",
+    "../software-factory/packs/designer",
+    "../software-factory/packs/coder",
+    "../software-factory/packs/reviewer",
+    "../software-factory/packs/deployer",
+    # optional — only if W4 is done
+    "../software-factory/packs/improver",
+]
 ```
 
 ---
 
-## The Use Case (New Feature)
+## The Feature (Pick This Before the Bead)
 
-The capstone deliberately uses a feature you have **not** touched in L2–L4. The prior labs built a loyalty points system. The capstone is about a different area of the codebase so your factory can't rely on cached reasoning from earlier sessions.
+The capstone deliberately uses a feature you have **not** touched in L2–L4. If the prior labs drove a write-path feature (loyalty points, order creation, inventory mutation), pick a read-path feature now — and vice versa. A factory that ships two different feature types is an actual factory; a factory that ships the same shape twice is an elaborate prompt.
 
 ### For Fired Up Pizza (reference project)
 
 **Feature:** Order history page — customers view past orders by phone number.
 
-Concretely, a customer navigates to `/orders/history`, enters their phone number, and sees a list of their past orders with items ordered, total paid, order date, and order status. This feature:
+A customer navigates to `/orders/history`, enters a phone number, and sees their past orders with items, totals, date, and status. The feature:
 
-- Touches the backend (new API endpoint to look up orders by phone)
-- Touches the frontend (new page + form + table)
-- Requires at least one architectural decision (how to handle the phone-number lookup — indexed column? separate lookup table? rate-limited endpoint?)
-- Has testable acceptance criteria (given phone X, see orders Y and Z; given unknown phone, see empty state)
-- Is medium complexity — roughly the same scope as the loyalty points feature but in a different slice (read path, not write path)
+- Touches both backend (new lookup endpoint on an existing table) and frontend (new page + form + list).
+- Requires at least one architectural decision (rate-limiting against phone-number enumeration; the data-access pattern).
+- Has acceptance criteria that are objectively testable (given phone X: see orders Y, Z; given unknown phone: see empty state; given invalid format: see validation error).
+- Is medium complexity — roughly the same scope as the L2–L4 loyalty-points feature, but in a different slice of the app.
+
+L2–L4 already drove the loyalty feature (a write-path, points-ledger mutation). Order history is a read-path feature (indexed lookups, empty states, pagination). The contrast is the point.
 
 ### For your own project
 
-Pick an equivalent medium-complexity feature. It should:
+Pick an equivalent. It should:
 
-- Touch **both** backend and frontend (or their equivalents in your stack)
-- Require at least **one architectural decision** — something the Architect will need to write an ADR about
-- Have **acceptance criteria that are objectively testable** (given X, system does Y — not "the UX is nicer")
-- Be **90-minute-scope** — if you have to squint at the manifest to figure out where the code lives, it's too big
-- Be in a **different area of the codebase** than your L2–L4 thread — the capstone tests factory generality, not factory memory
+- **Touch both sides** of your architecture (backend + frontend, service + client, core + worker — whatever your analogue is).
+- **Require an architectural decision.** Something the architect will need to open `docs/adr/` and reason about.
+- **Have testable AC.** "Given X, system returns Y" — not "the UX feels better."
+- **Be 90-minute scope.** If you have to squint at the manifest to figure out where the code lives, the feature is too big.
+- **Live in a different area** than the L2–L4 thread. The capstone tests factory generality, not factory memory.
 
-Write the feature description as a markdown block before starting. You will paste this into the bead description in Step 1.
+Write the feature description as a markdown block before you run `bd create`. You'll paste it into the bead's notes.
 
 ---
 
 ## The Rules (Config Discipline)
 
-These three rules are the spine of the capstone. Every decision you make during the run comes back to one of these. They are not suggestions.
+Three rules. Every decision you make in the next 90 minutes comes back to one of them.
 
 ### Rule 1: No ad-hoc prompting.
 
-If an agent produces wrong output — missing sections, wrong directory, vague reasoning — the fix is **always** a prompt-file edit followed by a re-sling. Never type corrections into the agent's chat. Never prefix an instruction with "also please remember to...".
+If an agent produces wrong output — missing sections, wrong directory, vague reasoning — the fix is **always** a pack edit followed by re-arming the agent (add the label back; the order gate picks it up again). Never type corrections into `gc watch <agent>`. Never prefix an instruction with "also please remember to…".
 
-**Rationale.** The factory you're running today needs to run tomorrow without you present. If a fix lives only in a chat message, it evaporates the moment the session ends. A prompt-file diff is permanent, diffable, and reviewable. That's the only form of fix that scales.
-
-**Example violation.** The Planner's work package omits the Scope Boundary section. You notice, and in the same `gc watch planner` tmux you type "please add a Scope Boundary section." The section gets added — and the next time the Planner runs on a different bead, the scope boundary is missing again. The fix didn't stick.
-
-**Correct move.** Open `packs/planner/prompts/planner.md.tmpl`, sharpen the Output Format or Quality Gate to require Scope Boundary explicitly, commit the change, delete the half-finished work package, re-sling the Planner.
+**Why.** The factory you run today has to run tomorrow without you watching. A chat-message correction evaporates the moment the session ends; a prompt-file diff is committed, reviewable, and inherited by every future run.
 
 ### Rule 2: All fixes via config.
 
-If tests fail after the Coder runs, if the Reviewer flags an issue, if the Deployer gate refuses to pass — the fix is a **prompt update**, a **manifest update**, or a **feedback-rule update**. Never a manual code edit.
+If tests fail after the coder runs, if the reviewer flags an issue, if the deployer gate refuses — the fix is a **prompt update**, a **formula update**, a **manifest update**, or a **rules-file update**. Never a manual code edit in your rig's `src/`.
 
-**Rationale.** A manual code edit ships the fix for this feature and loses the fix for every future feature. A prompt or manifest update ships the fix into every subsequent factory run. The whole point of the factory is that corrections compound; manual edits erase that property.
+**Why.** A manual code edit ships the fix for this feature and loses it for every future feature. A pack edit ships the fix into every subsequent factory run. The whole point of the factory is that corrections compound; hand-edits erase that property.
 
-**Example violation.** The Coder writes a React component that imports from `@/lib/formatPrice` but your project uses `src/utils/formatPrice`. You open the file and change the import path by hand. The code builds, the PR merges. Three features later the Coder makes the same mistake — because the fix never reached its prompt.
+### Rule 3: Log everything in bead notes and in the run record.
 
-**Correct move.** Open `packs/coder/prompts/coder.md.tmpl`, add a rule to the Output Format: "All imports use project-relative paths from `src/` — never aliases like `@/lib/*` unless they're declared in the manifest's `tsconfig.paths`." Commit. Re-sling the Coder on the same bead.
+Findings, verdicts, gate checks, rollback plans — all live in the bead's notes via `bd update --notes`. The `docs/factory-runs/<date>-<slug>.md` record is a **live log** updated as the run unfolds, not a post-hoc write-up. At T+90 the record should already be 80% complete; the last 10 minutes are for the retrospective and the "what I'd change" lines.
 
-### Rule 3: Log everything.
-
-The Factory Run Report is not a post-mortem artifact you fill in at the end. It's a **live log**. You update it as each stage runs, each config change lands, each gate fires. At T+90 min, the report should already be 80% complete; the last 10 minutes are for the retrospective and the "What I'd do differently" rows.
-
-**Rationale.** Memory of what happened during a 90-minute factory run decays fast. Config changes you made at T+20 min blur into the ones you made at T+45 min. If the report is your working document during the run, it captures the truth; if you write it at T+85 min from memory, it captures fiction.
-
-**Example violation.** You finish the run, open `factory-runs/` and write "Planner took one sling, Architect took one sling, Designer took two slings." You actually re-slung the Planner twice and forgot; the "config iterations" count is wrong. When someone reads your report next month to understand what's flaky, they'll chase a phantom problem.
-
-**Correct move.** Keep the run report open in a split pane while the factory runs. Add a row to the Pipeline Results table the moment each stage starts. Fill in the outcome the moment it ends. The "Config Changes" column is populated as you make the changes, not after.
+**Why.** Memory of what happened during a 90-minute run decays inside hours. A change you made at T+20 blurs into the one at T+45. If the record is your working document during the run, it captures the truth; if you write it at T+85 from memory, it captures fiction.
 
 ---
 
-## Run Sequence
+## Part 0: Pre-Run Setup (~10 min)
 
-Below is the full run, broken into six agent-stage sub-steps plus a pre-run setup block. Each agent stage has: duration estimate, exact command, what to watch, expected artifact, common failure modes + config fix.
+> **Agent Guide:** Before the participant runs a single command, have them read the feature back to you out loud — user story, acceptance criteria, constraints. Push for medium complexity in a *different area of the codebase* than the L2–L4 runs. Also open the run record in a split pane now; it's a live log, not a write-up.
 
-### Step 0: Pre-Run Setup (~5 min)
+### Step 1: Start the run record
 
-> **Agent Guide:** Before typing anything, have the participant say the feature, the bead title, and the description out loud. For their own project, push for medium complexity in a *different area of the codebase* than the L2–L4 runs — a rehearsed feature tests memory, a new feature tests the factory. Also open the run report in a split pane now; it's updated live, not at the end.
-
-Create the feature bead and start the live run report.
+In your **project rig** (not `my-factory/`):
 
 ```bash
-cd my-factory
+cd ~/path/to/your-repo
+mkdir -p docs/factory-runs docs/retrospectives
+```
 
-# Create the capstone bead
-bd create "Order history page — customers view past orders by phone number" \
-  --label "capstone-feature" \
-  --description "$(cat <<'EOF'
-# Feature Request: Order History Page
+Create `docs/factory-runs/$(date +%Y-%m-%d)-<feature-slug>.md` with the skeleton below and open it in a split pane:
 
-## User Story
-**As a** returning customer
-**I want** to look up my past orders by phone number
-**So that** I can re-order my favorites and check the status of recent orders
+```markdown
+# Factory Run — <feature name>
 
-## Acceptance Criteria
-- [ ] Customer navigates to `/orders/history` and sees a phone number input
-- [ ] On submit with a phone number that has orders: list orders (newest first) with items, total, date, status
-- [ ] On submit with a phone number that has no orders: show empty state with link to menu
-- [ ] On submit with an invalid phone format: show validation error
-- [ ] Endpoint is rate-limited to prevent phone-number enumeration
+**Date:** 2026-04-22
+**Bead ID:** (fill in after Step 2)
+**Prior-session deviations:** (e.g. "W4 skipped — no improver observing")
+**Run status:** IN_PROGRESS | COMPLETE | PARTIAL
 
-## Constraints
-- Must use existing orders table (no schema migration unless ADR justifies it)
-- Lookups must be O(log n) or better — add an index if needed
-- UI consistent with existing order confirmation page (Tailwind, no new design tokens)
+---
 
-## Success Metrics
+## Label Walk
+
+| T+min | Stage | Agent | Inbound label | Outbound label | Artifact | Config iterations |
+|-------|-------|-------|---------------|----------------|----------|-------------------|
+
+## Pack edits made during the run
+
+| Commit | Pack | What the finding required |
+|--------|------|---------------------------|
+
+## Ad-hoc prompts used
+
+0 (target) — if non-zero, list each and the pack edit that would prevent it.
+
+## Human interventions
+
+| T+min | Why | Action taken | Duration |
+|-------|-----|--------------|----------|
+```
+
+### Step 2: File the root bead
+
+```bash
+cd ~/path/to/your-repo
+bd create \
+  --title "Feature: Order history page" \
+  --label needs-plan \
+  --notes "$(cat <<'EOF'
+user_story:
+  As a returning customer
+  I want to look up my past orders by phone number
+  So that I can re-order favourites and check recent order status
+
+acceptance_criteria:
+- Customer on /orders/history sees a phone-number input
+- Valid phone with orders: list orders newest-first with items, total, date, status
+- Valid phone with no orders: empty state with link to menu
+- Invalid phone format: inline validation error, no lookup
+- Endpoint is rate-limited to prevent phone-number enumeration
+
+constraints:
+- Use the existing orders table (no schema migration unless ADR justifies)
+- Lookup must be O(log n); add an index if needed
+- UI consistent with the order-confirmation page (Tailwind, no new tokens)
+
+success_metrics:
 - Lookup P95 < 200ms for up to 10,000 orders
 - Page loads in < 1s on a mid-tier phone
 EOF
 )"
 ```
 
-Note the bead ID returned (e.g., `my-factory-L5a2p3`). This is the anchor for every subsequent sling.
+Note the bead ID that comes back. Paste it into the run record's **Bead ID** field. This is the anchor for every subsequent label flip.
 
-Open the Factory Run Report template (further down in this document) in a split-pane editor. Add the feature name, date, and bead ID to the header. You will fill in the rest as the run proceeds.
-
-If you have `orchestrator.yaml` from W3 fully wired:
+### Step 3: Open the observation panes
 
 ```bash
-gc orchestrate --pipeline feature-pipeline --bead my-factory-L5a2p3
-```
-
-This will sequentially sling each stage. You still monitor and still handle human gates. **If orchestrator is not wired, sling each stage manually below.** Note which path you took in the Config Discipline section of your report.
-
-Also open two observability panes:
-
-```bash
-# Pane A — every city event
+# Pane A — every city event in real time
 gc events --follow
 
-# Pane B — active sessions
-gc session list         # refresh as needed
+# Pane B — active sessions (refresh as needed)
+gc status
+
+# Pane C — the bead itself
+watch -n 5 "bd show <bead-id>; echo '---'; bd label list <bead-id>"
 ```
 
-### Step 1: Planner (~10 min)
+Pane C is the single most important view in the capstone. The labels on the bead tell you where the feature is in the pipeline; the notes tell you what each agent found. If you can only keep one pane visible, keep this one.
 
-> **Agent Guide:** Before every sling in this run, ask: "What artifact does this agent produce, and where will it land?" The participant should name the path — that's the pipeline's contract. If they can't name it, open the pack's prompt template together and read the Output section before slinging.
+---
 
-**Command:**
+## Part 1: Watch the Factory Run (~55 min)
+
+> **Agent Guide:** Before every label flip, ask the participant: "Which agent is about to wake, and what artifact will it produce?" If they can't name the agent and the path (e.g. `architect → docs/architecture/<topic>.md`), open `LABELED_BEADS.md` together before letting the next agent run.
+
+The factory is now autonomous. You do not `gc sling` anything — the order gates in each pack's `formulas/orders/<agent>-intake/order.toml` poll `bd ready --label=<inbound>` every few seconds, and the agent wakes the moment its label shows up on the queue. Your job for the next 55 minutes is to **observe**, **record**, and **recover** (if an agent stalls).
+
+### Stage 1 — Planner wakes on `needs-plan`
+
+**What to watch:** the planner reads the bead's notes, `docs/PROJECT_MANIFEST.md`, `docs/architecture/*.md`, and `docs/rules/*.md`. It runs `mol-plan-breakdown` (intake → clarify → decompose → dep-graph → handoff).
+
+**Expected outcome:** a new file `docs/plans/<slug>.md`, plus one or more child beads. Each child is labelled either:
+- `needs-architecture` — if the planner detected drift from existing rules;
+- `needs-design` — if the child has user-facing behaviour;
+- `ready-to-build` — if the child is pure backend or internal work.
+
+**Log it:** add a row to the run record:
+
+```
+| T+5 | Plan | planner | needs-plan | needs-design, ready-to-build | docs/plans/order-history.md + 2 children | 0 |
+```
+
+**If it stalls** (no output after ~5 min, or output is missing a section): see *Part 2: When an Agent Stalls*.
+
+### Stage 2 — Architect wakes on `needs-architecture` (conditional)
+
+If the planner filed a `needs-architecture` child, the architect wakes next. It runs `mol-architect-review`, produces `docs/architecture/<topic>.md` and `docs/rules/<topic>.md`, syncs CLAUDE.md / AGENTS.md via `actual adr-bot`, and relabels the child back to `needs-plan` so the planner can re-decompose against the richer context.
+
+**What to watch:** the key output is the ADR under `docs/architecture/`. Open it; the decision + consequences section should name the rule-file additions. Then open the rule file.
+
+**If no architecture child was filed,** skip this stage entirely. Record in the run record: `Architecture stage: not triggered (planner's decomposition did not flag drift).`
+
+### Stage 3 — Designer wakes on `needs-design`
+
+The designer reads the child bead, `docs/plans/<slug>.md`, the design system rules, and any existing components. It runs `mol-design-cycle` (intake → wireframe → a11y-check → handoff), writes `docs/designs/<slug>.md`, and relabels the child `ready-to-build`.
+
+**What to watch:** the design doc's **a11y section**. Without explicit a11y bullets the coder has nothing to write tests against; a designer spec with no a11y coverage is the single most common upstream cause of coder stalls.
+
+### Stage 4 — Coder wakes on `ready-to-build`
+
+The coder runs `mol-code-from-spec` (intake → actual-adr-check → plan → implement → self-test → handoff). It creates a feature branch, writes code + tests, commits, and relabels the bead `needs-review`.
+
+**What to watch:** three things, in order:
+
+1. **actual-adr-check.** The bead notes should record `adr_check: ok` (or a documented hand-back to architect). If this step is missing the coder is writing against stale rules.
+2. **self-test.** The coder runs the `test_cmd` pinned in the formula (see L3 Part 3 Step 1). A green self-test is a hard predictor of a green reviewer run.
+3. **The commit message.** Conventional-commits format, one-liner references the bead ID. The deployer reads this at version-bump time.
+
+### Stage 5 — Reviewer wakes on `needs-review`
+
+The reviewer runs `mol-code-review` (intake → style → security → spec/AC → verdict). It reads the diff, the design doc, the project rules, and the bead notes. It writes four finding buckets (`style_findings`, `security_findings`, `spec_findings`, `verdict`) into the bead notes and relabels either:
+
+- `ready-to-ship` — verdict `pass`, bead advances to the deployer.
+- `ready-to-build` — verdict `request-changes`, bead goes back to the coder.
+
+**If the reviewer bounces the bead,** read the findings in `bd show <bead-id>`, identify the upstream cause (coder prompt gap, designer spec gap, or manifest rule gap), and apply a **config edit** — never a hand-edit to `src/`. Re-arm by adding `ready-to-build` back. Log both the finding and the pack commit in the run record's *Pack edits made during the run* table.
+
+### Stage 6 — Deployer wakes on `ready-to-ship`
+
+The deployer runs `mol-deployer` (intake → checks → smoke → version → tag → rollback-plan). It writes gate checks, a semver bump, a git tag, and — crucially — a **rollback plan** into the bead notes *before* the deploy trigger, not after. It then closes the bead and emits a fresh bead labelled `needs-improve` for the optional improver.
+
+**What to watch:** the rollback plan section. "Roll back somehow" is not a plan; "Revert tag v1.4.2, no migrations to reverse, no feature flags to toggle" is. If the plan is vague, that's a deployer-prompt issue — see L4 Scenario B.
+
+### Stage 7 — (optional) Improver observes on cooldown
+
+If W4 is done and `packs/improver/` is included, the improver either wakes on its 24-hour cooldown or you can trigger a live harvest:
 
 ```bash
-gc sling planner my-factory-L5a2p3
-gc watch planner          # Ctrl+b d to detach when you've seen it start
+cd my-factory
+sh packs/improver/commands/harvest.sh 1h
 ```
 
-**What to watch:**
+It reads bead notes, mail, and deploy-gate metadata from the run, classifies the signals, and files new beads (each with a canonical label) representing proposed config changes to the six essential agents. These beads are **proposals for humans to review**, not auto-applied edits. See W4 Part 3 for the accept/reject workflow.
 
-- Planner reads `docs/PROJECT_MANIFEST.md` (you'll see the file open in the session)
-- Planner reads the bead description
-- Planner writes `work-packages/order-history.md`
-- Planner commits on a feature branch and marks the bead ready for the Architect
+If W4 is skipped, the `needs-improve` bead from Stage 6 simply sits in the queue — that's fine, it's a durable breadcrumb for a future Improver run.
 
-**Expected artifact:** `work-packages/order-history.md` with the six sections from L2's Planner pack — Goal, User Stories, Acceptance Criteria, Dependencies, Test Cases, Scope Boundary. The Acceptance Criteria should map 1:1 to the bead's AC list (or expand them).
+---
 
-**Common failure modes + config fix:**
+## Part 2: When an Agent Stalls (mail, nudge, re-label)
 
-| Symptom | Root cause | Config fix |
-|---------|-----------|-----------|
-| Work package missing Scope Boundary | Planner prompt Output Format is ambiguous | Sharpen `packs/planner/prompts/planner.md.tmpl` Output Format; require `## Scope Boundary` verbatim; re-sling |
-| Work package uses "improve UX" or "make it faster" language | Quality Gate rule on ambiguous terms isn't being enforced | Add explicit forbidden-words list to `packs/planner/prompts/planner.md.tmpl` Quality Gate |
-| File written to `plan/` or `docs/plans/` instead of `work-packages/` | Output path drift | Make output path literal in the prompt: "Write to `work-packages/<feature-slug>.md` — never anywhere else" |
-| Acceptance criteria are rephrases of bead criteria, not expansions | Planner isn't adding edge cases | Add Quality Gate rule: "Each AC must include a happy-path AND at least one edge case" |
+> **Agent Guide:** The instinct to type into an agent's session to unstick it is the single strongest pull of the whole workshop. Catch the participant the moment their hand hovers over `gc watch <agent>` to type a correction. Redirect to one of the three recovery patterns below.
 
-Close the Planner bead when the work package passes its Quality Gate:
+A "stall" is 5+ minutes of no session activity, or output that immediately fails its own quality gate. There are three legitimate recovery actions, in order of preference.
+
+### Recovery 1: Re-label (when the agent finished but wrote the wrong outbound label)
+
+Most common. Example: the designer finished a design but relabelled `needs-plan` instead of `ready-to-build`.
 
 ```bash
-bd close my-factory-L5a2p3 --comment "Work package: work-packages/order-history.md"
+bd label remove <bead-id> needs-plan
+bd label add <bead-id> ready-to-build
 ```
 
-### Step 2: Architect (~10 min)
+The coder's order gate picks it up on the next poll. This is a **free** recovery — you don't even restart the agent. Record it in *Human interventions* with duration ~30 seconds.
 
-**Command:**
+### Recovery 2: Config edit + re-arm (when the agent produced wrong output)
+
+When the output is wrong in a way a prompt or formula edit would prevent. Example: the reviewer approved a diff with a string-concatenated SQL query.
 
 ```bash
-# Create the dependent bead
-bd create "ADR: Phone-number order lookup" \
-  --description "$(cat <<'EOF'
-Review work-packages/order-history.md. Make an architectural decision about:
+# 1. Identify the pack that owns the finding
+cd my-factory
+$EDITOR packs/reviewer/formulas/mol-code-review.formula.toml  # or prompts/, as the case requires
 
-- Phone-number storage and indexing (add index to existing column? normalize? hash?)
-- Rate-limit strategy to prevent phone-number enumeration
-- Whether the lookup endpoint is part of the existing /api/orders or a new /api/orders/lookup
+# 2. Commit the edit with a message naming the finding
+git add packs/reviewer
+git commit -m "chore(reviewer): BLOCKER on any SQL built via string concatenation"
 
-Read docs/PROJECT_MANIFEST.md for tech stack constraints.
-Read CLAUDE.md for tailored-ADR baselines.
-Produce docs/adr/NNNN-order-history-lookup.md using MADR.
-EOF
-)" \
-  --depends-on my-factory-L5a2p3
+# 3. Restart the service so the new config loads
+gc service restart
 
-gc sling architect <architect-bead-id>
-gc watch architect
+# 4. Re-arm the agent: add its inbound label back
+bd label add <bead-id> needs-review
 ```
 
-**What to watch:**
+The agent runs again on the same bead with the new rule. Record the commit hash in the run record's *Pack edits made during the run* table.
 
-- Architect reads `docs/PROJECT_MANIFEST.md`, `CLAUDE.md` (for tailored ADRs), and existing ADRs under `docs/adr/`
-- Architect reads `work-packages/order-history.md`
-- Architect writes `docs/adr/NNNN-order-history-lookup.md`
-- Architect appends a cross-reference to the work package under an `## Architectural Decisions` heading
+### Recovery 3: Mail + nudge (when the agent is stuck on something the bead can't carry)
 
-**Expected artifact:** An MADR-format ADR with Status, Context, Options Considered (at least 2 with trade-offs), Decision, Consequences (including at least one risk), References. The References section must cite `work-packages/order-history.md` by path.
-
-**Human gate (if configured in `orchestrator.yaml`):** The ADR usually sits in `needs-approval` before the Designer runs. Review the decision. Approve or reject via `bd approve` / `bd reject`. Keep the approval time in the run report under Human Interventions.
-
-**Common failure modes + config fix:**
-
-| Symptom | Root cause | Config fix |
-|---------|-----------|-----------|
-| ADR considers only 1 option | Architect prompt doesn't force comparison | Add Quality Gate: "You MUST evaluate at least 3 distinct approaches. List the naive approach and explain why rejected" |
-| ADR decides something already covered in tailored ADRs | Architect isn't reading `CLAUDE.md` | Add `CLAUDE.md` to Inputs section of `packs/architect/prompts/architect.md.tmpl` (see L2 Part 2 Step 4) |
-| No cross-reference appended to work package | Process step 5 missing or unclear | Make it literal in the Process: "Open the work package file and append the ADR path under `## Architectural Decisions`. Create the heading if it doesn't exist" |
-| Consequences lists only positives | Quality Gate isn't requiring risk | Add rule: "Consequences must include at least one line starting with `- Risk:`" |
-
-Close the Architect bead when the ADR passes its Quality Gate.
-
-### Step 3: Designer (~10 min)
-
-**Command:**
+When an agent needs context that doesn't belong in the bead itself — e.g. an architect wants the planner to clarify scope before committing to an ADR, or a reviewer wants the coder to explain a non-obvious choice.
 
 ```bash
-bd create "Design: Order history page + lookup endpoint" \
-  --description "Produce design/order-history-spec.md from work-packages/order-history.md and docs/adr/NNNN-order-history-lookup.md. Include component tree, props, API contract, test plan." \
-  --depends-on <architect-bead-id>
+# Send mail from one agent's inbox to another (you can impersonate either side in the capstone)
+gc mail send architect --to planner \
+  --subject "Clarify scope on <bead-id>" \
+  --body "The plan references 'normalize phone numbers' but doesn't specify E.164 vs. local format. Resolve before I ADR."
 
-gc sling designer <designer-bead-id>
-gc watch designer
+# Then nudge the target agent to re-read its mail
+gc nudge planner
 ```
 
-**What to watch:**
+The planner wakes, reads its inbox, updates the plan, and re-advances. Mail is the escape valve for coordination that doesn't fit on a label — it should be rare (0–2 uses in a clean capstone). If you're using mail more than twice, the agents' prompts are probably missing a reading list that should have caught the question upstream.
 
-- Designer reads work package + ADR + manifest
-- Designer writes `design/order-history-spec.md` with: component tree (e.g., `OrderHistoryPage > PhoneLookupForm > OrderList > OrderRow`), props/types, API contract (endpoint, request shape, response shape, error shapes), test plan
-- Designer cross-references both upstream artifacts
+### What not to do
 
-**Expected artifact:** A component spec that is specific enough that the Coder could implement it without reading the work package or ADR (but should still read them for context). Types defined, states enumerated (loading, empty, error, populated), edge cases flagged.
-
-**Common failure modes + config fix:**
-
-| Symptom | Root cause | Config fix |
-|---------|-----------|-----------|
-| Spec has components but no types/props | Output Format doesn't require a Types section | Add required section: "### Types (TypeScript interfaces for all props + API shapes)" |
-| No empty/error/loading states described | Quality Gate silent on UI states | Add rule: "Each component must enumerate states: loading, empty, error, populated (at minimum)" |
-| API contract missing error shapes | Too generous Output Format | Require: "API contract must include success shape AND every error shape the endpoint can return" |
-| Test plan is vague ("tests the component") | Quality Gate doesn't require specific test names | Require: "Test plan lists at least 5 test cases by name, each mapped to an AC from the work package" |
-
-Close the Designer bead.
-
-### Step 4: Coder (~20 min)
-
-> **Agent Guide:** This is where the factory most commonly stalls. If the Coder fails, the Designer spec is almost always the cause — missing edge cases or an ambiguous Location path. Fix `packs/designer/prompts/designer.md.tmpl`, re-sling Designer, then Coder. Also: every single time the participant is tempted to hand-edit code to make tests pass, stop them. Roll it back. Update the Coder prompt. Re-sling. No exceptions in the capstone.
-
-**Command:**
-
-```bash
-bd create "Implement: Order history page + lookup endpoint" \
-  --description "Implement design/order-history-spec.md. Follow the component tree exactly. All tests from the spec's test plan must pass before marking ready." \
-  --depends-on <designer-bead-id>
-
-gc sling coder <coder-bead-id>
-gc watch coder
-```
-
-**What to watch:**
-
-- Coder reads the spec (primary input), manifest, work package, ADR (for context)
-- Coder creates a feature branch like `feat/order-history`
-- Coder writes backend code (`src/api/orders/lookup.ts` or similar), frontend code (`src/pages/OrderHistoryPage.tsx`, child components), and tests
-- Coder runs quality gates locally: `npm run build`, `npm test`, `npm run lint`
-- Coder commits and pushes the branch
-
-**Expected artifact:** A committed feature branch with code + tests. `npm test`, `npm run build`, `npm run lint` all exit 0 when run on that branch. PR created (if `packs/workshop/` is installed) or branch pushed and noted in the bead.
-
-**Common failure modes + config fix:**
-
-| Symptom | Root cause | Config fix |
-|---------|-----------|-----------|
-| Tests fail on the same pattern repeatedly (e.g., "Cannot read property 'map' of undefined") | This is exactly what W4 feedback loops exist for | Your feedback rule from W4 should detect this and append a "Common Pitfalls" section to `CLAUDE.md`. If it doesn't fire, the rule's detection logic is wrong — fix the rule, not the code |
-| Coder writes to wrong directory (e.g., `components/` instead of `src/components/`) | Coder prompt doesn't reference manifest's Project Structure explicitly | Add to `packs/coder/prompts/coder.md.tmpl` Process: "Read `docs/PROJECT_MANIFEST.md` Project Structure section and use those paths exclusively" |
-| Coder re-implements something that already exists (e.g., a `formatPhone` util) | Coder isn't scanning existing `src/utils/` | Add to Process: "Before writing any util function, grep `src/utils/` for an existing implementation" |
-| Lint fails on every commit | Coder isn't running lint locally | Add to Quality Gate: "Before marking ready, run `npm run lint` and `npm test` — both must exit 0" |
-| Coder commits secrets or `.env` contents | Guardrail missing | Add hard rule: "Never commit files matching `.env*`, `*.pem`, `credentials*`" |
-
-**If the Coder stalls for 10+ minutes:** check the session with `gc session peek coder`. Most often, the spec was under-specified and the Coder is second-guessing. That's a Designer prompt issue — edit the Designer prompt to require whatever was missing, re-sling the Designer, then re-sling the Coder. Do not type instructions into the Coder's session.
-
-Close the Coder bead when its quality gates pass.
-
-### Step 5: Reviewer (~10 min)
-
-**Command:**
-
-```bash
-# If packs/workshop installed, pull latest PR state first
-gc workshop sync-all
-
-bd create "Review: Order history PR" \
-  --description "Review the feat/order-history PR. Use the review checklist in the reviewer prompt and the Review Standards in docs/PROJECT_MANIFEST.md. Post review as a PR comment. Also write review-reports/order-history-review.md." \
-  --depends-on <coder-bead-id>
-
-gc sling reviewer <reviewer-bead-id>
-gc watch reviewer
-```
-
-**What to watch:**
-
-- Reviewer checks out the feature branch locally (via `git fetch` or the GitHub MCP in `packs/workshop`)
-- Reviewer runs local quality gates to verify the Coder's claims
-- Reviewer evaluates the code against: project ADRs (`docs/adr/`), tailored ADRs (`CLAUDE.md`), manifest Review Standards
-- Reviewer writes `review-reports/order-history-review.md` with severity-tagged findings
-- Reviewer posts the review as a PR comment (if GitHub is wired)
-
-**Expected artifact:** `review-reports/order-history-review.md` with a clear verdict (APPROVE / CHANGES REQUESTED / BLOCK), a severity-tagged findings list, and a checklist showing which standards passed.
-
-**Common failure modes + config fix:**
-
-| Symptom | Root cause | Config fix |
-|---------|-----------|-----------|
-| Reviewer approves despite `npm test` failing | Reviewer isn't running gates locally | Add to Process: "Run `npm run build && npm test && npm run lint`. Verdict is BLOCK if any exit non-zero" |
-| Reviewer finds 1 Low-severity issue and calls it "clean" | No severity threshold for verdict | Add to Output Format: "APPROVE requires zero High findings. CHANGES REQUESTED for any Medium+. BLOCK for any High" |
-| Reviewer doesn't check tailored ADRs | Reviewer prompt doesn't list `CLAUDE.md` as input | Update checklist rule 2 to explicitly reference the Tailored ADRs section of `CLAUDE.md` (see L4's "Reviewer + the Actual AI ADR System" section) |
-| Reviewer contradicts the Architect's ADR | Reviewer prompt doesn't list project ADRs as authoritative | Add to the ordering: "Project ADRs under `docs/adr/` are authoritative. If a finding contradicts an ADR, the finding is wrong unless there's a new ADR" |
-
-If the review is CHANGES REQUESTED: do **not** manually fix the code. Update the Coder prompt with the missing guidance (or update the Designer prompt if the issue is a spec gap). Re-sling the Coder. When the Coder finishes, re-sling the Reviewer. Count each of these as a "Config Iteration" in the run report.
-
-Close the Reviewer bead.
-
-### Step 6: Deployer (~10 min)
-
-**Command:**
-
-```bash
-bd create "Deploy: Order history feature" \
-  --description "Evaluate release-gates for order-history. Use Release Criteria in docs/PROJECT_MANIFEST.md. Write release-gates/order-history-gate.md. If all required gates PASS, proceed with the deploy pipeline defined in the deployer prompt." \
-  --depends-on <reviewer-bead-id>
-
-gc sling devops <deployer-bead-id>
-gc watch devops
-```
-
-**What to watch:**
-
-- Deployer reads the review report and the manifest's Release Criteria
-- Deployer runs each required gate (tests, lint, mergeable check, review verdict) and records pass/fail
-- Deployer writes `release-gates/order-history-gate.md` with the gate table
-- If all Required gates PASS, deployer executes the deploy script (may be a no-op for MVP — `npm run build` + a staging copy is fine)
-- Deployer updates `CHANGELOG.md`, creates/updates runbook if relevant
-
-**Expected artifact:** `release-gates/order-history-gate.md` with every Required gate and its status. If the feature reached production: URL + health check result. If the manifest says "no external deploy target — local staging only," the gate document is the deploy.
-
-**Human gate (if configured):** Production deploy typically requires human approval. Review the gate document. Approve or reject.
-
-**Common failure modes + config fix:**
-
-| Symptom | Root cause | Config fix |
-|---------|-----------|-----------|
-| Deployer marks all gates PASS without actually running them | Process doesn't require evidence | Add: "For each gate, show the command run and the exit code. Screenshot-level evidence in the gate document" |
-| Vague release criteria ("code is clean") produce vague gate results | Manifest issue, not prompt issue | Tighten `docs/PROJECT_MANIFEST.md` Release Criteria — this is the L4 lesson applied |
-| Deployer proceeds with Reviewer verdict CHANGES REQUESTED | Deployer isn't reading review report | Add to Process: "Read `review-reports/<slug>-review.md` FIRST. If verdict ≠ APPROVE, write gate document with BLOCK status and stop" |
-| No CHANGELOG entry | Deployer prompt doesn't require it | Add to Process step: "Append an entry to `CHANGELOG.md` under `## Unreleased`" |
-
-Close the Deployer bead.
-
-### Step 7: Close the Run (~5 min)
-
-> **Agent Guide:** Do not let the participant skip this step, even if time is tight and the run is partial. A partial report with honest state is an audit trail; a discarded partial run is wasted learning. The report, feature branch, and retrospective must all be committed before the session ends.
-
-Regardless of how far you got:
-
-```bash
-# Commit the run report + retrospective
-cd ~/path/to/your-repo
-git checkout main || git checkout -    # back to whichever branch you've been on
-git add factory-runs/capstone-<date>-order-history.md
-git add retrospectives/capstone-<date>.md
-git commit -m "docs(capstone): factory run report + retrospective for order history"
-git push
-```
-
-If you didn't reach the Deployer, **that's fine**. The report and retrospective still ship. Note which stages completed and which didn't. Partial completion is a successful capstone — see the inline insight "Why Partial Completion Still Teaches You What You Need" below.
+- **Don't `gc sling <agent> <bead>`** as a first response to a stall. Slinging is for manual debugging (L2 Scenario 2 style); in the capstone the order gates should be waking the agents on their own. If they aren't, `gc doctor` will tell you why — usually a missing binary or a mistyped label.
+- **Don't type into `gc watch <agent>`** to correct the agent's output. Ad-hoc prompts are Rule 1 violations; they also don't persist across runs, so "fixing" one bead leaves every future bead broken in the same way.
+- **Don't hand-edit files in your rig's `src/`** to make a test pass. Rule 2. The coder's next run on any bead regenerates the same bug.
 
 ---
 
-## Factory Run Report Template
+## Part 3: Close the Run & Retrospective (~15 min)
 
-Create `factory-runs/capstone-<date>-<feature-slug>.md`. Update it continuously during the run, not at the end (Rule 3).
+> **Agent Guide:** Do not let the participant skip this step, even if the bead is still in-flight at T+85. A partial record with honest state is an audit trail; a discarded partial run is wasted learning. The record and the retrospective must be committed before the session ends.
 
-```markdown
-# Factory Run Report — Capstone
+### Step 1: Finish the run record
 
-## Feature
-Order history page — customers view past orders by phone number
+In the run record, mark status:
 
-**Date:** 2026-04-22
-**Bead ID:** my-factory-L5a2p3
-**Branch:** feat/order-history
-**Report status:** COMPLETE | PARTIAL | ABANDONED
+- `COMPLETE` — the bead reached `closed` after the deployer ran.
+- `PARTIAL` — the bead is in-flight somewhere in the pipeline. Name the stage in the *Run status* line: `PARTIAL — stalled at reviewer on request-changes loop`.
 
----
+Fill in the remaining columns. A partial record is valuable **because** it names the stall point; don't retroactively invent outcomes for stages that didn't run.
 
-## Pipeline Results
+### Step 2: Write the Keep / Change / Question card
 
-| Stage | Agent | Status | Artifact | Runs | Config Changes |
-|-------|-------|--------|----------|------|----------------|
-| Plan | planner | PASS | work-packages/order-history.md | 1 | — |
-| Architect | architect | PASS | docs/adr/0002-order-history-lookup.md | 2 | Added CLAUDE.md to Inputs (was missing tailored-ADR baseline); re-slung |
-| Design | designer | PASS | design/order-history-spec.md | 1 | — |
-| Code | coder | PASS | feat/order-history (src/pages/OrderHistoryPage.tsx + src/api/orders/lookup.ts + tests) | 2 | Added import-path rule to coder prompt after first run used `@/lib` aliases that don't exist in manifest |
-| Review | reviewer | PASS | review-reports/order-history-review.md | 1 | — |
-| Deploy | deployer | PARTIAL | release-gates/order-history-gate.md | 1 | Gate passed; no external staging target in manifest; local `npm run build` is the deploy |
-
-**Totals:** 6/6 stages executed, 4/6 first-try passes, 2 config iterations.
-
----
-
-## Quality Gates (from Reviewer + Deployer)
-
-| Gate | Status | Evidence |
-|------|--------|----------|
-| Build | PASS | `npm run build` exit 0 |
-| Lint | PASS | `npm run lint` exit 0 (0 warnings) |
-| Tests | PASS | `npm test` exit 0, 11/11 passing |
-| Test coverage | INFO | 82% line coverage (manifest requires no minimum; informational) |
-| Review verdict | APPROVE | review-reports/order-history-review.md §Verdict |
-| Branch mergeable | PASS | no conflicts with main |
-| Manifest Release Criteria | PASS | all 6 required criteria PASS in release-gates/order-history-gate.md |
-
----
-
-## Artifacts Produced
-
-- [x] Work package: `work-packages/order-history.md`
-- [x] ADR: `docs/adr/0002-order-history-lookup.md`
-- [x] Design spec: `design/order-history-spec.md`
-- [x] Feature branch: `feat/order-history` (12 commits)
-- [x] Review report: `review-reports/order-history-review.md`
-- [x] Release gate: `release-gates/order-history-gate.md`
-- [x] CHANGELOG entry: `CHANGELOG.md` §Unreleased
-- [x] This run report
-- [x] Retrospective card: `retrospectives/capstone-2026-04-22.md`
-
-Every upstream artifact is referenced by every downstream artifact — verified by `grep -l order-history` across the repo.
-
----
-
-## Ad-Hoc Prompts Used
-
-0. Zero ad-hoc prompts typed into any agent session.
-
-(If non-zero, list each and why it was needed — then write the prompt-file rule that will prevent this next time.)
-
----
-
-## Feedback Rules Triggered
-
-1. **None fired during this run.** The W4 `test-failure-array-check.sh` rule would have fired on a "Cannot read property X of undefined" pattern, but all tests passed first try.
-
-(If any fired, cite the rule file, the commit hash of the auto-update, and the resulting `CLAUDE.md` diff.)
-
----
-
-## Human Interventions
-
-| When | Why | Action Taken | Duration |
-|------|-----|--------------|----------|
-| T+15min | Architect ADR human gate | Reviewed 3 options (index on phone column / normalized lookup table / hashed phone column). Approved option 1. | 4 min |
-| T+75min | Deployer pre-deploy gate | Reviewed release-gates/order-history-gate.md. All required criteria PASS. Approved. | 2 min |
-
-**Total human time: 6 min out of 90 min** — human time was gate decisions, not debugging.
-
----
-
-## Config Discipline
-
-- Ad-hoc prompts used: 0
-- Manual code edits: 0
-- Manual edits to agent-produced artifacts (work package, ADR, spec, etc.): 0
-- Config iterations (prompt/manifest/feedback-rule edits): 2
-- Orchestrator mode: `gc orchestrate --pipeline feature-pipeline` (not manual)
-
-**Config changes committed during the run:**
-- `chore(architect): add CLAUDE.md to Inputs section` — commit abL523
-- `chore(coder): require manifest-declared import paths only` — commit def456
-
----
-
-## What Went Well
-
-1. The Designer spec was detailed enough that the Coder needed one iteration to produce passing code. This was a direct outcome of tightening the Designer Quality Gate in L3.
-2. The Architect's ADR correctly deferred to the tailored ADR for rate limiting — confirming that `CLAUDE.md` baselines prevent re-deriving decisions already covered.
-3. The Reviewer caught no Highs on a first review, meaning the factory's upstream stages are producing code that meets the manifest's Review Standards without the Reviewer acting as safety net.
-
-## What Didn't Go Well
-
-1. The Architect missed `CLAUDE.md` on the first run — the prompt had the tailored-ADR awareness **almost** right but not literally. Cost: one extra sling (~5 min).
-2. The Coder used non-existent `@/lib` path aliases, caught by a test failure, not by the Reviewer. Add a feedback rule: "if build fails with module-not-found, append import-path rule to coder prompt."
-
-## Lessons Learned (carry into daily use)
-
-1. **Every agent prompt's Inputs list must be literal file paths.** "Tailored-ADR baselines" was too vague; "Read `CLAUDE.md`, specifically the `# Tailored ADRs` section" works.
-2. **Build errors that should be caught upstream aren't feedback failures — they're config gaps.** Add rules only for recurring runtime issues; fix upstream prompts for things that should never reach the Coder.
-
----
-
-## Next Steps
-
-- [ ] Promote the import-path rule into a tailored ADR (it's now triggering in real runs — upgrade it from Coder-prompt to ADR)
-- [ ] Wire the build-failure → coder-prompt feedback rule (new W4-style rule)
-- [ ] Refresh tailored ADRs with `actual adr-bot` — the phone-number-validation decision from this run is worth capturing as a pattern
-
----
-
-**Factory Status:** Production-ready for features of this complexity. Needs more runs on write-path features before relying on it for everything.
-```
-
----
-
-## Retrospective Card
-
-Create `retrospectives/capstone-<date>.md`. Short, committed alongside the run report.
+Create `docs/retrospectives/$(date +%Y-%m-%d)-capstone.md`:
 
 ```markdown
 # Capstone Retrospective
 
-**Run:** Order history page
+**Run:** <feature name>
 **Date:** 2026-04-22
+**Run status:** COMPLETE | PARTIAL
 
-- **Keep:** The Designer-spec-first discipline. When the spec is detailed, the
-  Coder is fast and the Reviewer finds little. When the spec is vague, the
-  Coder is slow and the Reviewer finds everything.
+- **Keep:** One thing the factory did well and will keep doing. Be specific:
+  what did the factory's config produce that you didn't have to intervene
+  on? (e.g. "The reviewer caught an AC-coverage gap I would have missed —
+  L4's AC-rubric tightening is paying off.")
 
-- **Change:** I still think of `CLAUDE.md` as documentation. It's not — it's a
-  runtime input every agent reads. Next run, I'll treat `CLAUDE.md` as
-  first-class config and grep every agent prompt for it the way I grep for
-  manifest references.
+- **Change:** One thing the factory got wrong that a pack edit would fix.
+  Name the pack, the finding, and the edit you'd make. (e.g. "Designer
+  produced a spec with no error-state wireframe. Tightening mol-design-
+  cycle.formula.toml wireframe step to require one-per-state would prevent
+  this.")
 
-- **Question:** When a feedback rule and a tailored ADR conflict (e.g., the
-  rule wants to relax a constraint the ADR enforces), what's the right
-  escalation path? W4 said "escalate via bead" — in practice that bead sits
-  for days. Need a faster signal than another bead.
+- **Question:** One thing you genuinely don't know how to resolve from the
+  run. Not a complaint — a research question. (e.g. "When the reviewer
+  bounces the bead twice on the same finding, what's the escalation path?
+  Re-slinging is still hand-editing by another name.")
 ```
 
-Additional worked examples for inspiration:
-
-### Worked example A — A run that stalled at the Coder
-
-```markdown
-- **Keep:** Re-slinging the Designer when the Coder stalled instead of fixing
-  the Coder directly. That upstream fix caught a second bug the Coder hadn't
-  reached yet.
-- **Change:** I kept the Coder session open while editing the Designer prompt.
-  The Coder session had stale context once the spec changed. Close the session
-  before editing upstream prompts, then re-sling cleanly.
-- **Question:** Is there a way to invalidate an agent's in-flight session when
-  an upstream artifact changes? Manually killing tmux feels wrong.
-```
-
-### Worked example B — A run that shipped but with config debt
-
-```markdown
-- **Keep:** Shipping a partial run and being honest about it in the report.
-  Partial with an accurate report > complete with a fictional report.
-- **Change:** I let three prompt-file diffs pile up uncommitted to "fix them
-  all together at the end." Two of them conflicted when I went to commit.
-  Commit each prompt diff the moment it's made.
-- **Question:** How long should a factory-runs/ history grow before I start
-  archiving? A year of reports is useful; five years is noise.
-```
-
----
-
-## Reference: What a Successful Capstone Directory Looks Like
-
-After a complete capstone run on the reference project, the directory state should resemble this:
-
-```
-reference-project/fired-up-pizza/
-  work-packages/order-history.md                        ← Planner output
-  docs/adr/0002-order-history-lookup.md                 ← Architect output
-  design/order-history-spec.md                          ← Designer output
-  src/pages/OrderHistoryPage.tsx                        ← Coder output
-  src/components/PhoneLookupForm.tsx                    ← Coder output
-  src/components/OrderHistoryList.tsx                   ← Coder output
-  src/api/orders/lookup.ts                              ← Coder output
-  src/api/orders/__tests__/lookup.test.ts               ← Coder output
-  src/pages/__tests__/OrderHistoryPage.test.tsx        ← Coder output
-  review-reports/order-history-review.md                ← Reviewer output
-  release-gates/order-history-gate.md                   ← Deployer output
-  CHANGELOG.md                                          ← Deployer updated
-  factory-runs/capstone-2026-04-22-order-history.md     ← Your report
-  retrospectives/capstone-2026-04-22.md                 ← Your retrospective
-```
-
-Each downstream file references each upstream file by path. Run this to verify the reference chain:
+### Step 3: Commit both artifacts
 
 ```bash
-# Every upstream artifact should be mentioned by name in every downstream artifact
 cd ~/path/to/your-repo
-grep -rl "order-history" work-packages/ docs/adr/ design/ review-reports/ release-gates/ factory-runs/
+git add docs/factory-runs/ docs/retrospectives/
+git commit -m "docs(capstone): factory run record + retrospective — <feature>"
+
+# And any pack edits made during the run
+cd ../my-factory  # or wherever my-factory lives
+git status
+# review the pending prompt/formula commits from Part 2 Recovery 2
+# ensure each has a chore(<agent>): message naming the finding
+git push
 ```
 
-You should see every artifact listed. If any directory has no reference to order-history, that stage didn't run or its output is miswired.
-
-**Contrast with the loyalty thread from L2–L4.** The loyalty run lives in the same directory structure but with different filenames (`loyalty-points-system.md`, `0001-loyalty-points-storage.md`, etc.). Both threads coexist. Over time your factory-runs/ directory will accumulate one run report per feature, each linking to the seven artifacts that belong to it. This is the factory's running history.
+A capstone that ended with a partial run, one pack commit, and two committed docs is a successful capstone. A capstone that shipped to prod but left the commits unpushed is not.
 
 ---
 
-## Gas City Commands You'll Actually Use
+## What You Built (across L1–L5)
 
-This is the first session where you exercise Gas City's full orchestration surface, not just `gc sling` one agent at a time.
+If this is the last session you're doing in the workshop, take five minutes here to look at what lives on disk now. Every row below is something the factory did not have at the start of Day 1.
 
-| Command | What it does | Used when |
-|---------|--------------|-----------|
-| `gc orchestrate --pipeline feature-pipeline --bead <id>` | Kick off the full pipeline from `orchestrator.yaml` | Start of run, if orchestrator is wired |
-| `gc sling <agent> <bead>` | Manually dispatch one stage | Manual mode, or re-slinging after config fix |
-| `bd list --status needs-approval` | Poll for human-gate beads | Between stages, to catch pending gates |
-| `bd approve <bead> --comment "..."` | Release a human gate | ADR approval, pre-deploy approval |
-| `bd reject <bead> --comment "..."` | Reject + send back upstream | When a gate artifact isn't good enough to approve |
-| `bd event list --since 1h` | Inspect feedback signals | During run, to see what's been logged |
-| `gc events --follow` | Stream every city-level event | Continuously in a side pane |
-| `gc session list` | See all running agent sessions | Spot stuck sessions |
-| `gc session peek <agent>` | Snapshot an agent's session without attaching | When you suspect a stall but don't want to Ctrl+C |
-| `gc workshop sync-all` | Pull fresh tickets/PR state | Before Reviewer, if packs/workshop installed |
+| Layer | File / Location | What it is |
+|-------|-----------------|-----------|
+| Workspace | `my-factory/city.toml` | The factory's wiring — six pack includes plus (optional) improver |
+| Planner | `my-factory/packs/planner/` | Your customised planner; reads manifest + rules; decomposes beads |
+| Architect | `my-factory/packs/architect/` | Customised architect; writes ADRs + rules; syncs via `actual adr-bot` |
+| Designer | `my-factory/packs/designer/` | Customised designer; wireframes + a11y audits |
+| Coder | `my-factory/packs/coder/` | Customised coder; commits code + tests against ACs |
+| Reviewer | `my-factory/packs/reviewer/` | Customised reviewer; four-lens verdict (style + security + spec/AC + engineering) |
+| Deployer | `my-factory/packs/deployer/` | Customised deployer; tags releases + writes rollback plans |
+| Improver (optional) | `my-factory/packs/improver/` | Optional 7th; classifies runtime signals into proposed config changes |
+| Project manifest | `~/path/to/your-repo/docs/PROJECT_MANIFEST.md` | Tech stack + review standards + release criteria (read by all agents) |
+| Rules | `~/path/to/your-repo/docs/rules/*.md` | Project-specific guardrails populated by the architect |
+| ADRs | `~/path/to/your-repo/docs/architecture/*.md` + `docs/adr/*.md` | Architectural decisions; synced into CLAUDE.md / AGENTS.md |
+| Plans | `~/path/to/your-repo/docs/plans/*.md` | Planner-produced decomposition records |
+| Designs | `~/path/to/your-repo/docs/designs/*.md` | Designer-produced wireframes + a11y audits |
+| Releases | `~/path/to/your-repo/docs/releases/v*.md` | Deployer-produced release notes + rollback plan |
+| Feedback | `~/path/to/your-repo/docs/feedback/*.md` | (If improver is wired) harvested signals + classifications |
+| Run records | `~/path/to/your-repo/docs/factory-runs/*.md` | One record per capstone-style end-to-end run |
+| Retrospectives | `~/path/to/your-repo/docs/retrospectives/*.md` | Keep / Change / Question cards per run |
 
-If your orchestrator isn't wired, you can still run the capstone **manually sequenced** — sling each stage by hand after the previous bead closes. Note this choice in the Factory Run Report under "Config Discipline — Orchestrator mode."
-
----
-
-## Inline Insight: Why the Capstone Has a Different Feature From L2–L4
-
-L2 through L4 used the loyalty points thread. That thread taught you the primitives — how a work package becomes an ADR, how an ADR becomes a spec, how a spec becomes code. But because you watched each stage iteratively, it's easy to leave the labs with a factory that works on *the loyalty feature* and not for *arbitrary features*.
-
-The capstone feature deliberately lives in a different slice of the codebase. Order history is a **read-path feature** (lookups, indexing, pagination) where loyalty points was a **write-path feature** (mutations, ledgers, consistency). If your factory runs cleanly on both, you've validated that the configuration generalizes. If it stumbles, the stumble location tells you exactly which agent's prompt has a write-path-only assumption baked in.
-
-This is the single most important test of the week. Factories that only work on one feature type are just elaborate prompts. Factories that work on two or more are actual factories.
+Every handoff between those agents is a label flip on a bead. Every finding is a note on that bead. The coordination surface of the whole factory is the six canonical labels in [`LABELED_BEADS.md`](../../../LABELED_BEADS.md) plus the mail inboxes; there is no central state, no SPEC.md, no orchestrator service. That is the factory. It's yours.
 
 ---
+
+## Inline Insight: Why the Capstone Uses a Feature You Haven't Seen Before
+
+L2 through L4 used the loyalty-points thread. That thread taught you the primitives — how a `needs-plan` bead becomes a design, how a design becomes code, how code becomes a release. But because you watched each stage iteratively on the same feature, it's easy to leave the labs with a factory that works on *the loyalty feature* and not for *arbitrary features*.
+
+The capstone feature deliberately lives in a different slice of your codebase. Order history is a **read-path feature** (lookups, indexing, empty states) where loyalty points was a **write-path feature** (mutations, ledgers, consistency). If your factory runs cleanly on both, you've validated that the configuration generalises. If it stumbles, the stumble location tells you exactly which agent's prompt has a write-path-only assumption baked in. That signal is more valuable than a successful run on the same feature would have been.
 
 ## Inline Insight: Why Partial Completion Still Teaches You What You Need
 
-You might not reach the Deployer in 90 minutes. This is not a failure condition — it's the most common outcome on a first capstone run, and the Run Report is calibrated to reward it.
+You might not reach the deployer in 90 minutes. This is not a failure condition — it's the most common outcome on a first capstone run, and the run record is calibrated to reward it.
 
-The value of the capstone is in the *signal you generate*, not the *stages you complete*. A run that stalls at the Coder because the Designer spec was under-specified tells you more about your factory than a run that ships to production on luck. The stall point is the exact coordinate of the weakest link.
+The value of the capstone is in the *signal it generates*, not the *stages it completes*. A run that stalls at the coder because the designer spec was under-specified tells you more about your factory than a run that ships to production on luck. The stall point is the exact coordinate of the weakest link.
 
-Commit what you have. If you finished Planner + Architect + Designer and the Coder is still thrashing at T+85, close the Coder session, write the report with `Code: PARTIAL`, note why it stalled in the "What Didn't Go Well" section, and commit. The retrospective card's "Change" bullet should be the fix for the stall point. Next week you run again; the stall moves downstream. Three runs in, you'll be hitting Deployer reliably.
+Commit what you have. If you finished planner + designer + coder and the reviewer is still bouncing at T+85, mark the record `PARTIAL — stalled at reviewer request-changes loop`, note why in the retrospective's *Change* bullet, and commit. Next week you run again; the stall moves downstream. Three runs in, you'll be hitting the deployer reliably. The only wrong outcome is an uncommitted run — those erase themselves from memory inside 48 hours.
 
-The only wrong outcome is an uncommitted run. Uncommitted runs erase themselves from memory within 48 hours.
+## Inline Insight: Why You Don't Type `gc sling` During the Capstone
 
----
+In L2–L4 you sometimes slung agents manually to test a specific prompt edit. That was training. The capstone is the first session where the factory *is supposed to run itself*, with order gates waking agents on their own labels and no human in the dispatch loop.
 
-## Inline Insight: Config Iteration Is a First-Class Activity
-
-New participants often describe the capstone to themselves as "watching the factory run." That framing is subtly wrong. You are not a spectator — you are the **config engineer** for a process that happens to be running. Your job during the 90 minutes is to:
-
-1. Notice when an agent produces output that doesn't meet its Quality Gate
-2. Identify which config artifact (prompt, manifest, feedback rule) owns the gap
-3. Edit that artifact
-4. Commit the edit with a message that explains the cause
-5. Re-sling the affected stage
-
-A capstone run that required zero config iterations is suspicious. It either means your factory is genuinely production-grade (rare after four labs) or that you didn't look hard enough at the output. A capstone run that required 8+ config iterations is also suspicious — that's likely one or two upstream prompts producing garbage that you're patching at every downstream stage; fix the upstream prompt instead.
-
-The healthy band is **1-4 config iterations** for a 90-minute run. Each iteration should be committed as a `chore(<agent>): ...` message so the diff is reviewable. Your Factory Run Report's "Config Changes" column shows these, and your retrospective's Keep/Change bullets often come directly from them.
-
----
-
-## Inline Insight: How the Run Report Compounds
-
-Each completed run report adds a row to your factory's implicit metrics table. After six runs you will see things that are invisible after one:
-
-- **Stages-to-passing trends.** Are you getting faster? If the Planner consistently takes 1 sling and the Coder consistently takes 2, you know exactly where to invest your next hour of config work.
-- **Config-iteration distribution.** Which agent's prompt is accumulating the most post-run edits? That agent is under-specified relative to the others.
-- **Feedback-rule hit rates.** If no rule has fired in 4 runs, either your rules are too narrow or your factory is too clean. Usually the former.
-
-Keep a rolling `factory-runs/metrics.md` as a table with one row per run. Each run's report links to the row. Over time this is the truest picture of your factory's health.
-
----
-
-## Pipeline Stall Playbook
-
-A "stall" is 10+ minutes of no session activity or a stage producing output that immediately fails its own Quality Gate. Here is the pattern for each of the six stages.
-
-### Stall at Planner
-
-**Symptoms.** Work package is missing sections, uses vague language, writes to the wrong directory, or the Planner says "I need more information" and halts.
-
-**Root cause 85% of the time.** The bead description is too thin. You fed the Planner three sentences of feature intent and no acceptance criteria.
-
-**Config fix.** Open the bead description (or the source ticket the bead came from) and tighten it. If the Planner is halting for clarification on every run, add a rule to `packs/planner/prompts/planner.md.tmpl` Process: "If acceptance criteria are absent from the bead, write your own best-guess AC list and mark the work package as `Status: draft — AC needs human review`." This converts halting into progress-with-a-flag.
-
-### Stall at Architect
-
-**Symptoms.** ADR considers only 1 option, rehashes a decision already in `CLAUDE.md`, or treats a non-decision as a multi-option analysis (the button-color-ADR problem from L2 Scenario 2).
-
-**Root cause.** Quality Gate isn't forcing option count, or Inputs doesn't include `CLAUDE.md`, or no decision threshold tells the Architect when *not* to write an ADR.
-
-**Config fix.** Add to `packs/architect/prompts/architect.md.tmpl`: "Only write an ADR if the decision affects more than one file OR has long-term consequences OR contradicts a tailored ADR. For cosmetic or single-file changes, write a one-line note in the work package and close the bead." Then the minimum-3-options rule for cases that do pass this threshold.
-
-### Stall at Designer
-
-**Symptoms.** Spec missing types, missing UI states, missing API error shapes, or just a rephrasing of the work package.
-
-**Root cause.** Designer prompt's Output Format is checklist-vague. It says "include component design" when it should say "include a `### Types` section, a `### States` section, a `### API Contract` section with every error shape."
-
-**Config fix.** Convert the Output Format from bullets to a literal template. The Designer writes what you template; if you don't template it, they don't write it.
-
-### Stall at Coder
-
-**Symptoms.** Tests failing repeatedly on the same pattern, code written to wrong paths, imports breaking, or the Coder getting stuck in a "fix one test → break another" loop.
-
-**Root cause, 70% of stalls.** Upstream spec gap. The Coder can't implement what the Designer didn't specify.
-
-**Config fix.** Don't edit the Coder prompt. Edit the **Designer** prompt to require whatever is missing. Re-sling Designer, then Coder. If after one Designer-spec iteration the Coder is still stuck, then and only then edit the Coder prompt — usually to add a project-convention rule (import paths, utility re-use, naming).
-
-**Root cause, 30% of stalls.** A recurring runtime error pattern (null refs, array-undefined, unhandled promise rejections). That's a feedback-rule job — let the W4 rule fire, auto-append to `CLAUDE.md`, and re-sling the Coder. If no rule exists for the pattern, write one before fixing the code manually.
-
-### Stall at Reviewer
-
-**Symptoms.** Reviewer approves garbage, rejects clean code, or produces a review with no severity tags.
-
-**Root cause.** Review Standards in the manifest are vague. The Reviewer reflects the manifest.
-
-**Config fix.** Tighten `docs/PROJECT_MANIFEST.md` Review Standards — replace "code should be clean" with specific, testable rules (no inline styles, no `any`, components < 200 lines, etc.). The Reviewer will sharpen automatically because the manifest is its primary input.
-
-If the Reviewer over-approves, add a severity-threshold rule to the reviewer prompt: "APPROVE requires zero High findings. CHANGES REQUESTED for any Medium+. BLOCK for any High."
-
-### Stall at Deployer
-
-**Symptoms.** Gate document is vague, gates are marked PASS without evidence, deploy proceeds despite review CHANGES REQUESTED, or the Deployer halts because Release Criteria are unclear.
-
-**Root cause.** Release Criteria in the manifest are vague OR the Deployer prompt's Process doesn't enforce evidence-per-gate.
-
-**Config fix.** Tighten `docs/PROJECT_MANIFEST.md` Release Criteria to a numbered list of objectively testable conditions (see reference manifest's 6-item Required list). Then add to the Deployer prompt: "For each Required criterion, show the command run and exit code in the gate document. A criterion with no evidence is automatically FAIL."
-
-For the deploy-despite-changes-requested case: make the Deployer prompt's Process step 1 be "Read `review-reports/<slug>-review.md`. If verdict is not APPROVE, write a gate document with status BLOCK and exit." Make it literally the first step.
+If you catch yourself typing `gc sling <agent> <bead>` during the capstone, stop and ask why. The two legitimate reasons: (a) the order gate is broken and you're debugging it (check `gc doctor`); (b) you need a surgical re-run of one step after a pack edit and you don't want to wait for the next poll. Any other reason is a Rule 1 violation dressed up in CLI form — you're overriding the factory's contract to satisfy an impatience the factory is supposed to eliminate.
 
 ---
 
 ## Common Issues & Solutions
 
-A compact reference for what tends to go wrong across the whole factory during a real run. When you hit one of these, look up the fix here, apply it, re-sling, and log it in the run report.
+### Issue 1: A bead sits on a label and no agent wakes
 
-### 1. Agent gets stuck with no activity for 10+ min
+**Cause:** Either the label on the bead doesn't match what the agent's order gate polls, or the agent isn't running.
 
-Check the session: `gc session peek <agent>`. If the session is alive but idle, it's usually waiting on a clarification it's been taught not to ask for. Kill the session (`gc session kill <agent>`), tighten the upstream artifact or prompt, re-sling.
+**Fix:** `bd ready --label=<the-label> --limit=1` — if it returns the bead, the order-gate condition is met; check `gc doctor` for the agent's `check-<agent>` script. If it returns nothing, `bd label list <bead-id>` — watch for trailing spaces, case mismatches, or a label typo. Labels are case-sensitive.
 
-### 2. Same quality-gate failure recurs across features
+### Issue 2: Reviewer keeps bouncing the bead on the same finding
 
-This is the signal a W4 feedback rule should be catching. If no rule exists, write one now. If a rule exists but isn't firing, its detection pattern is wrong — check the regex/grep against actual log lines.
+**Cause:** You're hand-fixing the code, or the pack edit you did doesn't actually address the finding.
 
-### 3. Wrong stage runs before its dependency
+**Fix:** `git log my-factory/packs/coder my-factory/packs/reviewer` for the duration of the bounces. If there are zero commits matching the finding, you hand-fixed. If there's one commit, read it — does it make the rule explicit, or is it still interpretable? Make the edit literal (see L4 Scenario C for the pattern).
 
-Check `bd show <bead-id>` for the `depends_on` chain. If the chain is missing, the bead was created without `--depends-on`. Close the wrong-ordered work, recreate the bead with the dependency, re-sling from the correct stage.
+### Issue 3: Deployer sets `version_after` = `version_before`
 
-### 4. Orchestrator fails to advance to next stage
+**Cause:** The coder's commit message didn't follow conventional-commits (`feat:` / `fix:` / `chore:`), so the version-bump step had no signal.
 
-`gc orchestrate` reads `orchestrator.yaml`. If a stage doesn't advance, one of: (a) previous stage's bead wasn't closed, (b) `orchestrator.yaml` has a typo in the agent name, (c) a human gate is pending. Run `bd list --status needs-approval` to check for pending gates.
+**Fix:** Tighten the coder prompt to require conventional-commits (see L4 Issue 5). Re-arm the coder with `ready-to-build`; the next commit will bump correctly.
 
-### 5. `gc sling` returns "agent not found"
+### Issue 4: Rollback plan says "Data migrations to reverse: unknown"
 
-Agent isn't loaded. Run `gc rig list` to confirm the pack is installed. Re-run `gc rig add --include /absolute/path/to/pack` if missing. Run `gc restart`.
+**Cause:** The deployer couldn't confidently enumerate migration state. This is a safety-first default — the formula prefers "unknown" over a plan it can't verify.
 
-### 6. Artifact written to wrong path
+**Fix:** Add a project-specific hint to `packs/deployer/prompts/deployer.md.tmpl`: "Migrations live in `db/migrations/*.sql`. Diff HEAD vs. the previous tag to list new migrations." Re-arm with `ready-to-ship`.
 
-Output-path drift. Every prompt's Output Format line must have the literal path, not a description. Change "write the work package to an appropriate directory" to "write to `work-packages/<feature-slug>.md` — never anywhere else."
+### Issue 5: `actual-adr-check` aborts the coder run with "drift"
 
-### 7. Cross-references missing between artifacts
+**Cause:** CLAUDE.md / AGENTS.md are out of sync with `docs/adr/` — an ADR changed but the sync never ran.
 
-L2 Step 6 pattern: the downstream agent's prompt must explicitly include a Process step that opens the upstream artifact and appends a back-reference. If the Architect isn't back-linking to the work package, it's a Process step, not a Quality Gate — add the step.
+**Fix:** `cd ~/path/to/your-repo && actual adr-bot sync` (see L2 Part 2 Step 1). Then re-arm the coder with `ready-to-build`. The coder's next run sees consistent state and proceeds.
 
-### 8. Deployer passes gates but feature doesn't work in staging
+### Issue 6: Improver proposes a bead that would loosen a tailored ADR
 
-The gates are wrong, not the code. The manifest's Release Criteria is missing a condition that matters (e.g., "endpoint returns 200 on smoke test"). Add the condition to the manifest, re-sling the Deployer, and note in the run report that the gate coverage was inadequate.
+**Cause:** The improver is doing its job — classifying a signal — but the proposal conflicts with a baseline the architect committed to. This is expected; it's exactly why every improver proposal goes through a human gate.
 
-### 9. `CLAUDE.md` is growing monotonically from feedback rules
+**Fix:** Close the proposed bead with a reason: `bd close <bead-id> --reason "conflicts with tailored ADR <path>; escalate via new architecture bead if still needed"`. A rejected proposal is the gate working, not a failure.
 
-Feedback rules add but don't decay. Per W4 safety review: every auto-generated section in `CLAUDE.md` needs a "last triggered" timestamp comment. Anything not triggered in 90 days is auto-commented-out for review. If you don't have the decay rule, write it before `CLAUDE.md` becomes noise.
+### Issue 7: Planner produces zero child beads
 
-### 10. Reviewer contradicts Architect
+**Cause:** The feature is smaller than the planner's threshold for decomposition, or the bead description was too thin to plan against.
 
-Two possible causes: (a) the Architect's ADR is wrong and should be updated, or (b) the Reviewer prompt doesn't treat ADRs as authoritative. Check the ADR first; if the ADR is right, add to the Reviewer prompt: "Project ADRs under `docs/adr/` are authoritative. A finding that contradicts an ADR is only valid if accompanied by a proposed new ADR."
+**Fix:** If the feature is genuinely atomic, relabel the bead directly to the first non-planner label it needs (`needs-design` or `ready-to-build`) and note the skip in the run record's *Human interventions* table. If the description is thin, add to the notes (`bd update --notes "..."`) and re-arm with `needs-plan`.
 
-### 11. Tailored ADRs conflict with a new ADR the Architect wrote
+### Issue 8: Mail sent between agents sits unread
 
-The Architect is extending or overriding a baseline — which is allowed by L2's Part 2 Step 4 pattern, but must be explicit. Check that the new ADR has a "Relationship to tailored ADR X" section. If not, that section is missing from the Architect prompt's MADR template — add it and re-sling.
+**Cause:** Agents read their mail during specific formula steps (usually `intake`). An agent in cooldown or mid-run won't check mail until the next intake.
 
-### 12. Factory stalls because a prompt-file edit has a syntax error
+**Fix:** `gc nudge <agent>` wakes the target agent explicitly. If it still doesn't read mail, check that the formula's `intake` step includes a `gc mail inbox --agent <self>` call — the shipped formulas do; a customisation may have dropped it.
 
-Prompts aren't compiled, so "syntax" means markdown or whitespace. Most common: indentation of a list item in the Quality Gate section that makes the model misinterpret what's required vs. optional. Always re-read your own edits as if the agent were reading them. If an edit introduces ambiguity, fix the edit — don't layer another edit on top.
+---
+
+## Quality Bar
+
+When you review your capstone output, check each:
+
+- **Labels drove everything.** `gc events --follow` output for the root bead shows `label_added` / `label_removed` events at every handoff. No `gc sling <agent> <bead>` in the history except in Recovery 2 retries.
+- **Findings live in bead notes.** `bd show <bead-id>` renders `plan`, `design`, `impl_plan`, `self_test`, `adr_check`, `style_findings`, `security_findings`, `spec_findings`, `verdict`, `gate_checks`, `version_before`/`after`, and `rollback_plan` — all for one bead. A missing note means the corresponding formula step didn't run.
+- **Config-first fixes.** `git log my-factory/packs/` over the run duration has at least one commit whose message names a finding from the run. `git log ~/path/to/your-repo/src/` has **zero** commits attributable to fixing a finding.
+- **Run record honest.** If the run was partial, the status field says `PARTIAL` and the missing stages are listed as "not reached." A record that marks every row `PASS` when the reviewer never ran is fiction.
+- **Retrospective specific.** Keep / Change / Question bullets name concrete packs, files, or findings. "Keep: shipping faster" is vague; "Keep: the reviewer's AC-coverage rule from L4 caught the uncovered-state bug" is actionable.
+- **Pushed.** `git -C ~/path/to/your-repo status` and `git -C my-factory status` both say "up to date with origin." A capstone stranded on a local branch erases itself.
 
 ---
 
 ## Concept Check (before closing the capstone)
 
-> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain each bullet in their own words, without re-reading. If they can't, revisit the matching section before running the Exit Criteria check.
 
-- Why the capstone uses a feature they haven't seen before. (A rehearsed feature tests memory; a new feature tests the factory.)
-- Why ad-hoc prompts break the factory's contract. (Every ad-hoc correction is a prompt update that should have happened but didn't — the next bead inherits the missing rule.)
-- What a "PASS" from the Deployer actually proves. (Only that the release-criteria in the manifest were met — not that the feature is good; that's the Reviewer's job.)
-- Why the Retrospective asks for a Keep, a Change, and a Question. (Keep validates what compounds, Change surfaces what doesn't, Question surfaces the thing they couldn't resolve alone.)
-- Why the report is committable even when the run is incomplete. (A partial report with honest state is an audit trail; a discarded partial run is wasted learning.)
+- **Why the capstone uses a feature you haven't seen before.** (A rehearsed feature tests memory; a new feature tests the factory.)
+- **Why `gc sling` should be rare in the capstone.** (Order gates wake agents automatically; manual slinging is for debugging, not for the normal pipeline.)
+- **What a "pass" from the deployer actually proves.** (Only that the release-criteria in the manifest were met — not that the feature is good; that's the reviewer's job.)
+- **Why the retrospective asks for a Keep, a Change, and a Question.** (Keep validates what compounds, Change surfaces what doesn't, Question flags what you couldn't resolve alone and will need outside signal for.)
+- **Why a partial run is a committable success.** (A partial record with an honest stall point is an audit trail; a discarded partial run is wasted learning.)
+- **What the Improver does and does not do.** (Classifies runtime signals and files labelled beads for humans to accept or reject; **does not** edit prompts or code directly.)
 
 ---
 
@@ -931,106 +654,16 @@ Prompts aren't compiled, so "syntax" means markdown or whitespace. Most common: 
 
 You pass the capstone when all of these are true. Check them off as you go.
 
-- [ ] **Feature bead created** with explicit acceptance criteria and constraints (not a one-line description)
-- [ ] **At least one downstream artifact committed** — work package, ADR, spec, code, review, or gate. (A factory that produces only a work package still produced something, and that partial state goes in the report.)
-- [ ] **Zero ad-hoc prompts typed into any agent session** during the run
-- [ ] **Zero manual code edits** during the run (manual edits to *prompts*, *manifest*, and *feedback rules* are encouraged; manual edits to agent-produced *artifacts* are not)
-- [ ] **Factory Run Report completed and committed** — even if the report says `PARTIAL` and the Deploy row is blank. Commit what you have before stopping.
-- [ ] **Retrospective card written and committed** alongside the run report — Keep / Change / Question
-- [ ] **Feature branch present on the remote** (any stage — branch after Coder is ideal, branch after Planner is still valid)
+- [ ] **Feature bead created** with explicit acceptance criteria + constraints + success metrics in the notes (not a one-line description)
+- [ ] **At least one label flip recorded** on the bead — `needs-plan` → *something*. A factory that just re-reads its own inbound label is not a factory.
+- [ ] **Zero ad-hoc prompts** typed into any `gc watch <agent>` session during the run
+- [ ] **Zero hand-edits to `src/`** in your rig (manual edits to *prompts*, *formulas*, *rules*, and *manifest* are encouraged; manual edits to agent-produced code are not)
+- [ ] **Run record committed** at `docs/factory-runs/<date>-<slug>.md` in your rig — even if status is `PARTIAL` and most rows are blank
+- [ ] **Retrospective card committed** at `docs/retrospectives/<date>-capstone.md` — Keep / Change / Question all populated
+- [ ] **Any pack edits pushed** — if you ran Recovery 2 during the run, the resulting `chore(<agent>):` commits are on the remote
+- [ ] **Both repos in sync with origin** — `git -C ~/path/to/your-repo status` and `git -C my-factory status` both say "up to date"
 
-If all seven are checked, you've passed. If the Deploy row is blank, you've still passed — partial runs are first-class outcomes.
-
----
-
-## Test Scenarios (Optional — If You Finish Early)
-
-If you complete the primary run before T+90, try one of these stress tests. Each one exercises a different axis of factory generality.
-
-### Scenario A: Run on a deliberately under-specified feature
-
-Create a bead with a terse description: "Add CSV export to the reports page." No AC, no constraints.
-
-**Expected:** The Planner should either refuse (if your Quality Gate forbids ambiguous bead descriptions) or produce a work package that writes its own best-guess AC and flags them. What you're checking: does your factory degrade gracefully under thin inputs, or does it hallucinate?
-
-### Scenario B: Run on a feature that tests your tailored-ADR enforcement
-
-Pick a feature that deliberately tempts a pattern forbidden by a tailored ADR in `CLAUDE.md`. For example, if a tailored ADR requires parameterized queries: create a bead like "Add admin SQL report generator."
-
-**Expected:** The Architect should catch the conflict with the tailored ADR and write a *conflict-resolution* ADR, not a vanilla one. The Reviewer should reference the tailored ADR in its findings. If neither agent notices the conflict, your tailored-ADR inputs aren't being read — tighten the Inputs sections of both prompts.
-
-### Scenario C: Run on a refactor-only bead
-
-Create a bead: "Refactor src/api/orders/*.ts to extract shared validation." No user-facing feature.
-
-**Expected:** The Planner should recognize this is a non-feature work package (no user stories) and adapt its output. Some Planner prompts handle this gracefully; others produce nonsensical "As a developer I want..." stories. This test reveals whether your Planner's Output Format has a fallback for non-feature work.
-
----
-
-## What Comes After L5
-
-The capstone ends here. Your factory continues. Below are the habits that separate factories that *scale* from factories that *atrophy*.
-
-### Immediately (this week)
-
-1. **Commit everything** — prompts, manifest updates, feedback rules, the run report, the retrospective. Push to your team's default branch. The diff from L4-to-L5 is the most valuable artifact of the whole intensive.
-2. **Archive the full run log** — `gc events --dump --since 2h > factory-runs/capstone-<date>-events.log` captures every event for later inspection.
-3. **Update the DECISIONS.md** — append an L-series-style entry summarizing what changed and why, so the next agent/person reading the repo sees the full arc.
-
-### Next week
-
-1. **Run the factory on a real backlog ticket.** Don't pick a toy feature. Pick the next thing your team actually needs. The smoothness of the real-ticket run tells you whether the factory is ready for daily work.
-2. **Refine based on capstone learnings.** Whatever stalled most in the capstone is now your highest-leverage config target. Fix that one thing before running again.
-3. **Add one feedback rule per new failure pattern** you observe. Keep the catalog small and specific; noisy rules create noise, not learning.
-
-### Next month
-
-1. **Measure velocity.** Roll up `factory-runs/metrics.md` into a simple dashboard: average config iterations per stage, average human gate time, percentage of runs reaching the Deployer. Three data points are enough to see direction.
-2. **Expand the factory.** Specialized agents — security, performance, docs, data — follow the exact same pattern as the core six. Each is a pack: prompt file + pack.toml + overlay. The mechanics you've already mastered.
-3. **Re-run `actual adr-bot` on a weekly cron.** Tailored-ADR baselines drift as the codebase changes; the wiki reference to a weekly order in `my-factory/orders/adr-refresh/order.toml` captures this as a Gas City scheduled agent.
-
-### Ongoing habits
-
-- **Promote recurring feedback rules into ADRs.** A rule that fires 5+ times/month is no longer a pitfall — it's a principle. Move the guidance from the auto-generated `CLAUDE.md` section into a new `docs/adr/NNNN-*.md`, remove the rule, note the promotion in `DECISIONS.md`.
-- **Keep run reports short and committed.** A run report that's 200 lines is unread noise. 40-80 lines, linked to the commits and artifacts that matter, compounds beautifully across dozens of runs.
-- **Audit the `git log --grep="feedback:"` weekly.** Bad feedback rules silently poison the factory; the only cure is weekly review of what they've been auto-committing.
-- **Treat prompt files like source code.** They go through PR review. They have owners. They get refactored. When a prompt hits ~200 lines, split it: extract shared sections (like "Config Discipline" or standard commit conventions) into a shared include file that all packs reference.
-
-### Building a composite pack for your team
-
-If you've made it through the capstone, you've installed six packs individually. The next time a teammate joins, they shouldn't have to install six — they should install one composite that pulls in all six. The reference project ships `packs/fired-up-pizza/pack.toml` as a 20-line composite bundle. The shape is:
-
-```toml
-[pack]
-name = "fired-up-pizza-factory"
-schema = 1
-description = "Composite: all six factory agents for Fired Up Pizza"
-
-includes = [
-  "../planner",
-  "../architect",
-  "../designer",
-  "../coder",
-  "../reviewer",
-  "../deployer",
-]
-```
-
-After the capstone, build the equivalent for your own factory:
-
-```bash
-mkdir -p packs/team-factory
-# Write packs/team-factory/pack.toml using the shape above,
-# listing the six leaf packs under includes.
-```
-
-Then the next teammate bootstraps with a single include in their `my-factory/city.toml`:
-
-```toml
-includes = ["../packs/team-factory"]
-```
-
-One command instead of six. This is how your factory becomes shareable.
+If all eight are checked, you've passed. If the reviewer or deployer stages didn't run, you've still passed — partial runs are first-class outcomes, and the stall point is your most valuable signal for what to fix before next week.
 
 ---
 
@@ -1040,138 +673,100 @@ Every command you might use during the capstone, grouped by purpose.
 
 ```bash
 # ----- Pre-run setup -----
+cd ~/path/to/your-repo
+mkdir -p docs/factory-runs docs/retrospectives
+$EDITOR docs/factory-runs/$(date +%Y-%m-%d)-<slug>.md    # start the run record
+
+# ----- File the root bead -----
+bd create --title "Feature: <name>" --label needs-plan \
+  --notes "user_story:
+... 
+acceptance_criteria:
+- ...
+constraints:
+- ...
+success_metrics:
+- ..."
+
+# ----- Observation panes (run in parallel) -----
+gc events --follow                                # every city event
+gc status                                          # active sessions + packs
+watch -n 5 "bd show <bead-id>; echo ---; bd label list <bead-id>"
+
+# ----- Recovery 1: re-label -----
+bd label remove <bead-id> <wrong-label>
+bd label add <bead-id> <right-label>
+
+# ----- Recovery 2: config edit + re-arm -----
 cd my-factory
-bd create "Order history page — customers view past orders by phone number" \
-  --label "capstone-feature" \
-  --description "$(cat <<'EOF'
-...feature request with AC + constraints + success metrics...
-EOF
-)"
-# note the bead ID that comes back
+$EDITOR packs/<agent>/prompts/<agent>.md.tmpl    # or formulas/mol-*.formula.toml
+git add packs/<agent>
+git commit -m "chore(<agent>): <what the finding required>"
+gc service restart
+bd label add <bead-id> <the-agent's-inbound-label>
 
-# ----- Orchestrator mode (if orchestrator.yaml is wired) -----
-gc orchestrate --pipeline feature-pipeline --bead <bead-id>
+# ----- Recovery 3: mail + nudge -----
+gc mail send <from-agent> --to <target-agent> \
+  --subject "..." --body "..."
+gc nudge <target-agent>
 
-# ----- Manual mode (if running stage-by-stage) -----
-gc sling planner       <bead-id>
-gc sling architect     <architect-bead-id>
-gc sling designer      <designer-bead-id>
-gc sling coder         <coder-bead-id>
-gc sling reviewer      <reviewer-bead-id>
-gc sling deployer      <deployer-bead-id>
+# ----- Inspect the walk -----
+bd show <bead-id>                 # current notes + labels + status
+bd label list <bead-id>           # labels only
+bd list --status=closed --since="1 hour ago"      # closed by the deployer?
+bd list --label=needs-improve --since="1 hour ago" # improver's inbox
+gc mail inbox --agent <any>       # any outstanding coordination messages
 
-# ----- Each sling pairs with one of these to observe -----
-gc watch <agent>               # stream that agent's session
-gc session peek <agent>        # snapshot without attaching
-gc session list                # all active sessions
-gc events --follow             # every city event in real time
-
-# ----- Bead management -----
-bd list                                   # everything
-bd list --status open                     # active work
-bd list --status needs-approval           # pending human gates
-bd show <bead-id>                         # one bead's detail + dependency chain
-bd create "..." --depends-on <bead-id>    # dependent bead
-bd close <bead-id> --comment "..."        # mark done
-bd approve <bead-id> --comment "..."      # release human gate
-bd reject <bead-id> --comment "..."       # reject, send back upstream
-bd event list --since 1h                  # feedback-signal audit
-
-# ----- Workshop pack (if installed) -----
-gc workshop sync-all          # pull fresh ticket + PR state
-gc workshop status            # integration connectivity check
-
-# ----- Artifact inspection during the run -----
-cat work-packages/order-history.md
-cat docs/adr/*-order-history-*.md
-cat design/order-history-spec.md
-git log --oneline feat/order-history
-git diff main...feat/order-history
-cat review-reports/order-history-review.md
-cat release-gates/order-history-gate.md
-
-# ----- Config-iteration workflow (when a stage fails) -----
-# 1. Identify the prompt that owns the failing behavior
-# 2. Edit the prompt (packs/<agent>/prompts/<agent>.md)
-# 3. Commit with chore(<agent>): message
-# 4. Delete the bad artifact
-# 5. Re-sling
+# ----- (Optional) harvest on demand if improver is wired -----
+cd my-factory
+sh packs/improver/commands/harvest.sh 1h
+gc watch improver
 
 # ----- Close the run -----
-git add factory-runs/capstone-<date>-<slug>.md retrospectives/capstone-<date>.md
-git commit -m "docs(capstone): factory run report + retrospective"
+cd ~/path/to/your-repo
+$EDITOR docs/factory-runs/<date>-<slug>.md        # fill in final status + tables
+$EDITOR docs/retrospectives/<date>-capstone.md    # Keep / Change / Question
+git add docs/factory-runs/ docs/retrospectives/
+git commit -m "docs(capstone): factory run record + retrospective — <feature>"
 git push
-
-# ----- Full run log dump (optional, for metrics) -----
-gc events --dump --since 2h > factory-runs/capstone-<date>-events.log
+cd ../my-factory
+git push                                           # any Recovery-2 pack commits
 ```
 
 ---
 
-## Quick Reference: The 6 Agents + Their Artifacts
+## Next Steps
 
-| Stage | Agent | Primary Input | Output Artifact | Quality Gate Source |
-|-------|-------|---------------|------------------|--------------------|
-| 1 | Planner | Bead description + manifest | `work-packages/<slug>.md` | `packs/planner/prompts/planner.md.tmpl` |
-| 2 | Architect | Work package + manifest + `CLAUDE.md` + existing ADRs | `docs/adr/NNNN-<slug>.md` | `packs/architect/prompts/architect.md.tmpl` |
-| 3 | Designer | Work package + ADR + manifest | `design/<slug>-spec.md` | `packs/designer/prompts/designer.md.tmpl` |
-| 4 | Coder | Design spec + manifest + `CLAUDE.md` | Feature branch under `src/` + tests | `packs/coder/prompts/coder.md.tmpl` + manifest build gates |
-| 5 | Reviewer | Code diff + spec + manifest Review Standards + `CLAUDE.md` | `review-reports/<slug>-review.md` + PR comment | `packs/reviewer/prompts/reviewer.md.tmpl` + manifest |
-| 6 | Deployer | Review report + manifest Release Criteria | `release-gates/<slug>-gate.md` + (if passes) deploy | `packs/deployer/prompts/deployer.md.tmpl` + manifest |
+The capstone ends here. Your factory continues.
 
-### Capstone deliverables
+### This week
 
-| Deliverable | File | Status check |
-|-------------|------|--------------|
-| Feature bead with explicit AC | `bd show <bead-id>` | Description has AC + constraints + success metrics |
-| At least one downstream artifact | `work-packages/` and beyond | At minimum, Planner output committed |
-| Factory Run Report | `factory-runs/capstone-<date>-<slug>.md` | All sections present; partial completion noted honestly |
-| Retrospective card | `retrospectives/capstone-<date>.md` | Keep / Change / Question all populated |
-| Feature branch on remote | `git branch -r | grep <slug>` | Branch pushed; any stage counts |
-| Zero ad-hoc prompts | Self-attested in report | Config Discipline row: "Ad-hoc prompts used: 0" |
-| Zero manual code edits | `git log --author=<you>` on feature branch | All commits are from agents or are `chore(<agent>): ...` prompt edits |
+1. **Push everything.** Every `chore(<agent>):` commit, the run record, the retrospective, and any ADR / rules / manifest edits the agents made. The diff from the start of L2 to the end of L5 is the most valuable artifact of the intensive.
+2. **Archive the run log.** `gc events --dump --since 2h > ~/path/to/your-repo/docs/factory-runs/$(date +%Y-%m-%d)-events.log` — every event for later inspection if a future run regresses.
 
-When every row on both tables resolves, your factory works end-to-end on a feature it has never seen. That's the whole intensive, in one run.
+### Next week
 
----
+1. **Run the factory on a real backlog ticket** — not a toy feature. The smoothness of the real-ticket run tells you whether the factory is ready for daily work.
+2. **Act on your retrospective's *Change* bullet.** Whatever stalled most is your highest-leverage config target. Fix it before the second real-ticket run.
 
-## Quality Bar
+### Next month
 
-When you review your own capstone output, check each of these:
+1. **Roll up** `docs/factory-runs/` into a three-data-point trend: average config iterations per stage, average human intervention time, percentage of runs reaching the deployer. Three points are enough to see direction.
+2. **Add a feedback rule** for any failure pattern that recurred across two or more runs. Keep the catalog small and specific; noisy rules create noise, not learning.
+3. **Consider the Improver.** If you skipped W4, the `needs-improve` beads the deployer is emitting are sitting in the queue unread. Wire the improver and let it run for a week; even if you reject every proposal, the classified summary of your factory's runtime signals is worth the 30 minutes of W4.
 
-- **Stage traceability** — Every artifact references every upstream artifact by path. `grep -rl "<feature-slug>"` across the repo returns every stage's file.
-- **Config-first fixes** — Every fix landed as a commit to a prompt, manifest, or feedback-rule file. No commits directly edit agent-produced artifacts.
-- **Quality Gate honesty** — Each gate in the run report matches the command you actually ran, with an exit code or equivalent evidence. "PASS (by inspection)" is not evidence; "PASS (`npm test` exit 0)" is.
-- **Retrospective specificity** — Keep / Change / Question bullets are concrete. "Keep: shipping faster" is vague; "Keep: re-slinging the Designer when the Coder stalls" is actionable.
-- **Partial completion owned** — If the run was partial, the report says so in the header (`Report status: PARTIAL`), the missing stages are listed as "not reached" (not "PASS"), and the retrospective explains why.
+### Ongoing
 
----
-
-## Troubleshooting Quick Table
-
-One-line fixes for the top issues you're likely to hit during the run. These are the same patterns surfaced in the Pipeline Stall Playbook and Common Issues sections, compressed into a grep-friendly table.
-
-| Symptom | One-line fix |
-|---------|-------------|
-| `gc sling` "agent not found" | `gc rig list`; re-run `gc rig add --include /abs/path/to/pack`; `gc restart` |
-| Planner produces output with vague language | Add forbidden-words list to `packs/planner/prompts/planner.md.tmpl` Quality Gate; re-sling |
-| Architect writes 1-option ADR | Add "minimum 3 options" rule to `packs/architect/prompts/architect.md.tmpl`; re-sling |
-| Designer spec has no types | Convert Output Format to literal template with `### Types` required; re-sling |
-| Coder uses wrong import paths | Add manifest-declared-paths-only rule to `packs/coder/prompts/coder.md.tmpl`; re-sling |
-| Reviewer over-approves | Add severity-threshold-for-verdict rule to `packs/reviewer/prompts/reviewer.md.tmpl`; re-sling |
-| Deployer marks gates PASS without evidence | Add "show command + exit code per gate" rule to `packs/deployer/prompts/deployer.md.tmpl`; re-sling |
-| Cross-references missing between artifacts | Add explicit Process step to downstream prompt: "Open upstream artifact and append back-reference"; re-sling downstream |
-| Orchestrator doesn't advance | Check `bd list --status needs-approval`; check previous bead closed; check orchestrator.yaml agent names |
-| Feedback rule not firing | Check detection regex against actual log lines with `bd event list --since 1h` |
-| Session idle for 10+ min | `gc session peek <agent>` to inspect; kill with `gc session kill <agent>`; fix upstream prompt; re-sling |
-| Build fails on branch the Coder pushed | Coder prompt is missing "run `npm run build && npm test && npm run lint` before marking ready"; add and re-sling |
+- **Promote recurring findings into ADRs.** A finding that the reviewer flags five times across five features is no longer a finding — it's a principle. Move the guidance into a `docs/adr/NNNN-*.md`, let `actual adr-bot` sync it into CLAUDE.md / AGENTS.md, and the coder will respect it without the reviewer having to bounce.
+- **Treat pack files like source code.** They go through PR review. They have owners. They get refactored when they hit ~200 lines — extract shared sections into a common include file all packs reference.
+- **Audit `git log --grep="chore("` weekly.** Bad config edits quietly drift the factory; the only cure is weekly review of what's been committed to `packs/` and why.
 
 ---
 
 ## Final Note
 
-The capstone is not a milestone — it's a baseline. After you run it today, you should be able to run it again next week on a different feature and spend less time. Three months from now, the same run should take 20 minutes of human attention instead of 90. Six months from now, your factory should be running end-to-end on tickets while you're asleep, and the first sign of a problem is a bead sitting in `needs-approval` when you wake up.
+The capstone is not a milestone — it's a baseline. After you run it today, you should be able to run it again next week on a different feature and spend less time. Three months from now, the same run should take 20 minutes of human attention instead of 90. Six months from now, your factory should be running end-to-end on tickets while you're asleep, and the first sign of a problem is a bead sitting in `needs-review` — with findings already written by the reviewer — when you open your laptop in the morning.
 
-If your factory is getting faster per run, you're doing this right. If it's getting slower, the config is drifting faster than it's adapting — audit your feedback rules, prune the ones that don't fire, and tighten the manifest.
+If your factory is getting faster per run, you're doing this right. If it's getting slower, the config is drifting faster than it's adapting — audit the pack commits, prune the improver proposals that didn't pan out, and tighten the manifest.
 
-That's the whole discipline: **config over prompting, artifacts as handoffs, config discipline as the scaling axis.** The capstone is the first place you prove it. Every run after is the evidence.
+That's the whole discipline: **labels as handoffs, config as the scaling axis, findings in bead notes**. The capstone is the first place you prove it. Every run after is the evidence.
