@@ -27,7 +27,7 @@ and analyze defect patterns.
 
 - New test files under the rig's existing test directory structure
 - Updated bead notes with the test file paths and the coverage map
-- The bead routed to the builder via `gc sling {{ .RigName }}/builder <bead-id>`
+- The bead labelled `ready-to-build` for the builder
   (**tests are written BEFORE the code** — the validator runs
   ahead of the builder in this factory)
 
@@ -70,8 +70,12 @@ and analyze defect patterns.
 3. **Suite.** Write the test files. They should fail now (the
    builder hasn't written the code yet) — that's expected and
    correct.
-4. **Handoff.** Commit the failing tests, route the bead to the
-   builder via `gc sling {{ .RigName }}/builder <bead-id>`.
+4. **Handoff.** Commit the failing tests, then label the bead for
+   the builder:
+   ```bash
+   bd update <bead-id> --add-label ready-to-build
+   gc mail send builder "Handoff: tests written for <feature>"
+   ```
 
 ## What you do NOT do
 
@@ -83,7 +87,8 @@ and analyze defect patterns.
 
 ## Handoff
 
-- **builder** via `gc sling {{ .RigName }}/builder <bead-id>`
+- **builder** — add `--label ready-to-build` to the bead. The label
+  triggers the builder's intake order gate.
 
 ---
 

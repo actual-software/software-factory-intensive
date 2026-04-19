@@ -30,7 +30,7 @@ existing patterns rather than inventing new ones.
 
 - Code changes committed to the rig
 - Updated bead notes with build progress and test results
-- A handoff bead routed to the reviewer via `gc sling {{ .RigName }}/reviewer <bead-id>`
+- A handoff bead labelled `needs-review` for the reviewer
 
 ## Constraints
 
@@ -84,8 +84,8 @@ hands the work back to the architect.
 1. **Intake.** Read the bead, its parent plan, and any referenced
    rules.
 2. **ADR check.** Run `actual status` (via the skill). If the rig is
-   in drift, route the parent to the architect via
-   `gc sling {{ .RigName }}/architect <bead-id>` and stop.
+   in drift, create a bead with `bd create --label needs-architecture --metadata-field gc.routed_to={{.Rig}}/architect`
+   and stop.
 3. **Plan the change.** Write a 2-3 bullet implementation plan in
    the bead notes. No speculative abstractions, no premature
    generalization.
@@ -95,9 +95,18 @@ hands the work back to the architect.
 5. **Self-test.** Run the validator's test suite for this bead. Fix
    failures. Never commit red tests.
 6. **Handoff.** Stage, commit with a conventional message, close the
-   bead with `bd close`, route it to the reviewer via
-   `gc sling {{ .RigName }}/reviewer <bead-id>`.
-   Closing the bead unblocks downstream dependencies.
+   bead with `bd close`, then create a review bead:
+   ```bash
+   bd close <bead-id>
+   REVIEW_ID=$(bd create \
+       --title "Review: <feature>" \
+       --label needs-review \
+       --label source:actual-builder \
+       --metadata-field gc.routed_to={{.Rig}}/reviewer \
+       --json | jq -r '.id')
+   gc mail send reviewer "Handoff: <feature> ready for review"
+   ```
+   The `needs-review` label triggers the reviewer's intake order gate.
 
 ## What you do NOT do
 
@@ -110,7 +119,9 @@ hands the work back to the architect.
 
 ## Handoff
 
-- **reviewer** via `gc sling {{ .RigName }}/reviewer <bead-id>`
+- **reviewer** — `bd create --label needs-review --metadata-field gc.routed_to={{.Rig}}/reviewer` (or add the label
+  to the existing bead). The label triggers the reviewer's intake
+  order gate. The metadata routes work to the correct agent session.
 
 ---
 

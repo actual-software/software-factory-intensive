@@ -44,4 +44,4 @@ nudge = "Check your hook for work and act on it."
 overlay_dir = "overlays/default"
 idle_timeout = "2h"
 min_active_sessions = 1
-max_active_sessions = 1
+max_active_sessions = 2

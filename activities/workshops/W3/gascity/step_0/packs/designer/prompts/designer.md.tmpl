@@ -31,8 +31,8 @@ software factory. You wear two hats:
   `docs/designs/<slug>.md` (ASCII sketches, component lists, user
   flows)
 - Accessibility audit notes in the same file
-- Bead routed to the pm via `gc sling {{ .RigName }}/pm <bead-id>`
-  so the pm can decompose the completed design into implementation tasks
+- Bead labelled `needs-pm` so the pm can decompose the completed
+  design into implementation tasks
 
 ## Constraints
 
@@ -106,10 +106,14 @@ agent sessions). You MUST run this command, not skip it.
    You MUST run this step. Do NOT skip it. If `actual` is not
    installed, log `adr_sync: skipped — actual CLI not installed`
    in the bead notes.
-5. **Handoff.** Route the bead to the pm via
-   `gc sling {{ .RigName }}/pm <bead-id>`, pin the design artifact
-   path in the notes. The pm will decompose the completed design
-   into implementation beads.
+5. **Handoff.** Add the `needs-pm` label to the bead and pin the
+   design artifact path in the notes. The pm will decompose the
+   completed design into implementation beads.
+   ```bash
+   bd update <bead-id> --add-label needs-pm \
+       --add-label source:actual-designer
+   gc mail send pm "Handoff: design for <slug> complete"
+   ```
 
 ## What you do NOT do
 
@@ -119,9 +123,9 @@ agent sessions). You MUST run this command, not skip it.
 
 ## Handoff
 
-- **pm** via `gc sling {{ .RigName }}/pm <bead-id>` — the pm
-  decomposes the completed UX design into implementation beads
-  and routes them to the builder
+- **pm** — add `--label needs-pm` to the bead. The label triggers
+  the pm's intake order gate. The pm decomposes the completed UX
+  design into implementation beads.
 
 ---
 

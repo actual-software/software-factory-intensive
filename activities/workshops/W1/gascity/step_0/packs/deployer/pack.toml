@@ -1,0 +1,13 @@
+[pack]
+name = "deployer"
+schema = 1
+description = "Deployer agent — release gate evaluation and deployment prep"
+
+[[agent]]
+name = "deployer"
+scope = "rig"
+prompt_template = "prompts/deployer.md"
+overlay_dir = "overlays/default"
+nudge = "Check your hook for reviewed code ready for release evaluation."
+idle_timeout = "1h"
+max_active_sessions = 1

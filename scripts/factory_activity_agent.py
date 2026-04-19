@@ -2,11 +2,13 @@
 """Factory Activity Agent — install or delete Gas City factory setups for activities."""
 
 import argparse
+import json
 import os
 import re
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 SFI_DIR = Path(__file__).resolve().parent.parent
@@ -424,18 +426,6 @@ gc bd --rig {project_name} blocked
 
 ### Routing Work to Agents
 
-**Send work to the architect**
-
-LLM prompt:
-```
-/factory-activity-agent sling {activity} architect "Design the architecture for {activity_title}"
-```
-CLI command:
-```bash
-cd ~/Projects/factory/{slug}/{project_name}
-gc sling {project_name}/architect "Design the architecture for {activity_title}"
-```
-
 **Send work to the planner**
 
 LLM prompt:
@@ -446,6 +436,18 @@ CLI command:
 ```bash
 cd ~/Projects/factory/{slug}/{project_name}
 gc sling {project_name}/planner "Break down {activity_title} into implementation tasks"
+```
+
+**Send work to the architect**
+
+LLM prompt:
+```
+/factory-activity-agent sling {activity} architect "Design the architecture for {activity_title}"
+```
+CLI command:
+```bash
+cd ~/Projects/factory/{slug}/{project_name}
+gc sling {project_name}/architect "Design the architecture for {activity_title}"
 ```
 
 **Send work to the builder**
@@ -638,7 +640,7 @@ def install(activity, dry_run=False):
     # the template that aren't in the config struct round-trip. We re-add
     # them here after gc rig add has finished.
     if dry_run:
-        print(f'[dry-run] Insert default_sling_target = "{project_name}/architect" into [[rigs]] block')
+        print(f'[dry-run] Insert default_sling_target = "{project_name}/planner" into [[rigs]] block')
         print('[dry-run] Insert [providers.claude] option_defaults = {{ model = "sonnet" }}')
     else:
         content = city_toml_dest.read_text()
@@ -651,7 +653,7 @@ def install(activity, dry_run=False):
         if rigs_match and "default_sling_target" not in rigs_match.group():
             content = re.sub(
                 r'(^\[\[rigs\]\].*?^includes\s*=\s*\[[^\]]*\])',
-                rf'\1\ndefault_sling_target = "{project_name}/architect"',
+                rf'\1\ndefault_sling_target = "{project_name}/planner"',
                 content,
                 count=1,
                 flags=re.MULTILINE | re.DOTALL,
@@ -679,6 +681,11 @@ def install(activity, dry_run=False):
     print("\n##### Restart Factory")
     run(["gc", "stop"], cwd=str(factory_dir), dry_run=dry_run, check=False)
     run(["gc", "start"], cwd=str(factory_dir), dry_run=dry_run, check=False)
+
+    # Wait for the reconciler to finish spawning sessions before proceeding.
+    # This ensures agents are active before we sling work, and catches any
+    # orphaned session beads created during the restart.
+    wait_for_reconciler(factory_dir, dry_run=dry_run)
 
     # --- Step 6: Patch convoy ---
     # Use gc bd to ensure gc manages the Dolt lifecycle (no rogue servers).
@@ -740,22 +747,22 @@ def install(activity, dry_run=False):
     )
     print("\n##### Sling Setup Task")
     run(
-        ["gc", "sling", f"{alias_lower}-project/architect", sling_prompt],
+        ["gc", "sling", f"{alias_lower}-project/planner", sling_prompt],
         cwd=str(project_dir), dry_run=dry_run, check=False,
     )
 
 
-def close_stale_sessions(factory_dir, dry_run=False):
+def close_stale_sessions(factory_dir, min_age_secs=600, dry_run=False):
     """Close orphaned session beads that have no started_config_hash.
 
     After a delete/reinstall cycle, orphaned session beads block the
     reconciler from creating fresh sessions.  Only sessions with an
-    empty started_config_hash are stale — they were created but never
-    fully initialized.  Active sessions (with a config hash) are left
-    alone.
+    empty started_config_hash AND older than min_age_secs (default 10
+    minutes) are considered stale.  This avoids killing sessions that
+    are legitimately in the process of starting up.
     """
     if dry_run:
-        print("[dry-run] Close stale session beads (empty config hash) in factory database")
+        print(f"[dry-run] Close stale session beads (empty config hash, older than {min_age_secs}s)")
         return
     try:
         result = subprocess.run(
@@ -764,20 +771,169 @@ def close_stale_sessions(factory_dir, dry_run=False):
         )
         if result.returncode != 0 or not result.stdout.strip():
             return
-        import json
         beads = json.loads(result.stdout)
+        now = time.time()
+        closed = 0
+        skipped = 0
         for bead in beads:
             bid = bead.get("id", "")
             metadata = bead.get("metadata", {}) or {}
             config_hash = metadata.get("started_config_hash", "")
-            if bid and not config_hash:
-                subprocess.run(
-                    ["gc", "bd", "close", bid, "--reason", "factory reinstall cleanup"],
-                    cwd=str(factory_dir), capture_output=True, text=True, timeout=10,
-                )
-                print(f"  Closed stale session {bid}")
+            if not bid or config_hash:
+                continue
+            # Parse created_at to check age
+            created_at = bead.get("created_at", "")
+            if created_at:
+                try:
+                    from datetime import datetime, timezone
+                    # Handle ISO 8601 format (with or without fractional seconds)
+                    created_at_clean = created_at.replace("Z", "+00:00")
+                    dt = datetime.fromisoformat(created_at_clean)
+                    age_secs = now - dt.timestamp()
+                    if age_secs < min_age_secs:
+                        skipped += 1
+                        continue
+                except (ValueError, TypeError):
+                    # Can't parse date — be conservative, skip it
+                    skipped += 1
+                    continue
+            else:
+                # No created_at field — be conservative, skip it
+                skipped += 1
+                continue
+            subprocess.run(
+                ["gc", "bd", "close", bid, "--reason", "factory reinstall cleanup"],
+                cwd=str(factory_dir), capture_output=True, text=True, timeout=10,
+            )
+            print(f"  Closed stale session {bid} (age: {int(age_secs)}s)")
+            closed += 1
+        if skipped:
+            print(f"  Skipped {skipped} session(s) younger than {min_age_secs}s")
+        if not closed and not skipped:
+            print("  No stale sessions found")
     except (subprocess.TimeoutExpired, json.JSONDecodeError, Exception) as e:
         print(f"  Warning: could not sweep stale sessions: {e}")
+
+
+def wait_for_reconciler(factory_dir, timeout_secs=90, poll_interval=5, dry_run=False):
+    """Poll gc session list until no sessions are stuck in 'creating' state.
+
+    After gc start, the reconciler asynchronously spawns sessions for agents
+    with min_active_sessions >= 1.  Each session transitions through:
+      creating -> active (success) or creating -> failed/gone (error)
+
+    We wait until either:
+      - No sessions are in 'creating' state (all settled), or
+      - The timeout expires (proceed anyway with a warning).
+
+    After settling, we run a second stale-session sweep to catch any
+    orphaned beads created during the restart.
+    """
+    if dry_run:
+        print(f"[dry-run] Wait up to {timeout_secs}s for reconciler to settle")
+        print("[dry-run] Post-restart stale session sweep")
+        return
+
+    print(f"\n##### Waiting for reconciler to settle (up to {timeout_secs}s)")
+    deadline = time.time() + timeout_secs
+    settled = False
+
+    while time.time() < deadline:
+        try:
+            result = subprocess.run(
+                ["gc", "session", "list", "--json"],
+                cwd=str(factory_dir), capture_output=True, text=True, timeout=10,
+            )
+            if result.returncode != 0:
+                # session list not available yet, keep waiting
+                time.sleep(poll_interval)
+                continue
+
+            stdout = result.stdout.strip()
+            if not stdout:
+                # No sessions yet — reconciler hasn't started creating
+                time.sleep(poll_interval)
+                continue
+
+            parsed = json.loads(stdout)
+            # gc session list --json may return a list, a dict with
+            # a "sessions" key, or null — normalize to a list.
+            if isinstance(parsed, list):
+                sessions = parsed
+            elif isinstance(parsed, dict):
+                sessions = parsed.get("sessions") or []
+            else:
+                sessions = []
+            creating = [s for s in sessions if s.get("state") == "creating"]
+            active = [s for s in sessions if s.get("state") == "active"]
+
+            if not creating:
+                print(f"  Reconciler settled: {len(active)} active, 0 creating")
+                settled = True
+                break
+
+            print(f"  Waiting: {len(active)} active, {len(creating)} still creating...")
+        except (subprocess.TimeoutExpired, json.JSONDecodeError):
+            pass
+
+        time.sleep(poll_interval)
+
+    if not settled:
+        print(f"  Warning: reconciler did not fully settle within {timeout_secs}s, proceeding anyway")
+
+    # Post-restart sweep: catch any orphaned session beads created during restart
+    print("  Running post-restart stale session sweep...")
+    close_stale_sessions(factory_dir, dry_run=False)
+
+
+def force_close_all_sessions(factory_dir, dry_run=False):
+    """Close ALL open session beads and kill the city's tmux server.
+
+    Used during delete — we're tearing everything down, so there's no
+    reason to preserve any sessions regardless of age or config hash.
+
+    gc uses a named tmux socket (-L <city-name>) per factory, so
+    killing that socket only affects this city's sessions.
+    """
+    city_name = factory_dir.name  # e.g. "w3-gc-factory"
+
+    # 1. Close all open session beads
+    if dry_run:
+        print(f"[dry-run] Force-close all open session beads and kill tmux server '{city_name}'")
+        return
+    try:
+        result = subprocess.run(
+            ["gc", "bd", "list", "--label=gc:session", "--status=open", "--json"],
+            cwd=str(factory_dir), capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode != 0 or not result.stdout.strip():
+            print("  No open session beads found")
+        else:
+            beads = json.loads(result.stdout)
+            closed = 0
+            for bead in beads:
+                bid = bead.get("id", "")
+                if bid:
+                    subprocess.run(
+                        ["gc", "bd", "close", bid, "--reason", "factory delete cleanup"],
+                        cwd=str(factory_dir), capture_output=True, text=True, timeout=10,
+                    )
+                    print(f"  Closed session {bid}")
+                    closed += 1
+            if not closed:
+                print("  No open session beads found")
+    except (subprocess.TimeoutExpired, json.JSONDecodeError, Exception) as e:
+        print(f"  Warning: could not close session beads: {e}")
+
+    # 2. Kill the city-specific tmux server
+    result = subprocess.run(
+        ["tmux", "-L", city_name, "kill-server"],
+        capture_output=True, text=True, timeout=10,
+    )
+    if result.returncode == 0:
+        print(f"  Killed tmux server '{city_name}'")
+    else:
+        print(f"  No tmux server '{city_name}' running (already clean)")
 
 
 def delete(activity, dry_run=False):
@@ -786,10 +942,10 @@ def delete(activity, dry_run=False):
 
     print(f"\n##### Deleting activity {activity}")
 
-    # Close stale session beads before stopping — prevents orphaned
-    # sessions from blocking the reconciler on reinstall.
+    # Force-close ALL session beads before stopping — we're tearing
+    # everything down so no sessions should survive.
     if factory_dir.exists() or dry_run:
-        close_stale_sessions(factory_dir, dry_run=dry_run)
+        force_close_all_sessions(factory_dir, dry_run=dry_run)
 
     # Stop factory
     if factory_dir.exists() or dry_run:

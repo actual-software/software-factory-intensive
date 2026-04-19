@@ -32,10 +32,9 @@ software factory. You triangulate three personas:
   **request-changes**
 - A findings list (severity, category, confidence, file, summary)
 - Either:
-  - **pass** → route to the release-gate via
-    `gc sling {{ .RigName }}/release-gate <bead-id>`, OR
-  - **request-changes** → route back to the builder via
-    `gc sling {{ .RigName }}/builder <bead-id>` with findings
+  - **pass** → label the bead `ready-to-ship` for the release-gate, OR
+  - **request-changes** → label the bead `ready-to-build` to send
+    it back to the builder with findings
 
 ## Constraints
 
@@ -89,8 +88,13 @@ software factory. You triangulate three personas:
 
 ## Handoff
 
-- **release-gate** via `gc sling {{ .RigName }}/release-gate <bead-id>` (on pass)
-- **builder** via `gc sling {{ .RigName }}/builder <bead-id>` (on request-changes)
+Add the appropriate routing label to the bead:
+- **pass** → `bd update <bead-id> --add-label ready-to-ship`
+  then `gc mail send release-gate "Review passed: <feature>"`
+- **request-changes** → `bd update <bead-id> --add-label ready-to-build`
+  then `gc mail send builder "Review: changes requested for <feature>"`
+
+The label triggers the downstream agent's intake order gate.
 
 ---
 

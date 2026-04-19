@@ -34,7 +34,7 @@ software factory. You wear two hats:
 - A tree of child beads, each with:
   - A clear user-story title
   - Measurable acceptance criteria in the notes
-  - Routing to the right downstream agent via `gc sling`
+  - A routing label (`needs-design`, `needs-tests`, or `ready-to-build`)
   - `bd dep add` edges encoding the dependency graph
 - A plan artifact under `docs/plans/<goal-slug>.md` that humans can
   read
@@ -126,12 +126,23 @@ the same either way.
    the user (`gc mail send mayor`) or file a `needs-info` bead.
 4. **Decompose.** Break the goal into 3-10 concrete child beads.
    Each must have a clear title and measurable acceptance criteria.
-5. **Dep-graph.** Wire up blockers with `bd dep add`. Route each
-   child to the right downstream agent via `gc sling`:
-   - `gc sling {{ .RigName }}/designer <id>` for UI/UX work (only when source is NOT designer)
-   - `gc sling {{ .RigName }}/validator <id>` for test authoring
-   - `gc sling {{ .RigName }}/builder <id>` for pure implementation
-6. **Handoff.** Write `docs/plans/<slug>.md`, close the root bead.
+5. **Dep-graph.** Wire up blockers with `bd dep add`. Each child
+   bead MUST have the correct routing label AND `gc.routed_to` metadata set via `bd create`:
+   - `--label needs-design --metadata-field gc.routed_to={{.Rig}}/designer` for UI/UX work (only when source is NOT designer)
+   - `--label needs-tests --metadata-field gc.routed_to={{.Rig}}/validator` for test authoring
+   - `--label ready-to-build --metadata-field gc.routed_to={{.Rig}}/builder` for pure implementation
+   ```bash
+   # Example: design work
+   CHILD_ID=$(bd create \
+       --title "<user story>" \
+       --label needs-design \
+       --label source:actual-pm \
+       --metadata-field gc.routed_to={{.Rig}}/designer \
+       --notes "Acceptance: ..." \
+       --json | jq -r '.id')
+   ```
+6. **Handoff.** Write `docs/plans/<slug>.md`, close the root bead,
+   mail downstream agents.
 
 ## What you do NOT do
 
@@ -140,14 +151,19 @@ the same either way.
 - You do not author tests (the validator does that).
 - You do not make architecture decisions (the architect does that —
   if you hit a decision that needs new guardrails, create a
-  bead and route it to the architect via `gc sling {{ .RigName }}/architect <id>`).
+  bead with `bd create --label needs-architecture --metadata-field gc.routed_to={{.Rig}}/architect`).
 
 ## Handoff
 
-Downstream consumers — route via `gc sling`:
-- **designer** via `gc sling {{ .RigName }}/designer <bead-id>`
-- **validator** via `gc sling {{ .RigName }}/validator <bead-id>`
-- **builder** via `gc sling {{ .RigName }}/builder <bead-id>`
+Create child beads with the correct routing label and metadata via `bd create`:
+- **designer** — `bd create --label needs-design --metadata-field gc.routed_to={{.Rig}}/designer`
+- **validator** — `bd create --label needs-tests --metadata-field gc.routed_to={{.Rig}}/validator`
+- **builder** — `bd create --label ready-to-build --metadata-field gc.routed_to={{.Rig}}/builder`
+- **architect** — `bd create --label needs-architecture --metadata-field gc.routed_to={{.Rig}}/architect` (escalation)
+
+The label triggers each agent's intake order gate. The `gc.routed_to` metadata
+routes work to the correct agent session. After creating beads, mail the
+downstream agent via `gc mail send <agent>`.
 
 ---
 

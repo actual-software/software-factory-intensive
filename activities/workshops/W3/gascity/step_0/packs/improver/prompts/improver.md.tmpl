@@ -38,13 +38,13 @@ your scope.
 
 - Classification of each signal: bug, performance regression, UX
   paper cut, doc gap, architectural concern, etc.
-- New upstream beads routed via `gc sling` to the right agent:
-  - `gc sling {{ .RigName }}/architect <id>` (systemic issues)
-  - `gc sling {{ .RigName }}/pm <id>` (new feature work)
-  - `gc sling {{ .RigName }}/designer <id>` (UX paper cuts)
-  - `gc sling {{ .RigName }}/validator <id>` (coverage gaps)
-  - `gc sling {{ .RigName }}/builder <id>` (direct fixes)
-  - `gc sling {{ .RigName }}/reviewer <id>` (audit concerns)
+- New upstream beads created with routing labels and metadata via `bd create`:
+  - `--label needs-architecture --metadata-field gc.routed_to={{.Rig}}/architect` (systemic issues → architect)
+  - `--label needs-pm --metadata-field gc.routed_to={{.Rig}}/pm` (new feature work → pm)
+  - `--label needs-design --metadata-field gc.routed_to={{.Rig}}/designer` (UX paper cuts → designer)
+  - `--label needs-tests --metadata-field gc.routed_to={{.Rig}}/validator` (coverage gaps → validator)
+  - `--label ready-to-build --metadata-field gc.routed_to={{.Rig}}/builder` (direct fixes → builder)
+  - `--label needs-review --metadata-field gc.routed_to={{.Rig}}/reviewer` (audit concerns → reviewer)
 - A daily summary in `docs/feedback/<date>.md`
 
 ## Constraints
@@ -125,13 +125,17 @@ agent sessions). You MUST run this command, not skip it.
 
 ## Handoff
 
-Route via `gc sling`:
-- **architect** via `gc sling {{ .RigName }}/architect <bead-id>`
-- **pm** via `gc sling {{ .RigName }}/pm <bead-id>`
-- **designer** via `gc sling {{ .RigName }}/designer <bead-id>`
-- **validator** via `gc sling {{ .RigName }}/validator <bead-id>`
-- **builder** via `gc sling {{ .RigName }}/builder <bead-id>`
-- **reviewer** via `gc sling {{ .RigName }}/reviewer <bead-id>`
+Create child beads with the correct routing label and metadata via `bd create`:
+- **architect** — `bd create --label needs-architecture --label source:actual-improver --metadata-field gc.routed_to={{.Rig}}/architect`
+- **pm** — `bd create --label needs-pm --label source:actual-improver --metadata-field gc.routed_to={{.Rig}}/pm`
+- **designer** — `bd create --label needs-design --label source:actual-improver --metadata-field gc.routed_to={{.Rig}}/designer`
+- **validator** — `bd create --label needs-tests --label source:actual-improver --metadata-field gc.routed_to={{.Rig}}/validator`
+- **builder** — `bd create --label ready-to-build --label source:actual-improver --metadata-field gc.routed_to={{.Rig}}/builder`
+- **reviewer** — `bd create --label needs-review --label source:actual-improver --metadata-field gc.routed_to={{.Rig}}/reviewer`
+
+The label triggers each agent's intake order gate. The `gc.routed_to` metadata
+routes work to the correct agent session. After creating beads, mail the
+downstream agent via `gc mail send <agent>`.
 
 ---
 

@@ -1,0 +1,215 @@
+description = """
+Planner PRD generation — 4 steps from feature request to a formal
+Product Requirements Document with downstream routing.
+
+## Contract
+
+1. Caller slings with a bead id labelled `needs-plan`.
+2. Planner reads `docs/PROJECT_MANIFEST.md` for tech stack constraints,
+   domain model, conventions, and project scope.
+3. Planner writes a formal PRD at `docs/PRD.md`.
+4. On completion, child beads labelled `needs-architecture` and/or
+   `needs-design` exist for downstream agents.
+
+## Variables
+
+| Variable | Source | Description |
+|----------|--------|-------------|
+| slug | caller | Short slug for the PRD feature (e.g., "user-profiles") |
+"""
+formula = "mol-planner-prd"
+version = 1
+
+[vars]
+[vars.slug]
+description = "Short slug for the PRD feature; e.g., 'user-profiles'"
+required = true
+
+[[steps]]
+id = "intake"
+title = "Read the bead and classify the feature request"
+description = """
+**1. Find the root bead:**
+```bash
+ROOT_ID=$(bd mol current --json | jq -r '.molecule_id')
+```
+
+**2. Read its title, body, and notes:**
+```bash
+bd show $ROOT_ID
+```
+
+**3. Classify the request type** (new-feature, enhancement,
+integration, infrastructure). Record in bead notes:
+```bash
+bd update $ROOT_ID --notes "request_type: <new-feature|enhancement|integration|infrastructure>
+slug: {{slug}}"
+```
+
+**Exit criteria:** Request type and slug recorded in root bead notes.
+"""
+
+[[steps]]
+id = "research"
+title = "Read the project manifest and survey existing context"
+needs = ["intake"]
+description = """
+Understand the project constraints before writing the PRD.
+
+**1. Read the project manifest:**
+```bash
+cat docs/PROJECT_MANIFEST.md
+```
+Extract: tech stack, domain model, conventions, constraints, task
+inputs, review standards, release criteria.
+
+**2. Check for existing PRDs:**
+```bash
+ls docs/PRD.md docs/prd/ 2>/dev/null || echo "(no existing PRDs)"
+```
+
+**3. Read existing ADRs and architecture docs for context:**
+```bash
+find docs/adr docs/architecture -type f -name '*.md' 2>/dev/null || true
+```
+
+**4. Survey the codebase structure:**
+```bash
+ls -la src/ 2>/dev/null || ls -la . 2>/dev/null
+```
+
+**5. Write a 1-paragraph assessment to the bead notes:**
+```bash
+bd update $ROOT_ID --notes "<existing notes>
+assessment: <1-paragraph summary of project context and constraints>"
+```
+
+**Exit criteria:** Manifest read, existing context surveyed, assessment
+recorded in bead notes.
+"""
+
+[[steps]]
+id = "draft-prd"
+title = "Write the Product Requirements Document"
+needs = ["research"]
+description = """
+Produce the formal PRD at `docs/PRD.md`.
+
+**1. Write `docs/PRD.md`:**
+
+Structure:
+```markdown
+# Product Requirements Document: {{slug}}
+
+Root: $ROOT_ID
+Generated: <YYYY-MM-DD>
+
+## Problem Statement
+
+<What problem does this solve? Who is affected? What is the impact
+of not solving it?>
+
+## Goals & Non-Goals
+
+### Goals
+- <measurable goal 1>
+- <measurable goal 2>
+
+### Non-Goals
+- <explicit exclusion 1>
+- <explicit exclusion 2>
+
+## User Stories
+
+- As a <role>, I want <action>, so that <benefit>.
+- (2-5 stories per feature)
+
+## Functional Requirements
+
+| ID | Requirement | Priority | Acceptance Criteria |
+|----|-------------|----------|---------------------|
+| FR-1 | ... | Must | ... |
+| FR-2 | ... | Should | ... |
+
+## Non-Functional Requirements
+
+| ID | Requirement | Metric |
+|----|-------------|--------|
+| NFR-1 | Performance | <measurable target> |
+| NFR-2 | Accessibility | <standard to meet> |
+
+## Technical Constraints
+
+<Derived from PROJECT_MANIFEST.md — tech stack, conventions, limits.
+Reference the manifest sections that apply.>
+
+## Dependencies
+
+<External services, APIs, packages, or existing features this
+depends on.>
+
+## Open Questions
+
+<Unresolved items requiring stakeholder input. Each question should
+state who needs to answer it.>
+```
+
+**2. Stage and commit:**
+```bash
+mkdir -p docs
+git add docs/PRD.md
+git commit -m "actual-planner: PRD for {{slug}} (refs $ROOT_ID)"
+```
+
+**Exit criteria:** PRD written to `docs/PRD.md` and committed.
+"""
+
+[[steps]]
+id = "handoff"
+title = "Create downstream work beads and hand off"
+needs = ["draft-prd"]
+description = """
+Route work to the architect and/or designer based on the PRD.
+
+**1. Create architecture beads** for system design, tech choices,
+and infrastructure decisions:
+```bash
+ARCH_ID=$(bd create \\
+    --title "<architecture topic from PRD>" \\
+    --label needs-architecture \\
+    --label source:actual-planner \\
+    --label plan:{{slug}} \\
+    --notes "Derived from PRD: docs/PRD.md
+See: docs/PROJECT_MANIFEST.md for tech stack constraints" \\
+    --json | jq -r '.id')
+bd dep add $ARCH_ID --blocked-by $ROOT_ID
+```
+
+**2. Create design beads** for UI/UX work implied by the PRD:
+```bash
+DESIGN_ID=$(bd create \\
+    --title "<design topic from PRD>" \\
+    --label needs-design \\
+    --label source:actual-planner \\
+    --label plan:{{slug}} \\
+    --notes "Derived from PRD: docs/PRD.md
+See user stories and functional requirements for scope" \\
+    --json | jq -r '.id')
+bd dep add $DESIGN_ID --blocked-by $ROOT_ID
+```
+
+**3. Close the root bead:**
+```bash
+bd close $ROOT_ID --reason "PRD complete: docs/PRD.md"
+```
+
+**4. Notify downstream agents:**
+```bash
+gc mail send architect "Handoff: PRD for {{slug}} published, beads labelled needs-architecture"
+gc mail send designer "Handoff: PRD for {{slug}} published, beads labelled needs-design"
+```
+
+**Exit criteria:** Root bead closed, child beads created with
+`needs-architecture` and/or `needs-design` labels, downstream
+agents notified.
+"""
