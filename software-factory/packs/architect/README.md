@@ -78,15 +78,15 @@ Review and commit the diff.
 ## Handoff protocol
 
 ```
-architect (this pack)  →  planner  →  designer/validator  →  coder
-                                                                ↓
-                                                             reviewer
-                                                                ↓
-                                                             deployer
-                                                                ↓
-                                                            improver
-                                                                ↓
-                                                           (loop back)
+architect (this pack)  →  planner  →  designer  →  coder
+                                                     ↓
+                                                  reviewer
+                                                     ↓
+                                                  deployer
+                                                     ↓
+                                                improver (optional 7th)
+                                                     ↓
+                                                (loop back)
 ```
 
 Each step advances via a label change on the bead. No Go code, no

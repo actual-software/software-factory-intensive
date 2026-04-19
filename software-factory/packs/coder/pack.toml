@@ -1,7 +1,10 @@
 # actual-coder — Coder agent for the Actual Software Factory.
 #
 # Takes beads labelled `ready-to-build` and produces working code that
-# satisfies their acceptance criteria and passes the validator's tests.
+# satisfies their acceptance criteria, plus the tests that exercise
+# those criteria. The reviewer downstream verifies AC coverage (the
+# AC-verification responsibility was folded into reviewer when the
+# former validator pack was retired in the 6+1 factory model).
 #
 # Ships the vendored `actual` skill so the coder can consult the
 # rig's CLAUDE.md/AGENTS.md before writing code — the

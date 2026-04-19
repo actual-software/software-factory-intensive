@@ -25,7 +25,6 @@ wake_agent() {
 wake_agent needs-architecture architect
 wake_agent needs-plan planner
 wake_agent needs-design designer
-wake_agent needs-tests validator
 wake_agent ready-to-build coder
 wake_agent needs-review reviewer
 wake_agent ready-to-ship deployer

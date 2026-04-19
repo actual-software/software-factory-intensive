@@ -101,12 +101,11 @@ Each activity's factory includes some or all of these agent packs:
 | `planner` | Break features into work packages | Product/Program Manager |
 | `architect` | ADR decisions and architectural rules | Principal Engineer |
 | `designer` | Component specifications | UI/UX Designer |
-| `coder` | Code implementation | Backend/Frontend Engineer |
-| `reviewer` | Code review | Engineering Manager |
+| `coder` | Code implementation (with tests) | Backend/Frontend Engineer |
+| `reviewer` | Code review + acceptance-criteria coverage | Engineering Manager + QA Engineer |
 | `deployer` | Release quality gates | Release Engineer |
-| `validator` | Test case authoring (optional) | QA Engineer |
-| `improver` | Feedback loops (optional) | SRE/Performance Engineer |
-| `all` | Composition pack — includes all above | (meta) |
+| `improver` | Feedback loops (**optional 7th**, introduced in W4) | SRE/Performance Engineer |
+| `all` | Composition pack — bundles the 6 essentials | (meta) |
 
 ## Label-Based Handoff Protocol
 
@@ -117,11 +116,10 @@ Work flows through agents via labels, not hardcoded routing:
   → needs-architecture → architect
     → needs-plan → planner
       → needs-design → designer
-      → needs-tests → validator
       → ready-to-build → coder
         → needs-review → reviewer
           → ready-to-ship → deployer
-            → needs-improve → improver
+            → needs-improve → improver  (optional 7th)
               → done
 ```
 

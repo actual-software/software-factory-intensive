@@ -189,9 +189,8 @@ What `install` creates under `~/Projects/factory/`:
             ├── coder/
             ├── reviewer/
             ├── deployer/
-            ├── validator/
-            ├── improver/
-            └── all/                   # Composition pack
+            ├── improver/              # Optional 7th — opt-in (W4)
+            └── all/                   # Composition pack — bundles the 6 essentials
 ```
 
 ## Workflow: Install an Activity

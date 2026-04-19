@@ -8,8 +8,9 @@ graph of child beads.
 2. Planner pulls in any tracker issues (no-op if none).
 3. Planner clarifies acceptance criteria, decomposes the goal,
    wires dependencies, labels children for downstream agents.
-4. On completion, child beads with `needs-design`, `needs-tests`, or
-   `ready-to-build` exist.
+4. On completion, child beads with `needs-design` or
+   `ready-to-build` exist (the coder authors tests alongside the
+   implementation; the reviewer verifies AC coverage).
 
 ## Variables
 
@@ -151,7 +152,7 @@ that a single downstream agent can complete.
 ```bash
 CHILD_ID=$(bd create \\
     --title "<concrete user-story title>" \\
-    --label <needs-design|needs-tests|ready-to-build> \\
+    --label <needs-design|ready-to-build> \\
     --label source:actual-planner \\
     --label plan:{{slug}} \\
     --notes "Acceptance:
@@ -165,10 +166,10 @@ Derived from $ROOT_ID" \\
 **Label routing rules:**
 - **Design-touching work** (new screens, new flows, changed
   interactions) → `needs-design`
-- **Pure validation work** (new test coverage for existing code,
-  acceptance test suites) → `needs-tests`
-- **Pure implementation** (backend endpoint, algorithm, refactor) →
-  `ready-to-build`
+- **Implementation work** (backend endpoint, algorithm, refactor,
+  test coverage) → `ready-to-build`. The coder authors tests
+  alongside the code; the reviewer downstream verifies that each
+  acceptance criterion is exercised.
 - **Cross-cutting work** → create multiple children with different
   labels and wire dependencies
 
@@ -247,7 +248,6 @@ bd close $ROOT_ID --reason "plan complete: docs/plans/{{slug}}.md"
 ```bash
 # The labels trigger the corresponding intake orders automatically:
 #   needs-design   → designer-intake
-#   needs-tests    → validator-intake
 #   ready-to-build → coder-intake
 # Do NOT gc mail send — it creates duplicate sessions.
 # Wake any downstream agents whose beads just unblocked.

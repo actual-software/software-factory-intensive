@@ -23,8 +23,9 @@ in `actual-factory/extensions/factory-vscode/shared/actual-agents/built-in-agent
 - Wires a dependency graph with `bd dep add`
 - Labels children for routing:
   - `needs-design` → **designer**
-  - `needs-tests` → **validator**
-  - `ready-to-build` → **coder**
+  - `ready-to-build` → **coder** (the coder authors tests
+    alongside the implementation; there is no separate
+    test-authoring step in the 6+1 factory model)
 - Writes a human-readable plan under `.actual/plans/<slug>.md`
 
 ## The two skills this pack ships
@@ -113,7 +114,6 @@ gc sling <rig>/planner --on mol-plan-breakdown --var slug=user-profiles
 ## Handoff
 
 - **designer** via `needs-design`
-- **validator** via `needs-tests`
 - **coder** via `ready-to-build`
 - **architect** via `needs-architecture` (if the planner discovers an
   architectural question mid-breakdown and has to hand it back up)

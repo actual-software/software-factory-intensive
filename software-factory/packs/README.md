@@ -1,26 +1,29 @@
 # Actual Software Factory — Gas City Agent Packs
 
 A self-contained set of Gas City custom-agent packs implementing the
-8 Agent Operations described at
-[actual.ai/softwarefactory](https://www.actual.ai/softwarefactory):
+**6 essential Agent Operations** of the software factory described at
+[actual.ai/softwarefactory](https://www.actual.ai/softwarefactory),
+plus an **optional 7th** for continuous-improvement loops:
 
 1. **Architect** — set architectural rules; access controls, trust
    boundaries, guardrails
 2. **Plan / Work Breakdown** — create work packages from high-level
    goals
 3. **UI/UX Design** — wireframes, design systems, a11y audits
-4. **Validate / Test Cases** — write failing tests from acceptance
-   criteria
-5. **Code** — implement against the test suite
-6. **Code Review** — automated review for style, security, spec
-   compliance
-7. **Deploy** — quality gate with rollback plan
-8. **Improve / Feedback Loop** — runtime signals back into the spec
+4. **Code** — implement against acceptance criteria; author tests
+   alongside the implementation
+5. **Code Review** — automated review for style, security, and
+   acceptance-criteria coverage (this pack absorbed the former
+   validator's AC-verification responsibility — there is no
+   separate validator agent)
+6. **Deploy** — quality gate with rollback plan
+7. **Improve / Feedback Loop** — *(optional, introduced in W4)*
+   runtime signals back into the spec
 
 Each operation is one pack. Each pack is a single custom Gas City
 agent with its own prompt template, formula, order gate, doctor
-check, and commands. The 9th pack (`all/`) is a thin composition
-shell that `includes` all 8 leaf packs.
+check, and commands. The composition pack (`all/`) bundles only the
+6 essentials; improver is opt-in.
 
 ## Directory layout
 
@@ -31,13 +34,13 @@ software-factory/packs/
 ├── planner/             # Product-Manager + Program-Manager persona
 │                        # (ships the tracker-to-beads bridge skill)
 ├── designer/            # UI/UX-Designer + Accessibility-Engineer persona
-├── validator/           # QA-Engineer persona
 ├── coder/               # Backend+Frontend generalist persona
 ├── reviewer/            # Engineering-Manager + Principal-Engineer +
-│                        # Security-Engineer persona
+│                        # Security-Engineer + QA-Engineer persona
 ├── deployer/            # Release-Engineer + DevOps-Engineer persona
 ├── improver/            # SRE + Performance-Engineer + DevRel persona
-└── all/                 # composition pack — includes all 8
+│                        # (optional 7th — introduced in W4)
+└── all/                 # composition pack — includes the 6 essentials
 ```
 
 ## Persona mapping
@@ -50,11 +53,10 @@ The agent voices are anchored to the built-in personas from
 | architect | `principal-engineer` + `solutions-architect` |
 | planner | `product-manager` + `program-manager` |
 | designer | `ui-ux-designer` + `accessibility-engineer` |
-| validator | `qa-engineer` |
 | coder | `backend-engineer` + `frontend-engineer` |
-| reviewer | `engineering-manager` + `principal-engineer` + `security-engineer` |
+| reviewer | `engineering-manager` + `principal-engineer` + `security-engineer` + `qa-engineer` |
 | deployer | `release-engineer` + `devops-engineer` |
-| improver | `sre` + `performance-engineer` + `developer-advocate` |
+| improver *(optional 7th)* | `sre` + `performance-engineer` + `developer-advocate` |
 
 ## The actual-skill integration
 
@@ -116,12 +118,12 @@ on a bead label; the flow is emergent from labels, not hardcoded:
                                  │ (drift hand-back)  │
                                  │                    ▼
                                  │         ┌──────────┬──────────┐
-                                 │         ▼          ▼          ▼
-                                 │    needs-design  needs-tests ready-to-build
-                                 │         │          │          │
-                                 │    designer    validator   │
-                                 │         │          │       │
-                                 │         └──────────┴───────┘
+                                 │         ▼                     ▼
+                                 │    needs-design          ready-to-build
+                                 │         │                     │
+                                 │    designer                   │
+                                 │         │                     │
+                                 │         └──────────┬──────────┘
                                  │                    │
                                  │                    ▼  ready-to-build
                                  │                coder
@@ -136,7 +138,8 @@ on a bead label; the flow is emergent from labels, not hardcoded:
                                  │                        deployer
                                  │                             │
                                  │                             ▼  needs-improve
-                                 │                        improver (24h cooldown)
+                                 │                        improver (optional,
+                                 │                        24h cooldown)
                                  │                             │
                                  └─────────────────────────────┘
                                        (route upstream)

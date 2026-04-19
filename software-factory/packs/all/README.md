@@ -1,8 +1,9 @@
 # actual-factory (composition pack)
 
-Brings up all 8 Agent Operations of the Actual Software Factory in
-one include. Depends on the 8 sibling leaf packs under
-`software-factory/packs/`.
+Brings up the **6 essential Agent Operations** of the Actual Software
+Factory in one include. Depends on the 6 sibling leaf packs under
+`software-factory/packs/`. The optional 7th — improver — is opt-in,
+not bundled here.
 
 ## Usage
 
@@ -20,18 +21,32 @@ Or from outside this directory, with an absolute or relative path:
 includes = ["/abs/path/to/software-factory/packs/all"]
 ```
 
-## The 8 agents
+To add the optional improver, include it explicitly alongside `all`:
+
+```toml
+includes = ["all", "../improver"]
+```
+
+## The 6 essential agents (bundled)
 
 | Operation | Pack | Label gate |
 |-----------|------|------------|
 | Architect | `../architect` | `needs-architecture` |
 | Plan / Work Breakdown | `../planner` | `needs-plan` |
 | UI/UX Design | `../designer` | `needs-design` |
-| Validate / Test Cases | `../validator` | `needs-tests` |
 | Code | `../coder` | `ready-to-build` |
-| Code Review | `../reviewer` | `needs-review` |
+| Code Review (incl. AC verification) | `../reviewer` | `needs-review` |
 | Deploy | `../deployer` | `ready-to-ship` |
+
+## Optional 7th agent (opt-in)
+
+| Operation | Pack | Label gate |
+|-----------|------|------------|
 | Improve / Feedback Loop | `../improver` | cooldown (24h) |
+
+Introduced in W4. Add it to your `includes` only if your factory
+needs the continuous-improvement loop — the 6 essentials run
+end-to-end without it.
 
 ## Handoff flow
 
@@ -42,19 +57,20 @@ includes = ["/abs/path/to/software-factory/packs/all"]
 architect  ───────────►  needs-plan  ─►  planner
     ▲                                      │
     │ (hand-back)                          ▼
-    │                          needs-design / needs-tests / ready-to-build
+    │                          needs-design / ready-to-build
     │                                      │
-    │                      ┌───────────────┼───────────────┐
-    │                      ▼               ▼               ▼
-    │                  designer       validator         coder
-    │                      │               │               │
-    │                      └───►           └───►           │
-    │                      ready-to-build  ready-to-build  │
+    │                      ┌───────────────┴───────────────┐
+    │                      ▼                               ▼
+    │                  designer                          coder
+    │                      │                               │
+    │                      └─►  ready-to-build  ──────────►│
     │                                                      ▼
     │                                              needs-review
     │                                                      │
     │                                                      ▼
     │                                                  reviewer
+    │                                                  (also verifies
+    │                                                   AC coverage)
     │                                            ┌─────────┴─────────┐
     │                                            ▼                   ▼
     │                                  ready-to-build           ready-to-ship
@@ -62,7 +78,7 @@ architect  ───────────►  needs-plan  ─►  planner
     │                                                                ▼
     │                                                            deployer
     │                                                                │
-    │                                                                ▼
+    │                                          (optional 7th)        ▼
     │                                                         needs-improve
     │                                                                │
     │                                                                ▼

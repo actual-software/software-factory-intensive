@@ -21,7 +21,7 @@ version = 1
 
 [vars]
 [vars.test_cmd]
-description = "Command to run the validator's test suite. Empty means auto-detect."
+description = "Command to run the rig's test suite. Empty means auto-detect."
 default = ""
 
 [vars.commit_scope]
@@ -162,10 +162,12 @@ Execute the plan from the previous step.
 
 [[steps]]
 id = "self-test"
-title = "Run the validator's test suite"
+title = "Run the rig's test suite"
 needs = ["implement"]
 description = """
-Run the tests. Fix failures. Never hand off red tests.
+Run the tests (yours and the existing suite). Fix failures. Never
+hand off red tests. The reviewer downstream will verify that each
+acceptance criterion is exercised by at least one test.
 
 **1. Determine the test command:**
 ```bash

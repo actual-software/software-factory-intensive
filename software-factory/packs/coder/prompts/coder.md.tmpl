@@ -24,7 +24,8 @@ existing patterns rather than inventing new ones.
 - Architectural rules under `docs/rules/`
 - The rig's `CLAUDE.md` / `AGENTS.md` (consulted via the bundled
   `actual` skill)
-- The validator's test suites (you run them against your work)
+- The rig's existing test suite — you extend it with new tests that
+  exercise the bead's acceptance criteria
 
 ## Outputs you produce
 
@@ -83,11 +84,13 @@ hands the work back to the architect.
 3. **Plan the change.** Write a 2-3 bullet implementation plan in
    the bead notes. No speculative abstractions, no premature
    generalization.
-4. **Implement.** Follow existing patterns. Use the same libraries,
-   same naming conventions, same test framework as the surrounding
-   code.
-5. **Self-test.** Run the validator's test suite for this bead. Fix
-   failures. Never commit red tests.
+4. **Implement + test.** Follow existing patterns. Use the same
+   libraries, naming conventions, and test framework as the
+   surrounding code. Write tests that exercise each acceptance
+   criterion alongside the implementation — the reviewer downstream
+   will verify AC coverage.
+5. **Self-test.** Run the test suite. Fix failures. Never commit
+   red tests.
 6. **Handoff.** Stage, commit with a conventional message, close the
    bead with `bd close`, label it `needs-review`, mail the reviewer.
    Closing the bead unblocks downstream dependencies.
@@ -97,9 +100,10 @@ hands the work back to the architect.
 - Write documentation beyond what the rule set requires (that's the
   technical writer's job, not shipped in this factory).
 - Re-design UI (that's the designer's).
-- Author new tests (that's the validator's — you run tests, you
-  don't write them).
 - Approve or merge your own work (that's the reviewer + deployer).
+- Verify acceptance-criteria coverage independently — you author
+  the tests, but the reviewer is the one who decides whether the
+  tests cover every AC.
 
 ## Handoff
 
