@@ -667,17 +667,18 @@ def install(activity, dry_run=False):
         city_toml_dest.write_text(content)
 
     # --- Step 5: Restart Factory ---
-    # Start the factory first so gc manages the Dolt server lifecycle.
+    # Sweep stale session beads BEFORE restart so the reconciler
+    # starts clean and doesn't see orphaned sessions from a previous install.
+    print("\n##### Sweep stale sessions")
+    close_stale_sessions(factory_dir, dry_run=dry_run)
+
+    # Start the factory so gc manages the Dolt server lifecycle.
+    # Use stop → start (not restart) to avoid config-drift: gc restart
+    # does an unregister/register cycle that changes the config hash,
+    # which would immediately drain any sessions just spawned.
     print("\n##### Restart Factory")
     run(["gc", "stop"], cwd=str(factory_dir), dry_run=dry_run, check=False)
     run(["gc", "start"], cwd=str(factory_dir), dry_run=dry_run, check=False)
-    run(["gc", "restart"], cwd=str(factory_dir), dry_run=dry_run, check=False)
-
-    # --- Step 5b: Sweep stale session beads ---
-    # After reinstall, orphaned session beads from a previous install
-    # block the reconciler from creating fresh sessions.
-    print("\n##### Sweep stale sessions")
-    close_stale_sessions(factory_dir, dry_run=dry_run)
 
     # --- Step 6: Patch convoy ---
     # Use gc bd to ensure gc manages the Dolt lifecycle (no rogue servers).
@@ -745,18 +746,20 @@ def install(activity, dry_run=False):
 
 
 def close_stale_sessions(factory_dir, dry_run=False):
-    """Close all open session beads in the factory database.
+    """Close orphaned session beads that have no started_config_hash.
 
     After a delete/reinstall cycle, orphaned session beads block the
-    reconciler from creating fresh sessions.  Closing them lets the
-    reconciler spin up new ones on the next tick.
+    reconciler from creating fresh sessions.  Only sessions with an
+    empty started_config_hash are stale — they were created but never
+    fully initialized.  Active sessions (with a config hash) are left
+    alone.
     """
     if dry_run:
-        print("[dry-run] Close all open session beads in factory database")
+        print("[dry-run] Close stale session beads (empty config hash) in factory database")
         return
     try:
         result = subprocess.run(
-            ["gc", "bd", "list", "--type=session", "--status=open", "--json"],
+            ["gc", "bd", "list", "--label=gc:session", "--status=open", "--json"],
             cwd=str(factory_dir), capture_output=True, text=True, timeout=10,
         )
         if result.returncode != 0 or not result.stdout.strip():
@@ -765,7 +768,9 @@ def close_stale_sessions(factory_dir, dry_run=False):
         beads = json.loads(result.stdout)
         for bead in beads:
             bid = bead.get("id", "")
-            if bid:
+            metadata = bead.get("metadata", {}) or {}
+            config_hash = metadata.get("started_config_hash", "")
+            if bid and not config_hash:
                 subprocess.run(
                     ["gc", "bd", "close", bid, "--reason", "factory reinstall cleanup"],
                     cwd=str(factory_dir), capture_output=True, text=True, timeout=10,
