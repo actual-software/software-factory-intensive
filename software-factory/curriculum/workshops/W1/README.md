@@ -202,7 +202,6 @@ SFI="$(cd ~/Projects/actual-software/software-factory-intensive && pwd)" && sed 
 `gc rig add` needs the Gas City workspace runtime under `.gc/` (bead store helpers, etc.). That runtime is created by **`gc init`**, not by creating `city.toml` alone. From your factory directory:
 
 ```bash
-cd ~/Projects/factory/fired-up-pizza/fup-gc-factory
 gc init --file city.toml .
 ```
 

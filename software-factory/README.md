@@ -50,6 +50,7 @@ brew install gascity@0.14.1
 
 Clone the `software-factory-intensive` repo locally into a new project directory (this specific path is important for the factory-activity-agent to work correctly):
 ```bash
+mkdir -p ~/Projects/actual-software/
 git clone https://github.com/actual-software/software-factory-intensive.git ~/Projects/actual-software/software-factory-intensive
 ```
 
