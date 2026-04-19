@@ -13,7 +13,7 @@ in `actual-factory/extensions/factory-vscode/shared/actual-agents/built-in-agent
 
 ## What it does
 
-- Reads beads labelled `needs-plan` (from the architect or from a
+- Reads beads labelled `needs-pm` (from the architect or from a
   user)
 - Optionally imports issues from an external tracker (Jira / Linear /
   GitHub Issues / any `tracker-*` skill) via the bundled
@@ -54,7 +54,7 @@ The skill probes `.claude/skills/` for any sibling matching:
 - `tracker-*`
 
 If none are found, import is a no-op and the pm just processes
-whatever `needs-plan` beads already exist. If one or more are found,
+whatever `needs-pm` beads already exist. If one or more are found,
 the skill invokes their `list-issues` verb and materializes each
 issue as a bead, recording the mapping in
 `.actual/pm/tracker-sync.json` so re-runs are idempotent.

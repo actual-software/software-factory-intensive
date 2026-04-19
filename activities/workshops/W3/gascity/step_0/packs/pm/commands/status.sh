@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 echo "── actual-pm ──────────────────────────────────────────────"
-echo "Open planning work (label=needs-plan):"
-bd ready --label=needs-plan 2>/dev/null || echo "  (none)"
+echo "Open planning work (label=needs-pm):"
+bd ready --label=needs-pm 2>/dev/null || echo "  (none)"
 echo
 echo "Active plans:"
 if [ -d .actual/plans ]; then

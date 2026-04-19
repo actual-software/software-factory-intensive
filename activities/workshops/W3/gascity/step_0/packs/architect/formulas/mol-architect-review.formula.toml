@@ -9,7 +9,7 @@ skill to keep ADRs in sync with generated CLAUDE.md/AGENTS.md files.
 
 1. Caller slings with a bead id (passed implicitly via `bd mol current`).
 2. Architect reads steps, executes each in order.
-3. On completion, child beads labelled `needs-plan` exist for the pm.
+3. On completion, child beads labelled `needs-pm` exist for the pm.
 
 ## Variables
 
@@ -284,7 +284,7 @@ for the pm.
 ```bash
 CHILD_ID=$(bd create \\
     --title "<concrete implication>" \\
-    --label needs-plan \\
+    --label needs-pm \\
     --label source:actual-architect \\
     --notes "Derived from {{topic}} architecture. See docs/architecture/{{topic}}.md and docs/rules/{{topic}}.md" \\
     --json | jq -r '.id')
@@ -298,10 +298,10 @@ bd close $ROOT_ID --reason "architecture complete, see docs/architecture/{{topic
 
 **3. The pm picks up work automatically:**
 ```bash
-# Mail the pm so it wakes and picks up the needs-plan beads.
-gc mail send pm "Handoff: rule {{topic}} published, child beads labelled needs-plan"
+# Mail the pm so it wakes and picks up the needs-pm beads.
+gc mail send pm "Handoff: rule {{topic}} published, child beads labelled needs-pm"
 ```
 
 **Exit criteria:** Root bead closed, at least one child bead created
-with `needs-plan` label.
+with `needs-pm` label.
 """

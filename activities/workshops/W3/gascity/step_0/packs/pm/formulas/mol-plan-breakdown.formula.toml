@@ -4,7 +4,7 @@ graph of child beads.
 
 ## Contract
 
-1. Caller slings with a root bead labelled `needs-plan`.
+1. Caller slings with a root bead labelled `needs-pm`.
 2. PM pulls in any tracker issues (no-op if none).
 3. PM clarifies acceptance criteria, decomposes the goal,
    wires dependencies, labels children for downstream agents.

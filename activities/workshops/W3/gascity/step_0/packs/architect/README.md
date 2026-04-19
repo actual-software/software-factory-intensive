@@ -19,7 +19,7 @@ Anchor personas are defined in
   `CLAUDE.md` / `AGENTS.md` in sync with the rig's ADRs
 - Writes one-page guardrail rules under `.actual/rules/<topic>.md`
 - Hands off to the **pm** by creating child beads with the
-  `needs-plan` label
+  `needs-pm` label
 
 ## What it does NOT do
 

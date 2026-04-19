@@ -125,7 +125,7 @@ format. Do not create the beads yet — the file-beads step does that.
 
 For each draft, decide:
 - Title (clear, one-line, action-shaped)
-- Upstream label (one of needs-architecture, needs-plan,
+- Upstream label (one of needs-architecture, needs-pm,
   needs-design, needs-tests, ready-to-build, needs-review)
 - Severity label (p0 / p1 / p2)
 - Body (evidence link, reproduction steps, observed vs expected,
@@ -222,7 +222,7 @@ done
 
 Label routing map:
 - systemic/architectural → `--label needs-architecture`
-- new feature work → `--label needs-plan`
+- new feature work → `--label needs-pm`
 - UX paper cuts → `--label needs-design`
 - test gaps → `--label needs-tests`
 - direct fixes → `--label ready-to-build`

@@ -123,7 +123,7 @@ There is **no master orchestrator**. Each pack's order gate matches
 on a bead label; the flow is emergent from labels, not hardcoded:
 
 ```
-           needs-architecture           needs-plan
+           needs-architecture           needs-pm
 (user) ────────────────────► architect ──────────► pm
                                  ▲                    │
                                  │ (drift hand-back)  │
@@ -173,7 +173,7 @@ bd create --title "Build user profiles" --label needs-architecture
 
 The architect's order gate will match, wake the architect, which
 runs `mol-architect-review`, produces rules and child beads labelled
-`needs-plan`, which wakes the pm, and so on.
+`needs-pm`, which wakes the pm, and so on.
 
 ## Standalone use
 

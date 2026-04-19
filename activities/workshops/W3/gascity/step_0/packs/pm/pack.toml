@@ -1,6 +1,6 @@
 # actual-pm — Plan / Work-Breakdown agent for the Actual Software Factory.
 #
-# Takes goal-shaped beads (labelled needs-plan) and produces a
+# Takes goal-shaped beads (labelled needs-pm) and produces a
 # dependency-ordered graph of concrete task beads that the builder
 # can consume.
 #

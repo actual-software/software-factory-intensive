@@ -35,7 +35,7 @@ bd show $ROOT_ID
 
 **2. Extract acceptance criteria** from the bead notes. If none
 exist, the pm made a mistake — file it back with label
-`needs-plan` and stop.
+`needs-pm` and stop.
 
 **3. Survey existing tests** to match framework and style:
 ```bash

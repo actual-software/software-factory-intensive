@@ -7,7 +7,7 @@ handed off to the builder.
 1. Caller slings with a root bead labelled `needs-design`.
 2. Designer produces a wireframe + a11y audit in
    `docs/designs/<slug>.md`.
-3. Bead gets relabelled `needs-plan` with `source:actual-designer` and
+3. Bead gets relabelled `needs-pm` with `source:actual-designer` and
    the pm decomposes it into implementation tasks.
 
 ## Variables
@@ -186,7 +186,7 @@ needs = ["actual-adr-sync"]
 description = """
 ```bash
 bd update $ROOT_ID \\
-    --add-label needs-plan \\
+    --add-label needs-pm \\
     --add-label source:actual-designer \\
     --remove-label needs-design \\
     --notes "<existing notes>
@@ -196,5 +196,5 @@ design_artifact: docs/designs/{{slug}}.md"
 gc mail send pm "Handoff: $ROOT_ID design complete at docs/designs/{{slug}}.md"
 ```
 
-**Exit criteria:** Bead relabelled `needs-plan`; pm picks up work via intake order.
+**Exit criteria:** Bead relabelled `needs-pm`; pm picks up work via intake order.
 """
