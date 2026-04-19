@@ -25,8 +25,7 @@ fi
 # Run doctor for all installed factories
 ACTIVITY_SLUGS=(
     "workshop_w1:w1" "workshop_w2:w2" "workshop_w3:w3" "workshop_w4:w4"
-    "lab_l1:l1" "lab_l2:l2" "lab_l3:l3" "lab_l4:l4"
-    "capstone_L5:L5"
+    "lab_l1:l1" "lab_l2:l2" "lab_l3:l3" "lab_l4:l4" "lab_l5:l5"
     "baseline_b1:b1"
 )
 

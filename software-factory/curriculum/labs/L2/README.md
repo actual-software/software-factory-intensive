@@ -899,6 +899,6 @@ After L2 the first two stages of your factory are yours. Remaining labs follow t
 - **L3** — customise the **Designer** (consumes `needs-design`) and the **Coder** (consumes `ready-to-build`). The planner's children from this lab are exactly what L3's designer and coder consume — clean child beads here make L3's agents look sharp.
 - **L4** — customise the **Reviewer** (consumes `needs-review`) and the **Deployer** (consumes `ready-to-ship`). Completes the 6-agent pipeline.
 - **W4** — introduces the optional 7th agent, the **Improver**, which consumes `needs-improve` beads produced by the deployer and feeds production signal back into agent prompts.
-- **L5 / C1** — capstone. Combine everything and run a real feature end-to-end.
+- **L5** — the Capstone. Combine everything and run a real feature end-to-end.
 
 The pattern — read pack → include + wire → customise prompt and formula → watch a bead walk through on labels alone → fix findings by editing config, never by hand-editing output — is the whole curriculum at this point. L2 is where you first practised it on *your* project; L3 and L4 are the same loop at more stages.

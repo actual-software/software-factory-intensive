@@ -167,7 +167,7 @@ After installing, the skill should appear in Claude Code's skill list. Test with
 | L2 | labs | `lab_l2` | `~/Projects/factory/lab_l2/l2-project` | `~/Projects/factory/lab_l2/l2-gc-factory` |
 | L3 | labs | `lab_l3` | `~/Projects/factory/lab_l3/l3-project` | `~/Projects/factory/lab_l3/l3-gc-factory` |
 | L4 | labs | `lab_l4` | `~/Projects/factory/lab_l4/l4-project` | `~/Projects/factory/lab_l4/l4-gc-factory` |
-| L5 | capstone | `capstone_L5` | `~/Projects/factory/capstone_L5/L5-project` | `~/Projects/factory/capstone_L5/L5-gc-factory` |
+| L5 | labs | `lab_l5` | `~/Projects/factory/lab_l5/l5-project` | `~/Projects/factory/lab_l5/l5-gc-factory` |
 | B1 | baseline | `baseline_b1` | `~/Projects/factory/baseline_b1/b1-project` | `~/Projects/factory/baseline_b1/b1-gc-factory` |
 
 Pack sources for each activity: `activities/<category>/<activity>/gascity/step_0/packs/`

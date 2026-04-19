@@ -891,6 +891,6 @@ After L3, four of the six agents are yours. The final lab and the capstone follo
 
 - **L4** — customise the **Reviewer** (consumes `needs-review`) and the **Deployer** (consumes `ready-to-ship`). Completes the 6-agent pipeline. The reviewer reads the coder's commit and the design artifact side-by-side; make sure both are clean coming out of L3.
 - **W4** — introduces the optional 7th agent, the **Improver**, which consumes `needs-improve` beads produced by the deployer.
-- **L5 / C1** — capstone. Combine everything and run a real feature end-to-end.
+- **L5** — the Capstone. Combine everything and run a real feature end-to-end.
 
 The pattern — read pack → include + wire → customise prompt and formula → watch a bead walk through on labels alone → fix findings by editing config, never by hand-editing output — is the whole curriculum at this point. L2 was the first pass on *your* project; L3 is the middle of the pipeline; L4 closes it.

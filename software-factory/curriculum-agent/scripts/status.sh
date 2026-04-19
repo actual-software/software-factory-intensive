@@ -15,7 +15,7 @@ ACTIVITY_MAP=(
     "L2:labs:lab_l2:l2"
     "L3:labs:lab_l3:l3"
     "L4:labs:lab_l4:l4"
-    "L5:capstone:capstone_L5:L5"
+    "L5:labs:lab_l5:l5"
     "B1:baseline:baseline_b1:b1"
 )
 

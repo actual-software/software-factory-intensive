@@ -16,7 +16,7 @@ The Software Factory Intensive is a 9-session curriculum teaching multi-agent sy
 | 6 | Workshop | W3 | Multi-agent coordination patterns |
 | 7 | Lab | L4 | Deploy Reviewer + Deployer agents |
 | 8 | Workshop | W4 | Continuous improvement feedback loops |
-| 9 | Capstone | L5 | Run end-to-end factory on real project |
+| 9 | Capstone Lab | L5 | Run end-to-end factory on real project |
 
 ## Activity Details
 
@@ -87,7 +87,7 @@ The Software Factory Intensive is a 9-session curriculum teaching multi-agent sy
 ### L5 — End-to-End Factory Capstone
 
 - **Category:** capstone
-- **Slug:** `capstone_L5`
+- **Slug:** `lab_l5`
 - **Focus:** Running the complete factory (all 6+ agents) on a real project end-to-end
 - **Packs source:** `activities/labs/L5/gascity/step_0/packs/`
 - **Prerequisites:** All workshops and labs (W1-W4, L1-L4)
@@ -148,9 +148,9 @@ All factories are installed under `~/Projects/factory/`:
 │   ├── l1-project/
 │   └── l1-gc-factory/
 ...
-└── capstone_L5/
-    ├── L5-project/
-    └── L5-gc-factory/
+└── lab_l5/
+    ├── l5-project/
+    └── l5-gc-factory/
 ```
 
 Each factory workspace contains:

@@ -746,6 +746,6 @@ bd label add <bead-id> ready-to-build    # re-arm the coder
 After L4, your factory can take a feature bead from `needs-plan` through to a tagged release on labels alone. Two sessions remain:
 
 - **W4** — introduces the optional 7th agent, the **Improver**, which consumes `needs-improve` beads produced by the deployer and feeds production signal back into agent prompts. The factory runs without it; the improver is what turns the factory into a *learning* factory.
-- **L5 / C1** — the capstone. Combine everything you've built and run a real feature end-to-end.
+- **L5** — the Capstone. Combine everything you've built and run a real feature end-to-end.
 
 The pattern you practised in L2, L3, and L4 is the same: read pack → install pack → customise prompt and formula → watch a bead walk through on labels alone → fix findings by editing config, never by hand-editing output. L5 is that loop at scale.

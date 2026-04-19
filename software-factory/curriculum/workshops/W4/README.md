@@ -514,13 +514,13 @@ Before leaving this workshop, verify all of these:
 - [ ] At least one of those beads was acted on: either (a) closed with a reason after human review rejected it, or (b) resolved by a commit on one of the 6 essential agent packs (`packs/<name>/prompts/*.md.tmpl` or a formula), with the bead closed referencing the commit.
 - [ ] `git status` clean in both `my-factory/` and your project rig.
 
-**W4 feeds L5/C1.** The capstone assumes the Improver is wired; L5's end-to-end run includes a harvest as the final step, and the feedback summary it produces is one of the retrospective artifacts you'll audit.
+**W4 feeds L5.** The capstone assumes the Improver is wired; L5's end-to-end run includes a harvest as the final step, and the feedback summary it produces is one of the retrospective artifacts you'll audit.
 
 ---
 
 ## Next Steps
 
-In **L5 / C1 (Capstone)**, you'll:
+In **L5**, you'll:
 
 - Combine the six essential packs (with your L2–L4 customisations) plus the optional 7th into one end-to-end factory run
 - Drive a new feature from `needs-plan` to `closed`, then let the Improver harvest immediately after

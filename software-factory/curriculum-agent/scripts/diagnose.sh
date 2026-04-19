@@ -77,8 +77,7 @@ if [[ -d "$FACTORY_ROOT" ]]; then
     pass "Factory root exists: $FACTORY_ROOT"
     ACTIVITY_SLUGS=(
         "W1:workshop_w1:w1" "W2:workshop_w2:w2" "W3:workshop_w3:w3" "W4:workshop_w4:w4"
-        "L1:lab_l1:l1" "L2:lab_l2:l2" "L3:lab_l3:l3" "L4:lab_l4:l4"
-        "L5:capstone_L5:L5"
+        "L1:lab_l1:l1" "L2:lab_l2:l2" "L3:lab_l3:l3" "L4:lab_l4:l4" "L5:lab_l5:l5"
         "B1:baseline_b1:b1"
         "FUP:fired_up_pizza:fup"
     )
@@ -108,7 +107,6 @@ for activity in W1 W2 W3 W4 L1 L2 L3 L4 L5 B1 FUP; do
         FUP) category="reference" ;;
         W*) category="workshops" ;;
         L*) category="labs" ;;
-        C*) category="capstone" ;;
         B*) category="baseline" ;;
     esac
     packs_dir="$SFI_DIR/activities/$category/$activity/gascity/step_0/packs"

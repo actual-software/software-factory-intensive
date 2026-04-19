@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Estimated duration** | ~90 minutes |
-| **Type** | LAB / CAPSTONE |
+| **Type** | Capstone Lab |
 | **Deliverable** | One bead walked through the factory on labels alone (any distance counts), a `docs/factory-runs/<date>-<slug>.md` run record, and a Keep / Change / Question retrospective committed alongside it |
 
 ---
