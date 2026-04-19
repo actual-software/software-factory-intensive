@@ -48,7 +48,7 @@ brew install gascity@0.14.1
 
 ### 4. Clone the `software-factory-intensive` repo
 
-Clone the `software-factory-intensive` repo locally into a new project directory (this specific path is important for the factory-activity-agent to work correctly):
+Clone the `software-factory-intensive` repo locally into a new project directory. **Note**: this specific path is important for the workshops and labs to run correctly:
 ```bash
 mkdir -p ~/Projects/actual-software/
 git clone https://github.com/actual-software/software-factory-intensive.git ~/Projects/actual-software/software-factory-intensive
@@ -122,7 +122,7 @@ software-factory-intensive/
 ├── curriculum/
 │   ├── labs/L1..L5/                 # Participant-led, exploratory work sessions
 │   └── workshops/W1..W4/            # Instructor-led, structured sessions
-├── factory-activity-agent/                # factory-activity-agent skill to manage the curriculum
+├── factory-activity-agent/          # factory-activity-agent skill to manage the curriculum
 ├── images/                          # Images for the curriculum
 ├── packs/                           # Packs containing agents and configurations for the curriculum
 │   ├── all/                         # Composite 6-agent factory
