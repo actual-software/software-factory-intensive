@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Full environment diagnostic for factory_activity_agent
+# Full environment diagnostic for curriculum_agent
 # Checks all prerequisites, registered cities, and factory health
 
 FACTORY_ROOT="$HOME/Projects/factory"
@@ -46,17 +46,17 @@ else
     fail "bd not found on PATH"
 fi
 
-# Section 4: factory_activity_agent.py
+# Section 4: curriculum_agent.py
 section "Factory Activity Agent Script"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # Resolve through symlinks to find the real SFI repo root
 REAL_SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || realpath "$0" 2>/dev/null || echo "$0")")" && pwd)"
 SFI_DIR="$(cd "$REAL_SCRIPT_DIR/../../.." && pwd)"
-AGENT_SCRIPT="$SFI_DIR/scripts/factory_activity_agent.py"
+AGENT_SCRIPT="$SFI_DIR/scripts/curriculum_agent.py"
 if [[ -f "$AGENT_SCRIPT" ]]; then
-    pass "factory_activity_agent.py found at $AGENT_SCRIPT"
+    pass "curriculum_agent.py found at $AGENT_SCRIPT"
 else
-    fail "factory_activity_agent.py not found at $AGENT_SCRIPT"
+    fail "curriculum_agent.py not found at $AGENT_SCRIPT"
 fi
 
 # Section 5: Registered cities

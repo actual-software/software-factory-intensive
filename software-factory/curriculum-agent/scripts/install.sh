@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Wrapper for factory_activity_agent.py install
+# Wrapper for curriculum_agent.py install
 # Usage: install.sh <activity> [--dry-run]
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # Resolve through symlinks to find the real SFI repo root
 REAL_SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || realpath "$0" 2>/dev/null || echo "$0")")" && pwd)"
 SFI_DIR="$(cd "$REAL_SCRIPT_DIR/../../.." && pwd)"
-AGENT_SCRIPT="$SFI_DIR/scripts/factory_activity_agent.py"
+AGENT_SCRIPT="$SFI_DIR/scripts/curriculum_agent.py"
 
 VALID_ACTIVITIES="W1 W2 W3 W4 L1 L2 L3 L4 L5 B1 FUP"
 
@@ -53,7 +53,7 @@ if ! command -v python3 &>/dev/null; then
 fi
 
 if [[ ! -f "$AGENT_SCRIPT" ]]; then
-    echo "Error: factory_activity_agent.py not found at $AGENT_SCRIPT"
+    echo "Error: curriculum_agent.py not found at $AGENT_SCRIPT"
     exit 1
 fi
 

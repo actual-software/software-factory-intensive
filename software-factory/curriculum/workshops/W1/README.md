@@ -13,7 +13,7 @@
 
 ## Session workspace note
 
-* **Curriculum-agent source:** `software-factory/curriculum-agent/` — `SKILL.md` is the canonical entry point; `scripts/` hold the thin Bash wrappers (`install.sh`, `status.sh`, `doctor.sh`, `delete.sh`, `diagnose.sh`) that front the Python runner at `scripts/factory_activity_agent.py`.
+* **Curriculum-agent source:** `software-factory/curriculum-agent/` — `SKILL.md` is the canonical entry point; `scripts/` hold the thin Bash wrappers (`install.sh`, `status.sh`, `doctor.sh`, `delete.sh`, `diagnose.sh`) that front the Python runner at `scripts/curriculum_agent.py`.
 * **Reference project (the "rig" the factory works on):** `software-factory/reference-project/` — a small React + TypeScript + SQLite pizza-restaurant app with `docs/PROJECT_MANIFEST.md`, `tickets.md` (initial backlog), and `package.json` already in place.
 * **Fired-Up Pizza pack (what you install into your factory):** `software-factory/packs/fired-up-pizza/` — a composite pack bundling the six agents, plus a doctor check for the reference scaffold and a `tickets.md` importer.
 * **Factory workspace (created during this session):** `~/Projects/factory/fired-up-pizza/fup-gc-factory/` — the Gas City `city.toml` + workspace that runs the agents. Every `gc` command below is run from that directory unless otherwise noted.
@@ -144,7 +144,7 @@ The curriculum-agent is a wrapper over `gc` + Python scaffolding. You only need 
 bash software-factory/curriculum-agent/scripts/install.sh <activity> [--dry-run]
 ```
 
-The wrapper validates the activity name, pre-flight-checks `gc` and `python3`, then delegates to `scripts/factory_activity_agent.py install <activity>`. Always run a `--dry-run` first if you're unsure what it's about to do — the dry-run prints every command without executing.
+The wrapper validates the activity name, pre-flight-checks `gc` and `python3`, then delegates to `scripts/curriculum_agent.py install <activity>`. Always run a `--dry-run` first if you're unsure what it's about to do — the dry-run prints every command without executing.
 
 > **Note — fired-up-pizza install route is in flight.** The `install` verb today knows the workshop/lab activities (`W1`–`W4`, `L1`–`L5`). A dedicated `fired-up-pizza` activity is being wired up in a follow-up bead (F4 — `sfi-9iq`). Until that lands, you'll install the Fired-Up Pizza factory with the **manual stand-up** from [`packs/fired-up-pizza/README.md`](../../../packs/fired-up-pizza/README.md) — that's what Part 2 walks you through.
 
@@ -557,7 +557,7 @@ bd list --label needs-improve          # optional-7th handoff handle
 | Component | Location | What It Does |
 |-----------|----------|--------------|
 | `curriculum-agent` skill | `~/.claude/skills/curriculum-agent` → `software-factory/curriculum-agent` | Slash command and Bash wrappers for `install` / `status` / `doctor` / `dashboard` / `delete` |
-| `install.sh` wrapper | `software-factory/curriculum-agent/scripts/install.sh` | Validates an activity, pre-flight-checks, delegates to `factory_activity_agent.py` |
+| `install.sh` wrapper | `software-factory/curriculum-agent/scripts/install.sh` | Validates an activity, pre-flight-checks, delegates to `curriculum_agent.py` |
 | `status.sh` wrapper | `software-factory/curriculum-agent/scripts/status.sh` | Prints `gc version`, registered cities, and per-factory agent status |
 | `doctor.sh` wrapper | `software-factory/curriculum-agent/scripts/doctor.sh` | Runs `gc doctor --fix` and the curriculum's environment checks |
 | Fired-Up Pizza factory workspace | `~/Projects/factory/fired-up-pizza/fup-gc-factory/` | Your live Gas City workspace — `city.toml`, registered rig, six running agents |

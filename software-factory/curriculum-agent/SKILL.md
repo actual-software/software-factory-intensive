@@ -4,7 +4,7 @@ description: >-
   Install, delete, and operate Gas City factory setups for Software Factory
   Intensive curriculum activities (W1-W4, L1-L5) and the Fired Up Pizza
   reference factory (FUP). Wraps
-  factory_activity_agent.py for lifecycle management and provides gc CLI
+  curriculum_agent.py for lifecycle management and provides gc CLI
   v0.14.1 operational guidance for status, sling, sessions, formulas,
   dashboard, and troubleshooting. Use when setting up or tearing down
   activity environments, checking factory status, routing work to agents,
@@ -40,7 +40,7 @@ bash skills/curriculum-agent/scripts/install.sh <activity> [--dry-run]
 
 Or directly (must be in the SFI repo root):
 ```bash
-python3 scripts/factory_activity_agent.py install <activity> [--mode dry-run]
+python3 scripts/curriculum_agent.py install <activity> [--mode dry-run]
 ```
 
 Activities: `W1`, `W2`, `W3`, `W4`, `L1`, `L2`, `L3`, `L4`, `L5`, `B1`, `FUP`
@@ -55,7 +55,7 @@ bash skills/curriculum-agent/scripts/delete.sh <activity> [--dry-run]
 
 Or directly (must be in the SFI repo root):
 ```bash
-python3 scripts/factory_activity_agent.py delete <activity> [--mode dry-run]
+python3 scripts/curriculum_agent.py delete <activity> [--mode dry-run]
 ```
 
 ### status
@@ -199,12 +199,12 @@ What `install` creates under `~/Projects/factory/`:
 1. **Pre-flight** — verify `gc` and `python3` are on PATH
 2. **Dry-run** — preview what will happen:
    ```bash
-   python3 scripts/factory_activity_agent.py install W2 --mode dry-run
+   python3 scripts/curriculum_agent.py install W2 --mode dry-run
    ```
 3. **Confirm** — review the dry-run output with the user
 4. **Execute** — run the install:
    ```bash
-   python3 scripts/factory_activity_agent.py install W2
+   python3 scripts/curriculum_agent.py install W2
    ```
 5. **Verify** — check the factory is running and the setup task was slung:
    ```bash
@@ -219,7 +219,7 @@ Dashboard available at http://localhost:8080 after install.
 1. **Pre-flight** — confirm with user (this removes all files)
 2. **Execute**:
    ```bash
-   python3 scripts/factory_activity_agent.py delete W2
+   python3 scripts/curriculum_agent.py delete W2
    ```
 3. **Verify** — confirm directories are removed and factory is unregistered:
    ```bash

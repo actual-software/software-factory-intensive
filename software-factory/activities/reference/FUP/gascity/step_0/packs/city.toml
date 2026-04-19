@@ -2,7 +2,7 @@
 #
 # Brings up the composite `fired-up-pizza` pack against the FUP
 # reference project. Installed via:
-#   python3 software-factory/scripts/factory_activity_agent.py install FUP
+#   python3 software-factory/scripts/curriculum_agent.py install FUP
 
 [workspace]
 name = "fup-gc-factory"
