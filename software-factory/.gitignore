@@ -1,0 +1,15 @@
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/
+
+# Gas City runtime state (per-machine, not source)
+.gc/
+.runtime/
+
+# Python
+__pycache__/
+
+# Claude Code local settings
+.claude/

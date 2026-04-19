@@ -1,0 +1,175 @@
+description = """
+Feedback harvest — 4 steps from raw runtime signals to labelled
+upstream beads. Runs on a cooldown schedule (daily by default).
+
+## Variables
+
+| Variable | Source | Description |
+|----------|--------|-------------|
+| since | caller | Time window for signal collection (default: "24h") |
+| feedback_dir | caller | Where to write the daily summary (default: docs/feedback) |
+"""
+formula = "mol-feedback-harvest"
+version = 1
+
+[vars]
+[vars.since]
+description = "Collection window, e.g., '24h', '7d'"
+default = "24h"
+
+[vars.feedback_dir]
+description = "Directory for daily feedback summaries"
+default = "docs/feedback"
+
+[[steps]]
+id = "collect"
+title = "Collect runtime signals from whatever the rig exposes"
+description = """
+Signals you look for (any that are accessible — no signal is
+required):
+
+1. **Error-tracker** (Sentry, Rollbar, etc.) — new error
+   signatures in the last {{since}}.
+2. **Metrics** (Prometheus, Datadog, Grafana) — SLO burn or
+   anomalies on latency / error rate / saturation in the last
+   {{since}}.
+3. **Logs** — elevated ERROR / WARN rates, crash loops.
+4. **User feedback** — support tickets, GitHub issues labelled
+   `user-report`, Discord / Slack pain-point posts.
+5. **CI** — recent flaky test signals.
+6. **Dependency vulnerabilities** — new CVEs against pinned deps.
+
+**Write raw collected data to {{feedback_dir}}/<today>.raw.md.**
+If no signal source is accessible, write a "no signals collected"
+stub and continue — the cycle must always produce a summary.
+
+```bash
+TODAY=$(date -u +%Y-%m-%d)
+mkdir -p {{feedback_dir}}
+cat > "{{feedback_dir}}/$TODAY.raw.md" <<EOF
+# Raw signals for $TODAY (window: {{since}})
+
+## Errors
+<dump of error-tracker output, or "no access">
+
+## Metrics
+<dump of metrics output, or "no access">
+
+## Logs
+<dump of log tail, or "no access">
+
+## User feedback
+<dump of support feed, or "no access">
+
+## CI
+<dump of flaky test report, or "no access">
+
+## Deps
+<dump of vuln scanner, or "no access">
+EOF
+```
+
+**Exit criteria:** Raw file exists.
+"""
+
+[[steps]]
+id = "classify"
+title = "Classify each signal into a type and severity"
+needs = ["collect"]
+description = """
+Read the raw file. For each distinct signal, write one row in the
+classification table.
+
+Types:
+- `bug` — behavior deviating from acceptance criteria
+- `perf` — performance regression
+- `ux` — UX paper cut or usability complaint
+- `docs` — documentation gap
+- `arch` — systemic / cross-cutting concern
+- `security` — vulnerability or suspicious pattern
+- `test-gap` — observed failure mode uncovered by tests
+
+Severity: p0 / p1 / p2.
+
+Write to `{{feedback_dir}}/<today>.md`:
+
+```markdown
+# Feedback harvest $TODAY
+
+| # | Type | Severity | Signal | Proposed action | Upstream agent |
+|---|------|----------|--------|-----------------|-----------------|
+| 1 | bug | p1 | <summary> | <1-sentence action> | builder |
+| 2 | arch | p2 | <summary> | <1-sentence action> | architect |
+...
+```
+
+**Exit criteria:** Classified summary file exists.
+"""
+
+[[steps]]
+id = "propose"
+title = "Draft a bead for every actionable row"
+needs = ["classify"]
+description = """
+For every row in the classification table, draft a bead in a scratch
+format. Do not create the beads yet — the file-beads step does that.
+
+For each draft, decide:
+- Title (clear, one-line, action-shaped)
+- Upstream label (one of needs-architecture, needs-plan,
+  needs-design, needs-tests, ready-to-build, needs-review)
+- Severity label (p0 / p1 / p2)
+- Body (evidence link, reproduction steps, observed vs expected,
+  suggested action)
+
+Append to the summary file under a `## Proposed beads` section.
+
+**Exit criteria:** Every actionable row has a drafted bead entry.
+"""
+
+[[steps]]
+id = "file-beads"
+title = "Create the beads, close the source needs-improve beads, mail"
+needs = ["propose"]
+description = """
+**1. Create each drafted bead:**
+```bash
+while read -r row; do
+    # Parse the draft row into title, label, severity, body.
+    NEW_ID=$(bd create \\
+        --title "<title>" \\
+        --label "<upstream-label>" \\
+        --label "<severity>" \\
+        --label "source:actual-improver" \\
+        --notes "<body>" \\
+        --json | jq -r '.id')
+    echo "filed: $NEW_ID"
+done
+```
+
+**2. Close any `needs-improve` beads** that motivated this cycle:
+```bash
+bd ready --label=needs-improve --json 2>/dev/null \\
+    | jq -r '.[] | .id' \\
+    | while read -r imp_id; do
+        bd close "$imp_id" --reason "feedback harvested $(date -u +%Y-%m-%d)"
+    done
+```
+
+**3. Downstream agents pick up work automatically via labels:**
+```bash
+# Each label triggers the corresponding intake order automatically:
+#   needs-architecture → architect-guardrail-check
+#   needs-plan         → planner-intake
+#   needs-design       → designer-intake
+#   needs-tests        → validator-intake
+#   ready-to-build     → builder-intake
+#   needs-review       → reviewer-intake
+# Do NOT gc mail send — it creates duplicate sessions.
+# Wake downstream agents.
+sh packs/actual/all/scripts/wake-downstream.sh &
+```
+
+**Exit criteria:** Drafted beads exist; needs-improve beads closed;
+downstream agents pick up labelled work via intake orders.
+"""

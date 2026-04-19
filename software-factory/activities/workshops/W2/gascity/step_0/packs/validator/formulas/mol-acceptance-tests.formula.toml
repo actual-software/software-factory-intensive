@@ -1,0 +1,122 @@
+description = """
+Acceptance tests — 4 steps from a `needs-tests` bead to a failing
+test suite handed off to the builder.
+
+## Contract
+
+1. Caller slings with a bead labelled `needs-tests`.
+2. Validator enumerates cases from the acceptance criteria.
+3. Validator writes failing tests that encode those cases.
+4. Bead gets relabelled `ready-to-build` and mailed to the builder.
+
+## Variables
+
+| Variable | Source | Description |
+|----------|--------|-------------|
+| test_dir | caller | Override the target test directory (default: auto-detect) |
+"""
+formula = "mol-acceptance-tests"
+version = 1
+
+[vars]
+[vars.test_dir]
+description = "Directory where test files should land. Empty means auto-detect from the rig."
+default = ""
+
+[[steps]]
+id = "intake"
+title = "Read the bead, acceptance criteria, and existing tests"
+description = """
+**1. Root bead:**
+```bash
+ROOT_ID=$(bd mol current --json | jq -r '.molecule_id')
+bd show $ROOT_ID
+```
+
+**2. Extract acceptance criteria** from the bead notes. If none
+exist, the planner made a mistake — file it back with label
+`needs-plan` and stop.
+
+**3. Survey existing tests** to match framework and style:
+```bash
+find . -type f \\( -name '*_test.go' -o -name '*.test.ts' \\
+    -o -name '*.test.js' -o -name 'test_*.py' \\
+    -o -name '*_spec.rb' \\) 2>/dev/null | head -5
+```
+
+**Exit criteria:** You know the test framework, naming convention,
+and target directory.
+"""
+
+[[steps]]
+id = "cases"
+title = "Enumerate the test cases from the acceptance criteria"
+needs = ["intake"]
+description = """
+For every acceptance criterion, list:
+- One or more **happy-path** cases
+- At least one **error-path** case (bad input, permission denied,
+  missing dependency, etc.)
+- **Boundary** cases (empty input, max-size input, unicode, zero,
+  negative, etc.)
+
+Record the enumeration in the bead notes so the builder can see what
+it must satisfy:
+```bash
+bd update $ROOT_ID --notes "<existing notes>
+test_cases:
+- happy: <description>
+- error: <description>
+- boundary: <description>
+..."
+```
+
+**Exit criteria:** Case list in the bead notes.
+"""
+
+[[steps]]
+id = "suite"
+title = "Write the failing test suite"
+needs = ["cases"]
+description = """
+Write test files that match the rig's existing conventions. Tests
+MUST fail now because the builder hasn't implemented the code yet —
+that's the point.
+
+**Rules:**
+- One assertion per concept. Clear, named, short.
+- No mocks unless the rig's existing tests mock (avoid mock/prod
+  divergence).
+- No shared test state between cases.
+- Name tests after the behavior, not the implementation.
+
+Commit the tests with a conventional message:
+```bash
+git add <new test files>
+git commit -m "test: acceptance suite for $ROOT_ID (actual-validator)"
+```
+
+**Exit criteria:** Tests committed; `go test` / `pytest` / `npm test`
+reports the expected failures (not compile errors).
+"""
+
+[[steps]]
+id = "handoff"
+title = "Relabel the bead and mail the builder"
+needs = ["suite"]
+description = """
+```bash
+bd update $ROOT_ID \\
+    --add-label ready-to-build \\
+    --remove-label needs-tests \\
+    --notes "<existing notes>
+test_files: <list of committed paths>"
+
+# The ready-to-build label triggers builder-intake order automatically.
+# Do NOT gc mail send — it creates duplicate sessions.
+# Wake downstream agents.
+sh packs/actual/all/scripts/wake-downstream.sh &
+```
+
+**Exit criteria:** Bead relabelled; builder picks up work via intake order.
+"""
