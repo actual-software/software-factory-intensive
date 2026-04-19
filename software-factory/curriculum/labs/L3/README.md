@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Estimated duration** | ~75 minutes |
-| **Type** | LAB |
+| **Type** | Lab |
 | **Deliverable** | Customised `designer` + `coder` packs scoped to your project, plus one `needs-design` bead that walked through Designer and Coder to a committed implementation labelled `needs-review` |
 
 ---

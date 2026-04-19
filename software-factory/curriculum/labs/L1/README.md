@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Estimated duration** | ~60 minutes |
-| **Type** | LAB |
+| **Type** | Lab |
 | **Deliverable** | A running city with your project registered as a rig, all 6 agents wired in, and one feature bead fully traversed from `needs-plan` to `ready-to-ship` |
 
 ---

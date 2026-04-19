@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Estimated duration** | ~45 minutes |
-| **Type** | WORKSHOP |
+| **Type** | Workshop |
 | **Deliverable** | `improver` pack wired into your factory, one `docs/feedback/<date>.md` harvest summary committed in your project rig, and one config change committed on one of the 6 essential agent packs in response to a bead the Improver filed |
 
 ---

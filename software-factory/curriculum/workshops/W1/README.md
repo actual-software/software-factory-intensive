@@ -5,8 +5,7 @@
 | | |
 |---|---|
 | **Estimated duration** | ~60 minutes |
-| **Type** | WORKSHOP |
-| **Lead** | David |
+| **Type** | Workshop |
 | **Deliverable** | A running Fired-Up Pizza factory on your machine, with at least one bead visibly re-labelled by each of the six agents and inspectable via the dashboard |
 
 ---

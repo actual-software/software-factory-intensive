@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Estimated duration** | ~75 minutes |
-| **Type** | LAB |
+| **Type** | Lab |
 | **Deliverable** | Customised `reviewer` + `deployer` packs scoped to your project, plus one bead that walked the full review→ship handoff end-to-end |
 
 ---

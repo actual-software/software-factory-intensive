@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Estimated duration** | ~75 minutes |
-| **Type** | LAB |
+| **Type** | Lab |
 | **Deliverable** | Customised `planner` + `architect` packs scoped to your project, plus one goal bead that walked through planning (and architecture, if triggered) to a dependency graph of downstream child beads |
 
 ---

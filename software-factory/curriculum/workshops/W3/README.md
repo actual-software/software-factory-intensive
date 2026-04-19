@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Estimated duration** | ~45 minutes |
-| **Type** | WORKSHOP |
+| **Type** | Workshop |
 | **Deliverable** | One new coordination rule committed to your factory's config — an order, a hook, a mail trigger, or a shared-file convention — with a short note in `DECISIONS.md` explaining why you picked it |
 
 ---

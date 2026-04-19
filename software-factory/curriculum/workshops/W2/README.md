@@ -5,8 +5,7 @@
 | | |
 |---|---|
 | **Estimated duration** | ~45 minutes |
-| **Type** | WORKSHOP |
-| **Lead** | Austin |
+| **Type** | Workshop |
 | **Deliverable** | A factory-ready project workspace — clean repo, filled manifest, authenticated provider CLI, verified `gc` / `bd` / `curriculum-agent`, and `docs/FACTORY_READY.md` committed — that L1 can install the 6-agent factory against without extra scrambling |
 
 ---
