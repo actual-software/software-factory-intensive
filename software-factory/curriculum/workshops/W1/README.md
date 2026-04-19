@@ -71,18 +71,6 @@ Every transition is a **label flip on the same bead**. No `gc sling` is run by h
 
 ---
 
-## Prerequisites
-
-| Prerequisite | How to verify | If it's missing |
-|--------------|---------------|-----------------|
-| `software-factory-intensive` repo cloned locally | `ls ~/Projects/actual-software/software-factory-intensive/software-factory/packs/fired-up-pizza/README.md` exists | `git clone git@github.com:actual-software/software-factory-intensive.git ~/Projects/actual-software/software-factory-intensive` |
-
-| `~/Projects/factory/` exists and is writable | `mkdir -p ~/Projects/factory && ls -ld ~/Projects/factory` | `mkdir -p ~/Projects/factory` |
-
-**If any row fails in the room**, flag it to David — do not spend more than 2 minutes debugging on your own. Getting the factory moving is the point of this session, not debugging installs.
-
----
-
 ## Part 1: Read the Labeled-Beads Protocol (~5 min)
 
 Every question W1 raises — *"why did the Architect wake?" "why did the bead move to `ready-to-build`?" "what does the Coder look at to know it's up?"* — is answered in [`software-factory/LABELED_BEADS.md`](../../../LABELED_BEADS.md). Read it before installing anything.
@@ -304,7 +292,7 @@ That's the entire trigger for the factory. Within one supervisor poll (~60 secon
 
 ### Step 4: Narrate each handoff (~15 min, ~2 min per stage)
 
-For each of the six stages, run the three commands below and narrate what you see. You're not driving the factory — you're observing it. David will walk the room through a full cycle; if you're self-paced, expect 8–12 minutes of real time for each stage as the agents do real work.
+For each of the six stages, run the three commands below and narrate what you see. You're not driving the factory — you're observing it. The instructor will walk the room through a full cycle; if you're self-paced, expect 8–12 minutes of real time for each stage as the agents do real work.
 
 ```bash
 # See which agent is currently working + what bead they're on
@@ -469,7 +457,7 @@ Then `gc restart` to pick up the change.
 
 **Cause:** The Coder is regenerating the same issue because the shipped coder prompt is generic. That's expected — customizing the coder for your project is L3's entire job; you'll see the fix-via-config discipline land then.
 
-**Fix (for W1 specifically):** nothing. Let it cycle. The point of this session is to see the pipeline move, not to produce merge-ready code. If it cycles more than three times on the same finding, stop the factory (`gc stop`) and call David over — the failure mode might be worth walking the room through.
+**Fix (for W1 specifically):** nothing. Let it cycle. The point of this session is to see the pipeline move, not to produce merge-ready code. If it cycles more than three times on the same finding, stop the factory (`gc stop`) and call a facilitator over — the failure mode might be worth walking the room through.
 
 ### Issue 10: `import-tickets.sh` printed warnings like "failed to create FUP-2"
 

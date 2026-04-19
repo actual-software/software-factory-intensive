@@ -36,7 +36,7 @@ In **W1** you installed the `factory-activity-agent` skill and watched the Fired
 
 W2 takes you from "I've seen a factory run" to "I am preparing my project to host its own factory." The session is short, mostly discussion and setup, and the Big Reveal is subtle: **the factory only exists because the *inputs* to the factory (your manifest, your repo state, your tool auth) are in a shape the factory can operate on.** A sloppy manifest is why a factory stalls; a half-authenticated CLI is why an agent dies on startup. W2 is where you pay that debt before L1 installs anything.
 
-After W2, you'll move to L1, where David walks the room through standing up the 6-agent factory against the project you just prepared here.
+After W2, you'll move to L1, where the instructor walks the room through standing up the 6-agent factory against the project you just prepared here.
 
 ---
 
@@ -452,7 +452,7 @@ No `gc sling`, no `bd create`, no pack edits this session — those all start in
 
 ## Next Steps
 
-**L1** — David installs the 6-agent factory on your project. The installer reads your repo, registers it as a rig, copies the shipped packs, and spins up all six agents. Your `docs/FACTORY_READY.md` is what L1's prerequisites check looks for; everything else you did in W2 (clean repo, manifest, auth) is what makes the install succeed on the first try instead of the third.
+**L1** — The instructor installs the 6-agent factory on your project. The installer reads your repo, registers it as a rig, copies the shipped packs, and spins up all six agents. Your `docs/FACTORY_READY.md` is what L1's prerequisites check looks for; everything else you did in W2 (clean repo, manifest, auth) is what makes the install succeed on the first try instead of the third.
 
 **Bring to L1:**
 
