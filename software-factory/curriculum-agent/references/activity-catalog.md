@@ -92,6 +92,15 @@ The Software Factory Intensive is a 9-session curriculum teaching multi-agent sy
 - **Packs source:** `activities/labs/L5/gascity/step_0/packs/`
 - **Prerequisites:** All workshops and labs (W1-W4, L1-L4)
 
+### FUP — Fired Up Pizza Reference Factory
+
+- **Category:** reference
+- **Slug:** `fired_up_pizza`
+- **Focus:** Reference 6-agent factory bundled with the Fired Up Pizza project scaffold. Used by W1 to demonstrate a fully-functioning software factory.
+- **Packs source:** `activities/reference/FUP/gascity/step_0/packs/`
+- **Prerequisites:** None — can install independently of the workshop/lab track.
+- **Notes:** The `all` pack at this activity includes the composite `fired-up-pizza` pack rather than bundling the six leaves directly. The composite adds a `check-project` doctor that expects `docs/PROJECT_MANIFEST.md` and `package.json` in the rig.
+
 ## Agent Roles (Packs)
 
 Each activity's factory includes some or all of these agent packs:

@@ -23,6 +23,7 @@ ACTIVITY_MAP = {
     "L3": ("labs", "lab_l3"),
     "L4": ("labs", "lab_l4"),
     "L5": ("labs", "lab_l5"),
+    "FUP": ("reference", "fired_up_pizza"),
 }
 
 # Maps category to the singular uppercase prefix used in GUIDE filenames.

@@ -1,0 +1,6 @@
+[order]
+description = "Wake the designer when any bead is labelled needs-design"
+formula = "mol-design-cycle"
+gate = "condition"
+check = "bd ready --label=needs-design --limit=1 | grep -q ."
+pool = "designer"

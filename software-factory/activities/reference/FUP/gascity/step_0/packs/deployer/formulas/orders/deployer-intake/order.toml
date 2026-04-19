@@ -1,0 +1,6 @@
+[order]
+description = "Wake the deployer when any bead is labelled ready-to-ship"
+formula = "mol-deployer"
+gate = "condition"
+check = "bd ready --label=ready-to-ship --limit=1 | grep -q ."
+pool = "deployer"

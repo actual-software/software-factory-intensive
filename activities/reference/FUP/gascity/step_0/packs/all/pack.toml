@@ -1,0 +1,12 @@
+# fup-factory — aggregator pack for the Fired Up Pizza reference
+# factory. Includes the `fired-up-pizza` composite pack, which in
+# turn bundles the six agent packs (planner, architect, designer,
+# builder, reviewer, release-gate) plus a doctor check for the
+# reference project scaffold.
+
+[pack]
+name = "fup-factory"
+schema = 1
+includes = [
+    "../fired-up-pizza",
+]

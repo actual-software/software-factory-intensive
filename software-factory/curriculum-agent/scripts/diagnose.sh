@@ -80,6 +80,7 @@ if [[ -d "$FACTORY_ROOT" ]]; then
         "L1:lab_l1:l1" "L2:lab_l2:l2" "L3:lab_l3:l3" "L4:lab_l4:l4"
         "L5:capstone_L5:L5"
         "B1:baseline_b1:b1"
+        "FUP:fired_up_pizza:fup"
     )
     for entry in "${ACTIVITY_SLUGS[@]}"; do
         IFS=: read -r activity slug alias <<< "$entry"
@@ -102,8 +103,9 @@ fi
 
 # Section 7: Activity packs
 section "Activity Packs (source)"
-for activity in W1 W2 W3 W4 L1 L2 L3 L4 L5 B1; do
+for activity in W1 W2 W3 W4 L1 L2 L3 L4 L5 B1 FUP; do
     case "$activity" in
+        FUP) category="reference" ;;
         W*) category="workshops" ;;
         L*) category="labs" ;;
         C*) category="capstone" ;;

@@ -2,7 +2,8 @@
 name: factory-activity-agent
 description: >-
   Install, delete, and operate Gas City factory setups for Software Factory
-  Intensive curriculum activities (W1-W4, L1-L4, C1). Wraps
+  Intensive curriculum activities (W1-W4, L1-L4, C1, B1) and the Fired
+  Up Pizza reference factory (FUP). Wraps
   factory_activity_agent.py for lifecycle management and provides gc CLI
   v0.14.1 operational guidance for status, sling, sessions, formulas,
   dashboard, and troubleshooting. Use when setting up or tearing down
@@ -42,7 +43,7 @@ Or directly (must be in the SFI repo root):
 python3 scripts/factory_activity_agent.py install <activity> [--mode dry-run]
 ```
 
-Activities: `W1`, `W2`, `W3`, `W4`, `L1`, `L2`, `L3`, `L4`, `C1`, `B1`
+Activities: `W1`, `W2`, `W3`, `W4`, `L1`, `L2`, `L3`, `L4`, `C1`, `B1`, `FUP`
 
 ### delete
 

@@ -1,0 +1,51 @@
+# actual-coder — Coder agent for the Actual Software Factory.
+#
+# Takes beads labelled `ready-to-build` and produces working code that
+# satisfies their acceptance criteria, plus the tests that exercise
+# those criteria. The reviewer downstream verifies AC coverage (the
+# AC-verification responsibility was folded into reviewer when the
+# former validator pack was retired in the 6+1 factory model).
+#
+# Ships the vendored `actual` skill so the coder can consult the
+# rig's CLAUDE.md/AGENTS.md before writing code — the
+# "actual-adr-check" formula step enforces that ADRs and generated
+# rules are in sync before any implementation work.
+#
+# Persona anchor: backend-engineer + frontend-engineer (generalist
+# voice) from
+# actual-factory/extensions/factory-vscode/shared/actual-agents/built-in-agents.ts
+
+[pack]
+name = "actual-coder"
+schema = 1
+
+[[doctor]]
+name = "check-coder"
+script = "doctor/check-coder.sh"
+description = "Verify coder prerequisites (bd, gc, git, jq)"
+
+[[commands]]
+name = "status"
+description = "Show coder work status for the current rig"
+script = "commands/status.sh"
+
+[[commands]]
+name = "build"
+description = "Manually trigger the code formula against a bead"
+script = "commands/build.sh"
+
+[formulas]
+dir = "formulas"
+
+# ── CODER — Generalist engineer voice. Rig-scoped singleton. ────────
+[[agent]]
+name = "coder"
+scope = "rig"
+wake_mode = "fresh"
+work_dir = ".gc/agents/{{.Rig}}/coder"
+prompt_template = "prompts/coder.md.tmpl"
+nudge = "Run 'gc prime', then check bd ready --label=ready-to-build for work."
+overlay_dir = "overlays/default"
+idle_timeout = "2h"
+min_active_sessions = 0
+max_active_sessions = 1
