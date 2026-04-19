@@ -54,7 +54,7 @@ ls -al ~/Projects/factory/workshop_w1/w1-project/docs/
 #### Stop and Start Gascity
 
 ```bash
-pushd ~/Projects/factory/workshop_w1/w1-gc-factory
+cd ~/Projects/factory/workshop_w1/w1-gc-factory
 gc stop
 gc start
 ```
@@ -64,3 +64,13 @@ gc start
 ```bash
 gc sling w1-project/planner "Create SPA nextjs for Fired Up Pizza an online pizza ordering application where customers can build custom pizzas, select a pickup or delivery time, and place orders — all within a single-page experience. No payment processing is required; all transactions are handled on-site at pickup/delivery."
 ```
+
+#### Further Resources
+
+##### Complete Workshop 1 Guide
+
+`~/Projects/factory/workshop_w1/w1-project/WORKSHOP_1_GUIDE.md`
+
+##### Gas City Prompts and Commands
+
+`~/Projects/factory/workshop_w1/w1-project/README.md`
