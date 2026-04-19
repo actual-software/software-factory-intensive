@@ -1,74 +1,90 @@
 # L3 · Deploy Designer + Coder Agents
 
-> **What you'll build:** Two more specialized AI agents managed by Gas City — a Designer that turns the work package + ADR from L2 into a concrete component spec, and a Coder that reads the spec and produces a committed implementation with passing tests. By the end of this lab, you'll have extended your L2 pipeline with two more stages and shipped a working feature branch.
+> **What you'll build:** The next two agents of the 6-agent pipeline — a **Designer** that takes a `needs-design` bead and produces wireframes + an accessibility audit under `docs/designs/`, and a **Coder** that takes a `ready-to-build` bead and produces committed code plus tests that exercise the bead's acceptance criteria. By the end of this lab a bead walks `needs-design` → Designer → `ready-to-build` → Coder → `needs-review` on your own project, driven entirely by label flips.
 
 | | |
 |---|---|
 | **Estimated duration** | ~75 minutes |
 | **Type** | LAB |
-| **Deliverable** | Working Designer + Coder agents, one component spec at `design/<slug>-spec.md`, and committed implementation code with at least 2 passing test cases |
+| **Deliverable** | Customised `designer` + `coder` packs scoped to your project, plus one `needs-design` bead that walked through Designer and Coder to a committed implementation labelled `needs-review` |
 
 ---
 
 ## Session workspace note
 
-The Coder pack lives at `../../../packs/coder/` and the prompt template is `packs/coder/prompts/coder.md.tmpl`. Commands: `gc sling coder <bead>`, `gc session peek <rig>/coder`.
+* **Pack locations (shipped):** `packs/designer/` and `packs/coder/` under the `software-factory/` tree. Prompt templates are `packs/<agent>/prompts/<agent>.md.tmpl` (the `.tmpl` suffix is the Gas City template extension). Formulas are `packs/<agent>/formulas/mol-<name>.formula.toml`.
+* **Gas City workspace:** `my-factory/` — this is where `city.toml` lives. Every `gc` command below is run from that folder unless otherwise noted.
+* **Your deliverables this session:** `notes.md` plus customised pack copies. If your workshop uses an activity folder (`activities/labs/L3/`), put them there; otherwise keep your customised pack copies anywhere tracked by git.
+* **Wiring the packs:** at the end of the session, `my-factory/city.toml`'s `includes` should reach the `designer` and `coder` packs — either the shipped copies or your customised copies.
 
-**Where your work goes this session:**
-* Session deliverables → `../../../activities/labs/L3/` (the activity folder for L3)
-* Customised pack copies (if you deviate from shipped defaults) → `../../../activities/labs/L3/packs/<agent>/`
-* Wire packs into `../../../my-factory/city.toml` at the end of the session — by adding `../packs/designer` and `../packs/coder` to `includes`, or the `../activities/labs/L3/packs/<agent>` path if you customised. See [`activities/labs/L3/README.md`](../../../activities/labs/L3/README.md) for exact lines.
+If a pack edit breaks your factory, swap back to the shipped pack path in `city.toml` and `gc service restart` — the shipped packs always pass `gc doctor`.
 
-If you skipped an earlier lab or a prompt edit breaks the pack, point `includes` at the shipped `../packs/<name>` path and `gc service restart` — the shipped pack always passes `gc doctor`.
+**Canonical reference:** by L3 the labeled-beads protocol should be familiar, but keep [`LABELED_BEADS.md`](../../../LABELED_BEADS.md) open in another tab anyway — `needs-design` and `ready-to-build` are the two labels you'll be wiring against this session, and every handoff is a label flip on the same bead. There are no durable markdown docs passed between Designer and Coder; the bead carries the state, the label carries the routing.
 
 ---
 
-> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by opening `my-factory/PROJECT_MANIFEST.md` so suggestions about component structure, testing framework, and matching existing components are grounded in the participant's actual code.
+> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should open `docs/PROJECT_MANIFEST.md` in the participant's rig first — the designer reads it for design-system conventions and the coder reads it for the tech stack, test framework, and naming rules. If it's empty, designer output will be generic wireframes and coder output will default to common patterns instead of the project's actual conventions.
 
 ---
 
 ## Architecture Diagram
 
 ```
-                    ┌───────────────────────────┐
-                    │  Work Package + ADR         │
-                    │  (from L2, already           │
-                    │   committed)                 │
-                    └─────────────┬─────────────┘
+                (planner decomposed into children with
+                 needs-design or ready-to-build labels —
+                 from L2)
+                                 │
+                                 ▼  needs-design
+             ┌──────────────────────────────────────┐
+             │            DESIGNER AGENT             │
+             │                                        │
+             │  Order gate: bd ready --label=needs-   │
+             │              design --limit=1          │
+             │                                        │
+             │  Reads:                                 │
+             │    • the bead (title, notes, ACs)       │
+             │    • docs/plans/<slug>.md (if any)      │
+             │    • docs/rules/*.md (a11y + design     │
+             │      system rules)                      │
+             │    • existing components / tokens /     │
+             │      storybook entries                  │
+             │                                        │
+             │  Runs mol-design-cycle: intake →        │
+             │  wireframe → a11y-check → handoff       │
+             │                                        │
+             │  Produces: docs/designs/<slug>.md        │
+             │  (wireframe + a11y audit) and relabels  │
+             │  the bead ready-to-build                │
+             └────────────────────┬───────────────────┘
                                   │
-                                  ▼
-                    ┌───────────────────────────┐
-                    │      DESIGNER AGENT        │
-                    │                            │
-                    │  Reads:                     │
-                    │    • bead description       │
-                    │    • work-packages/<slug>.md│
-                    │    • docs/adr/NNNN-<slug>.md│
-                    │    • docs/PROJECT_MANIFEST  │
-                    │    • packs/designer/prompts │
-                    │                            │
-                    │  Produces:                  │
-                    │    design/<slug>-spec.md    │───► Purpose, Location,
-                    │                            │     Props, State, Layout,
-                    └─────────────┬─────────────┘     Interactions, Edge Cases
+                                  ▼  ready-to-build
+             ┌──────────────────────────────────────┐
+             │             CODER AGENT               │
+             │                                        │
+             │  Order gate: bd ready --label=ready-   │
+             │              to-build --limit=1        │
+             │                                        │
+             │  Reads:                                 │
+             │    • the bead (title, notes, ACs)       │
+             │    • docs/designs/<slug>.md (if any)    │
+             │    • docs/plans/<slug>.md (if any)      │
+             │    • docs/rules/*.md                    │
+             │    • CLAUDE.md / AGENTS.md (via the     │
+             │      actual skill, for tailored ADRs)   │
+             │                                        │
+             │  Runs mol-code-from-spec: intake →      │
+             │  actual-adr-check → plan → implement    │
+             │  → self-test → handoff                  │
+             │                                        │
+             │  Produces: code + tests committed on    │
+             │  a feature branch, bead relabelled      │
+             │  needs-review                           │
+             └──────────────────────────────────────┘
                                   │
-                    ┌─────────────▼─────────────┐
-                    │       CODER AGENT          │
-                    │                            │
-                    │  Reads:                     │
-                    │    • design/<slug>-spec.md  │
-                    │    • work-packages/<slug>.md│
-                    │    • docs/adr/NNNN-<slug>.md│
-                    │    • docs/PROJECT_MANIFEST  │
-                    │    • CLAUDE.md (tailored)   │
-                    │    • packs/coder/prompts    │
-                    │                            │
-                    │  Produces:                  │
-                    │    src/<Location>/*.ts(x)   │───► Implementation files,
-                    │    + tests committed on      │     tests, feature branch
-                    │    feature branch            │     commits
-                    └───────────────────────────┘
+                                  ▼  needs-review (handed to reviewer in L4)
 ```
+
+Nothing in this diagram is a durable markdown *handoff* document. The design file (`docs/designs/<slug>.md`) and any plan file are **artifacts** that both agents and humans can read — but the **routing signal** that wakes the next agent is the label flip on the bead. That's the paradigm the factory runs on — see [`LABELED_BEADS.md`](../../../LABELED_BEADS.md) for why.
 
 ---
 
@@ -78,899 +94,671 @@ Before starting this lab, verify each of these:
 
 | Prerequisite | How to verify | If it's missing |
 |-------------|---------------|-----------------|
-| L2 complete | `ls ~/path/to/your-repo/work-packages/` and `ls ~/path/to/your-repo/docs/adr/` both return files | Go back and complete L2. The Designer reads those artifacts as its primary input. |
-| Both L2 beads closed | `bd list --status closed` shows the Planner + Architect beads | Run `bd close <bead-id>` for any still open. |
-| Gas City running | `gc status` shows `planner` and `architect` agents | `gc restart`; if that doesn't work, re-run `gc rig add --include` for the missing packs. |
-| Feature branch checked out | `git branch --show-current` shows `l2-planner-architect` (or equivalent) | `git checkout l2-planner-architect`. You'll add Designer and Coder commits on the same branch. |
-| Project Manifest | `cat ~/path/to/your-repo/docs/PROJECT_MANIFEST.md` → filled in | This lab assumes L1 + L2 already populated it. If empty, fill it before continuing. |
-| (Recommended) Tailored ADRs | `grep -i "tailored" ~/path/to/your-repo/CLAUDE.md` finds content | If you skipped `actual adr-bot` in L2, run it now — the Coder reads `CLAUDE.md` too. |
+| L2 complete | `gc status` shows the planner and architect packs wired, and at least one bead has walked `needs-plan` → (optionally `needs-architecture` →) child beads labelled `needs-design` / `ready-to-build` | Finish L2 first. L3 consumes the planner's children as its own input. |
+| Gas City running | `gc status` shows your city and agents are up | Re-run `gc service start` from `my-factory/`. |
+| `docs/PROJECT_MANIFEST.md` filled in | `cat ~/path/to/your-repo/docs/PROJECT_MANIFEST.md` shows tech stack, domain model, conventions | Copy from [`../../../PROJECT_MANIFEST_TEMPLATE.md`](../../../PROJECT_MANIFEST_TEMPLATE.md) and fill in. Designer and coder both read it on every run. |
+| `docs/designs/` directory exists in your rig | `ls ~/path/to/your-repo/docs/designs/` succeeds (empty is fine) | `mkdir -p ~/path/to/your-repo/docs/designs` — the designer will populate it. |
+| `docs/rules/` directory exists in your rig | `ls ~/path/to/your-repo/docs/rules/` succeeds | If L2 architect didn't populate it, `mkdir -p ~/path/to/your-repo/docs/rules` and add at least one `.md` — the designer reads rules for design-system constraints, the coder reads them for implementation guardrails. |
+| `actual` CLI installed (recommended) | `actual --version` prints a version | `brew install actual-software/actual/actual`. The coder's `actual-adr-check` step skips gracefully without it; with it the coder verifies that `CLAUDE.md` / `AGENTS.md` are in sync with the rig's ADRs before writing code. |
+| A bead labelled `needs-design` or a feature that should produce one | `bd list --label needs-design` shows at least one open bead, OR you have a feature idea sized for a single component/screen | See *"No needs-design bead handy?"* below. |
 
----
+If any row fails, stop and fix it. L3 is the first lab where the downstream agent writes real code — a missing manifest propagates into defaulted library choices, and a missing rules file lets the designer invent a new navigation pattern instead of reusing the existing one.
 
-## Gas City Capabilities Used This Lab
+### No needs-design bead handy?
 
-| Command | What it does | Used in step |
-|---------|--------------|--------------|
-| `gc rig add <repo> --include packs/designer` | Register the Designer pack | Part 1 |
-| `gc rig add <repo> --include packs/coder` | Register the Coder pack | Part 1 |
-| `gc restart` | Reload city configuration after pack additions | Part 1, Part 2 |
-| `gc status` | Confirm which agents are live | Part 1, Part 2 |
-| `bd create --depends-on <bead>` | Chain the Designer bead after L2 outputs | Part 3 |
-| `gc sling designer <bead>` | Dispatch the Designer | Part 3 |
-| `gc sling coder <bead>` | Dispatch the Coder (longer-running) | Part 4 |
-| `gc watch <agent>` | Attach to the agent's live tmux session | Parts 3, 4 |
-| `gc events --follow` | Stream all city events from another terminal | Part 4 |
-| `bd close <bead>` | Mark a bead done after its artifact is committed | Parts 3, 4 |
+If L2's planner didn't produce a `needs-design` child (pure backend work), or if you want a fresh starting point for L3, file one:
 
----
+```bash
+cd ~/path/to/your-repo
+bd create \
+  --title "Feature: Loyalty points badge on order confirmation" \
+  --label needs-design \
+  --notes "$(cat <<'EOF'
+acceptance_criteria:
+- Badge renders on the order confirmation page
+- Shows current point balance fetched from the loyalty ledger
+- Empty state: new customer with zero points → "0 points · earn 1 per $1 spent"
+- Loading state: skeleton at the same width as the final badge
+- Error state: "Points unavailable" (non-blocking)
+- Reuses existing card + typography components
 
-## The Use Case: Loyalty Points for Fired Up Pizza (continued)
+context:
+- ADR: docs/adr/0001-loyalty-points-storage.md (points_ledger table)
+- Plan: docs/plans/loyalty-points-system.md (if L2 produced one)
+EOF
+)"
+```
 
-This lab continues the running example from L2: **adding a loyalty points system to Fired Up Pizza**. L2 produced two artifacts you'll consume here:
-
-- `work-packages/loyalty-points-system.md` — goal, stories, acceptance criteria, test cases, scope
-- `docs/adr/0001-loyalty-points-storage.md` — the decision to use a `points_ledger` table
-
-This lab's deliverable is the first customer-facing piece of that feature: **a loyalty points badge component** that shows a customer's current balance on the order confirmation page. The component is small enough to ship in 75 minutes but real enough to exercise typing, state, API integration, and edge cases (empty, loading, error).
-
-If you're working against your own project, pick a small component or API endpoint from your L2 work package — something with typed props, one to three interactions, and at least one async concern (fetch, mutation, or side effect).
+The acceptance criteria are deliberately concrete — this lab is about watching Designer + Coder work against a tight contract, not about resolving ambiguity.
 
 ---
 
 ## Part 0: Read the Shipped Packs (~5 min)
 
-Before installing anything, read what you're about to install. Designer and Coder packs follow the same pattern as Planner and Architect — `pack.toml` for metadata, a prompt file as the agent's personality, and an overlay directory for environment overrides.
+Before customising anything, read what you're about to install. Both packs ship with a prompt template, a formula, an order gate, a doctor check, and one or two commands.
 
-### Step 1: Open the Designer Pack Metadata
+### Step 1: Open the designer pack
 
-Open this file and read it end-to-end — it's 14 lines:
+Three files in order:
 
-[`packs/designer/pack.toml`](../../../packs/designer/pack.toml)
+1. [`packs/designer/pack.toml`](../../../packs/designer/pack.toml) — metadata. Note `wake_mode = "fresh"` (every wake re-derives state from the bead; no cached status files) and the nudge that tells the agent to `bd ready --label=needs-design`. `max_active_sessions = 1` is deliberate — design quality drops when the designer is context-switching between features.
+2. [`packs/designer/prompts/designer.md.tmpl`](../../../packs/designer/prompts/designer.md.tmpl) — the system prompt. Skim the two personas: **UI/UX Designer** (user-centered, wireframe-first) and **Accessibility Engineer** (WCAG 2.1 AA, keyboard + screen reader first). The hard constraint near the top is *accessibility is built in, not bolted on.*
+3. [`packs/designer/formulas/mol-design-cycle.formula.toml`](../../../packs/designer/formulas/mol-design-cycle.formula.toml) — the 4-step work loop: intake → wireframe → a11y-check → handoff. Every step writes state into the root bead's notes via `bd update --notes` and produces `docs/designs/<slug>.md`.
 
-```toml
-[pack]
-name = "designer"
-schema = 1
-description = "Designer agent — creates component specs from work packages and ADRs"
+And the order gate that decides *when* the designer wakes:
 
-[[agent]]
-name = "designer"
-scope = "rig"
-prompt_template = "prompts/designer.md"
-overlay_dir = "overlays/default"
-nudge = "Check your hook for work packages needing component specs."
-idle_timeout = "1h"
-max_active_sessions = 1
-```
-
-**What's happening here:** Same shape as the Planner and Architect pack files you read in L2. `prompt_template` points to the prompt the agent loads as its system message. `idle_timeout = "1h"` is the tmux session shutdown window. `max_active_sessions = 1` means the Designer handles one bead at a time — this is deliberate, because spec quality drops when the Designer is context-switching between features.
-
-### Step 2: Open the Designer Prompt
-
-Open this file and read it end-to-end — it's ~75 lines:
-
-[`packs/designer/prompts/designer.md.tmpl`](../../../packs/designer/prompts/designer.md.tmpl)
-
-You should see the familiar six-section structure:
-
-```
-# Designer Agent
-
-## Role              ← "You receive work packages and ADRs, and produce
-                        component specifications that the Coder agent can
-                        implement without ambiguity."
-
-## Inputs            ← work-packages/<slug>.md + docs/adr/<file>.md
-                        + docs/PROJECT_MANIFEST.md
-
-## Output Format     ← design/<feature-slug>-spec.md with 8 sections:
-                        Purpose, Location, Props, State, Layout,
-                        Interactions, Data Flow, Edge Cases, References
-
-## Quality Gate      ← 4 rules: props/state typed, at least one interaction,
-                        edge cases cover empty/error/loading, Location path
-                        specified
-
-## Process           ← 5 steps: read WP + ADR → read manifest → produce
-                        spec → commit → mark bead ready for Coder
-
-## Config Discipline ← "All your behavior comes from this prompt and the
-                        project manifest. If your output quality needs to
-                        change, the fix is updating this file — not
-                        ad-hoc re-prompting."
-```
-
-Pay attention to one line in the Output Format section:
-
-```markdown
-## Location
-`src/<path/to/component>` — where the implementation should live.
-```
-
-**What's happening here:** The Designer is required to pick a concrete destination path inside `src/` for the component. The Coder reads that path verbatim and writes there. This is the Designer/Coder handoff contract — a single string that tells the Coder where to put files. If the Designer picks the wrong path, the Coder builds in the wrong place. That's why the Quality Gate has an explicit "Location path is specified" rule.
-
-### Step 3: Open the Coder Pack Metadata
-
-[`packs/coder/pack.toml`](../../../packs/coder/pack.toml)
+[`packs/designer/formulas/orders/designer-intake/order.toml`](../../../packs/designer/formulas/orders/designer-intake/order.toml)
 
 ```toml
-[pack]
-name = "coder"
-schema = 1
-description = "Coder agent — implements code from component specs"
-
-[[agent]]
-name = "coder"
-scope = "rig"
-prompt_template = "prompts/coder.md"
-overlay_dir = "overlays/default"
-nudge = "Check your hook for component specs ready to implement."
-idle_timeout = "2h"
-min_active_sessions = 0
-max_active_sessions = 3
+[order]
+description = "Wake the designer when any bead is labelled needs-design"
+formula = "mol-design-cycle"
+gate = "condition"
+check = "bd ready --label=needs-design --limit=1 | grep -q ."
+pool = "designer"
 ```
 
-**What's happening here:** Two values differ from the other packs. `idle_timeout = "2h"` is longer because implementation often spans multiple build/test/fix cycles. `max_active_sessions = 3` lets you sling up to three features to three parallel Coder sessions — useful in the capstone when the Planner has queued multiple work packages. For this lab you'll run one at a time.
+**What's happening here:** Same shape as the planner and architect order gates you wired in L2. The label *is* the trigger. As soon as a bead shows up with `needs-design`, mol-design-cycle runs. No explicit `gc sling designer <bead>` anywhere.
 
-### Step 4: Open the Coder Prompt
+### Step 2: Open the coder pack
 
-Open this file and read it end-to-end — it's ~50 lines:
+Same shape, longer work loop:
 
-[`packs/coder/prompts/coder.md.tmpl`](../../../packs/coder/prompts/coder.md.tmpl)
+1. [`packs/coder/pack.toml`](../../../packs/coder/pack.toml) — metadata. The nudge points at `bd ready --label=ready-to-build`. `idle_timeout = "2h"` is longer than the designer's because a real implementation often spans multiple build/test/fix cycles.
+2. [`packs/coder/prompts/coder.md.tmpl`](../../../packs/coder/prompts/coder.md.tmpl) — persona is a **generalist engineer** in the mold of the Backend + Frontend voices. Hard constraint: *follow existing patterns rather than inventing new ones.* Note also the explicit bypass rule: the coder does **not** bypass `actual-adr-check` — stale ADRs get handed back to the architect.
+3. [`packs/coder/formulas/mol-code-from-spec.formula.toml`](../../../packs/coder/formulas/mol-code-from-spec.formula.toml) — the 6-step work loop: intake → actual-adr-check → plan → implement → self-test → handoff.
+4. [`packs/coder/formulas/orders/coder-intake/order.toml`](../../../packs/coder/formulas/orders/coder-intake/order.toml) — order gate polling `bd ready --label=ready-to-build`.
 
-Same six-section structure, with one extra section (`Rules`) unique to the Coder:
+Notice the two formula vars at the top of `mol-code-from-spec.formula.toml`:
 
-```
-## Role              ← "You receive component specs from the Designer and
-                        implement working code that passes the test cases
-                        defined in the work package."
+```toml
+[vars]
+[vars.test_cmd]
+description = "Command to run the rig's test suite. Empty means auto-detect."
+default = ""
 
-## Inputs            ← design/<slug>-spec.md + work-packages/<slug>.md
-                        + docs/adr/ + docs/PROJECT_MANIFEST.md
-
-## Output            ← Implementation files in src/ matching the spec's
-                        Location field, tests passing the WP's test cases
-
-## Quality Gate      ← 5 rules: every prop implemented, every interaction
-                        works, edge cases handled, at least 2 WP test cases
-                        pass, lint clean
-
-## Process           ← 7 steps: read spec + WP → read ADR → implement at
-                        Location → write tests → run lint/tests → commit →
-                        mark ready for Reviewer
-
-## Rules             ← Follow spec exactly, never modify files outside
-                        feature scope, always on a feature branch
-
-## Config Discipline ← Same message as other packs — fix the prompt, not
-                        the output.
+[vars.commit_scope]
+description = "Conventional-commit type (feat|fix|refactor|...)"
+default = "feat"
 ```
 
-Notice rule #4 in the Quality Gate: **"At least 2 test cases from the work package pass."** This is the specific, measurable bar this lab cares about. It's how you know the Coder did real work, not just type-checked a stub.
+`test_cmd` is how you pin the coder to your project's test runner instead of the auto-detect (which guesses from `go.mod` / `package.json` / `Cargo.toml` / `pyproject.toml`). Override it if your project uses something nonstandard. `commit_scope` controls the conventional-commits prefix on the coder's commit — most participants leave it as `feat` for feature work and only override when shipping a fix or a refactor.
+
+### Step 3: Notice what's *not* here
+
+Read both prompts end to end. A few things are deliberately absent:
+
+- **No `design/<slug>-spec.md`, no component-spec file passed from designer to coder.** Earlier drafts of this curriculum had the designer write a structured spec (Props / State / Layout / Interactions) consumed by the coder. That's gone — the wireframe + a11y audit lives in `docs/designs/<slug>.md` as reference documentation, and the *routing signal* is the `ready-to-build` label flip on the bead.
+- **No `gc sling` in the prompts.** Both prompts' Startup sections poll `bd ready --label=…` in a loop. The designer's outbound label is `ready-to-build` (per the canonical handoff in [`LABELED_BEADS.md`](../../../LABELED_BEADS.md)); the coder's outbound label is `needs-review`.
+- **No separate test file / spec file authored by the designer.** The designer produces wireframes and an a11y audit. The coder authors the tests, alongside the code, driven by the bead's acceptance criteria. The reviewer downstream (L4) verifies AC coverage.
 
 You're done reading. Now install.
 
 ---
 
-## Part 1: Install the Designer Agent (~10 min)
+## Part 1: Include the Packs and Wire `city.toml` (~10 min)
 
-### Step 1: Add the Designer Pack to Your Rig
+### Step 1: Decide shipped vs. customised
+
+You have two choices for each pack:
+
+**(a) Shipped as-is.** Include the pack directly from `../software-factory/packs/designer/` and `../software-factory/packs/coder/`. Fastest path — good for a first green run.
+
+**(b) Copy and customise.** Copy the pack into your workspace (typically `my-factory/packs/<agent>/` or `activities/labs/L3/packs/<agent>/`), edit the prompt or formula, and include your copy. This is what Parts 2 and 3 below actually teach — the lab's main deliverable is a *customised* copy.
+
+Most participants do (a) first to confirm the pipeline runs end-to-end, then switch to (b). The swap is one line in `city.toml`.
+
+### Step 2: Copy the packs into your workspace
 
 ```bash
 cd my-factory
-gc rig add ~/path/to/your-repo \
-  --include /path/to/software-factory-intensive/packs/designer
+mkdir -p packs
+cp -rf ../software-factory/packs/designer packs/designer
+cp -rf ../software-factory/packs/coder packs/coder
 ```
 
-You should see output like:
+(Exact source path depends on your checkout — adjust to point at `packs/designer/` and `packs/coder/` in the software-factory tree.)
 
-```
-rig "your-repo" updated — added pack "designer"
-```
+### Step 3: Add the includes
 
-**What's happening here:** Gas City merged the `[[agent]]` block from `packs/designer/pack.toml` into your rig's effective configuration. The Designer now exists as a declared agent — but it hasn't been started yet. That happens on `gc restart`.
-
-### Step 2: Declare the Designer Agent in city.toml
-
-The pack registration above created a declaration — but to make the agent live in your city, make sure your `city.toml` includes this block (add it if it's not auto-inserted):
+Open `my-factory/city.toml` and make sure `includes` reaches `designer` and `coder`. If you did L2, you already have `planner` and `architect` wired — this session adds two more:
 
 ```toml
-[[agent]]
-name = "designer"
-dir = "your-repo-name"
-provider = "claude"          # other providers (codex, cursor, gemini, etc.) are also supported
-idle_timeout = "1h"
-role = "designer"
+includes = [
+    "packs/planner",        # from L2
+    "packs/architect",      # from L2
+    "packs/designer",       # NEW — your customised copy under my-factory/packs/
+    "packs/coder",          # NEW
+    "../packs/reviewer",    # shipped (L4 customises this)
+    "../packs/deployer",    # shipped (L4 customises this)
+]
 ```
 
-**What's happening here:** The `provider` comment is a deliberate reminder: Gas City treats the provider as swappable. Same prompt, same bead, different model backend. If a Designer run comes back weak on a specific tech stack, changing `provider = "claude"` to `provider = "codex"` (or any other supported provider) is a valid experiment — no prompt rewrite needed.
+If you're running shipped only (Step 1a), point the includes at the shipped paths (e.g. `"../packs/designer"`) and skip the copy.
 
-### Step 3: Restart Gas City and Verify
+### Step 4: Restart and verify
 
 ```bash
-gc restart
+gc service restart
+gc doctor
 gc status
 ```
 
-You should see:
+`gc doctor` should be green for all six agents. `gc status` should list `designer` and `coder` alongside the four other agents from L2 and L4. If either is missing, `gc doctor`'s output names the failing check — usually a missing binary (`bd`, `gc`, `git`, `jq`; `actual` is optional but recommended for the coder).
 
-```
-NAME        STATE   LAST ACTIVITY   BEAD
-dev-agent   idle    1h ago          --
-planner     idle    30m ago         --
-architect   idle    20m ago         --
-designer    idle    --              --
-```
-
-Four agents. Half the pipeline.
-
-If `designer` doesn't appear, run `gc rig list` to confirm the pack is registered. If the pack is registered but the agent is still missing, inspect your `city.toml` for a missing or malformed `[[agent]]` block.
-
-### Step 4: Customize the Designer Prompt for Your Project
-
-The shipped prompt is generic. Two edits make it project-specific:
-
-**a) Open `packs/designer/prompts/designer.md.tmpl` in your editor.**
-
-**b) Update the Output Format's Location example** with your project's src layout. For a React/TypeScript feature-folder layout (Fired Up Pizza's convention per `docs/PROJECT_MANIFEST.md`):
-
-Find this line:
-```markdown
-## Location
-`src/<path/to/component>` — where the implementation should live.
-```
-
-Make the guidance explicit:
-```markdown
-## Location
-`src/features/<feature-slug>/` for React components with co-located hooks,
-types, and tests. Never write implementation files directly under `src/`
-— always nest inside a feature folder. Test files go in
-`src/features/<feature-slug>/__tests__/`.
-```
-
-**c) Add a project-specific Quality Gate rule.** Append one rule referencing a convention from `docs/PROJECT_MANIFEST.md`:
-
-```markdown
-## Quality Gate
-
-A component spec is complete when:
-1. Props/inputs and state are typed
-2. At least one interaction is documented
-3. Edge cases cover empty, error, and loading states
-4. Location path is specified
-5. All monetary values in props, state, and layout are in cents
-   (not dollars) per project convention
-```
-
-For your own project, substitute rule 5 with something measurable from your manifest (e.g. "All database access is via the existing `db.ts` helper, never raw SQLite").
-
-### Step 5: Commit Your Customization
-
-```bash
-cd ~/path/to/your-repo
-git add -A
-git commit -m "chore(designer): customize designer prompt for project conventions"
-```
-
-**Why commit now?** Same reason as L2: the diff between the shipped prompt and your edited version is your config-discipline evidence. If the Designer drifts later, `git log packs/designer/prompts/designer.md.tmpl` tells you exactly what changed and when.
-
----
-
-## Part 2: Install the Coder Agent (~10 min)
-
-### Step 1: Add the Coder Pack to Your Rig
+### Step 5: Commit the wiring
 
 ```bash
 cd my-factory
-gc rig add ~/path/to/your-repo \
-  --include /path/to/software-factory-intensive/packs/coder
-```
-
-You should see:
-
-```
-rig "your-repo" updated — added pack "coder"
-```
-
-### Step 2: Declare the Coder Agent in city.toml
-
-Make sure your `city.toml` contains:
-
-```toml
-[[agent]]
-name = "coder"
-dir = "your-repo-name"
-provider = "claude"          # other providers (codex, cursor, gemini, etc.) are also supported
-idle_timeout = "3h"
-role = "coder"
-```
-
-**What's happening here:** `idle_timeout = "3h"` is longer than the other agents because real implementation — especially with a first-time install of npm dependencies, a typecheck, and a full test run — can take 15–45 minutes for a non-trivial component. The tmux session shouldn't evict itself while the agent is mid-build. If you're running against a fast project you can drop this to `"2h"`; keep `"3h"` for first-run confidence.
-
-### Step 3: Restart Gas City and Verify
-
-```bash
-gc restart
-gc status
-```
-
-You should see:
-
-```
-NAME        STATE   LAST ACTIVITY   BEAD
-dev-agent   idle    1h ago          --
-planner     idle    30m ago         --
-architect   idle    20m ago         --
-designer    idle    5m ago          --
-coder       idle    --              --
-```
-
-All five agents (four from the factory pipeline plus the `dev-agent` from L1).
-
-### Step 4: Customize the Coder Prompt for Your Project
-
-Open `packs/coder/prompts/coder.md.tmpl` and make two edits:
-
-**a) Add the project's quality-gate commands to the Quality Gate section.** The shipped prompt says "Code passes lint (`npm run lint` or equivalent)." Replace with exact commands from the project manifest. For a React/TypeScript project:
-
-```markdown
-## Quality Gate
-
-Code is complete when:
-1. Every prop/input from the spec is implemented
-2. Every interaction from the spec works
-3. Edge cases (empty, error, loading) are handled
-4. At least 2 test cases from the work package pass
-5. Code passes all of these commands without errors:
-   - `npm run typecheck`
-   - `npm run lint`
-   - `npm test`
-```
-
-**b) Add a reference-the-manifest instruction** to the Process section. Find:
-
-```markdown
-1. Read the component spec and work package from your bead
-2. Read the ADR for technical constraints
-```
-
-Expand to:
-
-```markdown
-1. Read the component spec and work package from your bead
-2. Read the ADR for technical constraints
-3. Read `docs/PROJECT_MANIFEST.md` for conventions — test framework, CSS
-   approach, state management, linting rules, commit message style
-4. Read `CLAUDE.md` for any tailored ADR baselines — these are binding
-   unless the Designer's spec explicitly overrides them
-```
-
-Renumber the remaining steps.
-
-**What's happening here:** Making manifest-reading explicit forces the Coder to internalize conventions *before* writing code. Without this step, you'll see the Coder write Jest tests in a project that uses Vitest, or Tailwind classes in a project using CSS Modules — because the Coder defaulted to common patterns instead of reading your project's actual setup.
-
-### Step 5: Commit Your Customization
-
-```bash
-cd ~/path/to/your-repo
-git add -A
-git commit -m "chore(coder): customize coder prompt with project quality gates"
+git add city.toml packs/designer packs/coder
+git commit -m "chore(L3): wire designer + coder packs into my-factory"
 ```
 
 ---
 
-## Part 3: Create and Run the Designer (~20 min)
+## Part 2: Customise the Designer (~20 min)
 
-> **Agent Guide:** Before slinging, ask the participant two questions: (1) what component structure does your project use — flat, feature-based, something else? The Designer needs to tell the Coder exactly where the new file goes. (2) Which existing component most closely matches this feature? Naming a reference file anchors the Designer's output to real conventions.
+> **Agent Guide:** Before the participant edits anything, ask them: "What existing components does your project have that this feature should reuse before inventing new ones?" Then: "What's the one accessibility concern you most often forget to address in design review?" Naming both out loud before editing keeps the customisation grounded in real project shape rather than generic design advice.
 
-The Designer's inputs are the work package and ADR from L2. You'll chain a new bead after the Architect bead from L2 and sling it to the Designer.
+The designer's behaviour comes from three places:
+- `packs/designer/prompts/designer.md.tmpl` — the personas, the primary focus, the work-loop narrative
+- `packs/designer/formulas/mol-design-cycle.formula.toml` — the step-by-step procedure (wireframe → a11y-check → handoff)
+- `docs/PROJECT_MANIFEST.md` and `docs/rules/*.md` in your rig — the project-specific context
 
-### Step 1: Create the Designer Bead
+You'll make one edit in each of the first two (the manifest and rules were populated in L1/L2).
+
+### Step 1: Align the handoff label with canonical
+
+Open `my-factory/packs/designer/formulas/mol-design-cycle.formula.toml` and find the `handoff` step. The shipped formula relabels the bead `needs-plan` and hands back to the planner — a historical artifact from an earlier draft where the designer's wireframe could span multiple implementation beads.
+
+The canonical contract in [`LABELED_BEADS.md`](../../../LABELED_BEADS.md) is simpler: the designer's outbound label is `ready-to-build`, and the coder consumes it directly. Align the handoff:
+
+```diff
+ ```bash
+ bd update $ROOT_ID \\
+-    --add-label needs-plan \\
++    --add-label ready-to-build \\
+     --add-label source:actual-designer \\
+     --remove-label needs-design \\
+     --notes "<existing notes>
+ design_artifact: docs/designs/{{slug}}.md"
+ ```
+```
+
+This is the single most important edit of Part 2. Without it the bead flips back to `needs-plan`, the planner re-runs, and the lab's clean `needs-design` → `ready-to-build` walk gets muddied. Commit it before moving on.
+
+### Step 2: Sharpen the designer prompt for your project
+
+Open `my-factory/packs/designer/prompts/designer.md.tmpl` in your editor. Find the *Primary focus* block:
+
+```markdown
+> Design user-centered interfaces that are intuitive, consistent, and
+> visually polished. Ensure accessibility is built in, not bolted on.
+```
+
+Append one project-specific sentence that tells the designer what your product most often hinges on. Example for an e-commerce app with a mature design system:
+
+```diff
+ > Design user-centered interfaces that are intuitive, consistent, and
+ > visually polished. Ensure accessibility is built in, not bolted on.
++> For this project, every design must reuse existing components from
++> src/components/ui/ before proposing new ones. If a wireframe cannot
++> be assembled from existing primitives, call out the missing piece
++> explicitly — don't silently invent a new visual pattern.
+```
+
+Substitute your own highest-leverage design-system rule. Aim for one sentence that tells the designer what to weigh hardest.
+
+### Step 3: Tighten the wireframe step for your project shape
+
+Open `my-factory/packs/designer/formulas/mol-design-cycle.formula.toml` and find the `wireframe` step's output structure. The shipped template produces Screens / Components / Interactions sections. If your project has a more specific shape — states, routing, data dependencies — extend the template. Example for a React app with feature folders:
+
+```diff
+ ## Screens
+
+ ### Screen 1: <name>
+
+ ```
+ +--------------------+
+ | Header             |
+ +--------------------+
+ | ... ASCII sketch . |
+ +--------------------+
+ ```
+
+ Components reused: <list from the design system>
+ New components needed: <list, or "none">
++
++Feature folder: src/features/<feature-slug>/
++Data dependencies: <list of hooks or endpoints the screen calls>
++Loading / error / empty states: <one line each>
+```
+
+The added fields force the designer to name the feature folder path, the data dependencies, and the three lifecycle states on every design — concrete enough that the coder in Part 3 has unambiguous context to implement against.
+
+### Step 4: Add one project-specific a11y rule
+
+The `a11y-check` step is where accessibility gets recorded. The shipped template covers focus order, ARIA, contrast, keyboard nav, and screen-reader labels. Add one project-specific rule if your product has recurring a11y debt. Example:
+
+```diff
+ - **Screen-reader labels:** <list of labels, alt text, aria-labels>
+ - **Risks:** <any known a11y gaps the coder must avoid>
++- **Live regions:** any async state that updates without user action
++  (e.g. toast, balance refresh) must be announced via aria-live.
++  Silent updates are a blocker finding.
+```
+
+Substitute an a11y gap that has bitten your project before. Generic WCAG coverage is already in the shipped template; project-specific rules are what make this pack *yours*.
+
+### Step 5: Restart and commit
 
 ```bash
 cd my-factory
-bd create "Design: Loyalty Points Badge Component" \
-  --description "$(cat <<'EOF'
-Produce a component spec for the Loyalty Points Badge — the first user-facing
-piece of the loyalty points feature. It shows a customer's current point
-balance on the order confirmation page.
-
-Inputs:
-- Work package: work-packages/loyalty-points-system.md
-- ADR: docs/adr/0001-loyalty-points-storage.md
-- Project manifest: docs/PROJECT_MANIFEST.md
-
-Requirements:
-1. Use Story 2 from the work package ("View Points Balance") as the scope
-2. Define typed props (customer id is required)
-3. Specify Location under src/features/loyalty-points/
-4. Document empty, loading, and error states
-5. Reference the ADR's points_ledger schema in the Data Flow section
-
-Output: design/loyalty-points-badge-spec.md
-EOF
-)" \
-  --depends-on my-factory-d4e5f6
-```
-
-Replace `my-factory-d4e5f6` with your L2 Architect bead ID (from `bd list`).
-
-You should see:
-
-```
-Created bead: my-factory-design123
-```
-
-Note this bead ID — you'll sling it next.
-
-**What's happening here:** `--depends-on` is optional here (the Architect bead is already closed), but including it preserves the dependency chain in your bead graph. Later, when you look at the provenance of `design/loyalty-points-badge-spec.md`, you can walk backward from this bead to the Architect bead to the Planner bead and see the full history of who decided what.
-
-### Step 2: Sling the Bead to the Designer
-
-```bash
-gc sling designer my-factory-design123
-```
-
-You should see:
-
-```
-Slinging my-factory-design123 → designer
-Session started: designer-design123 (tmux)
-```
-
-**What's happening here:** Gas City started a tmux session, launched Claude Code inside your repo, loaded `packs/designer/prompts/designer.md.tmpl` as the system prompt, and handed the bead's description as the task. The Designer is now autonomous.
-
-### Step 3: Watch the Designer Work
-
-```bash
-gc watch designer
-```
-
-You'll see the session streaming in real-time. The Designer should:
-
-1. Read `docs/PROJECT_MANIFEST.md`
-2. Read `work-packages/loyalty-points-system.md`
-3. Read `docs/adr/0001-loyalty-points-storage.md`
-4. Start writing `design/loyalty-points-badge-spec.md`
-5. Commit the spec on your feature branch
-
-Press `Ctrl+b d` to detach from tmux; the agent continues. Monitor progress from another terminal:
-
-```bash
-gc events --follow            # stream all city events
-gc status                     # designer state: working → idle
-bd show my-factory-design123     # bead status
-```
-
-Typical runtime: 2–4 minutes.
-
-### Step 4: Review the Spec
-
-> **Agent Guide:** After the Designer runs, verify the spec has props, state, interactions, edge cases, AND a `Location` path. If any is missing, that's a prompt gap — fix `packs/designer/prompts/designer.md.tmpl` before slinging the Coder. Also watch for over-specification: if the Designer is re-inventing patterns the codebase already has, push it to reference existing files instead.
-
-```bash
-cd ~/path/to/your-repo
-cat design/loyalty-points-badge-spec.md
-```
-
-You should see a file with this structure (content will vary):
-
-```markdown
-# Component Spec: LoyaltyPointsBadge
-
-## Purpose
-Display a customer's current loyalty point balance on the order confirmation
-page with contextual messaging about what they can redeem.
-
-## Location
-`src/features/loyalty-points/LoyaltyPointsBadge.tsx`
-Tests: `src/features/loyalty-points/__tests__/LoyaltyPointsBadge.test.tsx`
-Hook:  `src/features/loyalty-points/useLoyaltyBalance.ts`
-Types: `src/features/loyalty-points/types.ts`
-
-## Props / Inputs
-| Name       | Type    | Required | Description                                 |
-|------------|---------|----------|---------------------------------------------|
-| customerId | string  | yes      | The customer whose balance to display        |
-| compact    | boolean | no       | If true, render only the numeric balance     |
-
-## State
-| Name     | Type                               | Initial    | Description                |
-|----------|------------------------------------|------------|----------------------------|
-| balance  | number                             | 0          | Current points balance      |
-| status   | "idle" \| "loading" \| "error"     | "loading"  | Request lifecycle state     |
-
-## Layout
-```
-┌──────────────────────────────┐
-│  Points: 340                 │
-│  Redeem 100 for $5 off       │
-└──────────────────────────────┘
-```
-Compact mode renders only the numeric balance (no redemption line).
-
-## Interactions
-- On mount: fetch balance via `useLoyaltyBalance(customerId)`
-- On successful order completion event: refetch balance
-
-## Data Flow
-Balance is derived from the `points_ledger` table (per ADR-0001) via
-`GET /api/customers/:id/points`. The hook aggregates positive + negative
-ledger entries server-side and returns a single integer. The component
-never computes balance client-side.
-
-## Edge Cases
-- Empty state: new customer with zero points → render "0 points · earn 1
-  per dollar spent"
-- Loading state: render a subtle skeleton at the same width
-- Error state: render "Points unavailable" and log to the error pipeline
-  (do not block the order confirmation page)
-
-## References
-- work-packages/loyalty-points-system.md
-- docs/adr/0001-loyalty-points-storage.md
-```
-
-### Step 5: Check the Spec Against the Quality Gate
-
-Open `packs/designer/prompts/designer.md.tmpl` and walk the Quality Gate rules:
-
-| Quality Gate Rule | Pass? | Evidence |
-|-------------------|-------|----------|
-| Props/inputs and state are typed | check | Every row in the Props and State tables has a Type column filled in |
-| At least one interaction documented | check | At least one bullet in the Interactions section |
-| Edge cases cover empty, error, loading | check | Three bullets under Edge Cases, one for each |
-| Location path is specified | check | A line starting with `src/...` in the Location section |
-
-**If any rule fails:**
-
-1. **Do NOT edit the spec file directly.** That breaks config discipline.
-2. Open `packs/designer/prompts/designer.md.tmpl` and add a more specific rule. For example, if the Location is too vague:
-
-```markdown
-## Quality Gate
-...
-6. Location must name concrete file paths — no placeholders like
-   `<path>` or `TBD`. Include the primary component file, the test
-   file, and any co-located hook/type files.
-```
-
-3. Delete the spec and re-sling:
-
-```bash
-rm design/loyalty-points-badge-spec.md
-gc sling designer my-factory-design123
-gc watch designer
-```
-
-4. Review the new output. Repeat until all rules pass.
-
-**Target: one sling.** Spec iteration is usually faster than work-package iteration because the constraints are more concrete.
-
-### Step 6: Close the Designer Bead
-
-```bash
-bd close my-factory-design123 --comment "Component spec committed: design/loyalty-points-badge-spec.md"
+gc service restart
+gc doctor            # should still be green
+git add packs/designer
+git commit -m "chore(designer): align handoff label + add project design rules"
 ```
 
 ---
 
-## Part 4: Create and Run the Coder (~25 min)
+## Part 3: Customise the Coder (~20 min)
 
-> **Agent Guide:** Before slinging, ask the participant what testing framework the project uses — Jest, Vitest, pytest, Go test, etc. Wrong framework means wrong tests. Also track the sling count: target is ≤3 to passing. If the participant hits 4+, one of their rules is fighting an existing convention — pause and reconcile before they spin.
+> **Agent Guide:** Before the participant edits anything, ask them what testing framework their project uses — Jest, Vitest, pytest, Go test, etc. Then: what's the one convention (commit style, import order, naming rule) that a first-week contributor most often gets wrong? Both answers should end up in the customisation below — the first as `test_cmd`, the second as a rule in the prompt.
 
-The Coder's inputs are the spec you just produced plus the original work package (for test cases) and ADR (for technical constraints).
+The coder's behaviour comes from three places:
+- `packs/coder/prompts/coder.md.tmpl` — the persona, the primary focus, the work-loop narrative
+- `packs/coder/formulas/mol-code-from-spec.formula.toml` — the step-by-step procedure (actual-adr-check → plan → implement → self-test → handoff) and the two formula vars
+- `docs/PROJECT_MANIFEST.md` + `docs/rules/*.md` + `CLAUDE.md` / `AGENTS.md` in your rig — project context read on every run
 
-### Step 1: Create the Coder Bead
+You'll make one edit to each of the first two.
+
+### Step 1: Set the formula vars
+
+Open `my-factory/packs/coder/formulas/mol-code-from-spec.formula.toml`. The `[vars]` block controls how the coder runs tests and commits. Pin both to your project:
+
+```diff
+ [vars]
+ [vars.test_cmd]
+ description = "Command to run the rig's test suite. Empty means auto-detect."
+-default = ""
++default = "npm run typecheck && npm run lint && npm test -- --run"
+
+ [vars.commit_scope]
+ description = "Conventional-commit type (feat|fix|refactor|...)"
+ default = "feat"
+```
+
+Replace with your project's equivalent — `go test ./...`, `pytest -q`, `cargo test`, `./gradlew test`, whatever the project actually runs in CI. Tying `test_cmd` to your CI's exact command means a green `self-test` step is a hard predictor of a green CI run on the coder's commit.
+
+The auto-detect fallback (when `test_cmd` is empty) is fine for a first green pipeline, but it drops the typecheck and lint passes — making the coder's self-test weaker than CI. Explicit beats implicit.
+
+### Step 2: Sharpen the coder prompt for your project
+
+Open `my-factory/packs/coder/prompts/coder.md.tmpl`. Find the *Primary focus* block:
+
+```markdown
+> Implement reliable, performant code with clean architecture and
+> comprehensive error handling. Follow existing component patterns.
+> Keep bundle size minimal. Prefer correctness over performance
+> optimization.
+```
+
+Append one project-specific sentence that names the highest-leverage convention your project depends on. Example for a TypeScript web app with strict typing:
+
+```diff
+ > Implement reliable, performant code with clean architecture and
+ > comprehensive error handling. Follow existing component patterns.
+ > Keep bundle size minimal. Prefer correctness over performance
+ > optimization.
++> For this project, no exported function or component returns an
++> untyped value — `any` is prohibited in exported signatures. If a
++> type cannot be named precisely, prefer `unknown` with a narrowing
++> guard over `any`.
+```
+
+Substitute your own most-load-bearing code convention. This is the rule that, if broken, is expensive to fix later — so you want the coder to honour it on every first-pass implementation.
+
+### Step 3: Tighten the implement step's guardrails
+
+Open `my-factory/packs/coder/formulas/mol-code-from-spec.formula.toml` and find the `implement` step. The shipped guardrails are generic ("follow existing code patterns", "never add dependencies without a note"). Add one project-specific guardrail. Example for a React project with a standardised folder layout:
+
+```diff
+ **Guardrails:**
+ - Follow existing code patterns. Check neighbouring files for style,
+   naming, and library choices before adding anything new.
+ - Never add dependencies without an explicit note in the bead.
+ - Never modify files outside the scope implied by the plan.
+ - Do not write documentation files unless the rule set requires them.
+ - Do not commit yet — the commit happens in the handoff step after
+   tests pass.
++- If the bead's design artifact names a feature folder
++  (`src/features/<slug>/`), implementation files MUST live under
++  that path. Never flatten into `src/components/`. Tests go in
++  `src/features/<slug>/__tests__/`.
+```
+
+Substitute a structural rule specific to your repo. The design artifact the designer produced (`docs/designs/<slug>.md`) is the coder's primary input after the bead — pointing the coder at it explicitly makes the handoff tight.
+
+### Step 4: Require AC-referencing test descriptions
+
+In the same `implement` step, or as a separate guardrail under `self-test`, add:
+
+```diff
+ **1. Determine the test command:**
+```
+
+expand just above that block with a rule:
+
+```markdown
+**Test-authorship rule.** Before running the suite, enumerate every
+acceptance criterion from the bead notes. For each, write at least
+one test whose description references the criterion by wording or
+number (e.g. `it('[AC1] shows 0 points for a new customer', ...)`).
+A test file without AC references passes `npm test` but will fail the
+reviewer's spec-findings check in L4 — fix it here, not there.
+```
+
+This is how the coder pays down the AC-coverage gap *before* the reviewer flags it. The reviewer in L4 reads acceptance criteria off the bead and verifies each one is exercised by name; making that visible in the coder's prompt now saves a round-trip in L4.
+
+### Step 5: Restart and commit
 
 ```bash
 cd my-factory
-bd create "Implement: Loyalty Points Badge Component" \
-  --description "$(cat <<'EOF'
-Implement the Loyalty Points Badge component per the design spec.
-
-Inputs:
-- Component spec: design/loyalty-points-badge-spec.md
-- Work package: work-packages/loyalty-points-system.md (for test cases)
-- ADR: docs/adr/0001-loyalty-points-storage.md (for data model)
-- Project manifest: docs/PROJECT_MANIFEST.md (for conventions)
-- CLAUDE.md (for tailored baselines)
-
-Requirements:
-1. Implement at the Location paths from the spec
-2. Use the typed props and state definitions from the spec verbatim
-3. Handle all three edge cases (empty, loading, error)
-4. Write tests that cover the work package's Story 2 test cases
-5. At least 2 test cases from the work package must pass
-6. Pass npm run typecheck, npm run lint, and npm test before committing
-
-Commit on the existing feature branch. Use conventional-commit messages
-per the tailored ADR baselines.
-EOF
-)" \
-  --depends-on my-factory-design123
-```
-
-You should see:
-
-```
-Created bead: my-factory-impl456
-```
-
-### Step 2: Sling the Bead to the Coder
-
-```bash
-gc sling coder my-factory-impl456
-```
-
-You should see:
-
-```
-Slinging my-factory-impl456 → coder
-Session started: coder-impl456 (tmux)
-```
-
-### Step 3: Watch the Coder Work
-
-```bash
-gc watch coder
-```
-
-The Coder should:
-
-1. Read `design/loyalty-points-badge-spec.md`
-2. Read `work-packages/loyalty-points-system.md`
-3. Read `docs/adr/0001-loyalty-points-storage.md`
-4. Read `docs/PROJECT_MANIFEST.md`
-5. Read `CLAUDE.md` (for tailored baselines)
-6. Create `src/features/loyalty-points/types.ts`
-7. Create `src/features/loyalty-points/useLoyaltyBalance.ts`
-8. Create `src/features/loyalty-points/LoyaltyPointsBadge.tsx`
-9. Create `src/features/loyalty-points/__tests__/LoyaltyPointsBadge.test.tsx`
-10. Run `npm run typecheck`, `npm run lint`, `npm test` and fix until green
-11. Commit with a conventional-commit message on the feature branch
-
-Typical runtime: 10–25 minutes, depending on how many build/test cycles it takes to converge.
-
-Detach with `Ctrl+b d`. Monitor from another terminal:
-
-```bash
-gc events --follow
-gc status
-```
-
-Wait until the Coder's state returns to `idle`.
-
-### Step 4: Review the Implementation
-
-```bash
-cd ~/path/to/your-repo
-git log --oneline | head -10
-```
-
-You should see new commits at the top, e.g.:
-
-```
-f4d3c2b feat(loyalty-points): add LoyaltyPointsBadge component with balance fetching
-b8a7L5d test(loyalty-points): add badge component tests for Story 2 acceptance
-3e5f6a9 chore(coder): customize coder prompt with project quality gates
-... (earlier L2 commits)
-```
-
-Look at the full diff from the start of this lab:
-
-```bash
-git diff main -- src/features/loyalty-points/
-```
-
-You should see four new files (types, hook, component, tests) inside the feature folder the Designer specified. Scan for three things:
-
-1. **The component file implements every prop from the spec** — do a quick name-match: if the spec said `customerId: string`, the component should declare `customerId: string` (not `userId`, not optional).
-2. **The tests reference the work package by name** — test descriptions should echo the Story 2 acceptance criteria ("shows 0 points for a new customer", "shows the correct balance for an existing customer", "renders a loading state while fetching").
-3. **The test file has at least 2 `it(...)` / `test(...)` blocks** — this is the measurable Quality Gate bar.
-
-### Step 5: Run the Quality Gates Manually
-
-```bash
-cd ~/path/to/your-repo
-npm run typecheck
-npm run lint
-npm test -- --run src/features/loyalty-points/
-```
-
-All three should exit zero. If any fails, the Coder's commit was premature — move to Part 5.
-
-### Step 6: Close the Coder Bead
-
-Once the quality gates pass:
-
-```bash
-bd close my-factory-impl456 --comment "Implementation committed on feature branch; tests pass"
+gc service restart
+gc doctor
+git add packs/coder
+git commit -m "chore(coder): pin test_cmd + AC-referencing rule + feature-folder guardrail"
 ```
 
 ---
 
-## Part 5: Run Tests & Iterate Via Config (~10 min)
+## Part 4: Walk a Bead Through the Handoff (~15 min)
 
-> **Agent Guide:** This is the strictest part of the session. Stop the participant the moment they reach for the editor to hand-fix failing code — that fix is invisible to the next bead. Roll back, update `packs/coder/prompts/coder.md.tmpl`, re-sling. Also flag if they sling the Coder without a spec in place: without the spec there's no contract, and they've regressed to L1's vanilla `dev-agent`.
+> **Agent Guide:** Once the participant's `needs-design` bead is queued, resist the urge to `gc sling` anything. The point of the lab is to see that **labels alone drive the handoff.** If the designer doesn't wake within ~60s, the problem is the order gate or `gc doctor`, not a missing sling. Same for the coder after the designer relabels.
 
-This is the core discipline section. Quality gate failures happen — the fix is *never* to edit code by hand, and *never* to paste corrections into the Coder's tmux session. The fix is always a prompt edit followed by a re-sling.
+You'll pick up (or create) one `needs-design` bead, watch it walk through the designer and then the coder, and inspect every artifact and note it accumulates.
 
-Below are two realistic scenarios. Work through the flow for any that apply to your run.
+### Step 1: Queue the `needs-design` bead
 
-### Scenario 1: Tests fail because the Coder used the wrong test framework
-
-**What you see:**
-
-```
-$ npm test
-sh: vitest: command not found
-Error: Cannot find module 'jest'
-```
-
-The Coder wrote `import { describe, it, expect } from 'jest';` but the project's `package.json` uses Vitest.
-
-**What NOT to do:**
-
-- Open the test file and change `'jest'` to `'vitest'` by hand
-- Tell the tmux session "hey, this project uses vitest, fix it"
-- Re-sling with a longer bead description
-
-**What to do:** Update `packs/coder/prompts/coder.md.tmpl` so the *next* feature doesn't hit this problem. Add to the Process section:
-
-```markdown
-## Process
-...
-3. Before writing any test file, run `cat package.json | grep -E '"(test|vitest|jest|mocha)"'`
-   and use the test framework declared there. Never assume. Never default
-   to Jest.
-```
-
-Then:
+Option (a) — use a child bead L2's planner produced:
 
 ```bash
-git add packs/coder/prompts/coder.md.tmpl
-git commit -m "chore(coder): require explicit test-framework detection"
-
-rm -r src/features/loyalty-points/
-gc sling coder my-factory-impl456
-gc watch coder
+bd list --label needs-design           # pick one of the IDs
 ```
 
-**Why this works:** The fix lives in the Coder's system prompt, so every future bead inherits it. The next feature won't have to learn this lesson twice.
-
-### Scenario 2: Tests pass but file structure doesn't match the spec
-
-**What you see:** `npm test` passes, but the Coder wrote `src/components/LoyaltyBadge.tsx` instead of `src/features/loyalty-points/LoyaltyPointsBadge.tsx`. The Designer specified the feature-folder path; the Coder flattened it.
-
-**What NOT to do:** Move the files manually with `git mv`.
-
-**What to do:** Update `packs/coder/prompts/coder.md.tmpl` Rules section:
-
-```markdown
-## Rules
-
-- Follow the spec exactly. If the spec is wrong, note it but implement as written.
-- Open the component spec's Location section and list every file path it
-  declares. If a file you want to create is not in that list, stop — do
-  not invent structure. Create exactly the paths the Designer specified.
-- Never modify files outside the scope of your bead's feature.
-- If you need a dependency, add it via package manager and document in
-  the commit.
-- All code changes must be on a feature branch, never directly on main.
-```
-
-Then:
+Option (b) — file a fresh one (see *"No needs-design bead handy?"* in Prerequisites for a full example):
 
 ```bash
-git add packs/coder/prompts/coder.md.tmpl
-git commit -m "chore(coder): require literal adherence to spec Location paths"
-
-# Back out the wrong-location commit
-git reset --hard HEAD~1    # only if the Coder committed on a feature branch
-# OR: if the wrong files are unstaged, just `rm` them
-
-gc sling coder my-factory-impl456
-gc watch coder
+cd ~/path/to/your-repo
+bd create \
+  --title "Feature: Loyalty points badge on order confirmation" \
+  --label needs-design \
+  --notes "acceptance_criteria:
+- Badge renders on order confirmation page
+- Shows current point balance from the ledger
+- Empty/loading/error states all handled"
 ```
 
-### Scenario 3 (bonus): Coder skips the empty-state edge case
+Either way, the designer's order gate (`bd ready --label=needs-design --limit=1 | grep -q .`) will match within the gate's poll interval, and `mol-design-cycle` will start.
 
-If the Coder implemented loading and error but silently dropped the empty state, the fix is in the Designer prompt, not the Coder prompt. The Designer's spec should have been explicit enough that a skipped state is a flag the Coder sees. Update `packs/designer/prompts/designer.md.tmpl` Output Format:
+### Step 2: Watch the designer work
 
-```markdown
-## Edge Cases
-- Empty state: what shows when there's no data (always required — every
-  component has an empty state; if you think yours doesn't, describe what
-  the first-render-no-data case looks like)
-- Error state: what shows on failure
-- Loading state: what shows during fetch
+```bash
+gc status                           # designer should flip to working
+gc session peek <rig>/designer      # snapshot of the tmux session
+gc events --follow                  # stream events from another terminal
+bd show <bead-id>                   # notes accumulate as each step completes
 ```
 
-Re-sling the Designer (then the Coder). This is also why the Designer and Coder sit in separate agents with separate prompts: some fixes belong upstream, some downstream. Knowing which is half the skill.
+The designer walks its 4 steps:
 
-### The Runs-to-Passing Target
+1. **intake** — reads the bead, any parent plan, existing components. Records the primary user action in notes.
+2. **wireframe** — writes `docs/designs/<slug>.md` with screens, reused components, interactions (plus your project-specific fields from Part 2 Step 3).
+3. **a11y-check** — appends an accessibility section (focus, ARIA, contrast, keyboard nav, screen-reader labels, plus your project-specific a11y rule from Part 2 Step 4).
+4. **handoff** — adds `ready-to-build`, removes `needs-design`, pins `design_artifact: docs/designs/<slug>.md` in the notes.
 
-Track your runs. A healthy L3 converges in **≤3 Coder slings**. Sling count = 1 means the shipped prompt plus your one customization was enough. Sling count = 5+ means your prompts are fighting your project's existing conventions — time to stop and read your own `docs/PROJECT_MANIFEST.md` for gaps.
+After step 4, the bead is aimed at the coder. Verify:
+
+```bash
+bd label list <bead-id>                        # should show ready-to-build + source:actual-designer
+ls ~/path/to/your-repo/docs/designs/           # new <slug>.md file
+bd show <bead-id> | grep -E 'design_artifact|slug'
+```
+
+If the bead is still labelled `needs-design` after the designer returned to idle, the handoff step didn't run — inspect `gc events --follow` for the failure. Most common cause is a template variable (`{{slug}}`) that wasn't set; the formula exits step 4 early and leaves the bead in place.
+
+### Step 3: Watch the coder work
+
+The coder's order gate is now matching (because the designer just added `ready-to-build`). Within a poll interval, `gc status` shows the coder working. Its 6 steps:
+
+1. **intake** — reads the bead, plan artifact, design artifact, and all rules under `docs/rules/`. Records acceptance criteria as the "exit contract" in bead notes.
+2. **actual-adr-check** — runs `actual status` to verify CLAUDE.md / AGENTS.md are in sync with ADRs. If drifted, files a `needs-architecture` hand-back bead and stops; if `actual` isn't installed, skips gracefully.
+3. **plan** — writes a 2–3 bullet implementation plan into bead notes. No speculative abstractions.
+4. **implement** — writes code following the plan. The guardrails you tightened in Part 3 Step 3 apply here.
+5. **self-test** — runs `{{test_cmd}}` from Part 3 Step 1. If it fails, loops back to step 4 and fixes. Never hands off red tests.
+6. **handoff** — stages the scoped files, commits with a conventional message, removes `ready-to-build`, adds `needs-review`, closes the bead so downstream dependencies unblock.
+
+The coder's run is usually the longest single step in the whole pipeline — typical runtime 10–25 minutes for a first-time feature, depending on how many implement/self-test cycles it takes to converge.
+
+Detach with `Ctrl+b d`; the agent continues. Monitor progress:
+
+```bash
+gc events --follow                  # see every file read, every tool call
+gc status                           # coder state: working → idle
+bd show <bead-id>                   # notes keep growing
+```
+
+Wait until the coder's state returns to `idle`.
+
+### Step 4: Verify the commit + handoff
+
+```bash
+cd ~/path/to/your-repo
+git log --oneline | head -5
+bd label list <bead-id>
+bd show <bead-id> | grep -E 'impl_plan|self_test|commit'
+```
+
+You should see:
+
+- A new commit at the top of `git log`, with a conventional-commit subject referencing the bead ID (e.g. `feat: Loyalty points badge on order confirmation (refs my-factory-abc123)`).
+- Labels on the bead: `needs-review` added, `ready-to-build` removed. Status: `CLOSED` (the coder closes the bead after handoff; the reviewer in L4 re-labels without re-opening it).
+- Notes containing `impl_plan:` (from step 3), `self_test: pass` and `test_cmd:` (from step 5), and the design_artifact line from the designer.
+
+If the commit doesn't reference the bead ID, or the bead isn't labelled `needs-review`, the handoff step hit an error — `gc events --follow` will show where. Most common cause is `git add` failing because the coder edited files outside the scope implied by the plan; the commit step exits, and the bead sits in `ready-to-build` until the next poll.
+
+### Step 5: Capture the run in `notes.md`
+
+For your activity deliverable, drop a short `notes.md` noting:
+
+- The bead id you walked through
+- The design artifact path and a one-line summary of its a11y findings
+- The coder's `impl_plan` bullets and the final `test_cmd` that ran
+- Any pack edits you made during iteration and which finding motivated each
 
 ---
 
-## Inline Insight: Why the Designer Sits Between Architect and Coder
+## Part 5: Fix via Config (~10 min)
 
-You might wonder why the pipeline needs a Designer at all — couldn't the Coder read the work package and ADR directly? In practice, that loses quality for three reasons:
+> **Agent Guide:** This is the strictest part of the session. The instant the participant opens a source file to hand-fix a bug the coder introduced — or opens the wireframe to hand-fix a design gap — stop them, revert, and redirect to the prompt or formula. Hand-fixes die with the bead; config edits persist across every future feature.
 
-1. **Work packages describe user-facing behavior, not component shape.** A work package says "customer sees their balance." It doesn't say "a React component named `LoyaltyPointsBadge` with a `customerId: string` prop and a three-state status enum." The Designer's job is to bridge the gap — taking ambiguous acceptance criteria and producing unambiguous component contracts.
+Three realistic scenarios follow, one each for the designer, the coder, and the designer-coder seam. Work through whichever applies to your run.
 
-2. **ADRs describe technical decisions at a different level.** An ADR says "use a points_ledger table." It doesn't say "call it through a hook named `useLoyaltyBalance` that returns `{ balance, status }`." The Designer translates data-model decisions into API-shaped consumption patterns.
+### Scenario A — Designer omitted the empty/loading/error states
 
-3. **Specs are cheaper to iterate than code.** When your Coder produces the wrong output, it's faster to re-sling a 200-line spec than to re-sling a 2,000-line implementation. The Designer acts as a compression layer — any ambiguity that would have burned a whole Coder run gets caught in a two-minute Designer re-sling instead.
+The designer's wireframe shows a happy-path balance display, but nothing about a new customer with zero points, the async fetch, or a failed request.
 
-If you ever hit a project where the Designer feels redundant (e.g. "the work package already says exactly what to build"), that's a sign your Planner is overreaching. Pull component-shape details *out* of the work package and let the Designer own them.
+**Wrong fix:** Open `docs/designs/<slug>.md` and add the three states by hand.
 
-## Inline Insight: Why the Coder Reads the Project Manifest Every Time
+**Right fix:** The designer's `wireframe` step template is the contract. Tighten it in `my-factory/packs/designer/formulas/mol-design-cycle.formula.toml`:
 
-One rule shows up in every agent's Process section: "Read `docs/PROJECT_MANIFEST.md`." The Coder is the one where skipping this step hurts most.
+```diff
+ Components reused: <list from the design system>
+ New components needed: <list, or "none">
 
-The manifest contains answers that can't be derived from the spec alone: which test framework, which CSS approach, which state library, which file naming convention, which commit-message style, which linting rules, which package manager. Each of these is a defaulted choice the Coder will make *somehow* — and the default will almost always be wrong for a non-generic project.
+ Feature folder: src/features/<feature-slug>/
+ Data dependencies: <list of hooks or endpoints the screen calls>
+ Loading / error / empty states: <one line each>
++
++**Exit criteria for this step:** The Loading, Error, and Empty state
++lines each describe what renders in words. "TBD" or "skeleton"
++without further detail is not acceptable — name the element.
+```
 
-Making manifest-reading explicit in the Coder prompt forces the agent to pull in those answers *before* writing code. This is why Part 2 Step 4 added `"Read docs/PROJECT_MANIFEST.md for conventions"` to the Process section. Without that line, you'll see the Coder default to Jest in a Vitest project, Tailwind in a CSS-Modules project, or MobX in a Redux project — each requiring a full re-sling.
+Re-run by adding `needs-design` back on the bead (`bd label add <id> needs-design`) and removing any downstream labels so the designer re-starts cleanly.
 
-## Inline Insight: Config Changes Compound Across Agents
+### Scenario B — Coder skipped AC-referencing test descriptions
 
-When you fix a Coder issue in `packs/coder/prompts/coder.md.tmpl`, that fix applies to every future feature the Coder touches — including ones no one has thought of yet. This is the compounding return on config discipline: every prompt edit pays down a class of failures, not a single instance. A chat-based "just fix it this time" correction pays down *only* the single instance, and the next bead re-encounters the same failure. Over a factory lifetime (dozens to hundreds of features), the gap between these two strategies is enormous. This is why the Quality Bar below includes "Zero manual code edits" — it's the single most leveraged habit in the whole lab.
+Tests pass, but `grep -E 'AC[0-9]' src/features/<slug>/__tests__/` returns nothing. The reviewer in L4 will flag `uncovered_criteria` on every AC.
+
+**Wrong fix:** Open the test file and rename the `it(...)` blocks by hand.
+
+**Right fix:** The rule you added in Part 3 Step 4 wasn't load-bearing enough. Make it an exit criterion in the formula instead of a note in the prompt:
+
+```diff
+ [[steps]]
+ id = "self-test"
+ title = "Run the rig's test suite"
+```
+
+Add before step 6 (or to the end of step 5):
+
+```markdown
+**AC-coverage gate.** Before running the tests, grep the test files
+for AC references:
+
+```bash
+AC_REFS=$(grep -cE '\[AC[0-9]+\]' $(find tests __tests__ -name '*.test.*' 2>/dev/null) 2>/dev/null || echo 0)
+AC_COUNT=$(bd show $ROOT_ID --json | jq -r '.notes' | grep -cE '^- ' || echo 0)
+if [ "$AC_REFS" -lt "$AC_COUNT" ]; then
+    bd update $ROOT_ID --notes "<existing notes>
+self_test: blocked — $AC_REFS/$AC_COUNT tests reference acceptance criteria by tag"
+    exit 1
+fi
+```
+
+Every `- ` line in acceptance_criteria must be matched by at least
+one `[AC<N>]` reference in a test description.
+```
+
+Commit the formula edit, remove `needs-review` and re-add `ready-to-build` on the bead to send it back through the coder — the new gate runs before the coder can hand off, so the coder itself writes the tags instead of the reviewer chasing them in L4.
+
+### Scenario C — Designer's feature folder disagrees with existing layout
+
+The designer wrote `Feature folder: src/features/loyalty-points/` but your project uses `src/modules/loyalty-points/` by convention. The coder implemented in a brand-new `src/features/` path that didn't exist before this bead.
+
+**Wrong fix:** `git mv` the files to the right path.
+
+**Right fix:** This is a designer bug (wrong folder) that the coder inherited. Tighten the designer's `intake` step:
+
+```diff
+ **2. Survey existing components** — grep for existing storybook
+ entries, component files, or design tokens. Re-use aggressively.
++
++**3. Identify the project's feature folder convention** by running
++`ls src/` and noting whether it contains `features/`, `modules/`,
++`pages/`, or something else. Use the existing convention on every
++design. Never propose a new top-level folder.
+```
+
+Commit, revert the commits the coder made (`git reset --hard HEAD~1` on the feature branch), remove `needs-review`, add `needs-design` back on the bead, and let the walk run again. Both designer and coder pick up the new convention.
+
+### The Rule
+
+At least **one** finding in your run must be resolved via a prompt or formula edit — not a hand-edit in `src/` or `docs/designs/`. That is the deliverable of this lab. Run `git log my-factory/packs/designer my-factory/packs/coder` at the end of the session; you should see at least one commit whose message names the finding the edit addresses.
+
+---
+
+## Inline Insight: Why the Designer Doesn't Author Tests
+
+In the shipped factory the designer's work loop ends at a wireframe + a11y audit. Tests are authored by the coder, alongside the implementation. That split exists because design and test design draw on different expertise — a UX designer knows the contrast ratio and the focus order; a generalist engineer knows the test framework, the existing test doubles, and the typical flakiness modes in your suite.
+
+Merging the two would produce weaker outputs in both directions. A designer writing Jest assertions from inside the wireframe loses contact with the user; a coder doing a11y from scratch duplicates the designer's a11y audit. The split keeps each agent focused on the artefact it produces best, and the bead's acceptance criteria are the contract that keeps them aligned — the designer's wireframe must cover every AC, and the coder's tests must reference every AC.
+
+## Inline Insight: Why the Coder Runs `actual-adr-check` Before Writing Code
+
+The coder's second formula step is `actual-adr-check`: run `actual status`, verify CLAUDE.md / AGENTS.md match the rig's ADRs, and hand back to the architect on drift. It looks like ceremony until you imagine the alternative.
+
+Without the check, the coder reads a CLAUDE.md that says "all queries use the ORM" — but the most recent ADR (that didn't sync) just replaced the ORM with hand-written SQL. The coder dutifully writes ORM code against the new schema; the reviewer bounces it; the coder rewrites it; the bead cycles. The fix isn't a better prompt — it's a gate that refuses to start work until the rules the coder will read are the rules the architect actually decided. That's what `actual-adr-check` enforces, and it's why it runs *before* the plan step, not after.
+
+If your rig doesn't have `actual` installed, the step skips gracefully (records `adr_check: skipped — actual CLI not installed` in bead notes). You lose the check but nothing else crashes.
+
+## Inline Insight: Why the Bead Closes at the Coder's Handoff, Not at the Reviewer's
+
+The coder's handoff step runs `bd close $ROOT_ID`. At first glance that seems premature — the code hasn't been reviewed or shipped yet. The reason is that `bd close` unblocks downstream dependencies in the bead graph. Other beads waiting on this one (e.g. a follow-up feature that depends on the points ledger existing) become ready as soon as the coder's implementation is committed — not after the reviewer eventually passes.
+
+The reviewer's job (L4) is to decide whether the committed code is safe to ship. That decision produces a `ready-to-ship` label or a `ready-to-build` bounce — both of which can happen on a *closed* bead via `bd update --add-label`. The label is the routing signal; the close state is the dependency-graph signal. Conflating them would force every blocked feature to wait for review — slowing the factory by the review time on every predecessor.
 
 ---
 
 ## Common Issues & Solutions
 
-### Issue 1: Designer produces a spec without a Location path
-**Symptom:** Spec has props, state, layout — but the Location section is empty or says `TBD`.
-**Fix:** Add to `packs/designer/prompts/designer.md.tmpl` Quality Gate: "Location must name at least one concrete file path ending in a valid extension (`.tsx`, `.ts`, `.py`, `.go`). Never leave it as a placeholder." Re-sling.
+### Issue 1: Designer never wakes after a bead gets `needs-design`
 
-### Issue 2: Designer produces a spec with untyped props
-**Symptom:** Props table has `Name` and `Description` filled in but `Type` column is blank or says "any".
-**Fix:** Add to `packs/designer/prompts/designer.md.tmpl` Quality Gate: "Every row in the Props and State tables must have a concrete type. Prohibited values in the Type column: `any`, `object`, `unknown`, empty string." Re-sling.
+**Cause:** Same family as L2's Issue 1. Either `bd` isn't on PATH for the order gate, or the label on the bead doesn't match exactly.
 
-### Issue 3: Coder skips tests
-**Symptom:** Implementation files exist, but no test file — or test file has zero `it(...)` blocks.
-**Fix:** Add to `packs/coder/prompts/coder.md.tmpl` Process section: "You may not commit until `npm test` passes with at least 2 passing test cases that reference the work package's Story <N> acceptance criteria in their test descriptions." Re-sling.
+**Fix:** Run `bd ready --label=needs-design --limit=1` manually. If it returns a result but the designer doesn't wake, `gc doctor` will show the `check-designer` script failing. If it returns nothing, `bd label list <bead-id>` — watch for trailing spaces, case mismatches, or typos.
 
-### Issue 4: Coder writes code but doesn't commit
-**Symptom:** `git status` shows uncommitted changes after the Coder session ends.
-**Fix:** Add to `packs/coder/prompts/coder.md.tmpl` Process section: "After all quality gates pass, run `git add` and `git commit` before marking the bead ready. An uncommitted implementation is equivalent to no implementation." Re-sling.
+### Issue 2: Designer relabels to `needs-plan` instead of `ready-to-build`
 
-### Issue 5: Coder writes files at the wrong location
-**Symptom:** Files exist but under `src/components/` instead of `src/features/<slug>/`.
-**Fix:** See Part 5 Scenario 2 above. Update the Rules section to require literal adherence to the spec's Location paths.
+**Cause:** You skipped Part 2 Step 1 (aligning the handoff label). The shipped formula hands back to the planner by default.
 
-### Issue 6: Coder uses the wrong test framework
-**Symptom:** Tests fail with `Cannot find module 'jest'` in a Vitest project (or vice versa).
-**Fix:** See Part 5 Scenario 1 above. Require the Coder to inspect `package.json` before writing tests.
+**Fix:** Apply the Part 2 Step 1 diff in `mol-design-cycle.formula.toml`. Remove `needs-plan` from the stuck bead and add `ready-to-build`; the coder picks it up on the next poll.
 
-### Issue 7: Coder violates a tailored ADR from CLAUDE.md
-**Symptom:** The tailored ADR says "use parameterized queries" and the Coder writes string-concatenation SQL.
-**Fix:** Add to `packs/coder/prompts/coder.md.tmpl` Process section: "Before writing code, read the Tailored ADRs section of `CLAUDE.md`. Every decision in that section is binding unless the Designer's spec explicitly overrides it." Re-sling.
+### Issue 3: Designer produces a wireframe without an a11y section
 
-### Issue 8: Coder stalls on `npm install`
-**Symptom:** The tmux session shows `npm install` running for 30+ minutes with no progress.
-**Fix:** This is usually a network or registry issue, not a prompt issue. In another terminal: `cd ~/path/to/your-repo && npm install` manually, then `gc sling coder my-factory-impl456` again — the Coder will skip install if `node_modules/` is already present.
+**Cause:** The `a11y-check` step crashed or exited early. Usually a missing template variable (`{{slug}}`) that made the file path invalid.
 
-### Issue 9: `gc status` doesn't show `designer` or `coder` after restart
-**Symptom:** Expected 5 agents, only see 3.
-**Fix:** The `--include` path may have been wrong. Run `gc rig list` to verify registration. Re-run `gc rig add --include` with an absolute path. Verify with `ls /absolute/path/to/packs/designer/pack.toml`.
+**Fix:** `gc events --follow` during the next run. Look for an error in the a11y-check step. Fix the template variable or fall back to setting it explicitly on the invocation (`bd update $ROOT_ID --notes 'slug: loyalty-points-badge'`) before re-labeling.
 
-### Issue 10: Coder produces code that passes tests but violates the spec
-**Symptom:** `npm test` is green but the component has different prop names than the spec declared.
-**Fix:** This is the most common failure mode in L3. Add to `packs/coder/prompts/coder.md.tmpl` Process section: "Before writing any source file, copy the Props table from the spec into a comment at the top of the component file. Your implementation must match those names and types exactly." Re-sling.
+### Issue 4: Coder never wakes after the designer's handoff
 
-### Issue 11: Coder modifies files outside the feature folder
-**Symptom:** The commit diff includes edits to `src/api/orders.ts` or `src/App.tsx` that you didn't expect.
-**Fix:** Add to `packs/coder/prompts/coder.md.tmpl` Rules: "You may read any file in the repo. You may write only files inside the Location path from the spec. If you believe an external file must change for the feature to work, stop, append a `## Open Follow-ups` section to the spec noting what needs to change, and mark the bead blocked." Re-sling.
+**Cause:** Either the designer didn't actually add `ready-to-build` (see Issue 2), or the coder's order gate is failing.
 
-### Issue 12: The spec and the work package disagree on a requirement
-**Symptom:** The work package says "earn 1 point per dollar spent" and the spec says "earn 1 point per $10 spent."
-**Fix:** This is a Designer-side bug that the Coder inherited. Delete the spec, update `packs/designer/prompts/designer.md.tmpl` Process: "Before writing the spec, list every numeric value and quantifier from the work package's Goal and User Stories. Every one must appear verbatim in the spec." Re-sling the Designer, then the Coder.
+**Fix:** `bd ready --label=ready-to-build --limit=1` manually. If it returns the bead but the coder is missing from `gc status`, `gc doctor` will name the failing check.
+
+### Issue 5: Coder commits code that doesn't implement the design's a11y notes
+
+**Cause:** The coder read the design artifact but the a11y section wasn't load-bearing enough in its prompt/formula to translate into test cases.
+
+**Fix:** Add a rule in the coder's `implement` step: "Before writing any component file, list every bullet in the design's Accessibility section and write at least one test per bullet (focus, ARIA, contrast, keyboard nav, screen-reader labels, live regions)." Re-run the walk.
+
+### Issue 6: `actual status` fails inside the coder with `TerminalIOError`
+
+**Cause:** The formula isn't passing `--force --no-tui`, or the CLI is trying to open an interactive pane inside a tmux session that has no TTY.
+
+**Fix:** `grep -n 'actual status' my-factory/packs/coder/formulas/mol-code-from-spec.formula.toml` — verify the invocation. The shipped formula's invocation is safe for non-interactive use; if you customised it and added prompts, remove them.
+
+### Issue 7: Coder hand-edits files outside the plan, commit fails
+
+**Cause:** The `handoff` step stages specific paths from `impl_plan` but the coder wrote to other files too — the commit either succeeds with unwanted changes or fails on `git add <missing-file>`.
+
+**Fix:** Strengthen the `implement` step's guardrail: "Never modify files outside the scope implied by the plan" is too abstract. Replace with: "Before making a change, check that the file path is listed in `impl_plan`. If it isn't, either update `impl_plan` or don't make the change." Revert and re-run.
+
+### Issue 8: Self-test step passes locally but fails CI
+
+**Cause:** `test_cmd` is narrower than CI's invocation — e.g. the coder ran `npm test` but CI runs `npm run typecheck && npm run lint && npm test`.
+
+**Fix:** Update `test_cmd` in the formula's `[vars]` block to match CI verbatim (Part 3 Step 1). A green `self-test` should be a hard predictor of a green CI.
+
+### Issue 9: Designer's output duplicates components that already exist
+
+**Cause:** The intake step's "survey existing components" guidance is too vague — the designer proposed new components without checking for reuse.
+
+**Fix:** Tighten intake: "Run `rg -l 'export (default )?(function|const) [A-Z]' src/components/` and list every existing component by name. For each new component the wireframe proposes, justify explicitly why no existing component covers the use case." Commit and re-run.
+
+### Issue 10: Bead flips between `ready-to-build` and `needs-review` repeatedly
+
+**Cause:** The coder self-tests green, hands off to review, the reviewer (L4) bounces it, the coder re-runs, bounces again. This is the signal-from-L4 loop you're meant to act on — but the fix is in the coder's prompt, not in re-running.
+
+**Fix:** Read the reviewer's notes on the bead (`bd show <bead-id>`). Translate the finding into a coder prompt or formula rule (see Scenario B in Part 5). Only then re-run. Looping the coder without a prompt edit is the anti-pattern this workshop tries to break.
+
+### Issue 11: Coder closes the bead but never commits
+
+**Cause:** The `handoff` step's git add / git commit logic silently fails (e.g. no files in the scope), but the close + relabel run anyway.
+
+**Fix:** Guard the handoff: "If `git diff --cached --name-only` is empty after staging, abort — do not close the bead. Instead, record `handoff: blocked — no changes to commit` in notes and exit non-zero." Commit the formula edit; the next failure is explicit.
 
 ---
 
@@ -978,23 +766,24 @@ When you fix a Coder issue in `packs/coder/prompts/coder.md.tmpl`, that fix appl
 
 When you review your own output, check:
 
-- **Spec Completeness** — Purpose, Location, Props, State, Layout, Interactions, Data Flow, Edge Cases (all three states), and References all present. Every Props and State row has a concrete type.
-- **Implementation Match** — Every file path the Designer declared exists at that path. Every prop name and type matches the spec verbatim. Every edge case from the spec has visible handling in the code.
-- **Test Coverage** — At least 2 test cases from the work package pass. Test descriptions reference the work package's Story (e.g. "Story 2: shows 0 points for a new customer").
-- **Quality Gates Green** — `npm run typecheck`, `npm run lint`, `npm test` all exit zero (or the equivalents for your stack).
-- **Config Discipline** — Every iteration was a prompt-file diff plus a re-sling. Zero ad-hoc chat corrections. Zero manual code edits.
+- **Labels drove everything.** `gc events --follow` output for this bead shows `label_added` / `label_removed` events at every handoff. No `gc sling designer <bead>` or `gc sling coder <bead>` in the history.
+- **Design artifact exists.** `docs/designs/<slug>.md` is committed, contains wireframes + the a11y audit, and names a feature folder path.
+- **Coder respected the design.** The implementation lives under the feature folder path the designer named. Every prop or data dependency in the design has a visible implementation. Every a11y note has at least one test.
+- **Tests reference ACs.** Every acceptance criterion from the bead is exercised by at least one test whose description references it by tag or wording.
+- **Config-discipline evidence.** At least one commit in `git log my-factory/packs/designer my-factory/packs/coder` names a designer or coder finding the edit addresses. Zero hand-edits attributable to "fixing the design" or "fixing the code" in `git log ~/path/to/your-repo/`.
+- **ADR check ran or was explicitly skipped.** If `actual` is installed, the bead notes record `adr_check: ok` (or `adr_check: drift — handed back to architect`). If not, `adr_check: skipped — actual CLI not installed`. A silent absence is a signal the step crashed.
 
 ---
 
 ## Concept Check (before moving to L4)
 
-> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain each bullet in their own words, without re-reading. If they can't, revisit the matching section.
 
-- Why the Designer writes a spec before the Coder writes code. (The spec is the cheapest place to iterate; code is the most expensive.)
-- Why the spec names an exact `Location` path. (Without it, the Coder invents a path — usually the wrong one.)
-- Why the Coder's failing test is a prompt bug, not a code bug. (Manual edits die with the bead; prompt edits persist.)
-- What a spec produces for a project that has no UI. (API contracts, interface definitions, schema — the shape differs, the contract does not.)
-- Why the Designer doesn't write tests. (Test design is a Coder concern, informed by spec edge cases.)
+- **Why labels are the handoff contract between Designer and Coder.** (`needs-design` → `ready-to-build` is a single relabel; no SPEC.md needed. The bead carries the state; the label carries the routing.)
+- **Why the designer doesn't author tests.** (Separation of concerns: a11y + UX vs. test infrastructure. Tests are authored by the coder, alongside the code, against the bead's ACs.)
+- **Why the coder runs `actual-adr-check` before planning.** (To refuse to code against stale rules. If CLAUDE.md / AGENTS.md don't match the ADRs, hand back to architect rather than implement against rot.)
+- **Why the bead closes at the coder's handoff, not at the reviewer's.** (`bd close` unblocks the dependency graph; the reviewer's verdict lives on labels, not close state. Conflating them slows the factory.)
+- **What would happen if you hand-fixed a failing test rather than editing the coder's prompt.** (Current bead passes; next feature re-introduces the same bug. Hand-fixes die with the bead; prompt edits persist.)
 
 ---
 
@@ -1002,28 +791,17 @@ When you review your own output, check:
 
 Before leaving this lab, verify all of these:
 
-- [ ] `gc status` shows `designer` and `coder` agents (in addition to L1 + L2 agents)
-- [ ] `design/<slug>-spec.md` exists and is committed, with Layout + Props + State + Interactions + Edge Cases sections filled in
-- [ ] Implementation code is committed at the spec's Location path
-- [ ] At least 2 test cases from the work package are passing
-- [ ] `npm run typecheck`, `npm run lint`, and `npm test` all pass (or equivalent for your stack)
-- [ ] Zero manual code edits — all fixes were prompt updates to `packs/coder/prompts/coder.md.tmpl` or `packs/designer/prompts/designer.md.tmpl` followed by re-slings
-- [ ] Both beads (Designer, Coder) are closed
-- [ ] All changes pushed to remote
+- [ ] `gc doctor` is green for `designer` and `coder` alongside the four other packs
+- [ ] `my-factory/city.toml` includes the designer and coder packs (shipped or your customised copies)
+- [ ] One `needs-design` bead walked to `ready-to-build` (designer handoff) then to `needs-review` (coder handoff), on nothing but label flips
+- [ ] `docs/designs/<slug>.md` exists and is committed, with wireframes + a11y audit
+- [ ] Implementation code is committed on a feature branch at the path the designer named
+- [ ] Tests reference acceptance criteria by tag or wording and pass via the pinned `test_cmd`
+- [ ] If `actual` CLI is installed: the coder's bead notes record `adr_check: ok` (or a documented hand-back)
+- [ ] At least one commit in `git log my-factory/packs/designer my-factory/packs/coder` resolves a finding via a prompt / formula edit (zero hand-edits to design or code files attributable to findings)
+- [ ] Both customised packs are committed to git
 
-**L3 blocks L4.** Don't move on until the implementation is committed — L4's Reviewer agent reads the code and the spec together to produce review reports. Without a committed implementation, there's nothing to review.
-
----
-
-## Suggestions Based on Project Type
-
-- **React + TypeScript:** Update the Designer prompt to require TypeScript interface definitions for all props and "use Tailwind CSS class names in the Layout section" (or whatever your project uses). Update the Coder prompt to require `useState` for local state, `useQuery`/`useSWR` for async state (match the project's library), and that test files live next to source files under `__tests__/`.
-
-- **Python backend:** Change the Designer's Output Format to produce API endpoint specs (method, path, request/response schema, status codes) instead of UI component specs. Change Location to a module path (`app/routes/loyalty.py`). Update the Coder prompt to require pytest fixtures and response-model pydantic validation.
-
-- **Go services:** The Designer should produce interface definitions with explicit return types, and the spec's Location should be a package path (`internal/loyalty/`). Update the Coder prompt to require: "Return errors, not exceptions. Every exported function has a godoc comment. Test files end in `_test.go` and live in the same package."
-
-- **Mobile (React Native / Flutter):** The Designer should produce screen specs with navigation actions, not web-component specs. Location should be a screen path (`screens/LoyaltyPointsScreen.tsx` or `lib/screens/loyalty_points_screen.dart`). The Coder prompt should specify the platform's idiomatic state management (MobX/Redux for React Native, Riverpod/Bloc for Flutter).
+**L3 is a prerequisite for L4.** The reviewer and deployer in L4 consume the coder's committed implementation and the design artifact together. If the coder's commit is missing, the feature branch is dirty, or the design artifact is stale, L4 will feel like the reviewer is inexplicably strict — the cause is upstream. Don't move on until the exit criteria above all pass.
 
 ---
 
@@ -1032,52 +810,58 @@ Before leaving this lab, verify all of these:
 Every command you ran during this lab, in order:
 
 ```bash
-# PART 0 — Read the packs (no commands — just read the files)
+# PART 0 — read the packs (no commands — just read the files)
 
-# PART 1 — Install Designer
+# PART 1 — include + wire
 cd my-factory
-gc rig add ~/path/to/your-repo --include /path/to/packs/designer
-# (edit my-factory/city.toml — ensure [[agent]] block for designer exists)
-gc restart
+mkdir -p packs
+cp -rf ../software-factory/packs/designer packs/designer
+cp -rf ../software-factory/packs/coder packs/coder
+$EDITOR city.toml                              # add "packs/designer" + "packs/coder" to includes
+gc service restart
+gc doctor
 gc status
-# (edit packs/designer/prompts/designer.md.tmpl — project-specific Quality Gate rule)
-cd ~/path/to/your-repo
-git add -A && git commit -m "chore(designer): customize designer prompt"
+git add city.toml packs/designer packs/coder
+git commit -m "chore(L3): wire designer + coder packs"
 
-# PART 2 — Install Coder
-cd my-factory
-gc rig add ~/path/to/your-repo --include /path/to/packs/coder
-# (edit my-factory/city.toml — ensure [[agent]] block for coder exists)
-gc restart
-gc status
-# (edit packs/coder/prompts/coder.md.tmpl — project-specific quality gates + manifest reading)
-cd ~/path/to/your-repo
-git add -A && git commit -m "chore(coder): customize coder prompt"
+# PART 2 — customise designer
+$EDITOR packs/designer/formulas/mol-design-cycle.formula.toml   # handoff label → ready-to-build
+$EDITOR packs/designer/prompts/designer.md.tmpl                 # tighten Primary focus
+$EDITOR packs/designer/formulas/mol-design-cycle.formula.toml   # wireframe + a11y additions
+gc service restart && gc doctor
+git add packs/designer
+git commit -m "chore(designer): align handoff label + project design rules"
 
-# PART 3 — Run the Designer
-cd my-factory
-bd create "Design: Loyalty Points Badge Component" \
-  --description "..." --depends-on my-factory-d4e5f6
-gc sling designer my-factory-design123
-gc watch designer                                # Ctrl+b d to detach
-cat design/loyalty-points-badge-spec.md          # review output
-# (if quality gate fails: edit prompt, rm spec, re-sling)
-bd close my-factory-design123 --comment "Component spec committed"
+# PART 3 — customise coder
+$EDITOR packs/coder/formulas/mol-code-from-spec.formula.toml   # test_cmd + commit_scope
+$EDITOR packs/coder/prompts/coder.md.tmpl                       # tighten Primary focus
+$EDITOR packs/coder/formulas/mol-code-from-spec.formula.toml   # implement guardrails + AC gate
+gc service restart && gc doctor
+git add packs/coder
+git commit -m "chore(coder): pin test_cmd + AC gate + feature-folder guardrail"
 
-# PART 4 — Run the Coder
-bd create "Implement: Loyalty Points Badge Component" \
-  --description "..." --depends-on my-factory-design123
-gc sling coder my-factory-impl456
-gc watch coder                                   # longer run — 10–25 min
+# PART 4 — walk a bead through the handoff
+bd list --label needs-design                          # pick an existing one, or create a fresh one:
 cd ~/path/to/your-repo
-git log --oneline | head -10                     # verify commits
-npm run typecheck && npm run lint && npm test    # quality gates
-# (if quality gate fails: edit prompt, reset/rm files, re-sling)
-bd close my-factory-impl456 --comment "Implementation committed; tests pass"
+bd create --title "Feature: <your feature>" --label needs-design \
+  --notes "acceptance_criteria:
+- <criterion 1>
+- <criterion 2>"
+gc status                                # watch designer wake + run
+bd show <bead-id>                        # notes accumulate
+bd label list <bead-id>                  # ready-to-build after designer handoff
+ls docs/designs/                         # design artifact
+gc status                                # watch coder wake + run
+bd show <bead-id>                        # notes grow through 6 steps
+git log --oneline | head -5              # coder's commit on top
+bd label list <bead-id>                  # needs-review (ready for L4)
 
-# PART 5 — Commit prompt changes and push
-cd ~/path/to/your-repo
-git push
+# PART 5 — fix via config (when designer or coder output has a finding)
+$EDITOR my-factory/packs/<agent>/...     # edit the prompt or formula
+git -C my-factory add packs/<agent>
+git -C my-factory commit -m "chore(<agent>): <what the finding required>"
+bd label add <bead-id> needs-design       # or ready-to-build — re-arm the relevant agent
+# (agent re-runs; findings are now absent)
 ```
 
 ---
@@ -1086,71 +870,27 @@ git push
 
 | Component | File / Location | What It Does |
 |-----------|-----------------|--------------|
-| Designer pack | `packs/designer/` | Defines the Designer agent: prompt, overlay, metadata |
-| Designer prompt | `packs/designer/prompts/designer.md.tmpl` | System prompt for the Designer — Role, Inputs, Output Format, Quality Gate, Process, Config Discipline |
-| Coder pack | `packs/coder/` | Defines the Coder agent: prompt, overlay, metadata |
-| Coder prompt | `packs/coder/prompts/coder.md.tmpl` | System prompt for the Coder — same six-section structure plus a Rules section |
-| Component spec | `design/<slug>-spec.md` | Designer's output: Purpose, Location, Props, State, Layout, Interactions, Data Flow, Edge Cases, References |
-| Implementation | `src/<Location from spec>/` | Coder's output: typed implementation, co-located tests, matching the spec verbatim |
-| Feature-branch commits | `git log feature-branch --oneline` | Conventional-commit history showing Designer commit + Coder commits |
-| Designer bead | `bd show my-factory-design123` | Work item that triggered the Designer, chained after the Architect bead |
-| Coder bead | `bd show my-factory-impl456` | Work item that triggered the Coder, chained after the Designer bead |
-| Passing tests | `npm test` output | Proof of Quality Gate rule 4: at least 2 work-package test cases pass |
-
----
-
-## Your Final File Structure
-
-After completing L3, your project repo should contain:
-
-```
-your-repo/
-├── CLAUDE.md                                         # (unchanged from L2)
-├── DECISIONS.md                                      # (unchanged from L2 for now)
-├── docs/
-│   ├── PROJECT_MANIFEST.md
-│   └── adr/
-│       └── 0001-loyalty-points-storage.md            # L2 Architect output
-├── work-packages/
-│   └── loyalty-points-system.md                      # L2 Planner output
-├── design/
-│   └── loyalty-points-badge-spec.md                  # ← L3 Designer output
-├── src/
-│   ├── main.tsx                                      # (pre-existing)
-│   └── features/
-│       └── loyalty-points/                           # ← L3 Coder output
-│           ├── LoyaltyPointsBadge.tsx
-│           ├── useLoyaltyBalance.ts
-│           ├── types.ts
-│           └── __tests__/
-│               └── LoyaltyPointsBadge.test.tsx
-├── review-reports/.gitkeep                           # Empty — Reviewer fills this in L4
-├── release-gates/.gitkeep                            # Empty — Deployer fills this in L4
-└── feedback-loops/.gitkeep                           # Empty — W4 fills this in
-```
-
-And your city:
-
-```
-my-factory/
-├── city.toml                                         # Now has dev-agent + planner + architect + designer + coder
-└── beads/
-    ├── my-city-a1b2c3 (closed)                      # L2 Planner bead
-    ├── my-factory-d4e5f6 (closed)                      # L2 Architect bead
-    ├── my-factory-design123 (closed)                   # L3 Designer bead
-    └── my-factory-impl456 (closed)                     # L3 Coder bead
-```
+| Designer pack | `packs/designer/` | Defines the Designer agent: prompt template, formula, order gate, doctor check, commands |
+| Designer prompt | `packs/designer/prompts/designer.md.tmpl` | UI/UX + Accessibility Engineer personas, primary focus, work-loop narrative |
+| Designer formula | `packs/designer/formulas/mol-design-cycle.formula.toml` | 4-step work loop: intake → wireframe → a11y-check → handoff |
+| Designer order gate | `packs/designer/formulas/orders/designer-intake/order.toml` | Polls `bd ready --label=needs-design`; wakes the designer on match |
+| Coder pack | `packs/coder/` | Defines the Coder agent |
+| Coder prompt | `packs/coder/prompts/coder.md.tmpl` | Generalist engineer persona (backend + frontend voices); follow-existing-patterns constraint |
+| Coder formula | `packs/coder/formulas/mol-code-from-spec.formula.toml` | 6-step work loop: intake → actual-adr-check → plan → implement → self-test → handoff |
+| Coder order gate | `packs/coder/formulas/orders/coder-intake/order.toml` | Polls `bd ready --label=ready-to-build`; wakes the coder on match |
+| Project manifest | `docs/PROJECT_MANIFEST.md` in your rig | Read by both agents on every run |
+| Design artifact | `docs/designs/<slug>.md` in your rig | Wireframe + a11y audit (reference doc, not a routing signal) |
+| Feature-branch commit | `git log <feature-branch> --oneline` | Coder's output: code + tests committed with a conventional-commit message referencing the bead |
+| Bead notes | `bd show <bead-id>` | Where design_artifact, impl_plan, self_test, and adr_check findings live |
 
 ---
 
 ## Next Steps
 
-After L3, your factory can:
-- Plan features (Planner)
-- Make architectural decisions (Architect)
-- Design implementations (Designer)
-- Write code and tests (Coder)
+After L3, four of the six agents are yours. The final lab and the capstone follow the same pattern you just practised:
 
-In **L4**, you'll add Reviewer + DevOps agents to complete the pipeline. The Reviewer reads your committed implementation and the spec side-by-side, producing a review report at `review-reports/<slug>-review.md`. The DevOps agent takes a green review report and produces a release gate decision at `release-gates/<slug>-release.md`. After L4, you'll have a 6-agent pipeline capable of taking a feature request all the way to a ready-to-deploy state without a human touching code.
+- **L4** — customise the **Reviewer** (consumes `needs-review`) and the **Deployer** (consumes `ready-to-ship`). Completes the 6-agent pipeline. The reviewer reads the coder's commit and the design artifact side-by-side; make sure both are clean coming out of L3.
+- **W4** — introduces the optional 7th agent, the **Improver**, which consumes `needs-improve` beads produced by the deployer.
+- **L5 / C1** — capstone. Combine everything and run a real feature end-to-end.
 
-The pattern is identical to what you just did twice (L2, L3): read pack, install pack, customize prompt, create bead, sling, review, iterate config, commit. You've now done the loop four times (planner, architect, designer, coder). L4 is two more passes on the same loop.
+The pattern — read pack → include + wire → customise prompt and formula → watch a bead walk through on labels alone → fix findings by editing config, never by hand-editing output — is the whole curriculum at this point. L2 was the first pass on *your* project; L3 is the middle of the pipeline; L4 closes it.
