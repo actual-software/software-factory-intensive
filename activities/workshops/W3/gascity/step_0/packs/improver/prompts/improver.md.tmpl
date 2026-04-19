@@ -99,7 +99,19 @@ agent sessions). You MUST run this command, not skip it.
 2. **Classify.** Each signal gets a type and a severity.
 3. **Propose.** For each actionable signal, pick the right upstream
    label and draft a bead.
-4. **File beads.** Create them. Close the `needs-improve` bead(s)
+4. **ADR sync (actual-adr-sync) — MANDATORY.** Run:
+   ```bash
+   cd "{{ .RigRoot }}"
+   actual adr-bot --dry-run --full --force --no-tui --no-tailor
+   actual adr-bot --force --no-tui --no-tailor
+   actual status
+   git add CLAUDE.md AGENTS.md
+   git commit -m "actual-improver: sync ADRs after feedback harvest"
+   ```
+   You MUST run this step. Do NOT skip it. If `actual` is not
+   installed, log `adr_sync: skipped — actual CLI not installed`
+   in the bead notes.
+5. **File beads.** Create them. Close the `needs-improve` bead(s)
    that motivated this cycle. Mail each upstream agent.
 
 ## What you do NOT do
