@@ -1,1059 +1,465 @@
-# W2 · Design the 6-Agent Software Factory
+# W2 · From Individual AI Workflow to Software Factory Pipeline
 
-> **Goal:** Understand the complete architecture of a 6-agent software factory and design how agents hand off work through the pipeline — producing a factory design doc you can turn directly into pack customizations in L2, L3, and L4.
+> **Goal:** Make the jump from "I chat with one AI and paste corrections until it gets the answer right" to "I configure a six-agent factory in files and let it run." By the end of this session your project repo is **factory-ready**: a filled `docs/PROJECT_MANIFEST.md`, a validated local AI toolset, and a committed `docs/FACTORY_READY.md` checklist that L1 will read as its prerequisite.
 
 | | |
 |---|---|
 | **Estimated duration** | ~45 minutes |
 | **Type** | WORKSHOP |
-| **Deliverable** | Factory wiring diagram + handoff contracts + filled `my-factory/PROJECT_MANIFEST.md` |
+| **Lead** | Austin |
+| **Deliverable** | A factory-ready project workspace — clean repo, filled manifest, authenticated provider CLI, verified `gc` / `bd` / `curriculum-agent`, and `docs/FACTORY_READY.md` committed — that L1 can install the 6-agent factory against without extra scrambling |
 
 ---
 
 ## Session workspace note
 
-Pack mapping, where this README mentions a role → the shipped pack name:
+W2 is not an activity you install. Nothing new lands in `~/Projects/factory/`. The whole session takes place inside **your own project repo** — the one you brought to the workshop. You use your existing individual-AI workflow (Claude Code or Codex in chat mode, one prompt at a time) for the last time; L1 is the session where the factory takes over.
 
-| Role (curriculum) | Shipped pack |
-|-------------------|--------------|
-| Planner | `packs/planner` |
-| Architect | `packs/architect` |
-| Designer | `packs/designer` |
-| **Coder** | **`packs/coder`** |
-| Reviewer | `packs/reviewer` |
-| **Deployer** | **`packs/deployer`** |
+* **Your project repo:** `~/path/to/your-project` (whatever you brought). Everything W2 produces lands here under `docs/`.
+* **Project Overview (you should already have):** `docs/PROJECT_OVERVIEW.md` in your repo — loose, 5 sections. If it's missing, see [`software-factory/PROJECT_OVERVIEW_TEMPLATE.md`](../../../PROJECT_OVERVIEW_TEMPLATE.md) for the template.
+* **Project Manifest (you will produce):** `docs/PROJECT_MANIFEST.md` — structured skeleton every factory agent reads. See [`software-factory/PROJECT_MANIFEST_TEMPLATE.md`](../../../PROJECT_MANIFEST_TEMPLATE.md) for the schema.
+* **Factory-ready checklist (you will commit):** `docs/FACTORY_READY.md` — short proof-of-preparation doc. L1's prerequisites check looks for this.
 
-Prompt files end in `.md.tmpl` (Gas City templates). The W2 deliverable (`factory-wiring.md`) belongs in `../../../activities/workshops/W2/`. No pack is installed in this workshop — L2 is the first session that adds packs to `../../../my-factory/city.toml`.
+**Canonical references** — keep both open in tabs:
 
----
-
-> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by opening `docs/PROJECT_MANIFEST.md` so every handoff example uses the participant's actual tech stack and artifact paths.
+1. [`software-factory/LABELED_BEADS.md`](../../../LABELED_BEADS.md) — the handoff protocol that replaces chat memory and markdown docs.
+2. [`software-factory/curriculum-agent/SKILL.md`](../../../curriculum-agent/SKILL.md) — the skill you installed in W1; every lab from here on uses it.
 
 ---
 
-## Architecture Diagram
-
-The 6-agent pipeline is a linear sequence of specialists. Each agent reads a small, fixed set of artifacts, writes exactly one new artifact, and hands off via the file system — never via chat memory.
-
-```
-                           ┌──────────────────────────┐
-                           │    Feature Request        │
-                           │  (bead title + body)      │
-                           └─────────────┬────────────┘
-                                         │
-                    ┌────────────────────▼────────────────────┐
-                    │ 1. PLANNER                              │
-                    │   Reads:  bead + PROJECT_MANIFEST.md     │
-                    │   Writes: work-packages/<slug>.md        │
-                    └────────────────────┬────────────────────┘
-                                         │  handoff: work package
-                                         ▼
-                    ┌────────────────────┴────────────────────┐
-                    │ 2. ARCHITECT                            │
-                    │   Reads:  work package + MANIFEST        │
-                    │           + CLAUDE.md (tailored ADRs)    │
-                    │           + existing docs/adr/*          │
-                    │   Writes: docs/adr/NNNN-<slug>.md        │
-                    └────────────────────┬────────────────────┘
-                                         │  handoff: work package + ADR
-                                         ▼
-                    ┌────────────────────┴────────────────────┐
-                    │ 3. DESIGNER                             │
-                    │   Reads:  work package + ADR + MANIFEST  │
-                    │   Writes: design/<slug>-spec.md          │
-                    └────────────────────┬────────────────────┘
-                                         │  handoff: component spec
-                                         ▼
-                    ┌────────────────────┴────────────────────┐
-                    │ 4. CODER                                │
-                    │   Reads:  spec + work package + ADR      │
-                    │   Writes: src/** files + tests           │
-                    └────────────────────┬────────────────────┘
-                                         │  handoff: feature branch
-                                         ▼
-                    ┌────────────────────┴────────────────────┐
-                    │ 5. REVIEWER                             │
-                    │   Reads:  diff + spec + AC               │
-                    │           + MANIFEST (Review Standards)  │
-                    │   Writes: review-reports/<slug>-review.md│
-                    └────────────────────┬────────────────────┘
-                                         │  handoff: APPROVE verdict
-                                         ▼
-                    ┌────────────────────┴────────────────────┐
-                    │ 6. DEPLOYER                             │
-                    │   Reads:  review report + branch         │
-                    │           + MANIFEST (Release Criteria)  │
-                    │   Writes: release-gates/<slug>-gate.md   │
-                    └────────────────────┬────────────────────┘
-                                         ▼
-                                   Done (closed bead)
-```
-
-Keep this diagram in mind throughout the workshop. Your design deliverable is *this exact shape*, filled in with paths, formats, and constraints from your own project.
+> **Agent Guide** — If an AI coding agent is walking you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by opening the participant's `docs/PROJECT_OVERVIEW.md` so every manifest suggestion is grounded in their actual project. If the overview is missing, stop and have the participant fill one out first; generating a manifest from a blank overview is the exact anti-pattern this workshop is teaching away from.
 
 ---
 
-## Prerequisites
+## Where This Workshop Sits
 
-Before starting W2, verify each of these:
+In **W1** you installed the `curriculum-agent` skill and watched the Fired-Up Pizza reference factory move a feature bead through six agents without typing a single prompt after the initial `bd label add`. You have the mental picture: labels on a bead, agents waking on order-gate matches, artifacts landing in canonical locations.
 
-| Prerequisite | How to verify | If it's missing |
-|-------------|---------------|-----------------|
-| W1 complete | You've read `curriculum/workshops/W1/README.md` end-to-end | Read W1 now — 20 min. It frames the "why" for this workshop's "how". |
-| L1 complete | `ls ~/path/to/your-repo/CLAUDE.md` → file exists | Complete L1 first. W2 assumes a Gas City city exists and a rig is pointed at your repo. |
-| Skeleton scaffold copied | `ls ~/path/to/your-repo/work-packages/` → directory exists | `mkdir -p ../../path/to/your-repo/{work-packages,docs/adr,design,review-reports,release-gates,feedback-loops}` |
-| Project Manifest in place | `cat ~/path/to/your-repo/docs/PROJECT_MANIFEST.md` → non-empty | Copy `curriculum/PROJECT_MANIFEST_TEMPLATE.md` and fill in tech stack, domain model, conventions |
-| One feature in mind | You can describe in one sentence the feature you'll trace through all six stages | Pick something small: "add CSV export to the orders page", "ship dark-mode toggle". Use the Fired Up Pizza loyalty points example if nothing else jumps out. |
-| Editor open on the packs dir | You can browse `packs/planner/`, `packs/architect/`, etc. | `cd software-factory-intensive && code .` (or your editor of choice) |
+W2 takes you from "I've seen a factory run" to "I am preparing my project to host its own factory." The session is short, mostly discussion and setup, and the Big Reveal is subtle: **the factory only exists because the *inputs* to the factory (your manifest, your repo state, your tool auth) are in a shape the factory can operate on.** A sloppy manifest is why a factory stalls; a half-authenticated CLI is why an agent dies on startup. W2 is where you pay that debt before L1 installs anything.
+
+After W2, you'll move to L1, where David walks the room through standing up the 6-agent factory against the project you just prepared here.
 
 ---
 
-## The Running Example: Loyalty Points for Fired Up Pizza
+## Part 1: The Two Paradigm Shifts (~8 min)
 
-Throughout this workshop we use a single feature to keep every example concrete: **a loyalty points system for Fired Up Pizza** (the reference project at `reference-project/fired-up-pizza/`).
+Two things change between W1's reference factory and L1's factory-on-your-project. Internalize both or L1 will feel like typing `gc` commands without knowing why.
 
-- Customers earn 1 point per $1 spent on an order.
-- Points can be redeemed at checkout (100 points = $5 off).
-- The points balance shows on the order confirmation page.
+### Shift 1: Config Over Prompting
 
-This feature is deliberately chosen because:
+In an individual AI workflow, when the model produces wrong output, you type a correction into the chat and try again. The fix is ephemeral — it lives in a message buffer that disappears when the session ends. The same mistake will recur on the next bead, and on the one after that.
 
-1. It has a clear *planning* question (what are the user stories?).
-2. It has a real *architectural* question (where do we store the points?).
-3. It has *both* frontend and backend work, so Designer and Coder produce non-trivial artifacts.
-4. It's small enough that every stage's output fits in a page.
+In a software factory, when an agent produces wrong output, you edit its **pack** — the declarative config that defines its role, inputs, output format, quality gate, and process. The fix is committed, versioned, and repeats on every future run of that agent. The agent inherits the fix the next time it wakes.
 
-If you're working against your own project, substitute a comparable feature. It should have at least one open architectural decision and touch at least one existing file.
+The packs you'll edit starting in L2 are under `software-factory/packs/<agent>/` — one directory per agent, with a `pack.toml` (metadata + overlay config), a `prompts/<agent>.md.tmpl` (the system prompt), and optionally `formulas/`, `commands/`, `doctor/`, `overlays/`. Every pack has the same six-section prompt: **Role, Inputs, Output Format, Quality Gate, Process, Config Discipline**. When an agent misbehaves, you ask: *which of these six sections needs to change?*
 
-**Do the substitution now, before continuing.** Write one sentence per agent describing what *your* feature's artifact will look like. You'll refine these into the full design deliverable during Part 3.
+> **Inline Insight: "Config" is not just prompts.**
+> A pack can carry hooks (pre/post-session shell scripts), order gates (label filters that decide when the agent wakes), formulas (multi-step molecules), skills (slash commands the agent can call), permissions (what the runner CLI is allowed to do), and settings overlays. All of them are config. When you feel the urge to paste "also, please remember to..." into chat, the discipline is: stop, find the config surface, edit it, rerun.
 
----
+### Shift 2: Coordination via Labeled Beads, Not Durable Markdowns
 
-## Part 1: Read the Shipped Packs (~5 min)
+In an individual AI workflow, context passes through chat memory — the model "remembers" because the messages are still in the context window. When the session ends or the window overflows, you paste the forgotten context back in. A single-threaded conversation is the entire coordination mechanism.
 
-Before you can design your factory, you need to see the shape each pack provides. Gas City ships one pack per agent, and each pack has the same six-section prompt file: **Role, Inputs, Output Format, Quality Gate, Process, Config Discipline**. Your design in Part 3 will customize those six sections per agent.
+In a software factory with six agents, each agent runs in its own session, on its own schedule, against its own order gate. There is no shared chat memory. If the Planner left a note for the Designer, the Designer has to find it somewhere — not in any agent's head.
 
-### Step 1: Open the Planner Pack Prompt
+The answer is **labeled beads**. Each bead is one unit of work; its labels are its state; each agent watches `bd ready --label <inbound>` for work aimed at it. The Planner writes findings into the bead's notes, re-labels `needs-plan` → `ready-to-build` (or whatever's next), and exits. The Coder wakes on its order gate match, reads the bead's notes + diff + manifest, does the work, re-labels to `needs-review`, exits. No long-lived per-feature markdown gets passed between agents — the bead is the handoff.
 
-Open this file and scan the six headings. It's 65 lines — skim, don't memorize.
+Open [`LABELED_BEADS.md`](../../../LABELED_BEADS.md) now and skim:
 
-[`packs/planner/prompts/planner.md.tmpl`](../../../packs/planner/prompts/planner.md.tmpl)
+1. The **six canonical labels** table (`needs-plan`, `needs-architecture`, `needs-design`, `ready-to-build`, `needs-review`, `ready-to-ship`).
+2. The **example lifecycle** — a bead walking the factory end-to-end.
+3. The section **"Why labels replaced durable markdowns"** — the four failure modes the label protocol fixes.
 
-```markdown
-# Planner Agent
+Do not memorize. You should walk out able to name, for any label, (a) who adds it and (b) who consumes it. Every factory touch point you meet from here on is an instance of this protocol.
 
-## Role              ← "You receive feature requests and break them into
-                        structured work packages..."
-
-## Inputs            ← bead description + docs/PROJECT_MANIFEST.md
-
-## Output Format     ← work-packages/<feature-slug>.md with 6 sections:
-                        Goal, User Stories, Acceptance Criteria,
-                        Dependencies, Test Cases, Scope Boundary
-
-## Quality Gate      ← 4 rules: every story has an AC, 2+ test cases,
-                        explicit scope boundary, no ambiguous terms
-
-## Process           ← 6 steps: read bead → read manifest → produce file
-                        → commit on branch → update bead → mark ready
-
-## Config Discipline ← "the fix is updating this file — not ad-hoc
-                        re-prompting"
-```
-
-**What's happening here:** This is the Planner's entire personality. In L2, when you `gc sling planner <bead>`, Gas City loads this prompt as the system message. Everything the Planner does comes from this file plus your `docs/PROJECT_MANIFEST.md`.
-
-### Step 2: Open the Planner Pack Metadata
-
-[`packs/planner/pack.toml`](../../../packs/planner/pack.toml)
-
-```toml
-[pack]
-name = "planner"
-schema = 1
-description = "Planner agent — breaks feature requests into structured work packages"
-
-[[agent]]
-name = "planner"
-scope = "rig"
-provider = "claude"        # Other providers (OpenAI, Gemini, local) are supported
-prompt_template = "prompts/planner.md"
-overlay_dir = "overlays/default"
-nudge = "Check your hook for new feature requests to plan."
-idle_timeout = "1h"
-max_active_sessions = 1
-```
-
-**What's happening here:** The `[[agent]]` block is what Gas City merges into your city's effective configuration when you run `gc rig add --include`. The `provider = "claude"` line is the runner selection — other providers (OpenAI, Gemini, local Ollama models) are supported, but this curriculum defaults to Claude.
-
-### Step 3: Repeat for Each of the Remaining Five Packs
-
-Open each prompt in the same way. You're looking for the **Inputs** and **Output Format** sections — those define the handoff contracts you'll design in Part 4.
-
-| Agent | Prompt file | Output Location |
-|-------|-------------|-----------------|
-| Planner | [`packs/planner/prompts/planner.md.tmpl`](../../../packs/planner/prompts/planner.md.tmpl) | `work-packages/<slug>.md` |
-| Architect | [`packs/architect/prompts/architect.md.tmpl`](../../../packs/architect/prompts/architect.md.tmpl) | `docs/adr/NNNN-<slug>.md` |
-| Designer | [`packs/designer/prompts/designer.md.tmpl`](../../../packs/designer/prompts/designer.md.tmpl) | `design/<slug>-spec.md` |
-| Coder | [`packs/coder/prompts/coder.md.tmpl`](../../../packs/coder/prompts/coder.md.tmpl) | `src/**` |
-| Reviewer | [`packs/reviewer/prompts/reviewer.md.tmpl`](../../../packs/reviewer/prompts/reviewer.md.tmpl) | `review-reports/<slug>-review.md` |
-| Deployer | [`packs/deployer/prompts/deployer.md.tmpl`](../../../packs/deployer/prompts/deployer.md.tmpl) | `release-gates/<slug>-gate.md` |
-
-**What's happening here:** Notice the shape is identical across all six packs — same six headings, same "read manifest first" step in Process, same Config Discipline paragraph. This uniformity is the point: once you've read one, you can read the rest in 30 seconds each, and you can edit any of them with the same mental model.
-
-### Inline Insight: Why six headings, not five or seven?
-
-Each of the six prompt sections has a specific purpose in the factory's error-recovery flow:
-
-| Heading | Purpose | When you'd edit it |
-|---------|---------|--------------------|
-| Role | Scopes *what the agent is*. | Almost never. |
-| Inputs | Declares what the agent is allowed to read. | When you add a new source of truth (e.g., adding `CLAUDE.md` as Architect input in L2). |
-| Output Format | Contract for the next stage. | When the downstream agent complains about missing fields. |
-| Quality Gate | Binary pass/fail rules the agent self-checks. | When output quality slips. Add a rule, re-sling. |
-| Process | Ordered steps the agent follows. | When the agent skips a step (e.g., forgets to cross-reference). |
-| Config Discipline | Reminder that behavior changes via config, not chat. | Never (it's the same across all packs). |
-
-When the factory misbehaves, you diagnose by asking: *which of these six sections needs to change?* That's why the shape is rigid.
+> **Inline Insight: The bead is the only memory.**
+> Cross-agent state lives on the bead — labels, notes, dependencies, assigned rig. If a fact about the feature matters to a downstream agent, it goes on the bead (via `bd label`, `bd note`, or as a cross-reference into a canonical on-disk artifact the agent will look up). "The Planner said in chat that refunds are out of scope" is useless to the Architect; "the Planner's bead notes list refunds under `OUT`" is authoritative.
 
 ---
 
-## Part 2: Understand the 6 Agents (~10 min)
+## Part 2: What Individual Workflows Can't Do (~7 min)
 
-Now that you've seen the shape, let's walk through each agent's role with concrete artifact examples. For each agent you'll see: a tiny input example, a tiny output example, how it reads `PROJECT_MANIFEST.md`, and a two-line skeleton of its prompt.
+You don't need to be convinced the factory is better than chat. You need to see, concretely, which tasks bust the individual workflow — so you recognize them when they hit you in L1–L4 and know why the factory gives them somewhere to go.
 
-### Agent 1: Planner
+### Parallelism
 
-**Responsibility:** Break a natural-language feature request into a structured work package.
+In chat, you run one task at a time. If you want the Architect and the Designer to work on sibling pieces of the same feature simultaneously, you physically can't — you are the bottleneck. In the factory, two agents can be in `working` state on the dashboard at once because they're filtering different labels off the same backlog. You saw this in W1 Part 3 Step 4 (the "two agents in working state simultaneously" note).
 
-**Key question the Planner asks:** "Is this feature clear enough that an Architect, Designer, and Coder could complete it without ever talking to a human?"
+### Continuity across sessions
 
-**Example input (bead description):**
+In chat, your context vanishes when the window closes. If you reopen a new session tomorrow to keep working on yesterday's feature, you paste yesterday's context back in — and miss a chunk, and the model picks a different path. In the factory, every agent's context is rebuilt from files (manifest + bead notes + pack prompts) on every invocation. The factory doesn't "remember" — it *re-reads*, and the files don't forget.
 
-```
-Add a loyalty points system. Customers earn 1 point per $1 spent and can
-redeem 100 points for $5 off at checkout. Balance shows on order
-confirmation.
-```
+### Fanning out / fanning in
 
-**Example output (excerpt of `work-packages/loyalty-points.md`):**
+In chat, one prompt produces one answer. If your feature decomposes into three children (backend, UI, migration), you either (a) handle the three in three separate chats and manually reconcile, or (b) ask one chat to handle all three and get worse output than three specialized agents would give. In the factory, the Planner decomposes the parent bead into children with different labels, and the child beads fan out to different agents and fan back in at `ready-to-ship`.
 
-```markdown
-# Work Package: Loyalty Points System
+### Verifiable, replayable runs
 
-## Goal
-Let customers earn redeemable points on every order, surfaced on the
-order confirmation page.
+In chat, if last Tuesday's run produced a good result, you can't rerun the same thing tomorrow with confidence. The model is non-deterministic, the prompt is gone, the context is gone. In the factory, the bead, its notes, the packs' prompts, and the commits are all in git. You can `git checkout` an earlier SHA and re-sling. You know which run produced which outcome. You can diff two factory configurations and reason about what changed.
 
-## User Stories
-- As a customer, I want to earn 1 point per $1 spent, so that repeated
-  orders feel rewarding.
-- As a customer, I want to redeem points at checkout, so that I see
-  tangible value from loyalty.
+### When to stop using chat
 
-## Acceptance Criteria
-- [ ] Points ledger is updated on order placement (not on cart change)
-- [ ] 100 points redeemed = 500 cents off (per PROJECT_MANIFEST convention)
-- [ ] Cancelled orders do not award points
+The moment you hit any of those four — parallelism, continuity, fan-out, replay — you are outside the chat workflow's comfort zone. The rest of the workshop is about giving yourself the factory so those four stop hurting.
 
-## Test Cases
-- Given a $12.99 order, when placed, then 12 points are awarded.
-- Given 250 point balance, when 100 are redeemed, then 150 remain.
-
-## Scope Boundary
-- IN: earn on placement, redeem at checkout, show balance on confirmation
-- OUT: expiration policy, admin dashboard, tier-based multipliers
-```
-
-**How Planner reads `PROJECT_MANIFEST.md`:** It pulls the domain model (`Order`, `OrderItem` entities) and conventions (prices in cents) to make sure stories and ACs use project-native vocabulary. It does *not* invent new entities.
-
-**Prompt skeleton:**
-
-```markdown
-# Planner Agent
-
-## Role
-You receive feature requests and break them into structured work packages.
-
-## Inputs
-- Feature request (bead title + description)
-- docs/PROJECT_MANIFEST.md
-
-## Output Format
-work-packages/<slug>.md with: Goal, User Stories, Acceptance Criteria,
-Dependencies, Test Cases, Scope Boundary.
-
-## Quality Gate
-1. Every story has ≥1 AC
-2. ≥2 test cases
-3. Explicit scope boundary
-4. No ambiguous terms
-```
-
-### Agent 2: Architect
-
-**Responsibility:** Make technical decisions for the feature and record them as ADRs.
-
-**Key question the Architect asks:** "What are the long-term consequences of this approach, and is it already covered by an existing ADR?"
-
-**Example input:** the work package above, plus this bead description:
-
-```
-Review work-packages/loyalty-points.md. Decide how to store loyalty
-points. Produce an ADR.
-```
-
-**Example output (excerpt of `docs/adr/0001-loyalty-points-storage.md`):**
-
-```markdown
-# ADR-0001: Loyalty Points Storage Strategy
-
-## Context
-The loyalty points feature (see work-packages/loyalty-points.md) needs
-persistent point balances. Existing stack is SQLite via better-sqlite3.
-
-## Options Considered
-1. **Column on users table** — simple, but no audit trail.
-2. **Separate points_ledger table** — event-sourced, derivable balance.
-3. **External points microservice** — over-engineered for a single store.
-
-## Decision
-Option 2 (points_ledger). Balance = SUM(delta) for user_id.
-
-## Consequences
-- Positive: natural refund handling (negative ledger entries)
-- Negative: balance query requires aggregation
-- Risk: >100K orders/month may require materialized view
-
-## References
-- work-packages/loyalty-points.md
-```
-
-**How Architect reads `PROJECT_MANIFEST.md`:** It pulls the tech stack (SQLite, no external services allowed per Constraints section) to rule out options, and reads `CLAUDE.md` for tailored industry ADRs that may already cover the pattern.
-
-**Prompt skeleton:**
-
-```markdown
-# Architect Agent
-
-## Role
-You receive work packages and produce ADRs.
-
-## Inputs
-- work-packages/<slug>.md
-- docs/PROJECT_MANIFEST.md
-- CLAUDE.md (tailored ADR baselines)
-- existing docs/adr/*
-
-## Output Format
-docs/adr/NNNN-<slug>.md in MADR form: Context, Options, Decision,
-Consequences, References.
-
-## Quality Gate
-1. All 4 MADR sections present
-2. ≥2 options with trade-offs
-3. Decision references work package by path
-4. Consequences include ≥1 risk
-```
-
-### Agent 3: Designer
-
-**Responsibility:** Translate a work package + ADR into a concrete component spec the Coder can implement without making design decisions.
-
-**Key question the Designer asks:** "Can a Coder implement this with zero architectural ambiguity?"
-
-**Example input:** the work package and the ADR above.
-
-**Example output (excerpt of `design/loyalty-points-spec.md`):**
-
-```markdown
-# Component Spec: LoyaltyBalance
-
-## Purpose
-Display the current points balance on the order confirmation page.
-
-## Location
-`src/components/LoyaltyBalance.tsx`
-
-## Props / Inputs
-| Name      | Type   | Required | Description                    |
-|-----------|--------|----------|--------------------------------|
-| userId    | string | yes      | Phone-number key (per MVP auth)|
-| showLabel | bool   | no       | Render "Points:" label         |
-
-## Edge Cases
-- Empty state: "Earn your first points on this order"
-- Error state: silent fail, don't block confirmation page render
-- Loading state: render skeleton (Tailwind `animate-pulse`)
-
-## References
-- work-packages/loyalty-points.md
-- docs/adr/0001-loyalty-points-storage.md
-```
-
-**How Designer reads `PROJECT_MANIFEST.md`:** It pulls Conventions (PascalCase component files, co-located tests, Tailwind-only styling) to decide file paths and the "no inline styles" constraint.
-
-**Prompt skeleton:**
-
-```markdown
-# Designer Agent
-
-## Role
-You receive work packages + ADRs and produce component specs.
-
-## Inputs
-- work-packages/<slug>.md
-- docs/adr/*
-- docs/PROJECT_MANIFEST.md
-
-## Output Format
-design/<slug>-spec.md with: Purpose, Location, Props, State, Layout,
-Interactions, Data Flow, Edge Cases, References.
-
-## Quality Gate
-1. Props and state are typed
-2. ≥1 interaction documented
-3. Empty, error, loading states covered
-4. Location path specified
-```
-
-### Agent 4: Coder
-
-**Responsibility:** Write code that implements the spec exactly, with tests covering the work package's test cases.
-
-**Key question the Coder asks:** "Does this code pass the spec's Quality Gate and the project's lint/test commands?"
-
-**Example input:** the spec above, the work package, and the ADR.
-
-**Example output:** files under `src/`:
-
-```
-src/components/LoyaltyBalance.tsx        # implements spec
-src/components/LoyaltyBalance.test.tsx   # covers work-package test cases
-src/db/pointsLedger.ts                   # pointsLedger table queries
-```
-
-**How Coder reads `PROJECT_MANIFEST.md`:** It pulls Review Standards (no `any`, no inline styles, components <200 lines) as self-imposed constraints *before* the Reviewer sees the code. Linting to the Review Standards is cheaper than a Reviewer rejection round-trip.
-
-**Prompt skeleton:**
-
-```markdown
-# Coder Agent
-
-## Role
-You receive specs and implement code.
-
-## Inputs
-- design/<slug>-spec.md
-- work-packages/<slug>.md
-- docs/adr/*
-- docs/PROJECT_MANIFEST.md
-
-## Output
-Files under src/ matching the spec's Location field.
-
-## Quality Gate
-1. Every prop/input implemented
-2. Every interaction works
-3. Edge cases handled
-4. ≥2 test cases from work package pass
-5. npm run lint passes
-```
-
-### Agent 5: Reviewer
-
-**Responsibility:** Check the Coder's diff against the spec, acceptance criteria, and project Review Standards. Return a binary APPROVE / REQUEST_CHANGES verdict.
-
-**Key question the Reviewer asks:** "Is this code ready for production, and if not, which specific config change would fix it?"
-
-**Example input:** the feature branch diff, the spec, the work package.
-
-**Example output (excerpt of `review-reports/loyalty-points-review.md`):**
-
-```markdown
-# Review Report: Loyalty Points
-
-## Summary
-PASS — all spec elements implemented, all AC test cases pass, no
-high-severity findings.
-
-## Spec Compliance
-| Spec Element  | Implemented? | Notes           |
-|---------------|--------------|-----------------|
-| userId prop   | Yes          | -               |
-| empty state   | Yes          | -               |
-| error state   | Partial      | silent fail ok, but no log emitted |
-
-## Recommendation
-APPROVE — minor: add console.warn on fetch error (low severity).
-If you want this enforced, add to packs/coder/prompts/coder.md.tmpl:
-"All network errors must be logged via the project logger."
-```
-
-**How Reviewer reads `PROJECT_MANIFEST.md`:** It pulls the Review Standards section (style, security, severity scale) and uses it as the checklist. This is why the manifest has an explicit Review Standards section — it's the Reviewer's configuration, versioned in the repo.
-
-**Prompt skeleton:**
-
-```markdown
-# Reviewer Agent
-
-## Role
-You review code against spec, AC, and review policy.
-
-## Inputs
-- feature branch diff
-- design/<slug>-spec.md
-- work-packages/<slug>.md
-- docs/PROJECT_MANIFEST.md (Review Standards section)
-
-## Output Format
-review-reports/<slug>-review.md: Summary, Spec Compliance, Style
-Findings, Security Findings, Test Coverage, Recommendation.
-
-## Quality Gate
-1. Every spec element checked
-2. Security review covers injection, auth, data exposure
-3. Each test case has PASS/FAIL
-4. Recommendation is actionable
-```
-
-### Agent 6: Deployer
-
-**Responsibility:** Evaluate every release criterion from the manifest. Produce a binary PASS/FAIL gate report.
-
-**Key question the Deployer asks:** "Does every required criterion have PASS evidence, or does any one fail?"
-
-**Example output (excerpt of `release-gates/loyalty-points-gate.md`):**
-
-```markdown
-# Release Gate: Loyalty Points
-
-## Overall Verdict
-PASS
-
-## Criteria
-| # | Criterion                        | Result | Evidence                   |
-|---|----------------------------------|--------|----------------------------|
-| 1 | All AC met                       | PASS   | see work package checklist |
-| 2 | Review report approved           | PASS   | review-reports/loyalty-points-review.md |
-| 3 | No high-severity findings open   | PASS   | 0 high, 1 low              |
-| 4 | Tests pass                       | PASS   | 142 passed, 0 failed       |
-| 5 | No untracked files in scope      | PASS   | git status clean           |
-| 6 | Branch mergeable with main       | PASS   | no conflicts               |
-
-## Release Notes
-Customers now earn 1 point per dollar spent and can redeem 100 points
-for $5 off at checkout. Point balance shows on order confirmation.
-```
-
-**How Deployer reads `PROJECT_MANIFEST.md`:** It pulls the Release Criteria section exactly — the criteria table is generated from the manifest, not invented by the agent.
-
-**Prompt skeleton:**
-
-```markdown
-# Deployer Agent
-
-## Role
-You evaluate whether a feature meets release criteria and produce a
-binary PASS/FAIL gate.
-
-## Inputs
-- review-reports/<slug>-review.md
-- work-packages/<slug>.md
-- docs/PROJECT_MANIFEST.md (Release Criteria section)
-
-## Output Format
-release-gates/<slug>-gate.md: Overall Verdict, Criteria table (PASS/FAIL
-with evidence), Release Notes, References.
-
-## Quality Gate
-1. Every criterion has binary PASS/FAIL with evidence
-2. Overall verdict matches individual criteria
-3. Release notes are present and user-facing
-```
-
-### Inline Insight: Why is Reviewer separate from Deployer?
-
-It's tempting to collapse these into one "shipping" agent. Don't.
-
-- **Reviewer** makes *qualitative* judgments informed by code. It looks at style, security, completeness, spec fidelity. Its output is an opinion backed by evidence.
-- **Deployer** makes *binary* judgments informed by checklists. It runs tests, counts findings, checks branch state. Its output is a gate result.
-
-Separating them means the Reviewer's subjectivity stays in one prompt (Review Standards) and the Deployer's determinism stays in another (Release Criteria). You tune them independently. When a dev complains "this feature was blocked for no reason," you can tell them exactly which criterion failed and which config file to edit.
+> **Agent Guide:** If the participant looks unconvinced, prompt them to name the last time *they* hit one of these four failure modes on their own project. Make it concrete: "two days ago I opened three Claude Code windows to parallelize three branches" is the real data. Link that experience to the primitive the factory adds (beads with sibling labels) so the rest of W2 lands.
 
 ---
 
-## Part 3: Map Your Project (~15 min)
+## Part 3: Prepare Your Project (~20 min)
 
-Now you design your own factory. You'll fill in the same pipeline shape, but with your project's paths, formats, and constraints.
+This is the hands-on bulk of the session. You will work in your own repo, using your existing individual-AI tool (Claude Code, Codex, or whatever you brought). The goal at the end of this part is: your repo state plus your local tool state plus your config all line up with what L1 expects as prerequisites.
 
-### Step 1: Pick Your Feature
+### Step 1: Verify the W1 Baseline Is Still Green (~2 min)
 
-> **Agent Guide:** Push the participant to pick a feature with both frontend and backend work — single-layer features don't exercise enough of the pipeline. If they can't name a real architectural question the feature raises, pick a different feature; the Architect stage exists to answer real trade-offs, not rubber-stamp.
-
-Write one sentence describing a feature you'll trace through all six stages. Keep it small (implementable in ~2 hours of real coding) and make sure it has at least one open architectural question.
-
-```markdown
-## Feature: <name>
-
-One-sentence description.
-
-The architectural question this feature raises: <question>
-```
-
-For Fired Up Pizza: *"Add a loyalty points system where customers earn 1 point per $1 and redeem 100 points for $5 off. Architectural question: where do we store the points ledger?"*
-
-**What's happening here:** The architectural question is what distinguishes a feature needing the full 6-agent pipeline from one that could skip the Architect. If you can't identify a real decision, pick a different feature — you'll be bored by L2.
-
-### Step 2: Draft the Per-Agent Table
-
-> **Agent Guide:** For each row, insist on a file path for "what it produces" — abstract names like "the plan" or "the design" aren't allowed. Also flag duplicate artifacts: if two stages produce or consume the same file, that's a missing boundary, split them.
-
-Paste this template into your editor and fill in each row. This *is* your design deliverable — keep it terse.
-
-```markdown
-## Factory Design · <Your Feature>
-
-| Agent      | What it produces for this feature                          |
-|------------|-------------------------------------------------------------|
-| Planner    | work-packages/<your-slug>.md — stories, AC, tests, scope    |
-| Architect  | docs/adr/NNNN-<your-slug>.md — <your architectural question>|
-| Designer   | design/<your-slug>-spec.md — <component/module name>        |
-| Coder      | src/<path> + tests — <files you'll touch>                   |
-| Reviewer   | review-reports/<your-slug>-review.md — <specific checks>    |
-| Deployer   | release-gates/<your-slug>-gate.md — <pass/fail criteria>    |
-```
-
-For Fired Up Pizza, this becomes:
-
-```markdown
-## Factory Design · Loyalty Points
-
-| Agent      | What it produces for this feature                          |
-|------------|-------------------------------------------------------------|
-| Planner    | work-packages/loyalty-points.md                             |
-| Architect  | docs/adr/0001-loyalty-points-storage.md (points_ledger vs column) |
-| Designer   | design/loyalty-points-spec.md (LoyaltyBalance + checkout hook) |
-| Coder      | src/components/LoyaltyBalance.tsx, src/db/pointsLedger.ts   |
-| Reviewer   | review-reports/loyalty-points-review.md                     |
-| Deployer   | release-gates/loyalty-points-gate.md                        |
-```
-
-**What's happening here:** Each row is one commit you'll see in L2-L4. If you can't name the file path now, you can't instruct the agent to write there later.
-
-### Step 3: List the Existing Code Your Feature Touches
-
-```markdown
-## Integration Points
-
-- src/api/orders.ts (add points award on POST /api/v1/orders)
-- src/pages/OrderConfirmation.tsx (mount LoyaltyBalance)
-- src/db/schema.sql (add points_ledger table)
-- docs/PROJECT_MANIFEST.md (add points_ledger to Domain Model)
-```
-
-**What's happening here:** This list is what your Designer will reference when writing the spec's Data Flow section, and what your Reviewer will constrain the Coder against ("don't modify files outside this list"). An incomplete list here leads to accidental out-of-scope changes in L3.
-
-### Step 4: Save Your Design to `docs/factory-wiring.md`
+Everything you installed in W1 should still work. Quick re-verification:
 
 ```bash
-cat > ~/path/to/your-repo/docs/factory-wiring.md <<'EOF'
-# Factory Wiring · <Your Feature>
+# curriculum-agent skill is resolved
+ls -l ~/.claude/skills/curriculum-agent         # (or ~/.codex/skills/curriculum-agent)
 
-## Architecture Diagram
+# gc is on PATH at the curriculum-pinned version
+gc version                                       # expect: gascity 0.14.1
 
-```mermaid
-graph LR
-    FR[Feature Request] --> P[Planner]
-    P -->|work-package.md| A[Architect]
-    A -->|ADR| D[Designer]
-    D -->|component-spec.md| C[Coder]
-    C -->|code on branch| R[Reviewer]
-    R -->|review-report.md| DP[Deployer]
-    DP -->|deploy-gate.md| DONE[Done]
+# bd is on PATH
+bd --version
+
+# Provider CLI is authenticated (example for Claude Code)
+claude --version
+# Run a trivial prompt to confirm auth:
+echo "say hi" | claude -p
 ```
 
-## Per-Agent Table
-<paste the table from Step 2>
+If any row fails, fix it now — no downstream step of W2 will succeed with a broken W1 baseline. See `curriculum-agent/SKILL.md` → *Prerequisites* for the pinned-version install recipe.
 
-## Integration Points
-<paste the list from Step 3>
-EOF
-```
+> **Agent Guide:** If `claude -p` returns an auth error, walk the participant through `claude auth login` (or `codex login` for Codex). Do not proceed until the trivial prompt returns a non-empty response.
 
-Commit it. This file becomes the reference document L2's facilitator re-reads at the start of each lab.
+### Step 2: Ensure a Project Overview Exists (~3 min)
 
-### Inline Insight: Why ADRs come before design specs
-
-A common failure mode is "Designer writes the spec; Coder discovers a fatal architectural flaw; spec is rewritten." This burns two agent-runs per discovery.
-
-The Architect goes *before* the Designer specifically to prevent this. The ADR is the cheap, small, reversible artifact that locks down the shape before we spend tokens on detailed props tables. If Designer and Coder produce garbage, you first suspect a bad ADR — then fix it — rather than re-spec'ing in place.
-
-If you're running without an Architect, you've effectively asked the Designer to make architectural decisions inline. That's fine for cosmetic features (button colors) but catastrophic for anything involving storage, concurrency, or external integrations.
-
----
-
-## Part 4: Define Handoff Contracts (~10 min)
-
-> **Agent Guide:** As the participant reads each handoff row, ask: "Could a stranger pick up the consumed artifact and produce the next one without asking a question?" If not, the fields list is incomplete. For the Reviewer handoff specifically, ask which checks are specific to this project — things a generic linter can't catch. Those define the Reviewer's unique value.
-
-The 6 agents are connected by 5 handoffs. Each handoff is a **contract**: Agent A produces a specific artifact; Agent B reads it as authoritative and is not allowed to relitigate.
-
-### Step 1: Read the Five Handoff Contracts
-
-Copy this table into your design doc:
-
-```markdown
-## Handoff Contracts
-
-| From → To             | Artifact                          | Required fields |
-|-----------------------|-----------------------------------|-----------------|
-| Planner → Architect   | work-packages/<slug>.md           | goal, stories, AC, deps, test cases, scope boundary |
-| Architect → Designer  | docs/adr/NNNN-<slug>.md           | context, options (≥2), decision, consequences, references to WP |
-| Designer → Coder      | design/<slug>-spec.md             | purpose, location, props, state, interactions, data flow, edge cases |
-| Coder → Reviewer      | feature branch (no file artifact) | passing tests, lint clean, code matches spec |
-| Reviewer → Deployer   | review-reports/<slug>-review.md   | summary, spec compliance, findings, test coverage, recommendation |
-```
-
-### Step 2: Pick the Two Most Interesting Handoffs
-
-For *your* project, pick the two handoffs with the most risk — the ones most likely to go wrong first. For a typical web app, those are:
-
-1. **Planner → Architect** — high risk because vague Planner output wastes Architect reasoning.
-2. **Designer → Coder** — high risk because ambiguous specs lead to wrong implementations.
-
-For a data/ML project, you might pick Architect → Designer (for schema decisions) and Reviewer → Deployer (for evaluation gates). Pick whatever *you* expect to struggle with.
-
-### Step 3: Write a Full Contract for Each
-
-Use this template per handoff:
-
-```markdown
-## <Agent A> → <Agent B> Handoff Contract
-
-### Agent A MUST provide:
-- <artifact type>
-- <required field 1>
-- <required field 2>
-
-### Agent B EXPECTS to receive:
-- <input format>
-- <level of detail>
-
-### Agent B MUST NOT:
-- <decision A should not revisit>
-- <artifact A should not edit>
-
-### Example for our feature:
-<paste a concrete excerpt showing the contract in use>
-```
-
-**Example: Planner → Architect for Fired Up Pizza loyalty points:**
-
-```markdown
-## Planner → Architect Handoff Contract
-
-### Planner MUST provide:
-- work-packages/loyalty-points.md
-- Goal section (one sentence, outcome-focused)
-- ≥1 AC per story, binary-testable
-- Test cases in Given/When/Then form
-- Scope Boundary with IN and OUT lists
-
-### Architect EXPECTS to receive:
-- Full work package path in the bead description
-- All AC already quantified (no "make it fast" — must say "<100ms p95")
-- Scope boundary that names the open architectural questions explicitly
-
-### Architect MUST NOT:
-- Edit the work package's stories or AC
-- Re-open scope that the Planner marked OUT
-- Invent new acceptance criteria
-
-### Example excerpt:
-  > From work-packages/loyalty-points.md:
-  > "Scope Boundary → OUT: expiration policy, admin dashboard"
-  >
-  > Architect's ADR therefore only addresses storage for earn/redeem,
-  > not retention or admin tooling.
-```
-
-**What's happening here:** The "MUST NOT" line is load-bearing. Without it, Agent B will helpfully "improve" the spec and silently erase scope. You'll see this pattern repeat in every downstream handoff — each agent must refuse to revise artifacts upstream of itself.
-
-### Step 4: Commit Both Contracts
-
-Append them to `docs/factory-wiring.md` so L2 can read them. In L2, Part 1 Step 3, you'll turn these contracts into concrete edits to `packs/planner/prompts/planner.md.tmpl` (Output Format) and `packs/architect/prompts/architect.md.tmpl` (Inputs + Quality Gate).
-
-### Inline Insight: Config over ad-hoc chat corrections
-
-When an agent produces bad output, there are two ways to respond:
-
-- **Wrong:** Open the chat, say "hey, also add a section on error handling." Agent complies. Next run, same bug.
-- **Right:** Edit the Quality Gate of that agent's prompt to require error handling. Re-sling the bead. The fix is now in version control and repeats every future run.
-
-This is the single biggest discipline shift from "using an LLM as a tool" to "running a software factory." L2, L3, and L4 all require this discipline to stick; W2 is where you internalize it before the stakes rise.
-
-### Inline Insight: Artifacts are the only memory
-
-Agents do not share memory across beads. When the Architect runs, it does not remember what the Planner said in chat — it reads the work package. When the Reviewer runs, it does not remember the Coder's reasoning — it reads the diff and the spec.
-
-This has two practical consequences:
-
-1. **If a fact matters, it must be in a file.** "The Planner said in chat that refunds are out of scope" is useless to the Architect. "The work package's Scope Boundary section lists refunds under OUT" is authoritative.
-2. **Cross-references are load-bearing.** The Architect appends the ADR path to the work package specifically so the Designer, reading the work package, finds the ADR. Break the cross-reference chain and you break the handoff.
-
----
-
-## Part 5: Understand the `actual adr-bot` Layer (~5 min)
-
-Your Architect agent writes ADRs. You have two ways to source ADR content:
-
-1. **Write each ADR from scratch** — the Architect proposes three options, evaluates trade-offs, picks one. This is what L2 walks you through.
-2. **Seed tailored industry ADRs first** (`actual adr-bot`) — a CLI that analyzes your repo and *tailors* best-practice ADRs to your codebase, writing them into `CLAUDE.md` / `AGENTS.md` automatically (works with any AI coding assistant). Your Architect then references those ADRs when making local decisions instead of rediscovering industry patterns.
-
-### Step 1: Install (Optional but Recommended)
+Every factory agent ultimately routes through your `docs/PROJECT_MANIFEST.md`. That manifest is generated from a short free-form narrative document: `docs/PROJECT_OVERVIEW.md`. Before you can generate the manifest, you need the overview.
 
 ```bash
-brew install actual-software/actual/actual
+cd ~/path/to/your-project
+ls docs/PROJECT_OVERVIEW.md
 ```
 
-From your project repo:
+If it exists, skim it quickly to confirm it still describes the project as you intend to build it — projects drift between "what you wrote down" and "what you're actually doing" faster than you'd think. Tighten it if it's stale.
+
+If it doesn't exist, create it now. The template is at [`software-factory/PROJECT_OVERVIEW_TEMPLATE.md`](../../../PROJECT_OVERVIEW_TEMPLATE.md) — five sections, loose structure, no schema to follow. A completed example lives at [`software-factory/reference-project/docs/PROJECT_OVERVIEW.md`](../../../reference-project/docs/PROJECT_OVERVIEW.md). Aim for one page; not a spec.
 
 ```bash
-cd ~/path/to/your-repo
-actual adr-bot --dry-run      # Preview what it would write
-actual adr-bot                 # Write tailored ADRs into CLAUDE.md / AGENTS.md
+mkdir -p docs
+cp ~/Projects/actual-software/software-factory-intensive/software-factory/PROJECT_OVERVIEW_TEMPLATE.md docs/PROJECT_OVERVIEW.md
+# Fill in the five sections. Plain English. Keep it short.
 ```
 
-### Step 2: Example ADRs You Might See Written
+This is the **last** document you will hand-write for the factory. Everything else — the manifest, any ADRs, specs, review reports — the factory produces from here on.
 
-For a React/TypeScript/SQLite project like Fired Up Pizza, `actual adr-bot` might populate `CLAUDE.md` with tailored versions of ADRs like:
+### Step 3: Generate Your Project Manifest (~8 min)
 
-- **ADR-seed-1: Prefer explicit TypeScript types at module boundaries** — customized to cite `src/types/` and call out exported functions specifically.
-- **ADR-seed-2: Use parameterized queries for all database access** — customized to name `better-sqlite3`'s `.prepare()` API and show an example against the `orders` table.
+This is the one time in the weekend you get to use a chat-style individual-AI workflow with intent. You are going to point Claude Code (or Codex) at your repo, ask it to read the overview + the codebase, and produce `docs/PROJECT_MANIFEST.md` against the shipped schema.
 
-The Architect, when asked to write ADR-0001 for loyalty points, will:
+The schema is defined in [`software-factory/PROJECT_MANIFEST_TEMPLATE.md`](../../../PROJECT_MANIFEST_TEMPLATE.md). Read through it once so you know what the agent is about to fill in — Tech Stack, Project Structure, Domain Model, Conventions, Constraints, Task Inputs, Services to Connect, Success Criteria, Review Standards, Release Criteria.
 
-1. Read these seed ADRs from `CLAUDE.md` first.
-2. Recognize that "parameterized queries" is already a project standard — it won't rewrite that decision.
-3. Focus its ADR exclusively on the *novel* question (points ledger vs column on users table).
+Then, from your project repo, launch Claude Code (or your preferred CLI agent) and run a single prompt against it:
 
-### Step 3: Note the Three Design Implications
+```text
+Read docs/PROJECT_OVERVIEW.md and the repository, then generate docs/PROJECT_MANIFEST.md
+using the schema at
+~/Projects/actual-software/software-factory-intensive/software-factory/PROJECT_MANIFEST_TEMPLATE.md.
 
-What this adds to your W2 design:
+Fill every section. For anything you can't determine from the overview or the code,
+insert `TBD — <specific follow-up question>` so I can resolve it later. Do not invent
+entities, tech choices, or constraints that aren't grounded in what you read.
 
-- **Handoff contract Planner → Architect** gains a prior step: the Architect reads the curated ADR set first, and only writes a new ADR when the decision isn't covered by an existing one.
-- **Quality bar for ADRs** gets higher: a decision to *deviate* from a tailored industry ADR is a more interesting artifact than a decision made in a vacuum.
-- **Review criteria (Reviewer agent, W4 inputs)** now has `actual`-sourced ADRs as an additional compliance axis: "Does this code violate ADR-seed-2 on parameterized queries?"
+When done, commit the result with message:
+  docs: generate project manifest from overview
 
-Note this in your `docs/factory-wiring.md`: *"Architect reads `CLAUDE.md` ADR section first; writes new ADRs to `docs/adr/NNNN-<slug>.md` only for decisions not covered."*
+Stop for confirmation before committing.
+```
 
-Skipping `actual adr-bot` is fine for the workshop — you'll just have fewer ADR baselines and the Architect will rederive more patterns. You can install it later.
+When the agent finishes, **read the manifest top to bottom**. Things to check:
+
+- **Tech Stack** — are the versions right? (The agent sometimes guesses from `package.json` names and gets majors wrong on transitive deps.)
+- **Domain Model** — are the entities real? (Drop any invented ones; the Reviewer will enforce this list in L4.)
+- **Conventions** — match your actual commit / branch / naming style, not an industry default.
+- **Review Standards** and **Release Criteria** — these two sections are the Reviewer's and Deployer's rubrics in L4. If they're thin, the agents downstream will be thin. Beef them up.
+
+Any section you can't fully fill today, leave as `TBD — <question>`. L2's Architect agent can resolve TBDs on your behalf later.
+
+Commit once you're satisfied:
+
+```bash
+git add docs/PROJECT_MANIFEST.md
+git commit -m "docs: generate project manifest from overview"
+```
+
+> **Agent Guide:** After the agent produces the draft, ask the participant: "Which three sections would you push back on the most?" Make them read and critique — not just scroll. The exercise of finding three weak sections now is what keeps the factory from shipping generic reviews in L4.
+
+### Step 4: Validate Your Local AI Toolset (~5 min)
+
+The factory, when it runs in L1, will spawn sessions of your provider CLI (Claude Code, Codex, etc.) one per agent. Each spawn needs the same permissions and auth the CLI has when you run it interactively. A missing tool permission or an unauthenticated provider is the single most common cause of a red agent in L1 — catch it now.
+
+Confirm each row. If your provider is Codex, substitute the equivalent commands.
+
+| Check | How to verify | Why it matters |
+|-------|---------------|----------------|
+| Provider CLI auth is valid | `echo "say hi" \| claude -p` returns non-empty | Every agent will fail on startup if auth is expired. |
+| CLI can read your repo | `claude -p "list the top-level directories of $(pwd)"` returns a plausible listing | Confirms filesystem access + working-directory handoff. |
+| CLI can write to your repo | `claude -p "create a throwaway file at /tmp/sfi-w2-test.txt containing 'ok'"` then `cat /tmp/sfi-w2-test.txt` | Confirms the runner isn't sandboxed away from filesystem writes. |
+| CLI can run shell commands | `claude -p "run 'git status' and summarize the output"` | Coder, Reviewer, Deployer all shell out for git/tests/linters. |
+| Memory / global settings are sane | `cat ~/.claude/CLAUDE.md` (or equivalent) — skim for overrides that would conflict with factory behavior | A global "always ask before running git" rule will hang the Coder agent. |
+
+If any row fails, fix it before moving on. Common fixes:
+
+- **Expired auth:** `claude auth login`.
+- **Filesystem denied:** check `~/.claude/settings.json` → `permissions` block; relax for the workshop, tighten later.
+- **Global CLAUDE.md conflicts:** move conflicting rules behind a project scope or comment out for the workshop.
+
+> **Agent Guide:** If the participant's global `~/.claude/CLAUDE.md` has rules that would block the factory (e.g., "always confirm before editing"), call it out explicitly: "this rule will turn into six stuck agents in L1 — decide now whether to scope it or suspend it." Don't silently edit their config.
+
+Clean up the throwaway file:
+
+```bash
+rm -f /tmp/sfi-w2-test.txt
+```
+
+### Step 5: Confirm Repo Hygiene (~2 min)
+
+L1 will register your project as a Gas City *rig*. Rigs work best against a clean git state — the factory will branch off from wherever you are, and surprises in your uncommitted working tree become surprises in agent output.
+
+```bash
+cd ~/path/to/your-project
+git status
+```
+
+You want to see either a clean tree or changes you're actively aware of. Stash or commit anything you don't want the factory to read. Also confirm:
+
+- You're on the branch you intend to run the factory on (usually `main` or a feature branch of your choice, not a scratch experiment branch).
+- Your `.gitignore` isn't excluding `docs/` (agents need to read the manifest).
+- You've recently pulled, so `bd dolt push` (when it comes up in L2+) doesn't collide.
+
+```bash
+git pull --rebase
+git status                    # clean tree (or expected in-progress changes only)
+git log --oneline -3          # you recognize the last three commits
+```
 
 ---
 
-## Connection to Gas City
+## Part 4: Commit the Factory-Ready Checklist (~5 min)
 
-Each row of your factory design maps directly to a file path under `packs/` and `my-factory/`. Here's the mapping to keep open as you move to L2:
+The concrete artifact W2 leaves in your repo is a short committed checklist that L1 reads as its prerequisite. Keep it tight — this is not a design doc. It's an evidence file.
 
-| W2 design deliverable | Becomes concrete edit in | Installed in |
-|-----------------------|--------------------------|--------------|
-| "Planner produces `<your work package format>`" | `packs/planner/prompts/planner.md.tmpl` — Output Format section | L2 |
-| "Architect produces `<your ADR format>`" | `packs/architect/prompts/architect.md.tmpl` — Output Format section | L2 |
-| "Designer produces `<your spec format>`" | `packs/designer/prompts/designer.md.tmpl` — Output Format section | L3 |
-| "Coder writes to `<your src layout>`" | `packs/coder/prompts/coder.md.tmpl` — Output + Rules sections | L3 |
-| "Reviewer checks `<your review standards>`" | `packs/reviewer/prompts/reviewer.md.tmpl` + `docs/PROJECT_MANIFEST.md` Review Standards | L4 |
-| "Deployer gates on `<your release criteria>`" | `packs/deployer/prompts/deployer.md.tmpl` + `docs/PROJECT_MANIFEST.md` Release Criteria | L4 |
-| Handoff contract Planner → Architect | `## Inputs` + `## Output Format` must match across both prompts | L2 |
-| Handoff contract Architect → Designer | `## Inputs` of designer.md must reference the ADR path format Architect writes | L3 |
-| Handoff contract Designer → Coder | `## Inputs` of coder.md must name the spec format Designer writes | L3 |
-| Handoff contract Coder → Reviewer | Reviewer's Inputs section references the feature-branch diff + spec path | L4 |
-| Handoff contract Reviewer → Deployer | Deployer's Inputs section references review report path + Release Criteria | L4 |
+### Step 1: Create `docs/FACTORY_READY.md`
 
-Also note the skeleton template layout — this is what your project's filesystem should look like after W2:
+Copy this template into your project repo. Fill in each row with a brief, honest answer — `Yes`, `No`, a version number, a path, a one-liner. Leave nothing as placeholder.
 
+```markdown
+# Factory-Ready Checklist
+
+Captured at the end of W2 as the prerequisite evidence for L1. Regenerate
+this file whenever your toolset changes materially.
+
+## Tool Baseline
+
+- [ ] `gc version` prints `gascity 0.14.1`
+- [ ] `bd --version` runs
+- [ ] `~/.claude/skills/curriculum-agent` (or Codex equivalent) resolves to the SFI repo
+- [ ] Provider CLI: <name + version>, authenticated against <account>
+- [ ] `echo "say hi" | <cli> -p` returns non-empty
+
+## Project State
+
+- [ ] Branch: <branch>
+- [ ] Working tree clean (or: expected in-progress changes only)
+- [ ] Last commit I can describe: <SHA short + one line>
+- [ ] `docs/PROJECT_OVERVIEW.md` exists and reflects current intent
+- [ ] `docs/PROJECT_MANIFEST.md` generated and committed at <SHA>
+- [ ] Remaining `TBD` items in manifest: <count, brief list>
+
+## Factory Wiring (context only — L1 installs)
+
+- [ ] I can name each of the 6 canonical labels and which agent consumes each
+- [ ] I accept that agent behavior changes via pack config, not chat
+
+## One-Line Summary
+
+<Your feature-and-first-bead intent in one sentence.>
 ```
-my-factory/
-  docs/
-    PROJECT_MANIFEST.md        ← source of truth every agent reads first
-    factory-wiring.md          ← your W2 deliverable
-    adr/                       ← Architect writes here (ADR-NNNN-slug.md)
-  work-packages/               ← Planner writes here
-  design/                      ← Designer writes here
-  review-reports/              ← Reviewer writes here
-  release-gates/               ← Deployer writes here
-  feedback-loops/              ← W4 feedback rules
-  CLAUDE.md                    ← Global agent instructions (+ tailored ADRs)
-```
 
-During W2, two of these files matter most:
-
-1. **`docs/PROJECT_MANIFEST.md`** — your design's single source of truth. Every agent reads this before doing anything. Domain model, conventions, success criteria, Review Standards, Release Criteria *all* land here.
-2. **`docs/factory-wiring.md`** — the Mermaid diagram + per-agent table + handoff contracts you just wrote in Parts 3–4.
-
-If you haven't copied the skeleton into your project repo yet, do so now so L2 starts clean:
+### Step 2: Commit it
 
 ```bash
-mkdir -p ../../path/to/your-repo/{work-packages,docs/adr,design,review-reports,release-gates,feedback-loops}
+cd ~/path/to/your-project
+git add docs/FACTORY_READY.md
+git commit -m "docs: W2 factory-ready checklist"
 ```
 
----
+If your L1 prerequisites check runs `ls docs/FACTORY_READY.md` and `grep -c '\[x\]' docs/FACTORY_READY.md` — that's all it's checking. The checklist exists; you filled it in honestly.
 
-## Read Fired Up Pizza as a Finished Reference
-
-Fired Up Pizza is the reference project — a complete, working example of a 6-agent factory's *shape*. Spend 5 minutes scanning:
-
-- [`reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md`](../../../reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md) — compare length and specificity to your own `docs/PROJECT_MANIFEST.md`. Note the Review Standards and Release Criteria sections — those are the Reviewer's and Deployer's input.
-- [`reference-project/fired-up-pizza/tickets.md`](../../../reference-project/fired-up-pizza/tickets.md) — the backlog that feeds the factory. Note how each ticket is written: single-sentence goal, explicit acceptance criteria, no implementation detail. Tickets become bead descriptions, which become Planner input.
-- [`reference-project/fired-up-pizza/workflow-card.md`](../../../reference-project/fired-up-pizza/workflow-card.md) — the workflow card that seeded Fired Up Pizza's agent instructions. Note the rules around prices in cents and TypeScript strict mode — those constrain every agent downstream.
-- [`packs/fired-up-pizza/pack.toml`](../../../packs/fired-up-pizza/pack.toml) — the *composite* pack that bundles all 6 agent packs. In L5 (the capstone), you install this one pack and get all 6 agents at once.
-
-Ask yourself: *if I replaced `docs/PROJECT_MANIFEST.md` in Fired Up Pizza with mine, would the agent prompts still make sense?* If not, your manifest is under-specified — and that's exactly what Part 3 corrects.
+> **Agent Guide:** If any row says `No` or `TBD`, resolve it now. W2 runs only once in the workshop; the one session that's designed to absorb missing prereqs is over when lunch ends. A participant who leaves with `No` rows will get stuck in L1.
 
 ---
 
 ## Common Issues & Solutions
 
-Real problems you'll hit during and after W2:
+### Issue 1: The individual-AI agent produced a manifest with invented entities
 
-### Issue 1: "My feature is too simple — the Architect has nothing to decide"
+**Cause:** The Project Overview was vague, so the agent filled in plausible-but-wrong defaults for Domain Model.
 
-If your chosen feature is purely cosmetic (button color, copy change), the Architect will produce a trivial ADR and you won't learn the discipline. **Fix:** pick a feature with a storage, concurrency, or integration decision. "Add CSV export" becomes interesting if you ask "stream vs buffer? run in request vs queue job?".
+**Fix:** Edit the Overview to name real entities first. Re-run the manifest generation prompt. Don't try to hand-patch the manifest — it'll drift from the overview and the next manifest refresh will overwrite you anyway.
 
-### Issue 2: "My work package has vague acceptance criteria"
+### Issue 2: `claude -p` returns auth errors
 
-You wrote AC like "should be fast" or "should be nice." **Fix:** quantify everything. "Fast" → "p95 <100ms on the order confirmation page". "Nice" → "matches the visual style of the adjacent order summary card." The Planner's Quality Gate literally says "no ambiguous terms remain."
+**Cause:** Expired session, or you installed Claude Code after your token was issued.
 
-### Issue 3: "I can't tell what goes in the manifest vs. what goes in a prompt"
+**Fix:** `claude auth login`. If that fails, delete the credentials file under `~/.claude/` and re-auth.
 
-Rule of thumb: if it's *project-specific* (domain model, tech stack, Review Standards) it goes in `docs/PROJECT_MANIFEST.md`. If it's *agent-specific* (output format, quality gate, process steps) it goes in the pack prompt.
+### Issue 3: Global `CLAUDE.md` rules will block the factory
 
-### Issue 4: "My handoff contract has no MUST NOT clause"
+**Cause:** Your global `~/.claude/CLAUDE.md` has rules like "always confirm before `git commit`" or "never run shell commands without asking," which the factory's autonomous agents will trip over.
 
-Without it, downstream agents will edit upstream artifacts and silently erase scope. **Fix:** every contract needs at least one MUST NOT. Examples: "Architect MUST NOT edit AC", "Coder MUST NOT reorganize files from the spec", "Reviewer MUST NOT add new requirements not in the spec."
+**Fix:** Either (a) move those rules into a project-scoped `CLAUDE.md` in a different repo, or (b) comment them out for the duration of the workshop and restore after. The factory can't operate with a confirmation step between every action.
 
-### Issue 5: "I put integration points in the Designer's prompt, not the manifest"
+### Issue 4: My repo is on a feature branch that isn't mergeable
 
-Integration points (existing files and APIs your feature touches) are project-specific, not agent-specific. Put them in the manifest's Domain Model or a per-feature work package. Pack prompts should be reusable across features.
+**Cause:** Mid-refactor, merge conflicts with main, work-in-progress that isn't ready to show agents.
 
-### Issue 6: "I wrote my design as prose, not a table"
+**Fix:** Create a W2-specific branch off a clean SHA and run the factory there. `git switch -c factory-prep && git reset --hard <clean-sha>`. The factory branches from wherever the rig is; you want that wherever to be clean.
 
-Prose is hard to translate into prompt-file edits. **Fix:** the per-agent table in Part 3, Step 2 is the expected form. Each row becomes one concrete edit in L2-L4.
+### Issue 5: `docs/PROJECT_MANIFEST.md` is huge (>300 lines)
 
-### Issue 7: "I have more than one open architectural question for this feature"
+**Cause:** Your project is big, and the manifest faithfully captures all of it.
 
-Write more than one ADR. It's normal for a feature to spawn ADR-0001 (storage) and ADR-0002 (API pattern). Just make sure each ADR addresses a single decision — multi-decision ADRs are impossible to supersede cleanly later.
+**Fix:** It's fine to be long, but prune the **Domain Model** and **Tech Stack** sections to the 10–15 core entities / libraries the factory will actually touch. Agents read the manifest on every wake; an oversize manifest slows every agent down.
 
-### Issue 8: "My Reviewer is going to check things not in PROJECT_MANIFEST"
+### Issue 6: I don't have a Project Overview and didn't bring one
 
-Everything the Reviewer checks must be in the Review Standards section. If you want it to check accessibility, add an Accessibility subsection. If you want it to check error handling, add an Error Handling subsection. The Reviewer cannot invent standards out of thin air — it reads them from the manifest.
+**Cause:** Missed the pre-workshop prep.
 
-### Issue 9: "Skipped the Architect for a small feature — now the Coder is making architectural choices"
+**Fix:** Use the next 8 minutes to write a one-page Overview from scratch using the template. Lean on the five sections literally — don't freestyle. Then proceed to Step 3.
 
-If the Coder is deciding where to store data or which API pattern to use, you should have routed through the Architect first. **Fix:** in your wiring doc, write "Architect runs unless feature touches only one file in `src/components/`." Anything broader triggers the full pipeline.
+### Issue 7: The provider CLI works interactively but the factory will probably spawn it differently
 
-### Issue 10: "Not sure how `actual adr-bot` fits with my own ADRs"
+**Cause:** Factory sessions run in a non-interactive shell; some CLIs behave differently than in your terminal.
 
-Tailored ADRs (in `CLAUDE.md`) are baselines. Hand-written ADRs (in `docs/adr/`) are feature-specific decisions. The Architect reads baselines first, then writes a feature ADR only if the decision isn't already covered or needs a local override. Think of `CLAUDE.md` as ADR-seed-\* and `docs/adr/` as ADR-NNNN.
+**Fix:** Confirm the non-interactive path works: `echo "say hi" | claude -p` (or `codex exec` for Codex). This is the path L1 will exercise. If interactive works but `-p` fails, your CLI is misconfigured for headless use — fix it now.
 
----
+### Issue 8: My repo doesn't have `docs/` yet
 
-## Concept Check (before moving to L2)
+**Cause:** Small project, never needed a docs directory.
 
-> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
+**Fix:** `mkdir -p docs` and commit. The factory expects `docs/PROJECT_MANIFEST.md` at that path specifically — don't relocate it.
 
-- Why each agent reads files, not chat history, for handoff. (Chat memory is lost across sessions; files are durable.)
-- Why the artifact per stage is singular — one work package, one ADR, one spec. (Keeps the interface auditable.)
-- What distinguishes the Planner's work package from the Architect's ADR from the Designer's spec. (Scope of decision — what-to-build, how-to-build, how-to-structure.)
-- Why the 6-agent split produces better code than a single do-everything agent. (Each prompt is narrow; each handoff is a checkpoint.)
-- Why `AGENTS.md` stubs belong in the project repo even before the packs are installed. (They encode the pipeline shape — L2 just fills it in.)
+### Issue 9: I want to use my IDE's AI (not Claude Code / Codex CLI)
+
+**Cause:** Hoping an IDE extension (Cursor, Continue, etc.) will play the role of the agent runner.
+
+**Fix:** For the workshop, use a CLI runner — the factory spawns CLI processes per agent and IDE extensions aren't addressable that way. Once the factory works, you can absolutely keep your IDE AI for other purposes.
+
+### Issue 10: Manifest template says "generated in L1"; L1 says "completed in W2" — which is right?
+
+**Cause:** Slight drift between the template's old note and the current session flow.
+
+**Fix:** Trust the session flow: W2 generates the manifest, L1 consumes it. (The template will be refreshed in a follow-up bead; the generation step belongs where you do it with an individual AI, and L1 is where you run the factory on what W2 produced.)
 
 ---
 
 ## Exit Criteria
 
-Before leaving this workshop, verify all of these:
+Before leaving W2, verify all of these:
 
-- [ ] `docs/PROJECT_MANIFEST.md` exists in your project repo and has all five sections filled in (Tech Stack, Project Structure, Domain Model, Conventions, Review Standards, Release Criteria)
-- [ ] `docs/factory-wiring.md` exists with a Mermaid diagram + per-agent table + integration points + two handoff contracts
-- [ ] You can name, in one sentence each, what every one of the 6 agents will produce for your chosen feature
-- [ ] You've skimmed all 6 pack prompt files in `packs/*/prompts/*.md` and recognize the six-section shape
-- [ ] You've decided whether to seed ADR baselines with `actual adr-bot` before L2 (or explicitly noted "write all ADRs from scratch")
-- [ ] You've read the Fired Up Pizza reference project's manifest and tickets for comparison
+- [ ] `docs/PROJECT_OVERVIEW.md` exists in your project repo and is current.
+- [ ] `docs/PROJECT_MANIFEST.md` exists, every section filled (or marked `TBD — <question>`), committed to a known SHA.
+- [ ] `docs/FACTORY_READY.md` exists, every row answered, committed.
+- [ ] `echo "say hi" | claude -p` (or Codex equivalent) returns non-empty output.
+- [ ] `gc version` prints `gascity 0.14.1`.
+- [ ] `bd --version` runs cleanly.
+- [ ] `ls -l ~/.claude/skills/curriculum-agent` resolves to the SFI repo (Codex equivalent: `~/.codex/skills/`).
+- [ ] Your project repo's working tree is clean (or has only the three commits from this session).
+- [ ] You can name, from memory, the six canonical labels and which agent consumes each.
+- [ ] You agree, in your own words, that agent behavior changes via **pack config**, not chat.
+
+If any row is unchecked, resolve it now — L1 opens in 5 minutes and assumes every row above is green.
+
+---
+
+## Concept Check (before moving to L1)
+
+> **Agent Guide:** Before declaring the session complete, ask the participant to answer each bullet below out loud without re-reading. If they can't, revisit the matching section.
+
+- **Why is the Project Manifest committed as a file, not kept in chat memory?** Because every factory agent reads it on every wake; chat memory doesn't persist across agent sessions, and agents run in separate processes anyway.
+- **When an agent produces wrong output, do you re-prompt it or edit the pack?** Edit the pack. Always. Chat corrections evaporate; pack edits are versioned and repeat.
+- **Name the six canonical labels and who consumes each.** `needs-plan` → Planner; `needs-architecture` → Architect; `needs-design` → Designer; `ready-to-build` → Coder; `needs-review` → Reviewer; `ready-to-ship` → Deployer.
+- **Where does the Coder get the Planner's findings?** Off the bead — notes + labels + cross-references to on-disk artifacts. Never from chat.
+- **Why is the factory-ready checklist committed rather than held in your head?** Because L1 reads it to decide whether to proceed, and because committing a small artifact is the habit the rest of the workshop builds on.
 
 ---
 
 ## Command Cheat Sheet
 
-W2 is design-only — no agent runs. These are the file-browsing and scaffolding commands you may have used:
-
 ```bash
-# Browse the shipped packs
-ls /path/to/software-factory-intensive/packs/
-cat /path/to/software-factory-intensive/packs/planner/prompts/planner.md.tmpl
-cat /path/to/software-factory-intensive/packs/architect/pack.toml
+# --- Part 3: prepare your project ---
 
-# Read the reference project
-cat /path/to/software-factory-intensive/reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md
-cat /path/to/software-factory-intensive/reference-project/fired-up-pizza/tickets.md
+cd ~/path/to/your-project
 
-# Scaffold your project with the skeleton
-mkdir -p ../../path/to/your-repo/{work-packages,docs/adr,design,review-reports,release-gates,feedback-loops}
+# Verify W1 baseline
+gc version                                                   # gascity 0.14.1
+bd --version
+ls -l ~/.claude/skills/curriculum-agent                       # resolves to SFI repo
+echo "say hi" | claude -p                                     # non-empty response
 
-# Optional: seed tailored industry ADRs before L2
-brew install actual-software/actual/actual
-cd ~/path/to/your-repo
-actual adr-bot --dry-run
-actual adr-bot
+# Ensure Project Overview exists
+mkdir -p docs
+cp ~/Projects/actual-software/software-factory-intensive/software-factory/PROJECT_OVERVIEW_TEMPLATE.md docs/PROJECT_OVERVIEW.md
+# Edit docs/PROJECT_OVERVIEW.md — fill 5 sections
 
-# Commit your design
-cd ~/path/to/your-repo
-git add docs/PROJECT_MANIFEST.md docs/factory-wiring.md
-git commit -m "docs: W2 factory design for <your feature>"
+# Generate Project Manifest via individual-AI CLI
+# (inside Claude Code / Codex, with your project repo as the working directory)
+# Prompt: see Part 3 Step 3
+
+# Commit the manifest
+git add docs/PROJECT_MANIFEST.md
+git commit -m "docs: generate project manifest from overview"
+
+# --- Part 4: factory-ready checklist ---
+
+# Create docs/FACTORY_READY.md from the template in Part 4 Step 1
+# Fill in every row
+git add docs/FACTORY_READY.md
+git commit -m "docs: W2 factory-ready checklist"
+
+# --- Sanity checks ---
+git log --oneline -3
+git status                                                    # clean
 ```
 
-No `gc` or `bd` commands are required for W2. Those kick in at L2 when you install your first pack.
+No `gc sling`, no `bd create`, no pack edits this session — those all start in L1 and L2.
 
 ---
 
-## Quick Reference: Your Factory Design
+## Quick Reference: What You Prepared
 
-After W2, your design doc should answer every row in this table. Fill it in now if any row is still blank.
-
-| Axis | Your answer |
-|------|-------------|
-| Chosen feature | e.g., "Loyalty points for Fired Up Pizza" |
-| Architectural question | e.g., "Column vs separate ledger table for storage?" |
-| Planner output path | `work-packages/<your-slug>.md` |
-| Architect output path | `docs/adr/NNNN-<your-slug>.md` |
-| Designer output path | `design/<your-slug>-spec.md` |
-| Coder output path(s) | `src/<subpath>` — list every file you expect to touch |
-| Reviewer output path | `review-reports/<your-slug>-review.md` |
-| Deployer output path | `release-gates/<your-slug>-gate.md` |
-| Integration points (existing files) | List every file your feature will edit or depend on |
-| Review Standards added to manifest | Any project-specific Review Standards (e.g., "prices in cents") |
-| Release Criteria added to manifest | Any project-specific gates (e.g., "bundle size delta <5%") |
-| ADR baselines via `actual adr-bot`? | Yes / No — decide before L2 |
-| Riskiest handoff | Which handoff you expect to struggle with most |
-| `docs/factory-wiring.md` committed? | Yes / No — must be Yes before starting L2 |
+| Artifact | Location | Read by |
+|----------|----------|---------|
+| Project Overview | `docs/PROJECT_OVERVIEW.md` | You + individual-AI (input to Manifest generation) |
+| Project Manifest | `docs/PROJECT_MANIFEST.md` | Every factory agent in L1–L4 |
+| Factory-ready checklist | `docs/FACTORY_READY.md` | L1 prerequisites check |
+| Provider CLI (authenticated) | your shell | Every agent spawn in L1–L4 |
+| `curriculum-agent` skill (from W1) | `~/.claude/skills/curriculum-agent` | Every lab install / doctor / status call |
+| Labeled-beads protocol (memorized) | [`LABELED_BEADS.md`](../../../LABELED_BEADS.md) | You, when reading agent behavior |
 
 ---
 
 ## Next Steps
 
-In **L2**, you'll:
+**L1 (next, 1:45pm Day 1)** — David installs the 6-agent factory on your project. The installer reads your repo, registers it as a rig, copies the shipped packs, and spins up all six agents. Your `docs/FACTORY_READY.md` is what L1's prerequisites check looks for; everything else you did in W2 (clean repo, manifest, auth) is what makes the install succeed on the first try instead of the third.
 
-- Install the Planner and Architect packs (`gc rig add --include`)
-- Customize `packs/planner/prompts/planner.md.tmpl` and `packs/architect/prompts/architect.md.tmpl` with the handoff contracts you wrote here
-- Create your first bead, sling it to the Planner, review the work package against the Quality Gate
-- Optionally seed tailored ADRs via `actual adr-bot` before running the Architect
-- Sling a dependent bead to the Architect, produce ADR-0001, verify cross-references in both directions
+**Bring to L1:**
 
-**Bring to L2:**
+- [ ] Your project repo path, committed and clean.
+- [ ] `docs/PROJECT_MANIFEST.md` committed.
+- [ ] `docs/FACTORY_READY.md` committed.
+- [ ] A one-sentence description of the first feature you want to walk through the factory (not required for L1 itself, but you'll want it by L2's Planner step).
 
-- [ ] `docs/PROJECT_MANIFEST.md` — filled in with tech stack, domain model, Conventions, Review Standards, Release Criteria
-- [ ] `docs/factory-wiring.md` — Mermaid diagram + per-agent table + integration points + two handoff contracts
-- [ ] A one-sentence note of whether you'll seed ADRs via `actual adr-bot` or write each from scratch
-- [ ] Your chosen feature ready to describe as a bead title + description
-
-Without these three artifacts, L2's first 20 minutes will be scrambling to write what W2 was designed to produce.
+Take a short break if you're ahead — L1 is 60 minutes of active factory setup and you want the attention budget intact.
