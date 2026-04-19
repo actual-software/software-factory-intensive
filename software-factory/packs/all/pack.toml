@@ -1,10 +1,10 @@
 # actual-factory — Composition pack that wires all 8 Agent Operations
 # into a single runnable software factory.
 #
-# Includes every leaf pack in examples/actual/ via relative paths.
+# Includes every leaf pack in software-factory/packs/ via relative paths.
 # Each leaf pack is also usable standalone — this one just bundles
 # them so a user can bring the whole factory up with a single
-# `includes = ["examples/actual/all"]` line in their city.toml.
+# `includes = ["software-factory/packs/all"]` line in their city.toml.
 #
 # The "pipeline" is NOT hardcoded here. Each leaf pack's order gate
 # matches on a bead label (needs-architecture, needs-plan, etc.)
@@ -19,8 +19,8 @@ includes = [
     "../planner",
     "../designer",
     "../validator",
-    "../builder",
+    "../coder",
     "../reviewer",
-    "../release-gate",
+    "../deployer",
     "../improver",
 ]

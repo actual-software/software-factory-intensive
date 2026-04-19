@@ -1,8 +1,8 @@
 # actual-architect
 
-The **Architect** agent of the Actual Software Factory. One of eight
-Agent-Operation packs under `examples/actual/`. Maps to the
-"Architect" operation at https://www.actual.ai/softwarefactory.
+The **Architect** agent of the Actual Software Factory. One of the
+leaf Agent-Operation packs under `software-factory/packs/`. Maps to
+the "Architect" operation at https://www.actual.ai/softwarefactory.
 
 ## Persona
 
@@ -78,11 +78,11 @@ Review and commit the diff.
 ## Handoff protocol
 
 ```
-architect (this pack)  →  planner  →  designer/validator  →  builder
+architect (this pack)  →  planner  →  designer/validator  →  coder
                                                                 ↓
                                                              reviewer
                                                                 ↓
-                                                          release-gate
+                                                             deployer
                                                                 ↓
                                                             improver
                                                                 ↓

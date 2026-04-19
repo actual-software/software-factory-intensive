@@ -22,7 +22,7 @@ factory rather than implementing fixes itself.
   - `needs-plan` → planner
   - `needs-design` → designer
   - `needs-tests` → validator
-  - `ready-to-build` → builder
+  - `ready-to-build` → coder
   - `needs-review` → reviewer
 - Writes a daily summary under `.actual/feedback/<date>.md`
 

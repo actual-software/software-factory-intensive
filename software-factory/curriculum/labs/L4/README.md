@@ -6,24 +6,24 @@
 |---|---|
 | **Estimated duration** | ~75 minutes |
 | **Type** | LAB |
-| **Deliverable** | Working Reviewer + Release-Gate agents, one `review-reports/<slug>-review.md`, one `release-gates/<slug>-gate.md`, and at least one finding resolved via a Builder prompt edit (never a manual code change) |
+| **Deliverable** | Working Reviewer + Deployer agents, one `review-reports/<slug>-review.md`, one `release-gates/<slug>-gate.md`, and at least one finding resolved via a Coder prompt edit (never a manual code change) |
 
 ---
 
 ## Session workspace note
 
-Pack renames since this README was first written: **Coder → `builder`** and **Deployer → `release-gate`** (same roles, same outputs, new pack directories). Prompt template paths are `packs/builder/prompts/builder.md.tmpl` and `packs/release-gate/prompts/release-gate.md.tmpl`. Commands `gc sling builder` and `gc sling release-gate` replace their `coder` / `deployer` equivalents.
+Prompt template paths are `packs/coder/prompts/coder.md.tmpl` and `packs/deployer/prompts/deployer.md.tmpl`. Commands: `gc sling coder` and `gc sling deployer`.
 
 **Where your work goes this session:**
 * Session deliverables → `../../../activities/labs/L4/` (the activity folder for L4)
 * Customised pack copies → `../../../activities/labs/L4/packs/<agent>/`
-* Wire packs into `../../../my-factory/city.toml` — `includes = [..., "../packs/reviewer", "../packs/release-gate"]` (shipped) or `../activities/labs/L4/packs/<agent>` (customised). See [`activities/labs/L4/README.md`](../../../activities/labs/L4/README.md) for exact lines.
+* Wire packs into `../../../my-factory/city.toml` — `includes = [..., "../packs/reviewer", "../packs/deployer"]` (shipped) or `../activities/labs/L4/packs/<agent>` (customised). See [`activities/labs/L4/README.md`](../../../activities/labs/L4/README.md) for exact lines.
 
 If a prompt edit breaks the pack, swap `includes` back to the shipped `../packs/<name>` path and `gc service restart` — the shipped pack always passes `gc doctor`.
 
 ---
 
-> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. This is the strictest session for config discipline: **review findings are fixed by editing the Builder prompt, never by editing code**. An agent reading this README should start by opening `my-factory/PROJECT_MANIFEST.md` — especially the Review Standards and Release Criteria sections — since the Reviewer and Release-Gate agents read those as their rubric.
+> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. This is the strictest session for config discipline: **review findings are fixed by editing the Coder prompt, never by editing code**. An agent reading this README should start by opening `my-factory/PROJECT_MANIFEST.md` — especially the Review Standards and Release Criteria sections — since the Reviewer and Deployer agents read those as their rubric.
 
 ---
 
@@ -55,7 +55,7 @@ If a prompt edit breaks the pack, swap `includes` back to the shipped `../packs/
                     └─────────────┬─────────────┘     Test Coverage, Recommendation
                                   │
                                   │   If REQUEST_CHANGES:
-                                  │   ◂────── edit packs/builder/prompts/builder.md.tmpl
+                                  │   ◂────── edit packs/coder/prompts/coder.md.tmpl
                                   │           re-sling coder, re-sling reviewer
                                   │
                                   │   If APPROVE:
@@ -88,7 +88,7 @@ Before starting this lab, verify each of these:
 | Prerequisite | How to verify | If it's missing |
 |-------------|---------------|-----------------|
 | L3 complete | `ls ~/path/to/your-repo/design/` and `ls ~/path/to/your-repo/src/` show the loyalty-points feature files | Go back and complete L3. The Reviewer needs a spec and implementation to review. |
-| Designer + Coder agents working | `gc status` shows `designer` and `coder` as `idle` | Re-run the L3 installs with `gc rig add --include packs/designer` and `gc rig add --include packs/builder`. |
+| Designer + Coder agents working | `gc status` shows `designer` and `coder` as `idle` | Re-run the L3 installs with `gc rig add --include packs/designer` and `gc rig add --include packs/coder`. |
 | All 4 prior packs installed | `gc rig list` shows `planner`, `architect`, `designer`, `coder` on your rig | Re-run `gc rig add --include` for each missing pack from L2 and L3. |
 | Feature branch present | `git branch --show-current` in your repo shows `l3-designer-coder` (or your L3 branch) with the Coder's commits on it | Check out the branch produced in L3 before slinging the Reviewer. |
 | Work package + spec exist | `ls work-packages/loyalty-points-system.md design/loyalty-points-system-spec.md` → both exist | Complete the Planner and Designer steps from L2 and L3 first. |
@@ -179,7 +179,7 @@ max_active_sessions = 1
 
 ### Step 3: Open the Deployer Pack Prompt
 
-[`packs/release-gate/prompts/release-gate.md.tmpl`](../../../packs/release-gate/prompts/release-gate.md.tmpl)
+[`packs/deployer/prompts/deployer.md.tmpl`](../../../packs/deployer/prompts/deployer.md.tmpl)
 
 Same six-section structure, different role:
 
@@ -215,7 +215,7 @@ Notice the key phrase in the Quality Gate: **"evidence (not opinions)"**. This i
 
 ### Step 4: Open the Deployer Pack Metadata
 
-[`packs/release-gate/pack.toml`](../../../packs/release-gate/pack.toml)
+[`packs/deployer/pack.toml`](../../../packs/deployer/pack.toml)
 
 ```toml
 [pack]
@@ -257,7 +257,7 @@ rig "your-repo" updated — added pack "reviewer"
 
 ```bash
 gc rig add ~/path/to/your-repo \
-  --include /path/to/software-factory-intensive/packs/release-gate
+  --include /path/to/software-factory-intensive/packs/deployer
 ```
 
 You should see:
@@ -389,7 +389,7 @@ git commit -m "chore(city): declare reviewer + deployer agents"
 
 ## Part 3: Sling to the Reviewer (~15 min)
 
-> **Agent Guide:** Before the participant slings, ask: "Which criteria in your Review Standards matter most for this feature? What should the Reviewer catch that a linter can't?" Naming those out loud anchors what "a good review" means for this bead. Also: do not let the participant sling the Reviewer without a Builder artifact — the Reviewer has no contract without the Coder's output.
+> **Agent Guide:** Before the participant slings, ask: "Which criteria in your Review Standards matter most for this feature? What should the Reviewer catch that a linter can't?" Naming those out loud anchors what "a good review" means for this bead. Also: do not let the participant sling the Reviewer without a Coder artifact — the Reviewer has no contract without the Coder's output.
 
 ### Step 1: Create the Reviewer Bead
 
@@ -469,7 +469,7 @@ Wait until the Reviewer returns to `idle` in `gc status`. This typically takes 3
 
 ### Step 4: Examine the Review Report
 
-> **Agent Guide:** Ask the participant: "What's the highest-severity finding?" Don't move on until they can state it in one sentence. Then — before any fix — have them confirm out loud: "I will fix this by editing `packs/builder/prompts/builder.md.tmpl`. I will not touch the code." This verbal checkpoint is where most participants break discipline; catching it before the fix starts is easier than rolling back after.
+> **Agent Guide:** Ask the participant: "What's the highest-severity finding?" Don't move on until they can state it in one sentence. Then — before any fix — have them confirm out loud: "I will fix this by editing `packs/coder/prompts/coder.md.tmpl`. I will not touch the code." This verbal checkpoint is where most participants break discipline; catching it before the fix starts is easier than rolling back after.
 
 ```bash
 cd ~/path/to/your-repo
@@ -515,12 +515,12 @@ edits that would prevent recurrence.
 ## Recommendation
 REQUEST_CHANGES. To resolve:
 
-1. **High: concurrent redeem race** — Update packs/builder/prompts/builder.md.tmpl
+1. **High: concurrent redeem race** — Update packs/coder/prompts/coder.md.tmpl
    Quality Gate to require: "Any code path that both reads and mutates a
    shared balance MUST wrap the read-and-write in a single transaction.
    Use db.transaction() from better-sqlite3."
 
-2. **Medium: redeem auth bypass** — Update packs/builder/prompts/builder.md.tmpl
+2. **Medium: redeem auth bypass** — Update packs/coder/prompts/coder.md.tmpl
    Rules section to require: "Every endpoint that takes a userId parameter
    MUST verify req.user.id === req.body.userId (or equivalent). If the
    spec does not specify auth behavior, assume the authenticated user is
@@ -557,14 +557,14 @@ If any rule fails: **do not edit the review report by hand.** Edit `packs/review
 
 ## Part 4: Fix Via Config (Critical Step — ~20 min)
 
-> **Agent Guide:** This is the strictest enforcement of the entire curriculum. The instant the participant opens the Coder's output files to hand-fix a finding, stop them, roll the edit back, and redirect them to `packs/builder/prompts/builder.md.tmpl`. No exceptions. If they argue "just this once," that's exactly the habit the workshop is trying to break.
+> **Agent Guide:** This is the strictest enforcement of the entire curriculum. The instant the participant opens the Coder's output files to hand-fix a finding, stop them, roll the edit back, and redirect them to `packs/coder/prompts/coder.md.tmpl`. No exceptions. If they argue "just this once," that's exactly the habit the workshop is trying to break.
 
 This is the crux of L4. The Reviewer has produced findings. A developer's instinct is to open the Coder's output files and fix them directly. **Do not do this.** The whole point of a factory is that improvements persist as agent config, not as one-off manual edits. If you hand-fix the code today, the next feature will have the same bug tomorrow.
 
 The discipline is:
 
 1. For each reviewer finding, identify what the Coder should have done differently.
-2. Edit `packs/builder/prompts/builder.md.tmpl` to make that behavior the Coder's default.
+2. Edit `packs/coder/prompts/coder.md.tmpl` to make that behavior the Coder's default.
 3. Re-sling the Coder against the same bead. The Coder regenerates the code with the updated prompt.
 4. Re-sling the Reviewer against the same review bead. Verify the finding is gone.
 
@@ -579,7 +579,7 @@ The Reviewer flagged this finding:
 #### Step 1: Open the Coder Prompt
 
 ```bash
-$EDITOR packs/builder/prompts/builder.md.tmpl
+$EDITOR packs/coder/prompts/coder.md.tmpl
 ```
 
 Current Quality Gate section:
@@ -622,7 +622,7 @@ Save and close.
 
 ```bash
 cd ~/path/to/your-repo
-git add packs/builder/prompts/builder.md.tmpl
+git add packs/coder/prompts/coder.md.tmpl
 git commit -m "chore(coder): require transaction wrapping for balance mutations"
 ```
 
@@ -630,7 +630,7 @@ git commit -m "chore(coder): require transaction wrapping for balance mutations"
 
 ```bash
 cd my-factory
-gc sling builder [coder-bead-id-from-L3]
+gc sling coder [coder-bead-id-from-L3]
 gc watch coder
 ```
 
@@ -695,11 +695,11 @@ Save.
 
 ```bash
 cd ~/path/to/your-repo
-git add packs/builder/prompts/builder.md.tmpl
+git add packs/coder/prompts/coder.md.tmpl
 git commit -m "chore(coder): require auth check on userId endpoints"
 
 cd my-factory
-gc sling builder [coder-bead-id]
+gc sling coder [coder-bead-id]
 gc watch coder
 
 gc sling reviewer my-factory-r1r2r3
@@ -712,7 +712,7 @@ After the re-sling, `src/api/loyalty.ts` contains an explicit `if (req.user.id !
 
 Every finding you resolve via config is a systemic improvement — the next feature the Coder writes will already have the transaction-wrapping rule and the auth-check rule baked in. Every finding you resolve via a hand-edit is a one-off — the next feature will re-introduce the bug. The orchestrator runs indefinitely; hand-edits do not accumulate into a better factory. Config edits do.
 
-**Minimum to pass the exit criteria:** at least one review finding must be resolved by editing `packs/builder/prompts/builder.md.tmpl` (or the Designer's spec when the gap is upstream of the Coder). Zero manual code edits in response to review findings.
+**Minimum to pass the exit criteria:** at least one review finding must be resolved by editing `packs/coder/prompts/coder.md.tmpl` (or the Designer's spec when the gap is upstream of the Coder). Zero manual code edits in response to review findings.
 
 ---
 
@@ -757,10 +757,10 @@ Created bead: my-factory-d1d2d3
 ### Step 2: Sling the Bead to the Deployer
 
 ```bash
-gc sling release-gate my-factory-d1d2d3
+gc sling deployer my-factory-d1d2d3
 ```
 
-(If you renamed the agent to something else in `city.toml` — e.g. `devops` or `deployer` — use `gc sling <your-name> my-factory-d1d2d3`. The shipped pack in this lab declares the agent as `release-gate`; the agent name in your city is whatever you declared.)
+(If you renamed the agent to something else in `city.toml` — e.g. `devops` — use `gc sling <your-name> my-factory-d1d2d3`. The shipped pack in this lab declares the agent as `deployer`; the agent name in your city is whatever you declared.)
 
 You should see:
 
@@ -790,7 +790,7 @@ Wait until the Deployer returns to `idle`. This typically takes 2–5 minutes.
 
 ### Step 4: Examine the Release Gate Record
 
-> **Agent Guide:** Check every row: does each criterion have PASS/FAIL with evidence (command output, test results, artifact paths), or does it read like an opinion? Any "looks good" verdict is a prompt gap in the Release-Gate template — fix it before the session ends. A gate whose output is opinions is not a gate.
+> **Agent Guide:** Check every row: does each criterion have PASS/FAIL with evidence (command output, test results, artifact paths), or does it read like an opinion? Any "looks good" verdict is a prompt gap in the Deployer template — fix it before the session ends. A gate whose output is opinions is not a gate.
 
 ```bash
 cd ~/path/to/your-repo
@@ -998,7 +998,7 @@ Re-sling the Reviewer. Specific standards produce specific findings.
 
 **Cause:** The prompt edit wasn't reloaded, or the new rule was ambiguous.
 
-**Fix:** Run `gc restart` after editing `packs/builder/prompts/builder.md.tmpl`. Verify the new text is present with `grep "<new rule text>" packs/builder/prompts/builder.md.tmpl`. If ambiguous, tighten the wording — prefer imperative "MUST" over suggestive "should."
+**Fix:** Run `gc restart` after editing `packs/coder/prompts/coder.md.tmpl`. Verify the new text is present with `grep "<new rule text>" packs/coder/prompts/coder.md.tmpl`. If ambiguous, tighten the wording — prefer imperative "MUST" over suggestive "should."
 
 ### Issue 6: Deployer writes PASS/FAIL without evidence
 
@@ -1068,13 +1068,13 @@ When you review your own output, check:
 
 ## Concept Check (before moving to W4)
 
-> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section. Also verify by running `git log packs/builder/prompts/` that at least one finding was resolved via a Builder prompt edit, not a code edit.
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section. Also verify by running `git log packs/coder/prompts/` that at least one finding was resolved via a Coder prompt edit, not a code edit.
 
-- Why review findings are fixed by editing the Builder prompt, not the code. (A manual fix solves this bead; a prompt edit prevents the next hundred.)
+- Why review findings are fixed by editing the Coder prompt, not the code. (A manual fix solves this bead; a prompt edit prevents the next hundred.)
 - The difference between a Reviewer and a linter. (Linters enforce syntax and style; Reviewers enforce spec compliance and project-specific conventions a linter can't express.)
 - What makes a release gate "binary." (A single command produces a clean PASS or FAIL with evidence — no "mostly ready" or "looks good.")
 - Why the full pipeline is driven by `orchestrator.yaml` (W3) and not by ad-hoc slings. (Declarative config is auditable, reproducible, and edit-once-run-many.)
-- What evidence the Release-Gate should attach to each PASS/FAIL. (Command output, test results, artifact paths — not prose.)
+- What evidence the Deployer should attach to each PASS/FAIL. (Command output, test results, artifact paths — not prose.)
 
 ---
 
@@ -1084,11 +1084,11 @@ Before leaving this lab, verify all of these:
 
 - [ ] `gc status` shows all 6 factory agents: `planner`, `architect`, `designer`, `coder`, `reviewer`, `deployer` (or `devops` if you kept that role name)
 - [ ] `review-reports/loyalty-points-system-review.md` is committed with Spec Compliance, Style, Security, and Test Coverage sections filled in
-- [ ] At least one reviewer finding was resolved by editing `packs/builder/prompts/builder.md.tmpl` (or the Designer's spec), not by hand-editing code
+- [ ] At least one reviewer finding was resolved by editing `packs/coder/prompts/coder.md.tmpl` (or the Designer's spec), not by hand-editing code
 - [ ] `release-gates/loyalty-points-system-gate.md` is committed with binary PASS/FAIL evidence for every criterion
 - [ ] Both the review report and the gate record reference the work package by path
 - [ ] `orchestrator.yaml` drives both the reviewer and the deployer (not just manual `gc sling` invocations)
-- [ ] Both beads are closed (`bd list` shows status `closed` for the review and release-gate beads)
+- [ ] Both beads are closed (`bd list` shows status `closed` for the review and deploy-gate beads)
 - [ ] `DECISIONS.md` has an L4 entry noting which Coder prompt edits the Reviewer drove
 
 **L4 completes the 6-agent pipeline.** The factory is now capable of taking a feature request from intake (Planner) to deployment gate (Deployer) without a human touching the code. The workshops and capstone that follow are about running this pipeline at volume, tightening the orchestrator, and adding feedback loops.
@@ -1116,7 +1116,7 @@ Every command you ran during this lab, in order:
 # PART 1 — Install Reviewer and Deployer
 cd my-factory
 gc rig add ~/path/to/your-repo --include /path/to/packs/reviewer
-gc rig add ~/path/to/your-repo --include /path/to/packs/release-gate
+gc rig add ~/path/to/your-repo --include /path/to/packs/deployer
 gc restart
 gc status
 gc doctor
@@ -1126,7 +1126,7 @@ gc rig list
 $EDITOR my-factory/city.toml             # add [[agent]] blocks
 gc restart
 gc status
-git -C my-factory add city.toml && git -C my-factory commit -m "chore(city): declare reviewer + release-gate agents"
+git -C my-factory add city.toml && git -C my-factory commit -m "chore(city): declare reviewer + deployer agents"
 
 # PART 3 — Sling to Reviewer
 bd create "Review: Loyalty Points PR" --description "..." --depends-on [coder-bead]
@@ -1135,10 +1135,10 @@ gc watch reviewer                        # Ctrl+b d to detach
 cat review-reports/loyalty-points-system-review.md
 
 # PART 4 — Fix via config
-$EDITOR packs/builder/prompts/builder.md.tmpl    # add Quality Gate / Rules entries
-git -C ~/path/to/your-repo add packs/builder/prompts/builder.md.tmpl
+$EDITOR packs/coder/prompts/coder.md.tmpl    # add Quality Gate / Rules entries
+git -C ~/path/to/your-repo add packs/coder/prompts/coder.md.tmpl
 git -C ~/path/to/your-repo commit -m "chore(coder): <what rule you added>"
-gc sling builder [coder-bead-id]          # re-sling after prompt edit
+gc sling coder [coder-bead-id]          # re-sling after prompt edit
 gc watch coder
 gc sling reviewer my-factory-r1r2r3        # re-verify
 gc watch reviewer
@@ -1146,7 +1146,7 @@ gc watch reviewer
 
 # PART 5 — Sling to Deployer
 bd create "Release Gate: Loyalty Points" --description "..." --depends-on my-factory-r1r2r3
-gc sling release-gate my-factory-d1d2d3
+gc sling deployer my-factory-d1d2d3
 gc watch deployer
 cat release-gates/loyalty-points-system-gate.md
 bd close my-factory-d1d2d3 --comment "Release gate PASS"
@@ -1169,13 +1169,13 @@ git -C ~/path/to/your-repo push
 |-----------|-----------------|--------------|
 | Reviewer pack | `packs/reviewer/` | Defines the Reviewer agent: prompt, overlay, metadata |
 | Reviewer prompt | `packs/reviewer/prompts/reviewer.md` | System prompt for the Reviewer — Role, Inputs, Output Format, Quality Gate, Process, Config Discipline |
-| Deployer pack | `packs/release-gate/` | Defines the Deployer agent: prompt, overlay, metadata |
-| Deployer prompt | `packs/release-gate/prompts/release-gate.md.tmpl` | System prompt for the Deployer — same six-section structure |
+| Deployer pack | `packs/deployer/` | Defines the Deployer agent: prompt, overlay, metadata |
+| Deployer prompt | `packs/deployer/prompts/deployer.md.tmpl` | System prompt for the Deployer — same six-section structure |
 | Review Standards | `docs/PROJECT_MANIFEST.md` (Review Standards section) | Project-specific review policy — what counts as a finding |
 | Release Criteria | `docs/PROJECT_MANIFEST.md` (Release Criteria section) | Project-specific release gate rows — what must be PASS for a release |
 | Review report | `review-reports/loyalty-points-system-review.md` | Reviewer's output: Summary, Spec Compliance, Style, Security, Test Coverage, Recommendation |
 | Release gate | `release-gates/loyalty-points-system-gate.md` | Deployer's output: Overall Verdict, Criteria table with binary PASS/FAIL + evidence, Release Notes, References |
-| Coder prompt edits | `packs/builder/prompts/builder.md.tmpl` diff | The config-discipline artifact — each reviewer finding resolved is a commit on this file |
+| Coder prompt edits | `packs/coder/prompts/coder.md.tmpl` diff | The config-discipline artifact — each reviewer finding resolved is a commit on this file |
 | Reviewer bead | `bd show my-factory-r1r2r3` | Work item that triggered the Reviewer, depends on the Coder bead |
 | Deployer bead | `bd show my-factory-d1d2d3` | Work item that triggered the Deployer, depends on the Reviewer bead |
 | Orchestrator config | `orchestrator.yaml` | Automation wiring: Coder-close → Reviewer-sling → (if APPROVE) Deployer-sling |

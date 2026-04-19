@@ -4,7 +4,7 @@
 # Harvests runtime signals (metrics, errors, user feedback) after a
 # release and feeds them back into the factory as new beads for the
 # right upstream agent — architect, planner, designer, validator,
-# builder, or reviewer.
+# coder, or reviewer.
 #
 # Wakes on a cooldown schedule (daily) rather than a label condition,
 # because the feedback loop needs to run periodically regardless of

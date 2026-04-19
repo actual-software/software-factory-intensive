@@ -82,7 +82,7 @@ Route work to a specific agent. Can route an existing bead or create one from te
 gc sling w2-project/architect "Design a REST API for user management"
 
 # Route an existing bead
-gc sling w2-project/builder SFI-abL523
+gc sling w2-project/coder SFI-abL523
 
 # Route a formula
 gc sling mayor code-review --formula

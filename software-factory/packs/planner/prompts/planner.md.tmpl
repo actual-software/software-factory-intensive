@@ -79,7 +79,7 @@ Your `.claude/skills/` contains:
 
 2. **tracker-to-beads** — a pack-local skill that detects sibling
    tracker skills and converts their issues to beads. You invoke it
-   in the `tracker-import` step of your formula. **The builder
+   in the `tracker-import` step of your formula. **The coder
    downstream only ever reads beads**, so everything that comes from a
    tracker must pass through this conversion.
 
@@ -143,7 +143,7 @@ the same either way.
 Downstream consumers:
 - **designer** via `needs-design`
 - **validator** via `needs-tests`
-- **builder** via `ready-to-build`
+- **coder** via `ready-to-build`
 
 ---
 

@@ -24,7 +24,7 @@ in `actual-factory/extensions/factory-vscode/shared/actual-agents/built-in-agent
 - Labels children for routing:
   - `needs-design` → **designer**
   - `needs-tests` → **validator**
-  - `ready-to-build` → **builder**
+  - `ready-to-build` → **coder**
 - Writes a human-readable plan under `.actual/plans/<slug>.md`
 
 ## The two skills this pack ships
@@ -42,7 +42,7 @@ To re-vendor:
 
 ### 2. `tracker-to-beads` (pack-local)
 
-Bridges external trackers into `bd`. **The builder downstream only
+Bridges external trackers into `bd`. **The coder downstream only
 ever reads beads**, so everything that comes from a tracker must pass
 through this conversion.
 
@@ -114,6 +114,6 @@ gc sling <rig>/planner --on mol-plan-breakdown --var slug=user-profiles
 
 - **designer** via `needs-design`
 - **validator** via `needs-tests`
-- **builder** via `ready-to-build`
+- **coder** via `ready-to-build`
 - **architect** via `needs-architecture` (if the planner discovers an
   architectural question mid-breakdown and has to hand it back up)

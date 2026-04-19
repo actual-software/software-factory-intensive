@@ -13,15 +13,15 @@ skeptic. Reviews behavior, not taste. Every finding cites a line.
 ## What it does
 
 - Reads beads labelled `needs-review`
-- Diffs the builder's commits
+- Diffs the coder's commits
 - Runs style / lint / vet against changed files
 - Walks the diff against OWASP Top 10
 - Runs the validator's test suite and checks spec coverage
 - Issues a verdict: **pass** or **request-changes**
-- Hands off to the release-gate (`ready-to-ship`) or back to the
-  builder (`ready-to-build`)
+- Hands off to the deployer (`ready-to-ship`) or back to the
+  coder (`ready-to-build`)
 
 ## Handoff
 
-- **release-gate** via `ready-to-ship` (on pass)
-- **builder** via `ready-to-build` (on request-changes)
+- **deployer** via `ready-to-ship` (on pass)
+- **coder** via `ready-to-build` (on request-changes)

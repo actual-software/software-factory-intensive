@@ -11,10 +11,10 @@ A self-contained set of Gas City custom-agent packs implementing the
 3. **UI/UX Design** — wireframes, design systems, a11y audits
 4. **Validate / Test Cases** — write failing tests from acceptance
    criteria
-5. **Build Code** — implement against the test suite
+5. **Code** — implement against the test suite
 6. **Code Review** — automated review for style, security, spec
    compliance
-7. **Deploy / Release Gate** — quality gate with rollback plan
+7. **Deploy** — quality gate with rollback plan
 8. **Improve / Feedback Loop** — runtime signals back into the spec
 
 Each operation is one pack. Each pack is a single custom Gas City
@@ -25,18 +25,17 @@ shell that `includes` all 8 leaf packs.
 ## Directory layout
 
 ```
-examples/actual/
+software-factory/packs/
 ├── README.md            # you are here
-├── city.toml            # runnable sample workspace
 ├── architect/           # Principal-Engineer persona
 ├── planner/             # Product-Manager + Program-Manager persona
 │                        # (ships the tracker-to-beads bridge skill)
 ├── designer/            # UI/UX-Designer + Accessibility-Engineer persona
 ├── validator/           # QA-Engineer persona
-├── builder/             # Backend+Frontend generalist persona
+├── coder/               # Backend+Frontend generalist persona
 ├── reviewer/            # Engineering-Manager + Principal-Engineer +
 │                        # Security-Engineer persona
-├── release-gate/        # Release-Engineer + DevOps-Engineer persona
+├── deployer/            # Release-Engineer + DevOps-Engineer persona
 ├── improver/            # SRE + Performance-Engineer + DevRel persona
 └── all/                 # composition pack — includes all 8
 ```
@@ -52,14 +51,14 @@ The agent voices are anchored to the built-in personas from
 | planner | `product-manager` + `program-manager` |
 | designer | `ui-ux-designer` + `accessibility-engineer` |
 | validator | `qa-engineer` |
-| builder | `backend-engineer` + `frontend-engineer` |
+| coder | `backend-engineer` + `frontend-engineer` |
 | reviewer | `engineering-manager` + `principal-engineer` + `security-engineer` |
-| release-gate | `release-engineer` + `devops-engineer` |
+| deployer | `release-engineer` + `devops-engineer` |
 | improver | `sre` + `performance-engineer` + `developer-advocate` |
 
 ## The actual-skill integration
 
-Three packs — **architect**, **planner**, **builder** — vendor the
+Three packs — **architect**, **planner**, **coder** — vendor the
 upstream [actual-software/actual-skill](https://github.com/actual-software/actual-skill)
 Claude Code companion for the `actual` CLI
 (ADR-powered CLAUDE.md/AGENTS.md generator). The skill sits under
@@ -69,9 +68,9 @@ up automatically when the agent starts.
 To re-vendor after upstream releases a new version:
 
 ```bash
-cd examples/actual/architect && ./scripts/sync-actual-skill.sh
-cd examples/actual/planner   && ./scripts/sync-actual-skill.sh
-cd examples/actual/builder   && ./scripts/sync-actual-skill.sh
+cd packs/architect && ./scripts/sync-actual-skill.sh
+cd packs/planner   && ./scripts/sync-actual-skill.sh
+cd packs/coder     && ./scripts/sync-actual-skill.sh
 ```
 
 The three packs use the skill slightly differently:
@@ -80,7 +79,7 @@ The three packs use the skill slightly differently:
   and generated rules in sync
 - **planner** reads `CLAUDE.md` / `AGENTS.md` for architectural
   context when breaking down work
-- **builder** runs `actual status` before coding to verify the rig
+- **coder** runs `actual status` before coding to verify the rig
   is not in ADR drift (and hands the work back to the architect if
   it is)
 
@@ -93,7 +92,7 @@ and calls its `list-issues` verb to materialize each external issue
 as a bead. The mapping is recorded idempotently in
 `.actual/planner/tracker-sync.json`.
 
-**The builder downstream only ever reads beads** — tracker
+**The coder downstream only ever reads beads** — tracker
 credentials, API quirks, and rate limits are entirely the sibling
 tracker skill's problem. The rest of the factory is tracker-agnostic.
 
@@ -125,16 +124,16 @@ on a bead label; the flow is emergent from labels, not hardcoded:
                                  │         └──────────┴───────┘
                                  │                    │
                                  │                    ▼  ready-to-build
-                                 │               builder
+                                 │                coder
                                  │                    │
                                  │                    ▼  needs-review
                                  │               reviewer
                                  │          ┌─────────┴─────────┐
                                  │          ▼                   ▼
                                  │   ready-to-build       ready-to-ship
-                                 │   (back to builder)         │
+                                 │   (back to coder)           │
                                  │                             ▼
-                                 │                      release-gate
+                                 │                        deployer
                                  │                             │
                                  │                             ▼  needs-improve
                                  │                        improver (24h cooldown)
@@ -149,11 +148,12 @@ honors Gas City's core invariant: **ZERO hardcoded roles**.
 ## How to run
 
 ```bash
-# 1. Register at least one rig (your project repo)
-gc rig add /path/to/your/project
+# 1. Register at least one rig (your project repo), from your Gas City
+#    workspace (e.g. `my-factory/`):
+gc rig add ../../path/to/your-project
 
-# 2. Start the factory — this brings up all 8 agents
-gc start examples/actual/
+# 2. Start the factory — this brings up whichever agents you've included
+gc start
 
 # 3. File a goal to kick things off
 bd create --title "Build user profiles" --label needs-architecture
@@ -171,7 +171,7 @@ Each leaf pack works on its own. To use just one:
 # in your own city.toml
 [workspace]
 name = "mycity"
-includes = ["/abs/path/to/examples/actual/builder"]
+includes = ["../packs/coder"]
 ```
 
 ## Principles honored

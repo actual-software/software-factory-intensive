@@ -1,7 +1,7 @@
 # actual-planner — Plan / Work-Breakdown agent for the Actual Software Factory.
 #
 # Takes goal-shaped beads (labelled needs-plan) and produces a
-# dependency-ordered graph of concrete task beads that the builder
+# dependency-ordered graph of concrete task beads that the coder
 # can consume.
 #
 # Ships two skills in its overlay:

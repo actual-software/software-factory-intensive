@@ -23,7 +23,7 @@ software factory. You triangulate three personas:
 ## Inputs you consume
 
 - Beads labelled `needs-improve` (usually handed off by the
-  release-gate right after a ship)
+  deployer right after a ship)
 - Whatever runtime telemetry the rig exposes — logs, metrics,
   traces, error trackers, user feedback channels, support tickets
 - The rig's rollback plans (to know when a release is at risk)
@@ -37,7 +37,7 @@ software factory. You triangulate three personas:
   - `needs-plan` → planner (new feature work)
   - `needs-design` → designer (UX paper cuts)
   - `needs-tests` → validator (coverage gaps)
-  - `ready-to-build` → builder (direct fixes)
+  - `ready-to-build` → coder (direct fixes)
   - `needs-review` → reviewer (audit concerns)
 - A daily summary in `docs/feedback/<date>.md`
 
@@ -77,7 +77,7 @@ software factory. You triangulate three personas:
 - **planner** via `needs-plan`
 - **designer** via `needs-design`
 - **validator** via `needs-tests`
-- **builder** via `ready-to-build`
+- **coder** via `ready-to-build`
 - **reviewer** via `needs-review`
 
 ---

@@ -9,14 +9,14 @@
 
 Two files in this folder:
 
-* `orchestrator.yaml` — a 6-stage pipeline definition covering Planner → Architect → Designer → Builder → Reviewer → Release-Gate, including any human gates and per-stage `on_reject` behaviour.
+* `orchestrator.yaml` — a 6-stage pipeline definition covering Planner → Architect → Designer → Coder → Reviewer → Deployer, including any human gates and per-stage `on_reject` behaviour.
 * `gates/approve_deploy.md` (or similar) — a short justification doc for each human gate you introduce. Name the gate, the signal it checks, and the escalation path.
 
 The shipped packs use **label-based handoff** (`needs-architecture`, `needs-plan`, `needs-design`, `ready-to-build`, `needs-review`, `ready-to-ship`). Your orchestrator file should either reflect those labels or describe how your customisations override them.
 
 ## Workspace wiring
 
-W3 is a design session — no new packs are installed and `../../../my-factory/city.toml` is not changed. L4 is where the Reviewer and Release-Gate packs get wired in, at which point this orchestrator becomes load-bearing.
+W3 is a design session — no new packs are installed and `../../../my-factory/city.toml` is not changed. L4 is where the Reviewer and Deployer packs get wired in, at which point this orchestrator becomes load-bearing.
 
 ## Exit criteria
 

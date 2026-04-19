@@ -98,7 +98,7 @@ Write to `{{feedback_dir}}/<today>.md`:
 
 | # | Type | Severity | Signal | Proposed action | Upstream agent |
 |---|------|----------|--------|-----------------|-----------------|
-| 1 | bug | p1 | <summary> | <1-sentence action> | builder |
+| 1 | bug | p1 | <summary> | <1-sentence action> | coder |
 | 2 | arch | p2 | <summary> | <1-sentence action> | architect |
 ...
 ```
@@ -163,7 +163,7 @@ bd ready --label=needs-improve --json 2>/dev/null \\
 #   needs-plan         → planner-intake
 #   needs-design       → designer-intake
 #   needs-tests        → validator-intake
-#   ready-to-build     → builder-intake
+#   ready-to-build     → coder-intake
 #   needs-review       → reviewer-intake
 # Do NOT gc mail send — it creates duplicate sessions.
 # Wake downstream agents.

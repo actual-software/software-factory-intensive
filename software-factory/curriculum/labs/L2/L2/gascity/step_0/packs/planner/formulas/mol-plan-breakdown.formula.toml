@@ -60,7 +60,7 @@ id = "tracker-import"
 title = "Import issues from external trackers (skip-safe)"
 needs = ["intake"]
 description = """
-Convert any external tracker issues to beads so the builder can
+Convert any external tracker issues to beads so the coder can
 consume them uniformly.
 
 **Skip entirely if `{{skip_tracker_import}}` is "true".**
@@ -248,7 +248,7 @@ bd close $ROOT_ID --reason "plan complete: docs/plans/{{slug}}.md"
 # The labels trigger the corresponding intake orders automatically:
 #   needs-design   → designer-intake
 #   needs-tests    → validator-intake
-#   ready-to-build → builder-intake
+#   ready-to-build → coder-intake
 # Do NOT gc mail send — it creates duplicate sessions.
 # Wake any downstream agents whose beads just unblocked.
 sh packs/actual/all/scripts/wake-downstream.sh &

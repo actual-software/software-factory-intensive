@@ -186,9 +186,9 @@ What `install` creates under `~/Projects/factory/`:
             ├── planner/
             ├── architect/
             ├── designer/
-            ├── builder/
+            ├── coder/
             ├── reviewer/
-            ├── release-gate/
+            ├── deployer/
             ├── validator/
             ├── improver/
             └── all/                   # Composition pack

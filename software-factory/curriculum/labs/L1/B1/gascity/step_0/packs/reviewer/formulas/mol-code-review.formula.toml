@@ -1,6 +1,6 @@
 description = """
 Code review — 5 steps from a `needs-review` bead to a pass/reject
-verdict handed off to the release-gate or back to the builder.
+verdict handed off to the deployer or back to the coder.
 
 ## Variables
 
@@ -26,7 +26,7 @@ ROOT_ID=$(bd mol current --json | jq -r '.molecule_id')
 bd show $ROOT_ID
 ```
 
-**2. Show the builder's diff:**
+**2. Show the coder's diff:**
 ```bash
 # Commits tagged with this bead ID are the review target.
 git log --grep "$ROOT_ID" --format=%H | head -5
@@ -112,7 +112,7 @@ id = "spec"
 title = "Spec compliance — run the validator's tests"
 needs = ["security"]
 description = """
-The validator wrote failing tests before the builder started. Those
+The validator wrote failing tests before the coder started. Those
 tests should now pass.
 
 **1. Run them:**
@@ -162,7 +162,7 @@ bd update $ROOT_ID \\
     --notes "<existing notes>
 verdict: pass"
 
-# The ready-to-ship label triggers release-gate-intake order automatically.
+# The ready-to-ship label triggers deployer-intake order automatically.
 # Do NOT gc mail send — it creates duplicate sessions.
 # Wake downstream agents.
 sh packs/actual/all/scripts/wake-downstream.sh &
@@ -180,7 +180,7 @@ bd update $ROOT_ID \\
 verdict: request-changes
 review_round: $(( $(bd show $ROOT_ID --json | jq -r '.notes' | grep -c '^review_round:' || echo 0) + 1 ))"
 
-# The ready-to-build label triggers builder-intake order automatically.
+# The ready-to-build label triggers coder-intake order automatically.
 # Do NOT gc mail send — it creates duplicate sessions.
 # Wake downstream agents.
 sh packs/actual/all/scripts/wake-downstream.sh &

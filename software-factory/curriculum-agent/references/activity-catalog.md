@@ -12,9 +12,9 @@ The Software Factory Intensive is a 9-session curriculum teaching multi-agent sy
 | 2 | Lab | L1 | Build structured dev loop (create CLAUDE.md + PROJECT_MANIFEST) |
 | 3 | Workshop | W2 | Design 6-agent factory architecture |
 | 4 | Lab | L2 | Deploy Planner + Architect agents |
-| 5 | Lab | L3 | Deploy Designer + Builder agents |
+| 5 | Lab | L3 | Deploy Designer + Coder agents |
 | 6 | Workshop | W3 | Multi-agent coordination patterns |
-| 7 | Lab | L4 | Deploy Reviewer + Release-Gate agents |
+| 7 | Lab | L4 | Deploy Reviewer + Deployer agents |
 | 8 | Workshop | W4 | Continuous improvement feedback loops |
 | 9 | Capstone | L5 | Run end-to-end factory on real project |
 
@@ -32,7 +32,7 @@ The Software Factory Intensive is a 9-session curriculum teaching multi-agent sy
 
 - **Category:** workshops
 - **Slug:** `workshop_w2`
-- **Focus:** Understanding the 6 core agent roles (planner, architect, designer, builder, reviewer, release-gate) and designing how they work together
+- **Focus:** Understanding the 6 core agent roles (planner, architect, designer, coder, reviewer, deployer) and designing how they work together
 - **Packs source:** `activities/workshops/W2/gascity/step_0/packs/`
 - **Prerequisites:** W1, L1
 
@@ -68,19 +68,19 @@ The Software Factory Intensive is a 9-session curriculum teaching multi-agent sy
 - **Packs source:** `activities/labs/L2/gascity/step_0/packs/`
 - **Prerequisites:** W2
 
-### L3 — Deploy Designer + Builder Agents
+### L3 — Deploy Designer + Coder Agents
 
 - **Category:** labs
 - **Slug:** `lab_l3`
-- **Focus:** Adding designer (component specs) and builder (code implementation) agents to the pipeline
+- **Focus:** Adding designer (component specs) and coder (code implementation) agents to the pipeline
 - **Packs source:** `activities/labs/L3/gascity/step_0/packs/`
 - **Prerequisites:** L2
 
-### L4 — Deploy Reviewer + Release-Gate Agents
+### L4 — Deploy Reviewer + Deployer Agents
 
 - **Category:** labs
 - **Slug:** `lab_l4`
-- **Focus:** Adding reviewer (code review) and release-gate (quality gates) agents to complete the 6-agent pipeline
+- **Focus:** Adding reviewer (code review) and deployer (quality gates) agents to complete the 6-agent pipeline
 - **Packs source:** `activities/labs/L4/gascity/step_0/packs/`
 - **Prerequisites:** L3, W3
 
@@ -101,9 +101,9 @@ Each activity's factory includes some or all of these agent packs:
 | `planner` | Break features into work packages | Product/Program Manager |
 | `architect` | ADR decisions and architectural rules | Principal Engineer |
 | `designer` | Component specifications | UI/UX Designer |
-| `builder` | Code implementation | Backend/Frontend Engineer |
+| `coder` | Code implementation | Backend/Frontend Engineer |
 | `reviewer` | Code review | Engineering Manager |
-| `release-gate` | Release quality gates | Release Engineer |
+| `deployer` | Release quality gates | Release Engineer |
 | `validator` | Test case authoring (optional) | QA Engineer |
 | `improver` | Feedback loops (optional) | SRE/Performance Engineer |
 | `all` | Composition pack — includes all above | (meta) |
@@ -118,9 +118,9 @@ Work flows through agents via labels, not hardcoded routing:
     → needs-plan → planner
       → needs-design → designer
       → needs-tests → validator
-      → ready-to-build → builder
+      → ready-to-build → coder
         → needs-review → reviewer
-          → ready-to-ship → release-gate
+          → ready-to-ship → deployer
             → needs-improve → improver
               → done
 ```

@@ -19,9 +19,9 @@ Pack mapping, where this README mentions a role → the shipped pack name:
 | Planner | `packs/planner` |
 | Architect | `packs/architect` |
 | Designer | `packs/designer` |
-| **Coder** | **`packs/builder`** |
+| **Coder** | **`packs/coder`** |
 | Reviewer | `packs/reviewer` |
-| **Deployer** | **`packs/release-gate`** |
+| **Deployer** | **`packs/deployer`** |
 
 Prompt files end in `.md.tmpl` (Gas City templates). The W2 deliverable (`factory-wiring.md`) belongs in `../../../activities/workshops/W2/`. No pack is installed in this workshop — L2 is the first session that adds packs to `../../../my-factory/city.toml`.
 
@@ -195,9 +195,9 @@ Open each prompt in the same way. You're looking for the **Inputs** and **Output
 | Planner | [`packs/planner/prompts/planner.md.tmpl`](../../../packs/planner/prompts/planner.md.tmpl) | `work-packages/<slug>.md` |
 | Architect | [`packs/architect/prompts/architect.md.tmpl`](../../../packs/architect/prompts/architect.md.tmpl) | `docs/adr/NNNN-<slug>.md` |
 | Designer | [`packs/designer/prompts/designer.md.tmpl`](../../../packs/designer/prompts/designer.md.tmpl) | `design/<slug>-spec.md` |
-| Coder | [`packs/builder/prompts/builder.md.tmpl`](../../../packs/builder/prompts/builder.md.tmpl) | `src/**` |
+| Coder | [`packs/coder/prompts/coder.md.tmpl`](../../../packs/coder/prompts/coder.md.tmpl) | `src/**` |
 | Reviewer | [`packs/reviewer/prompts/reviewer.md.tmpl`](../../../packs/reviewer/prompts/reviewer.md.tmpl) | `review-reports/<slug>-review.md` |
-| Deployer | [`packs/release-gate/prompts/release-gate.md.tmpl`](../../../packs/release-gate/prompts/release-gate.md.tmpl) | `release-gates/<slug>-gate.md` |
+| Deployer | [`packs/deployer/prompts/deployer.md.tmpl`](../../../packs/deployer/prompts/deployer.md.tmpl) | `release-gates/<slug>-gate.md` |
 
 **What's happening here:** Notice the shape is identical across all six packs — same six headings, same "read manifest first" step in Process, same Config Discipline paragraph. This uniformity is the point: once you've read one, you can read the rest in 30 seconds each, and you can edit any of them with the same mental model.
 
@@ -486,7 +486,7 @@ high-severity findings.
 
 ## Recommendation
 APPROVE — minor: add console.warn on fetch error (low severity).
-If you want this enforced, add to packs/builder/prompts/builder.md.tmpl:
+If you want this enforced, add to packs/coder/prompts/coder.md.tmpl:
 "All network errors must be logged via the project logger."
 ```
 
@@ -670,7 +670,7 @@ graph LR
     D -->|component-spec.md| C[Coder]
     C -->|code on branch| R[Reviewer]
     R -->|review-report.md| DP[Deployer]
-    DP -->|release-gate.md| DONE[Done]
+    DP -->|deploy-gate.md| DONE[Done]
 ```
 
 ## Per-Agent Table
@@ -861,9 +861,9 @@ Each row of your factory design maps directly to a file path under `packs/` and 
 | "Planner produces `<your work package format>`" | `packs/planner/prompts/planner.md.tmpl` — Output Format section | L2 |
 | "Architect produces `<your ADR format>`" | `packs/architect/prompts/architect.md.tmpl` — Output Format section | L2 |
 | "Designer produces `<your spec format>`" | `packs/designer/prompts/designer.md.tmpl` — Output Format section | L3 |
-| "Coder writes to `<your src layout>`" | `packs/builder/prompts/builder.md.tmpl` — Output + Rules sections | L3 |
+| "Coder writes to `<your src layout>`" | `packs/coder/prompts/coder.md.tmpl` — Output + Rules sections | L3 |
 | "Reviewer checks `<your review standards>`" | `packs/reviewer/prompts/reviewer.md.tmpl` + `docs/PROJECT_MANIFEST.md` Review Standards | L4 |
-| "Deployer gates on `<your release criteria>`" | `packs/release-gate/prompts/release-gate.md.tmpl` + `docs/PROJECT_MANIFEST.md` Release Criteria | L4 |
+| "Deployer gates on `<your release criteria>`" | `packs/deployer/prompts/deployer.md.tmpl` + `docs/PROJECT_MANIFEST.md` Release Criteria | L4 |
 | Handoff contract Planner → Architect | `## Inputs` + `## Output Format` must match across both prompts | L2 |
 | Handoff contract Architect → Designer | `## Inputs` of designer.md must reference the ADR path format Architect writes | L3 |
 | Handoff contract Designer → Coder | `## Inputs` of coder.md must name the spec format Designer writes | L3 |

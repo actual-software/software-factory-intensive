@@ -15,10 +15,10 @@ focused, defect pattern analyst. Tests behavior, not implementation.
 - Enumerates happy-path, error-path, and boundary cases from the
   acceptance criteria
 - Writes **failing** tests that encode those cases (runs BEFORE the
-  builder — tests come first in this factory)
+  coder — tests come first in this factory)
 - Commits the failing suite
-- Hands off to the builder via `ready-to-build`
+- Hands off to the coder via `ready-to-build`
 
 ## Handoff
 
-- **builder** via `ready-to-build`
+- **coder** via `ready-to-build`

@@ -1159,7 +1159,7 @@ Before leaving this lab, verify all of these:
 ## Next Steps
 
 In **L3**, you'll:
-- Install the Designer and Builder (Coder) packs (`packs/designer`, `packs/builder`)
+- Install the Designer and Coder packs (`packs/designer`, `packs/coder`)
 - The Designer reads your work package + ADR and produces a component spec at `design/<slug>-spec.md`
 - The Coder reads the spec and implements actual code under `src/`
 - Quality gates include `npm run build`, `npm test`, `npm run lint` — real compilation, real tests

@@ -12,7 +12,7 @@
 
 ## Session workspace note
 
-Pack naming: references to *Coder* and *Deployer* in this README map to the shipped packs **`packs/builder`** and **`packs/release-gate`** respectively. Other agent packs keep their curriculum names. W3 is a design session — no pack is installed and `my-factory/city.toml` is not touched. Orchestrator + gate docs live at `../../../activities/workshops/W3/`.
+W3 is a design session — no pack is installed and `my-factory/city.toml` is not touched. Orchestrator + gate docs live at `../../../activities/workshops/W3/`.
 
 ---
 
@@ -158,7 +158,7 @@ You read these in L2. Re-skim them now with coordination in mind, because each o
 
 - [`packs/planner/pack.toml`](../../../packs/planner/pack.toml) — `name = "planner"` is what `agent: planner` in your `orchestrator.yaml` will resolve to. `max_active_sessions = 1` means one bead at a time; the orchestrator will queue additional planner beads rather than run them concurrently.
 - [`packs/architect/pack.toml`](../../../packs/architect/pack.toml) — same shape. The `idle_timeout = "1h"` field determines how long the agent's tmux session lingers; longer timeouts reduce cold-start overhead for rapid stage transitions.
-- [`packs/designer/pack.toml`](../../../packs/designer/pack.toml), [`packs/builder/pack.toml`](../../../packs/builder/pack.toml), [`packs/reviewer/pack.toml`](../../../packs/reviewer/pack.toml), [`packs/release-gate/pack.toml`](../../../packs/release-gate/pack.toml) — the remaining four. You'll install the last two in L4, but the contracts are already defined.
+- [`packs/designer/pack.toml`](../../../packs/designer/pack.toml), [`packs/coder/pack.toml`](../../../packs/coder/pack.toml), [`packs/reviewer/pack.toml`](../../../packs/reviewer/pack.toml), [`packs/deployer/pack.toml`](../../../packs/deployer/pack.toml) — the remaining four. You'll install the last two in L4, but the contracts are already defined.
 
 Your `orchestrator.yaml` should treat the `[[agent]].name` values in these files as the **only** valid values for the `agent:` field in a stage. If you write `agent: plannr` by typo, `gc orchestrate apply` will fail at load time, not at runtime — which is the behavior you want.
 
@@ -238,7 +238,7 @@ pipeline:
 
 **Primitive used:** `bd create --requires-approval`
 
-**Fired Up Pizza example:** After the Reviewer approves the code, we **do not** automatically deploy to production. A human reviews the release-gate document, checks the database migration plan, and calls `bd approve` before the Deployer actually runs.
+**Fired Up Pizza example:** After the Reviewer approves the code, we **do not** automatically deploy to production. A human reviews the deploy-gate document, checks the database migration plan, and calls `bd approve` before the Deployer actually runs.
 
 **Expressed in orchestrator.yaml:**
 
@@ -598,7 +598,7 @@ Between `review` and `deploy` in the feature-pipeline.
 A schema migration for the points_ledger table is irreversible without
 customer-visible data loss. The Reviewer can verify the code compiles
 and tests pass, but cannot verify that production database state
-matches staging — a human must inspect the release-gate document
+matches staging — a human must inspect the deploy-gate document
 (which includes the migration plan and rollback strategy) before
 the Deployer is allowed to run.
 
@@ -771,7 +771,7 @@ Your `orchestrator.yaml` isn't aspirational — every field in it compiles to Ga
 
 **Where to look in the repo:**
 
-- [`packs/planner/pack.toml`](../../../packs/planner/pack.toml), [`packs/architect/pack.toml`](../../../packs/architect/pack.toml), [`packs/designer/pack.toml`](../../../packs/designer/pack.toml), [`packs/builder/pack.toml`](../../../packs/builder/pack.toml), [`packs/reviewer/pack.toml`](../../../packs/reviewer/pack.toml), [`packs/release-gate/pack.toml`](../../../packs/release-gate/pack.toml) — each defines one of the six agents referenced in your pipeline. Notice the `provider = "claude"` convention on `[[agent]]` blocks; other providers are supported, and the orchestrator is runner-agnostic.
+- [`packs/planner/pack.toml`](../../../packs/planner/pack.toml), [`packs/architect/pack.toml`](../../../packs/architect/pack.toml), [`packs/designer/pack.toml`](../../../packs/designer/pack.toml), [`packs/coder/pack.toml`](../../../packs/coder/pack.toml), [`packs/reviewer/pack.toml`](../../../packs/reviewer/pack.toml), [`packs/deployer/pack.toml`](../../../packs/deployer/pack.toml) — each defines one of the six agents referenced in your pipeline. Notice the `provider = "claude"` convention on `[[agent]]` blocks; other providers are supported, and the orchestrator is runner-agnostic.
 - [`packs/workshop/orders/sync-jira/order.toml`](../../../packs/workshop/orders/sync-jira/order.toml) — the shape of a declarative periodic trigger. Your `trigger.bead_label` works the same way: it watches for beads and kicks off the pipeline.
 - [`packs/workshop/orders/sync-linear/`](../../../packs/workshop/orders/sync-linear/), [`packs/workshop/orders/sync-github/`](../../../packs/workshop/orders/sync-github/), [`packs/workshop/orders/sync-gitlab/`](../../../packs/workshop/orders/sync-gitlab/) — same pattern, different issue trackers. Whichever tracker you use, feature requests enter the factory via one of these orders.
 - [`packs/workshop/pack.toml`](../../../packs/workshop/pack.toml) — the workshop pack's doctor checks. `gc doctor` runs these before you start; a broken issue-tracker connection is caught here, not at orchestration time.
@@ -919,7 +919,7 @@ git push -u origin w3-orchestrator
 
 In **L4**, you'll:
 
-- Install the Reviewer and Release-Gate (Deployer) packs (`packs/reviewer`, `packs/release-gate`) so all six agents referenced in your `orchestrator.yaml` are live
+- Install the Reviewer and Deployer packs (`packs/reviewer`, `packs/deployer`) so all six agents referenced in your `orchestrator.yaml` are live
 - Run `gc orchestrate apply orchestrator.yaml` to register the pipeline with Gas City
 - Trigger the full pipeline end-to-end with a single `bd create --label feature-request` call — the orchestrator will chain Planner through Deployer automatically, pausing only at your human gate
 - Observe the `on_reject` remediation loop in action when the Reviewer rejects a deliberately-broken implementation

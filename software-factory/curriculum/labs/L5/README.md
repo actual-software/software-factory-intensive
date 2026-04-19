@@ -12,7 +12,7 @@
 
 ## Session workspace note
 
-Pack mapping: *Coder* → `packs/builder`, *Deployer* → `packs/release-gate`. Prompt templates are `packs/<name>/prompts/<name>.md.tmpl`. Commands use the pack names: `gc sling builder <bead>`, `gc sling release-gate <bead>`.
+Prompt templates are `packs/<name>/prompts/<name>.md.tmpl`. Commands use the pack names: `gc sling coder <bead>`, `gc sling deployer <bead>`.
 
 Before starting the run, verify all six packs are wired in `../../../my-factory/city.toml`:
 
@@ -21,9 +21,9 @@ includes = [
     "../packs/planner",
     "../packs/architect",
     "../packs/designer",
-    "../packs/builder",
+    "../packs/coder",
     "../packs/reviewer",
-    "../packs/release-gate",
+    "../packs/deployer",
 ]
 ```
 
@@ -179,7 +179,7 @@ If tests fail after the Coder runs, if the Reviewer flags an issue, if the Deplo
 
 **Example violation.** The Coder writes a React component that imports from `@/lib/formatPrice` but your project uses `src/utils/formatPrice`. You open the file and change the import path by hand. The code builds, the PR merges. Three features later the Coder makes the same mistake — because the fix never reached its prompt.
 
-**Correct move.** Open `packs/builder/prompts/builder.md.tmpl`, add a rule to the Output Format: "All imports use project-relative paths from `src/` — never aliases like `@/lib/*` unless they're declared in the manifest's `tsconfig.paths`." Commit. Re-sling the Coder on the same bead.
+**Correct move.** Open `packs/coder/prompts/coder.md.tmpl`, add a rule to the Output Format: "All imports use project-relative paths from `src/` — never aliases like `@/lib/*` unless they're declared in the manifest's `tsconfig.paths`." Commit. Re-sling the Coder on the same bead.
 
 ### Rule 3: Log everything.
 
@@ -374,7 +374,7 @@ Close the Designer bead.
 
 ### Step 4: Coder (~20 min)
 
-> **Agent Guide:** This is where the factory most commonly stalls. If the Coder fails, the Designer spec is almost always the cause — missing edge cases or an ambiguous Location path. Fix `packs/designer/prompts/designer.md.tmpl`, re-sling Designer, then Coder. Also: every single time the participant is tempted to hand-edit code to make tests pass, stop them. Roll it back. Update the Builder prompt. Re-sling. No exceptions in the capstone.
+> **Agent Guide:** This is where the factory most commonly stalls. If the Coder fails, the Designer spec is almost always the cause — missing edge cases or an ambiguous Location path. Fix `packs/designer/prompts/designer.md.tmpl`, re-sling Designer, then Coder. Also: every single time the participant is tempted to hand-edit code to make tests pass, stop them. Roll it back. Update the Coder prompt. Re-sling. No exceptions in the capstone.
 
 **Command:**
 
@@ -383,7 +383,7 @@ bd create "Implement: Order history page + lookup endpoint" \
   --description "Implement design/order-history-spec.md. Follow the component tree exactly. All tests from the spec's test plan must pass before marking ready." \
   --depends-on <designer-bead-id>
 
-gc sling builder <coder-bead-id>
+gc sling coder <coder-bead-id>
 gc watch coder
 ```
 
@@ -402,7 +402,7 @@ gc watch coder
 | Symptom | Root cause | Config fix |
 |---------|-----------|-----------|
 | Tests fail on the same pattern repeatedly (e.g., "Cannot read property 'map' of undefined") | This is exactly what W4 feedback loops exist for | Your feedback rule from W4 should detect this and append a "Common Pitfalls" section to `CLAUDE.md`. If it doesn't fire, the rule's detection logic is wrong — fix the rule, not the code |
-| Coder writes to wrong directory (e.g., `components/` instead of `src/components/`) | Coder prompt doesn't reference manifest's Project Structure explicitly | Add to `packs/builder/prompts/builder.md.tmpl` Process: "Read `docs/PROJECT_MANIFEST.md` Project Structure section and use those paths exclusively" |
+| Coder writes to wrong directory (e.g., `components/` instead of `src/components/`) | Coder prompt doesn't reference manifest's Project Structure explicitly | Add to `packs/coder/prompts/coder.md.tmpl` Process: "Read `docs/PROJECT_MANIFEST.md` Project Structure section and use those paths exclusively" |
 | Coder re-implements something that already exists (e.g., a `formatPhone` util) | Coder isn't scanning existing `src/utils/` | Add to Process: "Before writing any util function, grep `src/utils/` for an existing implementation" |
 | Lint fails on every commit | Coder isn't running lint locally | Add to Quality Gate: "Before marking ready, run `npm run lint` and `npm test` — both must exit 0" |
 | Coder commits secrets or `.env` contents | Guardrail missing | Add hard rule: "Never commit files matching `.env*`, `*.pem`, `credentials*`" |
@@ -921,7 +921,7 @@ Prompts aren't compiled, so "syntax" means markdown or whitespace. Most common: 
 
 - Why the capstone uses a feature they haven't seen before. (A rehearsed feature tests memory; a new feature tests the factory.)
 - Why ad-hoc prompts break the factory's contract. (Every ad-hoc correction is a prompt update that should have happened but didn't — the next bead inherits the missing rule.)
-- What a "PASS" from the Release-Gate actually proves. (Only that the release-criteria in the manifest were met — not that the feature is good; that's the Reviewer's job.)
+- What a "PASS" from the Deployer actually proves. (Only that the release-criteria in the manifest were met — not that the feature is good; that's the Reviewer's job.)
 - Why the Retrospective asks for a Keep, a Change, and a Question. (Keep validates what compounds, Change surfaces what doesn't, Question surfaces the thing they couldn't resolve alone.)
 - Why the report is committable even when the run is incomplete. (A partial report with honest state is an audit trail; a discarded partial run is wasted learning.)
 
@@ -955,7 +955,7 @@ Create a bead with a terse description: "Add CSV export to the reports page." No
 
 ### Scenario B: Run on a feature that tests your tailored-ADR enforcement
 
-Pick a feature that deliberately tempts a pattern forbidden by a tailored ADR in `CLAUDE.md`. For example, if a tailored ADR requires parameterized queries: create a bead like "Add admin SQL report builder."
+Pick a feature that deliberately tempts a pattern forbidden by a tailored ADR in `CLAUDE.md`. For example, if a tailored ADR requires parameterized queries: create a bead like "Add admin SQL report generator."
 
 **Expected:** The Architect should catch the conflict with the tailored ADR and write a *conflict-resolution* ADR, not a vanilla one. The Reviewer should reference the tailored ADR in its findings. If neither agent notices the conflict, your tailored-ADR inputs aren't being read — tighten the Inputs sections of both prompts.
 
@@ -1010,9 +1010,9 @@ includes = [
   "../planner",
   "../architect",
   "../designer",
-  "../builder",
+  "../coder",
   "../reviewer",
-  "../release-gate",
+  "../deployer",
 ]
 ```
 
@@ -1056,9 +1056,9 @@ gc orchestrate --pipeline feature-pipeline --bead <bead-id>
 gc sling planner       <bead-id>
 gc sling architect     <architect-bead-id>
 gc sling designer      <designer-bead-id>
-gc sling builder       <builder-bead-id>
+gc sling coder         <coder-bead-id>
 gc sling reviewer      <reviewer-bead-id>
-gc sling release-gate  <release-gate-bead-id>
+gc sling deployer      <deployer-bead-id>
 
 # ----- Each sling pairs with one of these to observe -----
 gc watch <agent>               # stream that agent's session
@@ -1115,9 +1115,9 @@ gc events --dump --since 2h > factory-runs/capstone-<date>-events.log
 | 1 | Planner | Bead description + manifest | `work-packages/<slug>.md` | `packs/planner/prompts/planner.md.tmpl` |
 | 2 | Architect | Work package + manifest + `CLAUDE.md` + existing ADRs | `docs/adr/NNNN-<slug>.md` | `packs/architect/prompts/architect.md.tmpl` |
 | 3 | Designer | Work package + ADR + manifest | `design/<slug>-spec.md` | `packs/designer/prompts/designer.md.tmpl` |
-| 4 | Coder | Design spec + manifest + `CLAUDE.md` | Feature branch under `src/` + tests | `packs/builder/prompts/builder.md.tmpl` + manifest build gates |
+| 4 | Coder | Design spec + manifest + `CLAUDE.md` | Feature branch under `src/` + tests | `packs/coder/prompts/coder.md.tmpl` + manifest build gates |
 | 5 | Reviewer | Code diff + spec + manifest Review Standards + `CLAUDE.md` | `review-reports/<slug>-review.md` + PR comment | `packs/reviewer/prompts/reviewer.md.tmpl` + manifest |
-| 6 | Deployer | Review report + manifest Release Criteria | `release-gates/<slug>-gate.md` + (if passes) deploy | `packs/release-gate/prompts/release-gate.md.tmpl` + manifest |
+| 6 | Deployer | Review report + manifest Release Criteria | `release-gates/<slug>-gate.md` + (if passes) deploy | `packs/deployer/prompts/deployer.md.tmpl` + manifest |
 
 ### Capstone deliverables
 
@@ -1157,9 +1157,9 @@ One-line fixes for the top issues you're likely to hit during the run. These are
 | Planner produces output with vague language | Add forbidden-words list to `packs/planner/prompts/planner.md.tmpl` Quality Gate; re-sling |
 | Architect writes 1-option ADR | Add "minimum 3 options" rule to `packs/architect/prompts/architect.md.tmpl`; re-sling |
 | Designer spec has no types | Convert Output Format to literal template with `### Types` required; re-sling |
-| Coder uses wrong import paths | Add manifest-declared-paths-only rule to `packs/builder/prompts/builder.md.tmpl`; re-sling |
+| Coder uses wrong import paths | Add manifest-declared-paths-only rule to `packs/coder/prompts/coder.md.tmpl`; re-sling |
 | Reviewer over-approves | Add severity-threshold-for-verdict rule to `packs/reviewer/prompts/reviewer.md.tmpl`; re-sling |
-| Deployer marks gates PASS without evidence | Add "show command + exit code per gate" rule to `packs/release-gate/prompts/release-gate.md.tmpl`; re-sling |
+| Deployer marks gates PASS without evidence | Add "show command + exit code per gate" rule to `packs/deployer/prompts/deployer.md.tmpl`; re-sling |
 | Cross-references missing between artifacts | Add explicit Process step to downstream prompt: "Open upstream artifact and append back-reference"; re-sling downstream |
 | Orchestrator doesn't advance | Check `bd list --status needs-approval`; check previous bead closed; check orchestrator.yaml agent names |
 | Feedback rule not firing | Check detection regex against actual log lines with `bd event list --since 1h` |

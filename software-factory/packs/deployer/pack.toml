@@ -1,0 +1,42 @@
+# actual-deployer — Deployer agent for the Actual Software Factory.
+#
+# Takes beads labelled `ready-to-ship` and decides whether they pass
+# the final quality gate before deployment. Every approved release
+# comes with a rollback plan.
+#
+# Persona anchor: release-engineer + devops-engineer from
+# actual-factory/extensions/factory-vscode/shared/actual-agents/built-in-agents.ts
+
+[pack]
+name = "actual-deployer"
+schema = 1
+
+[[doctor]]
+name = "check-deployer"
+script = "doctor/check-deployer.sh"
+description = "Verify deployer prerequisites (bd, gc, git, jq)"
+
+[[commands]]
+name = "status"
+description = "Show deployer work status"
+script = "commands/status.sh"
+
+[[commands]]
+name = "rollback"
+description = "Print the rollback plan recorded for a released bead"
+script = "commands/rollback.sh"
+
+[formulas]
+dir = "formulas"
+
+[[agent]]
+name = "deployer"
+scope = "rig"
+wake_mode = "fresh"
+work_dir = ".gc/agents/{{.Rig}}/deployer"
+prompt_template = "prompts/deployer.md.tmpl"
+nudge = "Run 'gc prime', then check bd ready --label=ready-to-ship for work."
+overlay_dir = "overlays/default"
+idle_timeout = "2h"
+min_active_sessions = 0
+max_active_sessions = 1

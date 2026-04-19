@@ -120,7 +120,7 @@ factory (`{factory_name}`) with AI agents that plan, design, build, review, and 
 │   └── .claude/             # Claude Code agent configuration
 └── {factory_name}/          # Gas City factory workspace
     ├── city.toml            # Factory configuration
-    └── packs/actual/        # Agent packs (planner, architect, builder, etc.)
+    └── packs/actual/        # Agent packs (planner, architect, coder, etc.)
 ```
 
 ## Next Steps
@@ -139,7 +139,7 @@ gc status
 ```bash
 gc sling {project_name}/architect "Describe the task here"
 gc sling {project_name}/planner "Break down this feature into tasks"
-gc sling {project_name}/builder "Implement the login page"
+gc sling {project_name}/coder "Implement the login page"
 ```
 
 ### Open the dashboard
@@ -447,16 +447,16 @@ cd ~/Projects/factory/{slug}/{project_name}
 gc sling {project_name}/planner "Break down {activity_title} into implementation tasks"
 ```
 
-**Send work to the builder**
+**Send work to the coder**
 
 LLM prompt:
 ```
-/curriculum-agent sling {activity} builder "Implement the next ready task for {activity_title}"
+/curriculum-agent sling {activity} coder "Implement the next ready task for {activity_title}"
 ```
 CLI command:
 ```bash
 cd ~/Projects/factory/{slug}/{project_name}
-gc sling {project_name}/builder "Implement the next ready task for {activity_title}"
+gc sling {project_name}/coder "Implement the next ready task for {activity_title}"
 ```
 
 **Send work to the reviewer**

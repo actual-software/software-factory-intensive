@@ -27,9 +27,9 @@ and analyze defect patterns.
 
 - New test files under the rig's existing test directory structure
 - Updated bead notes with the test file paths and the coverage map
-- The bead relabelled `ready-to-build` so the builder picks it up
+- The bead relabelled `ready-to-build` so the coder picks it up
   next (**tests are written BEFORE the code** — the validator runs
-  ahead of the builder in this factory)
+  ahead of the coder in this factory)
 
 ## Constraints
 
@@ -63,14 +63,14 @@ and analyze defect patterns.
 2. **Cases.** Enumerate the test cases from the criteria: happy
    path, error paths, boundary conditions, and edge cases.
 3. **Suite.** Write the test files. They should fail now (the
-   builder hasn't written the code yet) — that's expected and
+   coder hasn't written the code yet) — that's expected and
    correct.
 4. **Handoff.** Commit the failing tests, relabel the bead
-   `ready-to-build`, mail the builder.
+   `ready-to-build`, mail the coder.
 
 ## What you do NOT do
 
-- Write implementation code (builder).
+- Write implementation code (coder).
 - Run load tests or profiling (a performance engineer would; not in
   this factory today).
 - Decide the UI (designer).
@@ -78,7 +78,7 @@ and analyze defect patterns.
 
 ## Handoff
 
-- **builder** via `ready-to-build`
+- **coder** via `ready-to-build`
 
 ---
 

@@ -2,12 +2,12 @@
 
 Brings up all 8 Agent Operations of the Actual Software Factory in
 one include. Depends on the 8 sibling leaf packs under
-`examples/actual/`.
+`software-factory/packs/`.
 
 ## Usage
 
 ```toml
-# city.toml at the top level of examples/actual/
+# city.toml at the top level of software-factory/packs/
 [workspace]
 name = "actual-factory"
 provider = "claude"
@@ -17,7 +17,7 @@ includes = ["all"]
 Or from outside this directory, with an absolute or relative path:
 
 ```toml
-includes = ["/abs/path/to/gascity/examples/actual/all"]
+includes = ["/abs/path/to/software-factory/packs/all"]
 ```
 
 ## The 8 agents
@@ -28,9 +28,9 @@ includes = ["/abs/path/to/gascity/examples/actual/all"]
 | Plan / Work Breakdown | `../planner` | `needs-plan` |
 | UI/UX Design | `../designer` | `needs-design` |
 | Validate / Test Cases | `../validator` | `needs-tests` |
-| Build Code | `../builder` | `ready-to-build` |
+| Code | `../coder` | `ready-to-build` |
 | Code Review | `../reviewer` | `needs-review` |
-| Deploy / Release Gate | `../release-gate` | `ready-to-ship` |
+| Deploy | `../deployer` | `ready-to-ship` |
 | Improve / Feedback Loop | `../improver` | cooldown (24h) |
 
 ## Handoff flow
@@ -46,7 +46,7 @@ architect  ───────────►  needs-plan  ─►  planner
     │                                      │
     │                      ┌───────────────┼───────────────┐
     │                      ▼               ▼               ▼
-    │                  designer       validator         builder
+    │                  designer       validator         coder
     │                      │               │               │
     │                      └───►           └───►           │
     │                      ready-to-build  ready-to-build  │
@@ -58,9 +58,9 @@ architect  ───────────►  needs-plan  ─►  planner
     │                                            ┌─────────┴─────────┐
     │                                            ▼                   ▼
     │                                  ready-to-build           ready-to-ship
-    │                                  (back to builder)             │
+    │                                  (back to coder)               │
     │                                                                ▼
-    │                                                         release-gate
+    │                                                            deployer
     │                                                                │
     │                                                                ▼
     │                                                         needs-improve

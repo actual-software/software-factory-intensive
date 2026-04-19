@@ -21,7 +21,7 @@ cd ../../../my-factory
 gc doctor
 ```
 
-All of `check-planner`, `check-architect`, `check-designer`, `check-builder`, `check-reviewer`, and `check-release-gate` should be green.
+All of `check-planner`, `check-architect`, `check-designer`, `check-coder`, `check-reviewer`, and `check-deployer` should be green.
 
 If any are missing (e.g. you skipped a lab), add the shipped path for that pack before starting the run:
 
@@ -31,9 +31,9 @@ includes = [
     "../packs/planner",
     "../packs/architect",
     "../packs/designer",
-    "../packs/builder",
+    "../packs/coder",
     "../packs/reviewer",
-    "../packs/release-gate",
+    "../packs/deployer",
 ]
 ```
 
@@ -41,7 +41,7 @@ includes = [
 
 1. Pick a new feature from your backlog (not one used during the labs).
 2. File the root bead: `bd create --title "Feature: <name>" --label needs-plan`.
-3. Sling the Planner and follow the pipeline through to the Release-Gate. Log every sling, every prompt edit, and every ad-hoc chat correction.
+3. Sling the Planner and follow the pipeline through to the Deployer. Log every sling, every prompt edit, and every ad-hoc chat correction.
 4. At the end, draft `factory-run-report.md` using the reference report as the template.
 5. Write `retrospective-card.md` — one Keep, one Change, one Question.
 

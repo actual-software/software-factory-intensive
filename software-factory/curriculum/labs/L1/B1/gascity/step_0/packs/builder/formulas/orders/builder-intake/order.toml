@@ -1,6 +1,0 @@
-[order]
-description = "Wake the builder when any bead is labelled ready-to-build"
-formula = "mol-build-from-spec"
-gate = "condition"
-check = "bd ready --label=ready-to-build --limit=1 | grep -q ."
-pool = "builder"

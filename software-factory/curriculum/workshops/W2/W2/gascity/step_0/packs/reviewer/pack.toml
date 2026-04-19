@@ -1,8 +1,8 @@
 # actual-reviewer — Code-Review agent for the Actual Software Factory.
 #
-# Takes beads labelled `needs-review` (handed off by the builder) and
+# Takes beads labelled `needs-review` (handed off by the coder) and
 # reviews for style, security, and spec compliance. Hands off to the
-# release-gate on pass, back to the builder on fail.
+# deployer on pass, back to the coder on fail.
 #
 # Persona anchor: engineering-manager + principal-engineer +
 # security-engineer from

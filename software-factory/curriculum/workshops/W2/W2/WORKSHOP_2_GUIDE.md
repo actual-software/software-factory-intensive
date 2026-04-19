@@ -7,7 +7,7 @@
 
 One file in this folder:
 
-* `factory-wiring.md` — a per-agent table for the six agents (Planner, Architect, Designer, Builder, Reviewer, Release-Gate) showing input artifact, output artifact, config file, and the integration surface each agent touches (e.g. Jira, Slack, GitHub).
+* `factory-wiring.md` — a per-agent table for the six agents (Planner, Architect, Designer, Coder, Reviewer, Deployer) showing input artifact, output artifact, config file, and the integration surface each agent touches (e.g. Jira, Slack, GitHub).
 
 The six agents map to these shipped packs:
 
@@ -16,9 +16,9 @@ The six agents map to these shipped packs:
 | Planner | `../../../packs/planner` |
 | Architect | `../../../packs/architect` |
 | Designer | `../../../packs/designer` |
-| Builder (Coder) | `../../../packs/builder` |
+| Coder | `../../../packs/coder` |
 | Reviewer | `../../../packs/reviewer` |
-| Release-Gate (Deployer) | `../../../packs/release-gate` |
+| Deployer | `../../../packs/deployer` |
 
 ## Workspace wiring
 
@@ -27,7 +27,7 @@ W2 is a design session — no pack is installed yet, so `../../../my-factory/cit
 ## Exit criteria
 
 * [ ] `factory-wiring.md` exists and covers all six agents.
-* [ ] Each row names a concrete artifact path (e.g. `work-packages/<slug>.md`) and a concrete prompt file (e.g. `../../../packs/builder/prompts/builder.md.tmpl`).
+* [ ] Each row names a concrete artifact path (e.g. `work-packages/<slug>.md`) and a concrete prompt file (e.g. `../../../packs/coder/prompts/coder.md.tmpl`).
 * [ ] Integration surface column lists the specific external services your project touches — not generic "any tracker".
 
 ## Skipped this session?

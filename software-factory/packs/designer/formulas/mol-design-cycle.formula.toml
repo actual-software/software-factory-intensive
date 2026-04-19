@@ -1,6 +1,6 @@
 description = """
 Design cycle — 4 steps from a `needs-design` bead to a wireframe
-handed off to the builder.
+handed off to the coder.
 
 ## Contract
 
@@ -104,7 +104,7 @@ Add an accessibility section to the same design file:
 - **Keyboard navigation:** <what shortcuts, what gets focus>
 - **Color contrast:** <note any colors that need contrast checks>
 - **Screen-reader labels:** <list of labels, alt text, aria-labels>
-- **Risks:** <any known a11y gaps the builder must avoid>
+- **Risks:** <any known a11y gaps the coder must avoid>
 ```
 
 Never ship a design without this section.
