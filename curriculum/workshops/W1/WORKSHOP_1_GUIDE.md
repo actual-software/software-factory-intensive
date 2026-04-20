@@ -7,17 +7,17 @@ Prepare your environment to be software factory-ready, and demonstrate it by run
 |---|---|
 | **Estimated duration** | ~60 minutes |
 | **Type** | Workshop |
-| **Deliverable** | A running Fired Up Pizza factory on your machine, with at least one bead visibly re-labelled by each of the six agents and inspectable via the dashboard |
+| **Deliverable** | A running Fired Up Pizza factory on your machine, with at least one task visibly re-labelled by each of the six agents and inspectable via the dashboard |
 
 ## Overview
 
-In this workshop, you'll get hands-on with a six-agent software factory using the Gas City framework and this repo. The high-level goal: demonstrate how feature requests flow through Planner, Architect, Designer, Builder, Reviewer, and Deployer for the **Fired Up Pizza** project, with each agent flipping labels and handing off work without human intervention.
+In this workshop, you'll get hands-on with a six-agent software factory using the Gas City framework and this repo. The high-level goal: demonstrate how feature requests flow through Planner, Architect, Designer, Builder, Reviewer, and Deployer for the **Fired Up Pizza** project, with each agent using labels to manage task status and handing off work without human intervention.
 
 Through this workshop you will:
 - Explore the Fired Up Pizza project and its six-agent software factory
 - Understand the basic logic behind agent wakeups and task assignment
 - Learn to use core agent orchestration tools (`factory-activity-agent` skill, slash commands)
-- Observe the complete automated pipeline as one bead moves through every stage
+- Observe the complete automated pipeline as one task moves through every stage
 - Use multiple observability surfaces to monitor, debug, and understand factory state
 
 ## What You'll See Run
@@ -60,7 +60,7 @@ Through this workshop you will:
               ┌─────────────────────────┐
               │  Deployer               │
               │  tags; rollback plan;   │
-              │  closes bead            │
+              │  closes task            │
               └─────────────────────────┘
 ```
 
@@ -70,7 +70,9 @@ Every transition is triggered by a label flip on a task bead by an agent.
 
 > **Goal:** Understand the basic coordination principles that allow agents to collaborate on shared work, establishing the conceptual foundation for inter-agent communication that underpins software factories.
 
-Every question W1 raises — *"why did the Architect wake?" "why did the bead move to `ready-to-build`?" "what does the Coder look at to know what to build?"* — is answered in [`software-factory/LABELED_BEADS.md`](../../../LABELED_BEADS.md). Read it before installing anything.
+Software factories implemented with Gas City use a graph-based DAG framework called `beads` to manage task dependencies and status. These "beads" are the basic units of work in the factory, and are the objects that are manipulated by the agents in the process of producing software. They can include priorities, dependencies on other tasks, notes from agents, and other metadata. For more information on beads, see [gastownhall/beads](https://github.com/gastownhall/beads).
+
+For the purpose of this workshop, a simple lable protocol is added on top of the beads framework to manage task status and handoff. Every question W1 raises — *"why did the Architect wake?" "why did the task move to `ready-to-build`?" "what does the Coder look at to know what to build?"* — is answered in [`software-factory/LABELED_BEADS.md`](../../../LABELED_BEADS.md). Read it before installing anything.
 
 1. The **six canonical labels** table (`needs-architecture`, `needs-plan`, `needs-design`, `ready-to-build`, `needs-review`, `ready-to-ship`).
 2. The **example lifecycle** walkthrough — the single worked example of a bead walking the factory.
