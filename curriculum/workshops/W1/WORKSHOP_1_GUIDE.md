@@ -144,26 +144,26 @@ With the commands above, you can now install the Fired Up Pizza factory.
 
 This copies the W1 workshop Gas City packs from `activities/workshops/W1/gascity/step_0/packs/` into your factory workspace, in addition to the [PROJECT_MANIFEST.md](./docs/PROJECT_MANIFEST.md). For a browsable view of the **fired-up-pizza** composite packaging in-repo, see [`packs/fired-up-pizza/`](../../../packs/fired-up-pizza/). The curriculum’s **reference** app lives at [`reference-project/fired-up-pizza/`](../../../reference-project/fired-up-pizza/), with `docs/PROJECT_MANIFEST.md`, `tickets.md`, and `package.json`; your installed rig under `~/Projects/factory/workshop_w1/w1-project/` is the working copy the agents mutate.
 
-### Step 2: Move into the project workspace directory
+### Step 2: Move into the factory directory
 
 ```bash
-cd ~/Projects/factory/workshop_w1/w1-project
+cd ~/Projects/factory/workshop_w1/w1-gc-factory
 ```
 
-This is the home of your project, known in Gas City as a "rig". This is space that the factory acts on to produce software. The factory itself (Gas City's  `city.toml`, agent packs, where most `gc` commands assume your cwd) lives next door at `~/Projects/factory/workshop_w1/w1-gc-factory/`. You can run `gc start`, `gc status`, and similar commands from that directory to supervise the factory.
+This is the home of your factory. It contains a Gas City `city.toml`, agent packs, and other configuration files for the factory. You can run `gc start`, `gc status`, and similar commands from this directory to supervise the factory. The project workspace, known in Gas City as a "rig", is next door at `~/Projects/factory/workshop_w1/w1-project/`.
 
 ### Step 3: Verify the factory is installed
 
 You can now verify the factory is installed by running:
 ```bash
-# In your agent session, run:
+# In your agent session
 /factory-activity-agent status W1
 ```
 
 As long as you see agents listed and the rig configured correctly, you can proceed to the next step. You may also run the doctor command to check for potentially missing or broken dependencies:
 
 ```bash
-# In your agent session, run:
+# In your agent session
 /factory-activity-agent doctor W1
 ```
 
@@ -178,11 +178,10 @@ The project workspace was seeded with two files during install:
 - `tickets.md` — the initial FUP-1 … FUP-6 backlog, copied from [`reference-project/fired-up-pizza/tickets.md`](../../../reference-project/fired-up-pizza/tickets.md).
 - `scripts/import-tickets.sh` — a thin wrapper that parses `tickets.md` and calls `bd create` for each entry, copied from [`packs/fired-up-pizza/scripts/import-tickets.sh`](../../../packs/fired-up-pizza/scripts/import-tickets.sh).
 
-Run the import from the project workspace:
+Go to the factory directory and run the import:
 
 ```bash
-cd ~/Projects/factory/workshop_w1/w1-project
-bash scripts/import-tickets.sh tickets.md
+bash ./../w1-project/scripts/import-tickets.sh ../w1-project/tickets.md
 ```
 
 Each ticket is created with `--labels needs-plan`, so every task lands on the Planner's order gate (`bd ready --label=needs-plan`) the moment the factory wakes. `bd list` should now show six tasks titled after FUP-1 through FUP-6. No need to prompt the Planner, since the label is the trigger for the agent to wake and start working.
@@ -192,7 +191,6 @@ Each ticket is created with `--labels needs-plan`, so every task lands on the Pl
 First look at the tasks in the project:
 
 ```bash
-# See what the current tasks are in the project
 bd list --all
 bd show <task-id>
 ```
@@ -200,7 +198,7 @@ bd show <task-id>
 If the tasks are loaded correctly, you should see something like this:
 
 ```bash
- ~/Projects/factory/workshop_w1/w1-project $ bd list --all
+ ~/Projects/factory/workshop_w1/w1-gc-factory $ bd list --all
 ○ wp-269 ● P0 Pizza customization
 ○ wp-k04 ● P0 Shopping cart
 ○ wp-roo ● P0 Menu display page
@@ -217,7 +215,6 @@ Status: ○ open  ◐ in_progress  ● blocked  ✓ closed  ❄ deferred
 Next, start the factory so the agents can start working (from the **factory** directory):
 
 ```bash
-cd ~/Projects/factory/workshop_w1/w1-gc-factory
 gc start
 ```
 
