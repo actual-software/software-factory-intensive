@@ -1,13 +1,12 @@
 # W4 · Create Continuous Improvement Loops
 
-> **Goal:**
-Understand how a software factory can turn the signals from its own runs into durable improvements, and demonstrate that understanding by defining concrete improvement criteria for your factory and delivering a measurable improvement against those criteria.
+> **Goal:** Understand how a software factory can learn from its own signals, and demonstrate your understanding by demonstrating an improvement in the factory from a participant-defined set of improvement criteria.
 
 | | |
 |---|---|
 | **Estimated duration** | ~45 minutes |
-| **Type** | Workshop |
-| **Deliverable** | An `improvement-criteria.md` that lists the criteria you'll use to judge factory improvement, plus a demonstrable improvement in your factory (a change that moves at least one criterion in the right direction, with before/after evidence) |
+| **Type** | WORKSHOP |
+| **Deliverable** | Clear `improvement-criteria.md` that outlines the criteria for improvement of the software factory, and a demonstrable improvement in the factory based on the criteria |
 
 ## Overview
 

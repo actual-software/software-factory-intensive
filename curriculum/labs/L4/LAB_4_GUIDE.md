@@ -1,13 +1,12 @@
 # L4 · Deploy Reviewer + Deployer Agents
 
-> **Goal:**
-Complete your software factory by installing the Reviewer and Deployer stages, and anchor both to the `PROJECT_MANIFEST` so the review verdicts and release gates reflect your team's real standards and criteria rather than generic defaults.
+> **Goal:** Complete your software factory by adding its final two specialists, and tie the output back to the `PROJECT_MANIFEST.md` as a reference for the Review and Release criteria.
 
 | | |
 |---|---|
 | **Estimated duration** | ~75 minutes |
-| **Type** | Lab |
-| **Deliverable** | Working Reviewer and Deployer agents attached to your project factory, with `PROJECT_MANIFEST.md → Review Standards` and `PROJECT_MANIFEST.md → Release Criteria` populated from your team's actual rules and referenced directly from each agent's prompt |
+| **Type** | LAB |
+| **Deliverable** | Working Reviewer + Deployer (DevOps) agents, with the `PROJECT_MANIFEST.md` as a reference for the Review and Release criteria |
 
 ## Overview
 

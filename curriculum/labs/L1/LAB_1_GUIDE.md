@@ -1,14 +1,12 @@
-# L1 · Connect a Factory to Your Project Manifest
+# L1 · Build a Structured Development Loop
 
-> **Goal:**
-Connect a six-agent software factory to your own project by authoring the `PROJECT_MANIFEST` that every stage reads, and wiring the Planner's inputs — feature requests, knowledge bases, and other project-specific sources identified in W2 — into the factory so the pipeline can acquire work without ad-hoc human hand-offs.
+> **Goal:** Understand how the configuration of a software factory depends on the nature of the project it is building, and how to adapt the configuration to the specific needs of the project.
 
 | | |
 |---|---|
 | **Estimated duration** | ~60 minutes |
-| **Type** | Lab |
-| **Deliverable** | A working six-agent software factory applied to your software project, with `docs/PROJECT_MANIFEST.md` filled in and the Planner's input sources (feature requests, knowledge bases, and other artifacts from W2) connected to the factory |
-
+| **Type** | LAB |
+| **Deliverable** | Working six-agent software factory applied to your software project, with the `PROJECT_MANIFEST.md` and setup of the inputs on the Planner agent (feature requests, knowledge bases, and other artifacts) |
 ## Overview
 
 W1 ran a factory against a reference project that was already fully wired. W2 mapped the capabilities from your individual workflow onto the six stages and produced a `factory-pipeline.md`. L1 is where those two halves meet: you install a factory against **your project**, fill in the `PROJECT_MANIFEST.md` that grounds every agent, and connect the Planner's input sources so the factory can ingest real work instead of seeded tickets.

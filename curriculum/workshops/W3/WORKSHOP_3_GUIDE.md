@@ -1,13 +1,12 @@
 # W3 · Architect Multi-Agent Coordination
 
-> **Goal:**
-Learn the distinct coordination channels a software factory uses to move information between specialists — mail, work items, files, and external services — and demonstrate your understanding by extending your factory with a new coordination channel adapted to your software project.
+> **Goal:** Learn how different coordination channels can be used to coordinate the specialists in a software factory, and demonstrate your understanding by adding a new coordination channel to your software factory.
 
 | | |
 |---|---|
 | **Estimated duration** | ~45 minutes |
-| **Type** | Workshop |
-| **Deliverable** | Your six-agent software factory extended with at least one new coordination channel, adapted to your project and documented alongside the channels already in use |
+| **Type** | WORKSHOP |
+| **Deliverable** | Your six-agent software factory with a new coordination channel adapted to your software project |
 
 ## Overview
 

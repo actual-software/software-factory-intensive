@@ -1,13 +1,12 @@
 # L3 · Deploy Designer + Coder Agents
 
-> **Goal:**
-Extend your factory with the two implementation stages — Designer and Coder — and demonstrate that each is grounded in a real external source of truth by attaching at least one MCP server per agent, so specs and code are informed by the systems your team already uses rather than by the model's priors alone.
+> **Goal:** Extend your software factory with the next two specialists, and demonstrate that it can now carry a planned feature from concept through to a committed implementation.
 
 | | |
 |---|---|
 | **Estimated duration** | ~75 minutes |
-| **Type** | Lab |
-| **Deliverable** | Working Designer and Coder agents attached to your project factory, each with at least one MCP server wired in, and at least one feature traced from ADR → component spec → committed implementation with passing tests |
+| **Type** | LAB |
+| **Deliverable** | Working Designer + Coder agents, with at least one supported MCP server each |
 
 ## Overview
 

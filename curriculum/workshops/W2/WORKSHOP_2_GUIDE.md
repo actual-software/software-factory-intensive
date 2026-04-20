@@ -1,13 +1,12 @@
 # W2 · From Individual AI Workflow to Software Factory Pipeline
 
-> **Goal:**
-Identify the capabilities you already rely on in your individual AI coding workflow (models, memory, skills, integrations, knowledge sources), understand how a software factory pipeline distributes those capabilities across specialist agents, and capture the mapping as a durable reference you will use for the remainder of the curriculum.
+> **Goal:** Understand what unique capabilities you've built into your current AI workflow, learn how these differ in a software factory pipeline, and map those to capabilities in a software factory workflow document that you will leverage over the remainder of the curriculum.
 
 | | |
 |---|---|
 | **Estimated duration** | ~45 minutes |
-| **Type** | Workshop |
-| **Deliverable** | A `factory-pipeline.md` that catalogues your current agent toolsets, memory, model selections, and other capabilities, and maps each to the appropriate stage of a software factory pipeline |
+| **Type** | WORKSHOP |
+| **Deliverable** | `factory-pipeline.md` that encapsulates all of your current agent toolsets, memory, model selections, and other capabilities mapped to the software factory pipeline |
 
 ## Overview
 

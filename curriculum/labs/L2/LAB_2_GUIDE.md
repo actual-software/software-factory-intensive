@@ -1,13 +1,14 @@
 # L2 · Deploy Planner + Architect Agents
 
-> **Goal:**
-Understand the distinct responsibilities of the Planner and Architect stages in a software factory, and make them real against your project by installing each and equipping each with at least one concrete skill or CLI capability that reflects how your team actually plans and decides.
+> **Goal:** Understand the role of the Planner and Architect agents in the software factory, and explore the unique configurations that best adapt these agents to our specific software project.
+
+==
 
 | | |
 |---|---|
 | **Estimated duration** | ~75 minutes |
-| **Type** | Lab |
-| **Deliverable** | Working Planner and Architect agents attached to your project factory, each with at least one supported skill and/or CLI capability wired in, and at least one feature traced end-to-end from request → work package → ADR |
+| **Type** | LAB |
+| **Deliverable** | Working Planner + Architect agents with at least one suppported Skill and/or CLI capability for each |
 
 ## Overview
 

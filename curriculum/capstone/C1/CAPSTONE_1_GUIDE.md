@@ -1,13 +1,12 @@
 # C1 · Run the Software Factory End-to-End
 
-> **Goal:**
-Demonstrate that your software factory can carry an unfamiliar feature request — one you have not pre-scoped, pre-decided, or pre-written — from intake to a shippable implementation, guided entirely by the manifest, prompts, channels, standards, and criteria you have assembled across the prior eight sessions.
+> **Goal:** Demonstrate your understanding of the software factory pipeline by running an unfamiliar feature request through your complete software factory, guided entirely by the configuration you have assembled.
 
 | | |
 |---|---|
 | **Estimated duration** | ~90 minutes |
-| **Type** | Capstone |
-| **Deliverable** | A complete factory run against a feature request you did not pre-design, producing a high-quality feature in your software project with every stage's artifact committed, and a short run report that audits the run against your improvement criteria |
+| **Type** | CAPSTONE |
+| **Deliverable** | Six-agent software factory applied to an unfamiliar feature request, with a high-quality feature produced for your software project |
 
 ## Overview
 
