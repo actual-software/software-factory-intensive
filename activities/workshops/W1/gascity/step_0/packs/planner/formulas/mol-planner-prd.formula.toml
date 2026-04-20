@@ -8,8 +8,8 @@ Product Requirements Document with downstream routing.
 2. Planner reads `docs/PROJECT_MANIFEST.md` for tech stack constraints,
    domain model, conventions, and project scope.
 3. Planner writes a formal PRD at `docs/PRD.md`.
-4. On completion, child beads labelled `needs-architecture` and/or
-   `needs-design` exist for downstream agents.
+4. On completion, a child bead labelled `needs-architecture` ALWAYS exists.
+   A `needs-design` bead is also created if the PRD implies UI/UX work.
 
 ## Variables
 
@@ -169,10 +169,10 @@ id = "handoff"
 title = "Create downstream work beads and hand off"
 needs = ["draft-prd"]
 description = """
-Route work to the architect and/or designer based on the PRD.
+Route work to the architect. Every task goes through architect first — no
+exceptions. The architect decides what flows to PM, builder, or designer.
 
-**1. Create architecture beads** for system design, tech choices,
-and infrastructure decisions:
+**1. Create an architecture bead** (ALWAYS — no skipping):
 ```bash
 ARCH_ID=$(bd create \\
     --title "<architecture topic from PRD>" \\
@@ -185,7 +185,7 @@ See: docs/PROJECT_MANIFEST.md for tech stack constraints" \\
 bd dep add $ARCH_ID --blocked-by $ROOT_ID
 ```
 
-**2. Create design beads** for UI/UX work implied by the PRD:
+**2. If the PRD implies UI/UX work**, also create a design bead:
 ```bash
 DESIGN_ID=$(bd create \\
     --title "<design topic from PRD>" \\
@@ -203,13 +203,15 @@ bd dep add $DESIGN_ID --blocked-by $ROOT_ID
 bd close $ROOT_ID --reason "PRD complete: docs/PRD.md"
 ```
 
-**4. Notify downstream agents:**
+**4. Notify architect** (and designer if applicable):
 ```bash
-gc mail send architect "Handoff: PRD for {{slug}} published, beads labelled needs-architecture"
-gc mail send designer "Handoff: PRD for {{slug}} published, beads labelled needs-design"
+gc mail send architect "Handoff: PRD for {{slug}} published, bead labelled needs-architecture"
 ```
 
-**Exit criteria:** Root bead closed, child beads created with
-`needs-architecture` and/or `needs-design` labels, downstream
-agents notified.
+**ROUTING RULE:** The planner ONLY creates `needs-architecture` (and optionally
+`needs-design`) beads. Do NOT create `needs-pm`, `ready-to-build`, or any
+other label. The architect owns all downstream routing decisions.
+
+**Exit criteria:** Root bead closed, architecture bead created with
+`needs-architecture` label, architect notified.
 """

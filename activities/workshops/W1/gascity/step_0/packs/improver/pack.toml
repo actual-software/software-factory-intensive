@@ -45,5 +45,10 @@ prompt_template = "prompts/improver.md.tmpl"
 nudge = "Check your hook for work and act on it."
 overlay_dir = "overlays/default"
 idle_timeout = "2h"
-min_active_sessions = 1
-max_active_sessions = 2
+min_active_sessions = 0
+max_active_sessions = 1
+
+[[named_session]]
+template = "improver"
+scope = "rig"
+mode = "on_demand"

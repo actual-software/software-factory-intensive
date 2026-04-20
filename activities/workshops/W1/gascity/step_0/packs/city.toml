@@ -14,10 +14,11 @@
 [workspace]
 name = "w1-gc-factory"
 provider = "claude"
-start_command = "~/.nvm/versions/node/v22.19.0/bin/claude"
 includes = ["packs/actual/all"]
 
 [providers.claude]
+command = "claude"
+# command = "claude-personal2"
 option_defaults = { model = "sonnet" }
 
 [session]

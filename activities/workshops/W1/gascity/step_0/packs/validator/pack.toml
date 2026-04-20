@@ -38,5 +38,11 @@ prompt_template = "prompts/validator.md.tmpl"
 nudge = "Check your hook for work and act on it."
 overlay_dir = "overlays/default"
 idle_timeout = "2h"
-min_active_sessions = 1
-max_active_sessions = 2
+min_active_sessions = 0
+max_active_sessions = 1
+
+[[named_session]]
+template = "validator"
+scope = "rig"
+mode = "on_demand"
+work_query = "gc bd --rig {{.Rig}} list --label=needs-tests --status=open --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"

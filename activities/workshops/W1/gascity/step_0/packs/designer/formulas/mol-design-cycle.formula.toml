@@ -1,14 +1,13 @@
 description = """
-Design cycle — 4 steps from a `needs-design` bead to a wireframe
-handed off to the builder.
+Design cycle — triage then either fast-path or full design.
 
 ## Contract
 
 1. Caller slings with a root bead labelled `needs-design`.
-2. Designer produces a wireframe + a11y audit in
-   `docs/designs/<slug>.md`.
-3. Bead gets relabelled `needs-pm` with `source:actual-designer` and
-   the pm decomposes it into implementation tasks.
+2. Designer triages: does this task require UI/UX design work?
+   - **No design needed:** close root bead, create `needs-pm` child bead(s), done.
+   - **Design needed:** produce wireframe + a11y audit in `docs/designs/<slug>.md`,
+     then create `needs-pm` child bead(s) for the resulting design work.
 
 ## Variables
 
@@ -29,8 +28,60 @@ description = "Set to 'true' to skip the actual-adr-sync step (useful in rigs wi
 default = "false"
 
 [[steps]]
+id = "triage"
+title = "Decide: does this task need UI/UX design work?"
+description = """
+**1. Read the root bead and its context:**
+```bash
+ROOT_ID=$(bd mol current --json | jq -r '.molecule_id')
+bd show $ROOT_ID
+```
+
+**2. Read the parent PRD and architecture doc if referenced in notes.**
+
+**3. Decide: does this task require UI/UX design?**
+
+Design IS needed if the task involves:
+- New screens, pages, or user-facing flows
+- New components, forms, or visual layouts
+- Changes to user interaction patterns
+
+Design is NOT needed if the task involves:
+- Pure backend/infrastructure work (APIs, DBs, CI, configs)
+- Non-visual refactoring or performance work
+- Tasks already fully specified with no UI implications
+
+**4a. If NO design needed — fast-path to pm:**
+```bash
+bd update $ROOT_ID --notes "design_decision: no_design_needed — <one-line reason>"
+
+IMPL_ID=$(bd create \\
+    --title "<implementation task title>" \\
+    --label needs-pm \\
+    --label source:actual-designer \\
+    --notes "Fast-pathed from designer: no UI/UX design required. See root bead $ROOT_ID." \\
+    --json | jq -r '.id')
+bd dep add $IMPL_ID --blocked-by $ROOT_ID
+
+bd close $ROOT_ID --reason "no design needed, implementation bead $IMPL_ID created"
+gc mail send pm "Handoff: $ROOT_ID required no design. Implementation bead $IMPL_ID labelled needs-pm."
+```
+
+**STOP here if no design needed. Do not execute subsequent steps.**
+
+**4b. If design IS needed — record decision and continue:**
+```bash
+bd update $ROOT_ID --notes "design_decision: design_required — <one-line reason>"
+```
+
+**Exit criteria:** Decision recorded in bead notes. Either fast-path
+complete (root closed, needs-pm bead created) or design work proceeds.
+"""
+
+[[steps]]
 id = "intake"
-title = "Read the bead and map the user journey"
+title = "Map the user journey"
+needs = ["triage"]
 description = """
 **1. Root bead + parent plan:**
 ```bash
@@ -181,20 +232,36 @@ documented reason, or a divergence bead filed.
 
 [[steps]]
 id = "handoff"
-title = "Relabel bead and hand off to pm"
+title = "Create implementation beads and hand off to pm"
 needs = ["actual-adr-sync"]
 description = """
-```bash
-bd update $ROOT_ID \\
-    --add-label needs-pm \\
-    --add-label source:actual-designer \\
-    --remove-label needs-design \\
-    --notes "<existing notes>
-design_artifact: docs/designs/{{slug}}.md"
+Create new `needs-pm` child beads for each piece of implementation
+work implied by the design. Close the root design bead.
 
-# Mail the pm so it wakes and decomposes the completed design.
-gc mail send pm "Handoff: $ROOT_ID design complete at docs/designs/{{slug}}.md"
+**1. For each distinct implementation task from the design, create a child bead:**
+```bash
+IMPL_ID=$(bd create \\
+    --title "<implementation task from the design>" \\
+    --label needs-pm \\
+    --label source:actual-designer \\
+    --notes "Derived from design: docs/designs/{{slug}}.md
+See root bead $ROOT_ID for full context." \\
+    --json | jq -r '.id')
+bd dep add $IMPL_ID --blocked-by $ROOT_ID
 ```
 
-**Exit criteria:** Bead relabelled `needs-pm`; pm picks up work via intake order.
+Repeat for each distinct implementation task.
+
+**2. Close the root design bead:**
+```bash
+bd close $ROOT_ID --reason "design complete: docs/designs/{{slug}}.md"
+```
+
+**3. Notify pm:**
+```bash
+gc mail send pm "Handoff: design {{slug}} complete, implementation beads labelled needs-pm"
+```
+
+**Exit criteria:** Root bead closed, at least one child bead created
+with `needs-pm` label, pm notified.
 """

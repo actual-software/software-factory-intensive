@@ -44,5 +44,11 @@ nudge = "Check your hook for work and act on it."
 overlay_dir = "overlays/default"
 option_defaults = { model = "opus" }
 idle_timeout = "2h"
-min_active_sessions = 1
-max_active_sessions = 2
+min_active_sessions = 0
+max_active_sessions = 1
+
+[[named_session]]
+template = "architect"
+scope = "rig"
+mode = "on_demand"
+work_query = "gc bd --rig {{.Rig}} list --label=needs-architecture --status=open --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"

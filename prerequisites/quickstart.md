@@ -31,6 +31,13 @@ which gc
 gc version
 ```
 
+### skills/cli/MCP Services
+
+* [Serena](https://github.com/oraios/serena) - semantic retrieval & editing noetic agent
+* [Playwright](https://playwright.dev/agent-cli/skills) - skill/cli/mcp enables reliable web automation for testing, scriptiong, and AI agents.
+* [excalidraw](https://github.com/excalidraw/excalidraw) - An open source virtual hand-drawn style whiteboard.
+  * [excalidraw-mcp](https://github.com/excalidraw/excalidraw-mcp) - Excalidraw MCP App Server
+
 ### Script Setup Factory - baseline
 
 ```bash

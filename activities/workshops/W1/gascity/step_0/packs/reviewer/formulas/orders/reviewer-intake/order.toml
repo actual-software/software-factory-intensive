@@ -2,5 +2,5 @@
 description = "Wake the reviewer when any bead is labelled needs-review"
 formula = "mol-code-review"
 gate = "condition"
-check = "bd ready --label=needs-review --limit=1 | grep -q ."
+check = "[ -n \"$GC_RIG\" ] && gc bd --rig \"$GC_RIG\" list --label=needs-review --status=open --no-assignee --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"
 pool = "reviewer"

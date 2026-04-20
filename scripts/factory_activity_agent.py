@@ -697,16 +697,12 @@ def install(activity, dry_run=False):
     # orphaned session beads created during the restart.
     wait_for_reconciler(factory_dir, dry_run=dry_run)
 
-    # --- Step 6: Patch convoy ---
-    # Use gc bd to ensure gc manages the Dolt lifecycle (no rogue servers).
+    # --- Step 6: Register custom bead types ---
+    # gc doctor --fix registers all required types (molecule, session, convoy, etc.)
     # Must run after gc start so the Dolt server is available.
-    print("\n##### Patch convoy")
+    print("\n##### Register custom bead types")
     run(
-        ["gc", "bd", "config", "set", "types.custom", "convoy"],
-        cwd=str(factory_dir), dry_run=dry_run, check=False,
-    )
-    run(
-        ["gc", "bd", "--rig", alias_lower + "-project", "config", "set", "types.custom", "convoy"],
+        ["gc", "doctor", "--fix"],
         cwd=str(factory_dir), dry_run=dry_run, check=False,
     )
 
@@ -770,7 +766,7 @@ def install(activity, dry_run=False):
         (project_dir / "README.md").write_text(readme_content)
         print(f"  Wrote README.md -> {project_dir / 'README.md'}")
 
-    sling_prompt = (
+    setup_title = (
         "Set up this project: "
         "1) Add a .gitignore with canonical best-practice defaults "
         "(OS files, editor files, language build artifacts, env files, node_modules, __pycache__, .DS_Store, etc). "
@@ -779,10 +775,16 @@ def install(activity, dry_run=False):
         "(e.g. the Directory Structure section after files are created), "
         "update those sections in place. Preserve all existing content."
     )
+    # Use bd create --label needs-plan so the planner-intake order gate fires.
+    # gc sling creates a rig bead (wp- prefix) visible only from the rig db;
+    # the named_session on_demand work_query runs from city context and returns
+    # empty. The order gate runs its check against the rig db, creates a city
+    # formula wisp, which the planner's work_query finds and starts the session.
     print("\n##### Sling Setup Task")
     run(
-        ["gc", "sling", f"{alias_lower}-project/planner", sling_prompt],
-        cwd=str(project_dir), dry_run=dry_run, check=False,
+        ["gc", "bd", "--rig", f"{alias_lower}-project", "create",
+         "--title", setup_title, "--label", "needs-plan"],
+        cwd=str(factory_dir), dry_run=dry_run, check=False,
     )
 
 

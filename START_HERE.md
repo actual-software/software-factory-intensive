@@ -31,7 +31,7 @@ In Claude Code session in root of software-factory-intensive
 
 Prompt:
 ```
-/factory-activity-agent install w2
+/factory-activity-agent install w1
 ```
 
 #### Uninstall
@@ -40,14 +40,14 @@ If needed.
 
 Prompt:
 ```
-/factory-activity-agent delete w2
+/factory-activity-agent delete w1
 ```
 
 #### Setup Project Manafest
 
 ```bash
 mkdir -p ~/Projects/factory/workshop_w1/w1-project/docs/
-cp ~/Projects/actual-software/software-factory-intensive/activities/workshops/W3/docs/PROJECT_MANIFEST.md ~/Projects/factory/workshop_w1/w1-project/docs/
+cp ~/Projects/actual-software/software-factory-intensive/activities/workshops/W1/docs/PROJECT_MANIFEST.md ~/Projects/factory/workshop_w1/w1-project/docs/
 ls -al ~/Projects/factory/workshop_w1/w1-project/docs/
 ```
 
@@ -61,8 +61,14 @@ gc start
 
 #### Send Task to Factory
 
+Create a bead with `needs-plan` label in the rig db. This triggers the `planner-intake`
+order gate, which starts the planner automatically.
+
 ```bash
-gc sling w1-project/planner "Create SPA nextjs for Fired Up Pizza an online pizza ordering application where customers can build custom pizzas, select a pickup or delivery time, and place orders — all within a single-page experience. No payment processing is required; all transactions are handled on-site at pickup/delivery."
+cd ~/Projects/factory/workshop_w1/w1-gc-factory
+gc bd --rig w1-project create \
+  --title "Create SPA nextjs for Fired Up Pizza an online pizza ordering application where customers can build custom pizzas, select a pickup or delivery time, and place orders — all within a single-page experience. No payment processing is required; all transactions are handled on-site at pickup/delivery." \
+  --label needs-plan
 ```
 
 #### Further Resources
