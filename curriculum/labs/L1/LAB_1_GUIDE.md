@@ -73,15 +73,15 @@ cp -R ~/path/to/your-repo/. ~/Projects/factory/lab_l1/l1-project/
 
 This merges your code into the installed workspace. Do **not** `rm -rf` the installed workspace or replace it with a symlink — the install registered the path with the factory (the `gc rig add` step), so deleting or swapping it out leaves the registration dangling.
 
-### Step 3: Bring forward your W2 deliverable
+### Step 3: Confirm the W2 deliverable was carried forward
 
-Your `factory-pipeline.md` is the capability map you'll translate into manifest content in Part 2. Copy it into the L1 project workspace:
+The install step above automatically copies `docs/factory-pipeline.md` from your W2 workspace into the L1 workspace. Verify it arrived:
 
 ```bash
-mkdir -p ~/Projects/factory/lab_l1/l1-project/docs
-cp ~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md \
-   ~/Projects/factory/lab_l1/l1-project/docs/factory-pipeline.md
+ls ~/Projects/factory/lab_l1/l1-project/docs/factory-pipeline.md
 ```
+
+If W2 wasn't installed, the carry-forward is skipped silently — install W2 first if you want your capability map on hand during Part 2.
 
 ### Step 4: Verify the factory is healthy
 

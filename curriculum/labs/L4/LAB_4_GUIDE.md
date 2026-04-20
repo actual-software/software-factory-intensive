@@ -66,15 +66,19 @@ The arrow from the Reviewer to the Coder (if the verdict is REQUEST_CHANGES) is 
 
 Creates `~/Projects/factory/lab_l4/l4-project/` and `~/Projects/factory/lab_l4/l4-gc-factory/` with all six packs wired.
 
-### Step 2: Carry forward L3 artifacts
+### Step 2: Confirm L3 artifacts were carried forward
+
+The install step above bulk-copies `~/Projects/factory/lab_l3/l3-project/` into the L4 workspace — source and feature branch, manifest, work packages, ADRs, design specs, iteration log, factory-pipeline, and coordination-channels all flow through.
+
+Spot-check:
 
 ```bash
-# Everything from L3 (source, feature branch, manifest, work-packages/,
-# docs/adr/, design/, factory-pipeline.md, factory-iterations.md,
-# coordination-channels.md). The bulk copy creates any missing directories.
-cp -R ~/Projects/factory/lab_l3/l3-project/. \
-      ~/Projects/factory/lab_l4/l4-project/
+ls ~/Projects/factory/lab_l4/l4-project/design/
+ls ~/Projects/factory/lab_l4/l4-project/docs/adr/
+git -C ~/Projects/factory/lab_l4/l4-project log --oneline -5   # prior commits present
 ```
+
+If L3 wasn't installed, the carry-forward is skipped silently — install L3 first.
 
 ### Step 3: Verify all six stages are up
 

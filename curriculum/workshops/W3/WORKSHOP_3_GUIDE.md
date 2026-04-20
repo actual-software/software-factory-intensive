@@ -71,18 +71,15 @@ Every hand-off in a factory uses *at least one* channel, often two or more combi
 
 This scaffolds `~/Projects/factory/workshop_w3/w3-project/` and `~/Projects/factory/workshop_w3/w3-gc-factory/`.
 
-### Step 2: Bring forward the artifacts that anchor this workshop
+### Step 2: Confirm prior artifacts were carried forward
 
-You'll reference the project you connected to the factory in L1:
+The install step above automatically copies your L1 project's `docs/PROJECT_MANIFEST.md` and `docs/factory-pipeline.md` into the W3 workspace. Verify they arrived:
 
 ```bash
-mkdir -p ~/Projects/factory/workshop_w3/w3-project/docs
-cp ~/Projects/factory/lab_l1/l1-project/docs/PROJECT_MANIFEST.md \
-   ~/Projects/factory/workshop_w3/w3-project/docs/PROJECT_MANIFEST.md
-
-cp ~/Projects/factory/lab_l1/l1-project/docs/factory-pipeline.md \
-   ~/Projects/factory/workshop_w3/w3-project/docs/factory-pipeline.md
+ls ~/Projects/factory/workshop_w3/w3-project/docs/
 ```
+
+You should see both files. If you haven't installed L1 yet, the carry-forward is skipped silently — install L1 first if you want to work against your real project rather than an empty workspace.
 
 ### Step 3: Start the workshop's design doc
 

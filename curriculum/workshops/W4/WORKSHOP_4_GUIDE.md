@@ -71,27 +71,24 @@ Through this workshop you will:
 /factory-activity-agent install W4
 ```
 
-### Step 2: Carry forward the L2–L4 signal sources
+### Step 2: Confirm the L4 signal sources were carried forward
+
+The install step above pulls the artifacts W4 needs out of your L4 workspace:
+
+- `docs/factory-iterations.md` — the running config-change log
+- `docs/PROJECT_MANIFEST.md` — your current Review Standards and Release Criteria
+- `review-reports/` — every Reviewer verdict (the richest signal source)
+- `release-gates/` — every Deployer PASS/FAIL record
+
+Spot-check:
 
 ```bash
-mkdir -p ~/Projects/factory/workshop_w4/w4-project/docs
-
-# Iteration log (records every config-over-chat edit)
-cp ~/Projects/factory/lab_l4/l4-project/docs/factory-iterations.md \
-   ~/Projects/factory/workshop_w4/w4-project/docs/factory-iterations.md
-
-# Manifest (your current standards / criteria)
-cp ~/Projects/factory/lab_l4/l4-project/docs/PROJECT_MANIFEST.md \
-   ~/Projects/factory/workshop_w4/w4-project/docs/PROJECT_MANIFEST.md
-
-# Review + release artifacts (the richest sources of signal).
-# cp -R creates these directories if they don't already exist.
-cp -R ~/Projects/factory/lab_l4/l4-project/review-reports/ \
-      ~/Projects/factory/workshop_w4/w4-project/review-reports/
-
-cp -R ~/Projects/factory/lab_l4/l4-project/release-gates/ \
-      ~/Projects/factory/workshop_w4/w4-project/release-gates/
+ls ~/Projects/factory/workshop_w4/w4-project/review-reports/
+ls ~/Projects/factory/workshop_w4/w4-project/release-gates/
+ls ~/Projects/factory/workshop_w4/w4-project/docs/
 ```
+
+If L4 wasn't installed, the carry-forward is skipped silently — install L4 first so W4 has real signals to work with.
 
 ### Step 3: Keep L4 installed and running
 

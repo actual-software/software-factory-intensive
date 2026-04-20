@@ -60,22 +60,22 @@ Each stage now has: **the manifest** (what to honor), **the upstream artifact** 
 
 This scaffolds `~/Projects/factory/lab_l2/l2-project/` and `~/Projects/factory/lab_l2/l2-gc-factory/` with the Planner and Architect packs pre-wired into the factory's `city.toml`.
 
-### Step 2: Pull forward L1 + W3 artifacts
+### Step 2: Confirm L1 + W3 artifacts were carried forward
+
+The install step above automatically does this:
+
+1. Bulk-copies everything from `~/Projects/factory/lab_l1/l1-project/` (your project code, `docs/PROJECT_MANIFEST.md`, `docs/factory-pipeline.md`, `work-packages/`, etc.).
+2. Overlays W3's updates — `docs/coordination-channels.md` and the W3-edited `docs/PROJECT_MANIFEST.md` — on top.
+
+Spot-check:
 
 ```bash
-# 1) Everything from L1 (source, docs/PROJECT_MANIFEST.md, docs/factory-pipeline.md,
-#    work-packages/, etc.) — the bulk copy creates any missing directories.
-cp -R ~/Projects/factory/lab_l1/l1-project/. \
-      ~/Projects/factory/lab_l2/l2-project/
-
-# 2) Overlay W3's updates: the coordination channels doc, plus any manifest
-#    edits you made in W3 when you added a new channel.
-mkdir -p ~/Projects/factory/lab_l2/l2-project/docs
-cp ~/Projects/factory/workshop_w3/w3-project/docs/coordination-channels.md \
-   ~/Projects/factory/lab_l2/l2-project/docs/coordination-channels.md
-cp ~/Projects/factory/workshop_w3/w3-project/docs/PROJECT_MANIFEST.md \
-   ~/Projects/factory/lab_l2/l2-project/docs/PROJECT_MANIFEST.md
+ls ~/Projects/factory/lab_l2/l2-project/docs/
+# Expect: PROJECT_MANIFEST.md, factory-pipeline.md, coordination-channels.md
+ls ~/Projects/factory/lab_l2/l2-project/work-packages/  # from L1
 ```
+
+If either L1 or W3 wasn't installed, the matching carry-forward is skipped silently — install whichever is missing before continuing.
 
 ### Step 3: Verify the Planner and Architect are up
 

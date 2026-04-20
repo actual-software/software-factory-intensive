@@ -68,30 +68,35 @@ Through this capstone you will:
 
 Creates `~/Projects/factory/capstone_c1/c1-project/` and `~/Projects/factory/capstone_c1/c1-gc-factory/` with all six packs wired.
 
-### Step 2: Carry forward *everything*
+### Step 2: Confirm every prior artifact was carried forward
 
-This is the only session that accumulates every prior artifact. Copy them in full:
+The install step above pulls **everything** in. Specifically:
+
+1. Bulk-copies `~/Projects/factory/lab_l4/l4-project/` into the C1 workspace — every stage artifact from the L2→L4 runs plus your source tree.
+2. Overlays `docs/improvement-criteria.md` from W4.
+
+Spot-check:
 
 ```bash
-# 1) Source + all produced artifacts from L4 (the bulk copy creates
-#    c1-project/docs/ and every other directory under l4-project/).
-cp -R ~/Projects/factory/lab_l4/l4-project/. \
-      ~/Projects/factory/capstone_c1/c1-project/
+ls ~/Projects/factory/capstone_c1/c1-project/docs/         # improvement-criteria.md + manifest
+ls ~/Projects/factory/capstone_c1/c1-project/design/
+ls ~/Projects/factory/capstone_c1/c1-project/work-packages/
+ls ~/Projects/factory/capstone_c1/c1-project/review-reports/
+ls ~/Projects/factory/capstone_c1/c1-project/release-gates/
+```
 
-# 2) Improvement criteria from W4 (only file that lives outside the L4 tree).
-mkdir -p ~/Projects/factory/capstone_c1/c1-project/docs
-cp ~/Projects/factory/workshop_w4/w4-project/docs/improvement-criteria.md \
-   ~/Projects/factory/capstone_c1/c1-project/docs/improvement-criteria.md
+### Step 3: Mirror any pack customization from L2–L4
 
-# 3) If any pack customization in L2–L4 wasn't mirrored into the C1 factory's
-#    packs directory, copy those now. Check with:
+Pack prompts you edited live in the per-session factory directory, not the project workspace, so the carry-forward *doesn't* bring them. Confirm and mirror:
+
+```bash
 diff -qr ~/Projects/factory/lab_l4/l4-gc-factory/packs/ \
          ~/Projects/factory/capstone_c1/c1-gc-factory/packs/
 ```
 
-If the `diff` surfaces any customization missing from C1, mirror it before moving on. The point of the capstone is that your *final* configuration is what runs — not a fresh set of defaults.
+If the `diff` surfaces any customization missing from C1, copy it across before moving on. The point of the capstone is that your *final* configuration is what runs — not a fresh set of defaults.
 
-### Step 3: Verify health
+### Step 4: Verify health
 
 ```bash
 /factory-activity-agent status C1

@@ -62,15 +62,19 @@ Each attached MCP is the bridge between the model's generic knowledge and your t
 
 Creates `~/Projects/factory/lab_l3/l3-project/` and `~/Projects/factory/lab_l3/l3-gc-factory/` with the Planner, Architect, Designer, and Coder packs wired.
 
-### Step 2: Carry forward everything that anchors the new stages
+### Step 2: Confirm L2 artifacts were carried forward
+
+The install step above bulk-copies `~/Projects/factory/lab_l2/l2-project/` into the L3 workspace — source, manifest, work packages, ADRs, iteration log, factory-pipeline, and coordination-channels all flow through.
+
+Spot-check:
 
 ```bash
-# Everything from L2 (source, manifest, work-packages/, docs/adr/,
-# factory-pipeline.md, factory-iterations.md, coordination-channels.md).
-# The bulk copy creates any missing directories.
-cp -R ~/Projects/factory/lab_l2/l2-project/. \
-      ~/Projects/factory/lab_l3/l3-project/
+ls ~/Projects/factory/lab_l3/l3-project/docs/         # manifest + docs
+ls ~/Projects/factory/lab_l3/l3-project/work-packages/
+ls ~/Projects/factory/lab_l3/l3-project/docs/adr/
 ```
+
+If L2 wasn't installed, the carry-forward is skipped silently — install L2 first.
 
 ### Step 3: Verify the Designer and Coder are up
 
