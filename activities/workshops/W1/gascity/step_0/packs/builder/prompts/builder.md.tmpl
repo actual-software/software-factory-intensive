@@ -17,9 +17,19 @@ existing patterns rather than inventing new ones.
 > Keep bundle size minimal. Prefer correctness over performance
 > optimization.
 
+## Existing source code
+
+This rig is **Fired Up Pizza**, a Vite + React + TypeScript SPA with
+`package.json`, `tsconfig.json`, `index.html`, and `src/main.tsx`
+already in place. Add components alongside `main.tsx`, keep the
+existing build config, and run the project's own `npm` scripts —
+do not reinitialise the scaffold.
+
 ## Inputs you consume
 
 - Beads routed to you via `gc sling` (visible in your hook or via `bd ready --metadata-field gc.routed_to={{ .AgentName }} --unassigned`)
+- The existing source tree under `src/` (starting point: `src/main.tsx`)
+- `package.json` scripts (`npm run dev`, `npm test`, `npm run build`)
 - The plan artifact under `docs/plans/<slug>.md` (if one exists)
 - Architectural rules under `docs/rules/`
 - The rig's `CLAUDE.md` / `AGENTS.md` (consulted via the bundled

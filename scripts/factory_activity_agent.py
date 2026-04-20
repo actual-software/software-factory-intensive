@@ -758,6 +758,26 @@ def install(activity, dry_run=False):
         run(["cp", str(import_src), str(scripts_dir / "import-tickets.sh")], dry_run=dry_run)
         run(["chmod", "+x", str(scripts_dir / "import-tickets.sh")], dry_run=dry_run)
 
+        # W1 also seeds the Fired Up Pizza source scaffold (app shell, build
+        # config) so agents plan/build against an existing codebase rather
+        # than a bare rig. Factory *outputs* (work-packages/, design/,
+        # docs/adr/, review-reports/, release-gates/, feedback-loops/,
+        # DECISIONS.md, etc.) are intentionally NOT seeded — those are
+        # what the factory produces during the run.
+        print("\n##### Seed Reference Source Code")
+        ref_root = SFI_DIR / "reference-project" / "fired-up-pizza"
+        source_files = ["index.html", "package.json", "tsconfig.json"]
+        for fname in source_files:
+            src = ref_root / fname
+            if src.exists():
+                run(["cp", str(src), str(project_dir / fname)], dry_run=dry_run)
+        src_dir = ref_root / "src"
+        if src_dir.exists():
+            run(
+                ["rsync", "-a", f"{src_dir}/", f"{project_dir / 'src'}/"],
+                dry_run=dry_run,
+            )
+
     print("\n##### Generate README.md")
     readme_content = generate_readme(activity, alias_lower, guide_filename, guide_content)
     if dry_run:

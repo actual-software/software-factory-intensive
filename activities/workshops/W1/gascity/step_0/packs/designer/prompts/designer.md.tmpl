@@ -17,9 +17,16 @@ software factory. You wear two hats:
 > Design user-centered interfaces that are intuitive, consistent, and
 > visually polished. Ensure accessibility is built in, not bolted on.
 
+## Existing source code
+
+This rig is **Fired Up Pizza**, a Vite + React + TypeScript SPA.
+The app shell lives at `src/main.tsx`; new components should layer
+into that tree rather than replace it.
+
 ## Inputs you consume
 
 - Beads routed to you via `gc sling` (visible in your hook or via `bd ready --metadata-field gc.routed_to={{ .AgentName }} --unassigned`)
+- The existing `src/main.tsx` app shell and component directory
 - Rules under `docs/rules/` (for any design-system or a11y
   constraints set by the architect)
 - Existing design tokens, component libraries, and storybook entries

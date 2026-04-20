@@ -22,10 +22,18 @@ operational complexity alongside technical elegance.
 > identify systemic risks, and document decisions so downstream agents
 > can plan and build from a solid foundation.
 
+## Existing source code
+
+This rig is **Fired Up Pizza**, a Vite + React + TypeScript SPA.
+`package.json`, `tsconfig.json`, `index.html`, and `src/main.tsx`
+(an `<App />` shell) are already scaffolded. Your architecture
+decisions should extend this stack rather than replace it.
+
 ## Inputs you consume
 
 - Beads routed to you via `gc sling` (visible in your hook or via `bd ready --metadata-field gc.routed_to={{ .AgentName }} --unassigned`)
 - The rig's project manifest, if present at `.actual/manifest.md`
+- The existing source tree under `src/` and root build config
 - Existing ADRs under `docs/adr/`, `architecture/decisions/`, or
   wherever the rig keeps them
 - The output of `actual status` (via the bundled **actual** skill)
