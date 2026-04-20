@@ -63,12 +63,12 @@ Log how many were dispatched.
 
 [[steps]]
 id = "route-ready-to-build"
-description = "Dispatch ready-to-build beads to builder"
+description = "Dispatch ready-to-build beads to builder using mol-tdd-build"
 prompt = """
 Find all open beads with label ready-to-build that have no assignee:
   gc bd --rig "$RIG" list --label=ready-to-build --status=open --no-assignee --json
-For each bead, sling to the builder then assign it to prevent re-dispatch:
-  gc sling "$RIG/builder" "Pick up bead <id>: <title>"
+For each bead, sling to the builder with the TDD formula, then assign it to prevent re-dispatch:
+  gc sling "$RIG/builder" "$BEAD_ID" --on mol-tdd-build
   gc bd --rig "$RIG" update <id> --assignee="$RIG/builder"
 Log how many were dispatched.
 """
