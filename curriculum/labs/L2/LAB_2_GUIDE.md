@@ -25,6 +25,8 @@ If a pack edit breaks your factory, swap back to the shipped `../packs/<name>` p
 
 ---
 
+> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by opening `my-factory/PROJECT_MANIFEST.md` so the feature suggestions and architectural trade-offs match the participant's stack.
+
 ---
 
 ## Architecture Diagram
@@ -88,13 +90,9 @@ If you're working against your own project, substitute your own feature — but 
 
 ---
 
-> **Insight: The coder's job moved.**
->
-> An engineer who used to type functions now edits prompts and reads agent outputs. The coding still happens — inside the factory. You run the factory from your editor, managing six agent-sized tasks in parallel. This is not delegation. It's role multiplication, and L2 is where you feel it first: the Planner and Architect are yours to configure, not yours to outtype.
-
----
-
 ## Part 0: Read the Shipped Packs (~5 min)
+
+> **Goal:** Inspect the specialists you are about to install, so you begin configuration with a clear understanding of what they already do before adapting them to your project.
 
 Before installing anything, read what you're about to install. Each pack is a folder with three things: a `pack.toml` (metadata), a prompt file (the agent's instructions), and an overlay directory (environment overrides).
 
@@ -207,6 +205,8 @@ You're done reading. Now install.
 
 ## Part 1: Install the Planner Agent (~10 min)
 
+> **Goal:** Bring the first specialist of your factory online, establishing the stage that translates raw feature requests into structured work the rest of the factory can act on.
+
 ### Step 1: Add the Planner Pack to Your Rig
 
 ```bash
@@ -284,6 +284,8 @@ git commit -m "chore(planner): customize planner prompt for project conventions"
 ---
 
 ## Part 2: Install the Architect Agent (~10 min)
+
+> **Goal:** Add the specialist responsible for early architectural decisions, ensuring the rest of your factory works from choices that have been made deliberately rather than discovered late.
 
 ### Step 1: (Recommended) Seed Tailored Industry ADRs
 
@@ -438,9 +440,13 @@ git commit -m "chore(architect): customize architect prompt with tailored-ADR in
 
 ## Part 3: Create and Run the Planner (~20 min)
 
+> **Goal:** Put the Planner to work on a real feature, and evaluate whether its output is structured enough to hand off to every specialist that will follow.
+
 Now the agents are installed. Time to give the Planner real work.
 
 ### Step 1: Write the Feature Request
+
+> **Agent Guide:** Refuse trivial features — if the feature doesn't force a real trade-off, it won't exercise the Architect, and the participant will leave thinking the Architect is decorative. For their own project, push for medium complexity with both frontend and backend work. Before slinging, also ask: which architectural constraints from the manifest apply? Those constraints are what the Architect will have to honor.
 
 You need a feature request that's complex enough to need both a Planner and an Architect. Here's the Loyalty Points example for Fired Up Pizza — **adapt this to your own project or use it verbatim if you're working against the reference project:**
 
@@ -562,6 +568,8 @@ Wait until the Planner finishes (state returns to `idle` in `gc status`). This t
 
 ### Step 5: Review the Work Package
 
+> **Agent Guide:** After the Planner runs, ask the participant to check that the work package has goal + stories + AC + dependencies. If a section is weak, ask: "is the fix a better bead description or a stronger prompt?" Force them to name which — that decides where the next edit goes. Flag any manual edit to the work package itself: if they hand-edit to fix what the agent got wrong, the next bead gets the same bug.
+
 ```bash
 cd ~/path/to/your-repo
 cat work-packages/loyalty-points-system.md
@@ -659,6 +667,10 @@ Closed bead: my-factory-a1b2c3
 ---
 
 ## Part 4: Create and Run the Architect (~20 min)
+
+> **Goal:** Put the Architect to work on the Planner's output, and evaluate whether the resulting decisions are precise enough to guide the later stages of your factory.
+
+> **Agent Guide:** Before slinging, ask the participant to name the trade-off. Every ADR needs at least two viable options with pros/cons — if they can't name two, scope up the feature or skip the stage with a note. After the Architect runs, verify the ADR references the work package by path; if it summarizes instead of linking, that's a prompt gap to fix in the Architect template.
 
 The Planner's output is the Architect's input. Now the Architect reads the work package and produces an ADR for the open technical question: *where to store loyalty points?*
 
@@ -881,6 +893,8 @@ bd close my-factory-d4e5f6 --comment "ADR completed: docs/adr/0001-loyalty-point
 ---
 
 ## Part 5: Commit, Review, and Document (~10 min)
+
+> **Goal:** Capture and review the artifacts produced in this lab, so the decisions made now continue to inform your factory's work in later sessions.
 
 ### Step 1: Review the Full Artifact Set
 
@@ -1126,6 +1140,8 @@ When you review your own output, check:
 ---
 
 ## Concept Check (before moving to L3)
+
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. Also ask: how many prompt-template edits did each agent need? That count is what you'll aim to reduce in L3.
 
 - The difference between a vanilla `dev-agent` (L1) and a packaged agent (L2). (Packs add role-specific prompts and I/O contracts; vanilla agents only read `CLAUDE.md`.)
 - Why the Planner and Architect are separate agents instead of one "analyst." (Each has a distinct input contract, distinct output artifact, and distinct failure mode.)

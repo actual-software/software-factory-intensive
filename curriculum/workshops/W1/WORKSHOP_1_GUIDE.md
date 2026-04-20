@@ -75,7 +75,7 @@ Every transition is a **label flip on the same bead**. No `gc sling` is run by h
 
 ## Part 1: Read the Labeled-Beads Protocol (~5 min)
 
-> **Goal:** Understand the basic coordination principles that allow agents to collaborate on shared work, establishing the conceptual foundation for inter-agent communicationthat underpins software factories.
+> **Goal:** Understand the basic coordination principles that allow agents to collaborate on shared work, establishing the conceptual foundation for inter-agent communication that underpins software factories.
 
 Every question W1 raises — *"why did the Architect wake?" "why did the bead move to `ready-to-build`?" "what does the Coder look at to know it's up?"* — is answered in [`software-factory/LABELED_BEADS.md`](../../../LABELED_BEADS.md). Read it before installing anything.
 
@@ -151,7 +151,7 @@ With the commands above, you can now install the Fired-Up Pizza factory.
 /factory-activity-agent install W1
 ```
 
-This copies the W1 workshop Gas City packs from `activities/workshops/W1/gascity/step_0/packs/` into your factory workspace and wires the rig. For a browsable view of the **fired-up-pizza** composite packaging in-repo, see [`packs/fired-up-pizza/`](../../../packs/fired-up-pizza/). The curriculum’s **reference** app (what the rig is modeled on) lives at [`reference-project/fired-up-pizza/`](../../../reference-project/fired-up-pizza/), with `docs/PROJECT_MANIFEST.md`, `tickets.md`, and `package.json`; your installed rig under `~/Projects/factory/workshop_w1/w1-project/` is the working copy the agents mutate.
+This copies the W1 workshop Gas City packs from `activities/workshops/W1/gascity/step_0/packs/` into your factory workspace. For a browsable view of the **fired-up-pizza** composite packaging in-repo, see [`packs/fired-up-pizza/`](../../../packs/fired-up-pizza/). The curriculum’s **reference** app lives at [`reference-project/fired-up-pizza/`](../../../reference-project/fired-up-pizza/), with `docs/PROJECT_MANIFEST.md`, `tickets.md`, and `package.json`; your installed rig under `~/Projects/factory/workshop_w1/w1-project/` is the working copy the agents mutate.
 
 ### Step 2: Move into the project workspace directory
 
@@ -194,24 +194,21 @@ Run the import from the rig:
 ```bash
 cd ~/Projects/factory/workshop_w1/w1-project
 bash scripts/import-tickets.sh tickets.md
-bd list
 ```
 
-Each ticket is created with `--labels needs-plan`, so every bead lands on the Planner's order gate (`bd ready --label=needs-plan`) the moment the factory wakes. `bd list` should now show six beads titled after FUP-1 through FUP-6. No `gc sling` is needed — the label is the handoff.
+Each ticket is created with `--labels needs-plan`, so every bead lands on the Planner's order gate (`bd ready --label=needs-plan`) the moment the factory wakes. `bd list` should now show six beads titled after FUP-1 through FUP-6. No `sling` is needed for this steps, since the label is the handoff.
 
-### Step 2: Watch the bead move through the factory
+### Step 2: Observe the beads queued in the project
 
-First look at the beads in the factory:
+First look at the beads in the project:
 
 ```bash
-# See which agent is currently working + what bead they're on
-cd ~/Projects/factory/workshop_w1/w1-project
+# See what the current beads are in the rig
 bd list --all
-
-bd show <id>
+bd show <bead-id>
 ```
 
-Next, start the city so the agents can start working (from the **factory** directory):
+Next, start the factory so the agents can start working (from the **factory** directory):
 
 ```bash
 cd ~/Projects/factory/workshop_w1/w1-gc-factory
@@ -289,6 +286,29 @@ gc events --follow                 # stream label transitions + session lifecycl
 
 ---
 
+## Part 6: Sling Your Own Feature Request (~5 min, optional)
+
+> **Goal:** Close the loop by adding a bead to the backlog yourself — proving the factory accepts new work at any time, not just at install, and that authoring a ticket is the entire shape of your contribution.
+
+The factory is still running. Pick any small feature you wish Fired-Up Pizza had — a "today's special" banner, a loyalty-points badge, a nearest-store lookup — and hand it to the Planner the same way the workshop sling works elsewhere in the curriculum:
+
+```bash
+# In your agent session, run:
+/factory-activity-agent sling w1-project/planner "Add a 'today's special' banner that appears above the menu, text sourced from a single entry in docs/PROJECT_MANIFEST.md."
+```
+
+What to expect:
+
+1. `gc sling` creates a new bead with the prompt as its description and routes it to the Planner, which labels it `needs-plan`.
+2. The Planner wakes, decomposes the request, and hands child beads to Architect / Designer / Builder just like it did for FUP-1.
+3. Your bead flows through the same five transitions you watched in Part 4 — alongside any FUP-* beads still in flight.
+
+Track it with the surfaces from Part 5: the dashboard groups it into the right column as its label flips, `gc events --follow` streams the transitions, and `bd show <id>` carries every note each agent writes.
+
+There is no limit on how many beads you sling — each one is another order the gate can match. If you want to stress the factory, sling two or three requests in quick succession and see the pools fan out. This is the same mechanism L1 will use when the backlog becomes *your* project's tickets instead of Fired-Up Pizza's.
+
+---
+
 > **Insight: Why Participants Don't Write Code This Session**
 >
 > A reasonable thing to want on your first hands-on is to type *something* — to feel productive. W1 deliberately denies that. The whole point is that **the factory types for you**: you place a ticket, the agents take it from there. If you find yourself wanting to "just open `src/menu/MenuPage.tsx` and tweak that one line," notice the feeling — it's the exact habit the workshop exists to unbuild. The place for your customization is the agent packs in L2–L4, not the source code in `src/`. W1 is where you see that the customization location has moved.
@@ -320,7 +340,7 @@ Before leaving this workshop, verify all of these:
 |-----------|----------|--------------|
 | `/factory-activity-agent` skill | `~/.claude/skills/factory-activity-agent` → repo [`skills/factory-activity-agent/`](../../../skills/factory-activity-agent/) | Slash command; `install` / `delete` via [`scripts/factory_activity_agent.py`](../../../scripts/factory_activity_agent.py); other verbs via Bash helpers in [`skills/factory-activity-agent/scripts/`](../../../skills/factory-activity-agent/scripts/) |
 | Fired-Up Pizza **rig** (project) | `~/Projects/factory/workshop_w1/w1-project/` | Git repo — source, `.beads/`, deliverables |
-| Fired-Up Pizza **factory** (Gas City city) | `~/Projects/factory/workshop_w1/w1-gc-factory/` | `city.toml`, synced packs, supervisor — run `gc` here unless noted |
+| Fired-Up Pizza **factory** ("city" in Gas City terms) | `~/Projects/factory/workshop_w1/w1-gc-factory/` | `city.toml`, synced packs, supervisor — run `gc` here unless noted |
 
 ---
 

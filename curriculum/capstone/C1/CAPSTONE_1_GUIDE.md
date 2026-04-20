@@ -31,6 +31,8 @@ If you skipped an earlier lab, add the shipped path for that pack — the capsto
 
 ---
 
+> **Agent Guide** — If an AI coding agent is guiding you through this capstone, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. This is the one session where "I'll finish it later" is disallowed — the Factory Run Report, feature branch, and retrospective **must** be committed before the session ends, whether or not the run reaches the Deployer. An agent reading this README should start by opening `my-factory/PROJECT_MANIFEST.md` and glancing at `orchestrator.yaml`; the capstone is driven by the participant's own config.
+
 ---
 
 ## Architecture Diagram
@@ -197,6 +199,10 @@ Below is the full run, broken into six agent-stage sub-steps plus a pre-run setu
 
 ### Step 0: Pre-Run Setup (~5 min)
 
+> **Goal:** Prepare your factory and your run record so the capstone proceeds from a clean, well-documented starting point.
+
+> **Agent Guide:** Before typing anything, have the participant say the feature, the bead title, and the description out loud. For their own project, push for medium complexity in a *different area of the codebase* than the L2–L4 runs — a rehearsed feature tests memory, a new feature tests the factory. Also open the run report in a split pane now; it's updated live, not at the end.
+
 Create the feature bead and start the live run report.
 
 ```bash
@@ -256,6 +262,10 @@ gc session list         # refresh as needed
 
 ### Step 1: Planner (~10 min)
 
+> **Goal:** Observe your factory turning an unfamiliar feature request into a structured plan, and confirm the plan reflects your project rather than any previously rehearsed example.
+
+> **Agent Guide:** Before every sling in this run, ask: "What artifact does this agent produce, and where will it land?" The participant should name the path — that's the pipeline's contract. If they can't name it, open the pack's prompt template together and read the Output section before slinging.
+
 **Command:**
 
 ```bash
@@ -288,6 +298,8 @@ bd close my-factory-c1a2p3 --comment "Work package: work-packages/order-history.
 ```
 
 ### Step 2: Architect (~10 min)
+
+> **Goal:** Observe your factory reasoning about the architectural implications of this feature, and confirm the decisions it records are specific to your project rather than generic.
 
 **Command:**
 
@@ -336,6 +348,8 @@ Close the Architect bead when the ADR passes its Quality Gate.
 
 ### Step 3: Designer (~10 min)
 
+> **Goal:** Observe your factory translating architectural intent into a concrete specification, and confirm it is detailed enough for implementation to proceed without further input.
+
 **Command:**
 
 ```bash
@@ -367,6 +381,10 @@ gc watch designer
 Close the Designer bead.
 
 ### Step 4: Coder (~20 min)
+
+> **Goal:** Observe your factory producing an implementation that matches the specification, and confirm that the committed code is something you would accept into your own project.
+
+> **Agent Guide:** This is where the factory most commonly stalls. If the Coder fails, the Designer spec is almost always the cause — missing edge cases or an ambiguous Location path. Fix `packs/designer/prompts/designer.md.tmpl`, re-sling Designer, then Coder. Also: every single time the participant is tempted to hand-edit code to make tests pass, stop them. Roll it back. Update the Builder prompt. Re-sling. No exceptions in the capstone.
 
 **Command:**
 
@@ -404,6 +422,8 @@ gc watch coder
 Close the Coder bead when its quality gates pass.
 
 ### Step 5: Reviewer (~10 min)
+
+> **Goal:** Observe your factory critiquing its own implementation against the standards you have encoded, and confirm that the findings are actionable rather than generic.
 
 **Command:**
 
@@ -444,6 +464,8 @@ Close the Reviewer bead.
 
 ### Step 6: Deployer (~10 min)
 
+> **Goal:** Observe your factory making a final release judgement, and confirm that the decision rests on criteria you declared ahead of time rather than improvised in the moment.
+
 **Command:**
 
 ```bash
@@ -480,6 +502,10 @@ Close the Deployer bead.
 
 ### Step 7: Close the Run (~5 min)
 
+> **Goal:** Capture what you have learned from this end-to-end run, so the insights surfaced in the capstone carry forward into how you continue using your factory.
+
+> **Agent Guide:** Do not let the participant skip this step, even if time is tight and the run is partial. A partial report with honest state is an audit trail; a discarded partial run is wasted learning. The report, feature branch, and retrospective must all be committed before the session ends.
+
 Regardless of how far you got:
 
 ```bash
@@ -492,7 +518,7 @@ git commit -m "docs(capstone): factory run report + retrospective for order hist
 git push
 ```
 
-If you didn't reach the Deployer, **that's fine**. The report and retrospective still ship. Note which stages completed and which didn't. Partial completion is a successful capstone — see the Insight "Why Partial Completion Still Teaches You What You Need" below.
+If you didn't reach the Deployer, **that's fine**. The report and retrospective still ship. Note which stages completed and which didn't. Partial completion is a successful capstone — see the inline insight "Why Partial Completion Still Teaches You What You Need" below.
 
 ---
 
@@ -741,7 +767,7 @@ If your orchestrator isn't wired, you can still run the capstone **manually sequ
 
 ---
 
-## Insight: Why the Capstone Has a Different Feature From L2–L4
+## Inline Insight: Why the Capstone Has a Different Feature From L2–L4
 
 L2 through L4 used the loyalty points thread. That thread taught you the primitives — how a work package becomes an ADR, how an ADR becomes a spec, how a spec becomes code. But because you watched each stage iteratively, it's easy to leave the labs with a factory that works on *the loyalty feature* and not for *arbitrary features*.
 
@@ -751,7 +777,7 @@ This is the single most important test of the week. Factories that only work on 
 
 ---
 
-## Insight: Why Partial Completion Still Teaches You What You Need
+## Inline Insight: Why Partial Completion Still Teaches You What You Need
 
 You might not reach the Deployer in 90 minutes. This is not a failure condition — it's the most common outcome on a first capstone run, and the Run Report is calibrated to reward it.
 
@@ -763,7 +789,7 @@ The only wrong outcome is an uncommitted run. Uncommitted runs erase themselves 
 
 ---
 
-## Insight: Config Iteration Is a First-Class Activity
+## Inline Insight: Config Iteration Is a First-Class Activity
 
 New participants often describe the capstone to themselves as "watching the factory run." That framing is subtly wrong. You are not a spectator — you are the **config engineer** for a process that happens to be running. Your job during the 90 minutes is to:
 
@@ -779,7 +805,7 @@ The healthy band is **1-4 config iterations** for a 90-minute run. Each iteratio
 
 ---
 
-## Insight: How the Run Report Compounds
+## Inline Insight: How the Run Report Compounds
 
 Each completed run report adds a row to your factory's implicit metrics table. After six runs you will see things that are invisible after one:
 
@@ -794,10 +820,6 @@ Keep a rolling `factory-runs/metrics.md` as a table with one row per run. Each r
 ## Pipeline Stall Playbook
 
 A "stall" is 10+ minutes of no session activity or a stage producing output that immediately fails its own Quality Gate. Here is the pattern for each of the six stages.
-
-> **Insight: A stall names the missing rule.**
->
-> When the Coder stalls on empty-state logic, the Designer prompt is missing an Edge Cases section. When the Reviewer stalls on "is this a security issue?", the manifest's Review Standards section is missing a security subsection. Stalls are the factory telling you which prompt is under-specified. Treat each one as a feature request from the system to its operator — and answer it with a config edit.
 
 ### Stall at Planner
 
@@ -910,6 +932,8 @@ Prompts aren't compiled, so "syntax" means markdown or whitespace. Most common: 
 ---
 
 ## Concept Check (before closing the capstone)
+
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
 
 - Why the capstone uses a feature they haven't seen before. (A rehearsed feature tests memory; a new feature tests the factory.)
 - Why ad-hoc prompts break the factory's contract. (Every ad-hoc correction is a prompt update that should have happened but didn't — the next bead inherits the missing rule.)

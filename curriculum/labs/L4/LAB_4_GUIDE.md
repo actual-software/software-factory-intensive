@@ -23,6 +23,8 @@ If a prompt edit breaks the pack, swap `includes` back to the shipped `../packs/
 
 ---
 
+> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. This is the strictest session for config discipline: **review findings are fixed by editing the Builder prompt, never by editing code**. An agent reading this README should start by opening `my-factory/PROJECT_MANIFEST.md` — especially the Review Standards and Release Criteria sections — since the Reviewer and Release-Gate agents read those as their rubric.
+
 ---
 
 ## Architecture Diagram
@@ -110,6 +112,8 @@ In L4 the Reviewer reads all of this plus the diff on the feature branch, and th
 ---
 
 ## Part 0: Read the Shipped Packs (~5 min)
+
+> **Goal:** Inspect the final two specialists you are about to install, so you begin configuration with a clear understanding of how they evaluate and gate the work your factory has already produced.
 
 Before installing anything, read the two pack files. You will edit them later in this lab, so build the mental model now.
 
@@ -237,6 +241,8 @@ Identical shape to the Reviewer pack, differing only in `name`, `description`, `
 
 ## Part 1: Install the Packs (~10 min)
 
+> **Goal:** Bring the last two specialists of your factory online, preparing the ground for an end-to-end pipeline that can evaluate its own output.
+
 ### Step 1: Add the Reviewer Pack to Your Rig
 
 ```bash
@@ -323,6 +329,8 @@ If you don't see `reviewer` or `deployer` here, the pack didn't register. Check 
 
 ## Part 2: Declare Agents in city.toml (~5 min)
 
+> **Goal:** Wire the new specialists into your factory so that they can be invoked alongside every specialist you have installed in prior labs.
+
 `gc rig add --include` registers the pack's `[[agent]]` block for you automatically, but many participants prefer to also declare the agents explicitly in their city's `city.toml` so they can tune `idle_timeout` and override the role name per project. If you skip this step the pack defaults apply — still fine for the lab.
 
 ### Step 1: Add the Reviewer Agent Block
@@ -386,6 +394,10 @@ git commit -m "chore(city): declare reviewer + deployer agents"
 ---
 
 ## Part 3: Sling to the Reviewer (~15 min)
+
+> **Goal:** Subject your factory's implementation to the Reviewer's scrutiny, and evaluate whether the resulting feedback is specific enough to guide meaningful improvements.
+
+> **Agent Guide:** Before the participant slings, ask: "Which criteria in your Review Standards matter most for this feature? What should the Reviewer catch that a linter can't?" Naming those out loud anchors what "a good review" means for this bead. Also: do not let the participant sling the Reviewer without a Builder artifact — the Reviewer has no contract without the Coder's output.
 
 ### Step 1: Create the Reviewer Bead
 
@@ -464,6 +476,8 @@ bd show my-factory-r1r2r3        # bead progress
 Wait until the Reviewer returns to `idle` in `gc status`. This typically takes 3–8 minutes depending on the size of the Coder's diff.
 
 ### Step 4: Examine the Review Report
+
+> **Agent Guide:** Ask the participant: "What's the highest-severity finding?" Don't move on until they can state it in one sentence. Then — before any fix — have them confirm out loud: "I will fix this by editing `packs/builder/prompts/builder.md.tmpl`. I will not touch the code." This verbal checkpoint is where most participants break discipline; catching it before the fix starts is easier than rolling back after.
 
 ```bash
 cd ~/path/to/your-repo
@@ -550,6 +564,10 @@ If any rule fails: **do not edit the review report by hand.** Edit `packs/review
 ---
 
 ## Part 4: Fix Via Config (Critical Step — ~20 min)
+
+> **Goal:** Resolve the Reviewer's findings by refining the instructions of the specialists responsible, practicing the core discipline of improving your factory rather than improving any single output.
+
+> **Agent Guide:** This is the strictest enforcement of the entire curriculum. The instant the participant opens the Coder's output files to hand-fix a finding, stop them, roll the edit back, and redirect them to `packs/builder/prompts/builder.md.tmpl`. No exceptions. If they argue "just this once," that's exactly the habit the workshop is trying to break.
 
 This is the crux of L4. The Reviewer has produced findings. A developer's instinct is to open the Coder's output files and fix them directly. **Do not do this.** The whole point of a factory is that improvements persist as agent config, not as one-off manual edits. If you hand-fix the code today, the next feature will have the same bug tomorrow.
 
@@ -710,6 +728,10 @@ Every finding you resolve via config is a systemic improvement — the next feat
 
 ## Part 5: Sling to the Deployer (~10 min)
 
+> **Goal:** Submit the reviewed work for final evaluation, and confirm that your factory can make a release decision grounded in criteria declared in advance rather than improvised in the moment.
+
+> **Agent Guide:** Before slinging, ask the participant to read their release criteria aloud. Every criterion should be testable — produce PASS/FAIL evidence, not an opinion. "Code is clean" fails this test; "`npm run lint` exits 0" passes. If any criterion is opinion-based, that's a prompt gap in the manifest's Release Criteria section — fix it before slinging.
+
 Once the review report returns `APPROVE` (or returns `REQUEST_CHANGES` with only findings you've deliberately deferred and documented), the feature is ready for release gate evaluation.
 
 ### Step 1: Create the Deployer Bead
@@ -780,6 +802,8 @@ Wait until the Deployer returns to `idle`. This typically takes 2–5 minutes.
 
 ### Step 4: Examine the Release Gate Record
 
+> **Agent Guide:** Check every row: does each criterion have PASS/FAIL with evidence (command output, test results, artifact paths), or does it read like an opinion? Any "looks good" verdict is a prompt gap in the Release-Gate template — fix it before the session ends. A gate whose output is opinions is not a gate.
+
 ```bash
 cd ~/path/to/your-repo
 cat release-gates/loyalty-points-system-gate.md
@@ -839,6 +863,8 @@ bd close my-factory-d1d2d3 --comment "Release gate PASS. Feature deployment-read
 ---
 
 ## Part 6: Reviewer + the Actual AI ADR System
+
+> **Goal:** Understand how the Reviewer's findings connect to the broader system of recorded decisions that guides your factory, so quality improvements accumulate as durable knowledge rather than one-time corrections.
 
 If you seeded tailored ADRs via `actual adr-bot` in L2, your Reviewer should check **compliance with both sets of ADRs**:
 
@@ -915,7 +941,7 @@ This turns the Actual ADR system into an enforced quality gate, not just documen
 
 ---
 
-## Insight: Why the Reviewer is Not Just a Linter
+## Inline Insight: Why the Reviewer is Not Just a Linter
 
 A linter catches syntax and style issues that can be expressed as grammar rules (`no-unused-vars`, `prefer-const`, `indent: 2`). The Reviewer catches **intent** issues — whether the implementation matches the spec, whether security properties are preserved, whether test coverage is meaningful. Those require reading the spec, running the tests, and reasoning about the diff.
 
@@ -927,13 +953,13 @@ Concretely:
 
 The Reviewer can do all three, and its entire toolkit for doing so is `packs/reviewer/prompts/reviewer.md` + `docs/PROJECT_MANIFEST.md § Review Standards`. If a Reviewer is missing a class of finding, the fix is always upstream — add a standard, add a Quality Gate rule, add an input. Never patch the output.
 
-## Insight: Why Deployer Findings Must Be Binary
+## Inline Insight: Why Deployer Findings Must Be Binary
 
 A release decision is a commitment. Either you merge to main or you don't. Either you cut the release or you don't. If the Deployer reports `Criterion 3: mostly passing, some concerns`, a human has to re-evaluate the gate, and the factory has lost its automation. The binary-PASS/FAIL rule is what makes the Deployer's output a viable input to automated merge + release workflows.
 
 This is also why **every PASS must carry evidence**. The automation layer (or a human auditor later) needs to verify the claim without re-running the evaluation. `PASS — npm test 17/17 on commit f4e5d6c` can be verified in 10 seconds by running `git checkout f4e5d6c && npm test`. `PASS — tests look good` cannot be verified at all.
 
-## Insight: The Orchestrator Drives Both Stages
+## Inline Insight: The Orchestrator Drives Both Stages
 
 The exit criteria require that `orchestrator.yaml` drive both the Reviewer and the Deployer. That means:
 
@@ -1055,6 +1081,8 @@ When you review your own output, check:
 ---
 
 ## Concept Check (before moving to W4)
+
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section. Also verify by running `git log packs/builder/prompts/` that at least one finding was resolved via a Builder prompt edit, not a code edit.
 
 - Why review findings are fixed by editing the Builder prompt, not the code. (A manual fix solves this bead; a prompt edit prevents the next hundred.)
 - The difference between a Reviewer and a linter. (Linters enforce syntax and style; Reviewers enforce spec compliance and project-specific conventions a linter can't express.)

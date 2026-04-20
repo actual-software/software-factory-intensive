@@ -16,6 +16,8 @@ Pack naming: references to *Coder* and *Deployer* in this README map to the ship
 
 ---
 
+> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by skimming any existing `review-reports/`, `release-gates/`, and `DECISIONS.md` from the participant's L2–L4 runs. Real signals from their own factory produce much better feedback rules than hypothetical ones — if those directories are empty, fall back to the reference project.
+
 ---
 
 ## Architecture Diagram
@@ -114,6 +116,8 @@ We'll thread this "missing try/catch" pattern through the workshop as our reacti
 
 ## Part 0: Read the `feedback-loops/` Skeleton (~5 min)
 
+> **Goal:** Become familiar with the shape a feedback loop takes, so that every improvement you design in this session fits into a recognizable and reviewable form.
+
 Before designing any rules, read what's already in the repo.
 
 ### Step 1: Open the Skeleton Directory
@@ -160,9 +164,9 @@ You'll meet this file properly in C1, but the concept matters here: after every 
 
 ## Part 1: Design Your Signal → Target → Action Map (~15 min)
 
-> **Insight: feedback loops are how engineers become operators.**
->
-> You stop asking "how do I fix this?" and start asking "what permanent rule prevents this class of thing?" The loop discipline trains you to think in generalizations, not one-offs. Over time, most of your work moves from slinging beads to writing rules. That's the job change this curriculum is building toward.
+> **Goal:** Translate general notions of "quality" into an explicit map of what signals matter, where each one originates, and which part of the factory should change in response.
+
+> **Agent Guide:** Before the participant writes any rule, ask: "Which review finding or test failure recurred across multiple beads?" Recurrence is the key — one-off problems don't justify automation. If they can't name a recurring signal, push back on adding a rule for it. Also insist on all four fields per candidate rule: signal, threshold, target file, specific change. If any of the four is vague, the rule will never fire correctly.
 
 Every feedback rule has the same three parts:
 
@@ -244,6 +248,10 @@ If a row says "whenever this happens", rewrite it as "on the first occurrence" a
 ---
 
 ## Part 2: Reactive Loops — Single-Run Signals (~8 min)
+
+> **Goal:** Learn how to design loops that respond to signals raised within a single factory run, allowing your factory to self-correct without waiting for broader patterns to emerge.
+
+> **Agent Guide:** Before the rule file is written, ask: "What's the harm case?" What happens if the signal fires for the wrong reason and ships a bad prompt update? If the participant can't name the harm, they can't name the mitigation — and the rule shouldn't be written yet.
 
 A reactive loop fires on a signal from a single factory run. The source is usually the Reviewer (a finding) or the Deployer (a failed gate). The target is almost always an agent prompt. The action is always a small prompt edit.
 
@@ -370,6 +378,8 @@ The count should be higher than before the rule. If it's the same, the prompt up
 
 ## Part 3: Aggregate Loops — Pattern-Across-Runs Signals (~8 min)
 
+> **Goal:** Learn how to design loops that respond to recurring patterns across many factory runs, enabling improvements that would be invisible at the scale of any individual run.
+
 An aggregate loop fires when a pattern appears across many runs, not just one. The target is usually `docs/PROJECT_MANIFEST.md` (because the learning is about the project as a whole) or a pack's `pack.toml` (because the learning is about how an agent is invoked, not what it does). Aggregate loops are more expensive than reactive loops — they require you to look across files and count — but they catch patterns that no single finding would surface.
 
 ### Step 1: Identify the Aggregate Pattern
@@ -484,6 +494,8 @@ This record is what lets a future reviewer (or a future you) decide whether the 
 ---
 
 ## Part 4: External Loops — Production and User Signals (~8 min)
+
+> **Goal:** Learn how to design loops that respond to feedback from beyond the factory itself, allowing production and user signals to shape how your factory behaves.
 
 External loops fire on signals that come from *outside* the factory: production observability alerts, user-reported bugs, SRE incidents, support tickets. The target is never an agent prompt directly — it's a new bead that flows back through the factory starting at the Planner. External loops are the most expensive because they require the factory to process a full pipeline just to learn one thing.
 
@@ -612,6 +624,10 @@ Note we did *not* actually create the bead in this step — the rule file docume
 ---
 
 ## Part 5: Encode One Rule and Tie It All Together (~6 min)
+
+> **Goal:** Commit your first feedback rule and witness its effect end-to-end, closing the loop between the signal you defined, the target you identified, and the specialists that will now act on it.
+
+> **Agent Guide:** Before the participant picks, ask: "Is this rule safe to apply automatically, or does it need human review first?" Default to human review unless the rule is purely additive and trivially reversible. Also flag any rule that modifies code instead of a prompt — that's a manual fix dressed up as automation.
 
 You now have three rule files:
 
@@ -836,6 +852,8 @@ Note: we never auto-commit config changes from a cron-driven order. The order's 
 ---
 
 ## Concept Check (before moving to C1)
+
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
 
 - The Signal → Target → Action structure and why all three are required for a rule to be operational.
 - Why every automated rule needs a kill switch and a harm case. (Automation compounds — so do its mistakes.)

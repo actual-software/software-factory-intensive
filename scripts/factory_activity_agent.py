@@ -568,7 +568,7 @@ bash skills/factory-activity-agent/scripts/install.sh {activity}
 
 
 def install(activity, dry_run=False):
-    _, _, alias_lower, project_dir, factory_dir, packs_src = resolve_paths(activity)
+    category, _, alias_lower, project_dir, factory_dir, packs_src = resolve_paths(activity)
 
     # Validate packs source exists
     if not packs_src.exists():
@@ -737,6 +737,17 @@ def install(activity, dry_run=False):
         print(f"[dry-run] Copy {guide_path} -> {project_dir / guide_filename}")
     else:
         print(f"  Warning: No GUIDE.md found for {activity}, skipping guide injection")
+
+    # Seed activity-specific docs (e.g. PROJECT_MANIFEST.md) into the rig.
+    # Any files under activities/<category>/<activity>/docs/ are copied into
+    # the rig's docs/ folder so agents (Planner, Architect, etc.) can read
+    # them as soon as the factory wakes.
+    docs_src = SFI_DIR / "activities" / category / activity / "docs"
+    if docs_src.exists():
+        print("\n##### Seed Activity Docs")
+        rig_docs = project_dir / "docs"
+        run(["mkdir", "-p", str(rig_docs)], dry_run=dry_run)
+        run(["rsync", "-a", f"{docs_src}/", f"{rig_docs}/"], dry_run=dry_run)
 
     # For W1 (Fired-Up Pizza), seed the rig with the initial ticket set and
     # the import script so the workshop guide can exercise the full

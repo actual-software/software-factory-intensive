@@ -27,6 +27,8 @@ Prompt files end in `.md.tmpl` (Gas City templates). The W2 deliverable (`factor
 
 ---
 
+> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by opening `docs/PROJECT_MANIFEST.md` so every handoff example uses the participant's actual tech stack and artifact paths.
+
 ---
 
 ## Architecture Diagram
@@ -129,6 +131,8 @@ If you're working against your own project, substitute a comparable feature. It 
 
 ## Part 1: Read the Shipped Packs (~5 min)
 
+> **Goal:** Become familiar with the common structure that every agent in a software factory follows, so you can read, evaluate, and later adapt any specialist using the same mental model.
+
 Before you can design your factory, you need to see the shape each pack provides. Gas City ships one pack per agent, and each pack has the same six-section prompt file: **Role, Inputs, Output Format, Quality Gate, Process, Config Discipline**. Your design in Part 3 will customize those six sections per agent.
 
 ### Step 1: Open the Planner Pack Prompt
@@ -199,9 +203,26 @@ Open each prompt in the same way. You're looking for the **Inputs** and **Output
 
 **What's happening here:** Notice the shape is identical across all six packs — same six headings, same "read manifest first" step in Process, same Config Discipline paragraph. This uniformity is the point: once you've read one, you can read the rest in 30 seconds each, and you can edit any of them with the same mental model.
 
+### Inline Insight: Why six headings, not five or seven?
+
+Each of the six prompt sections has a specific purpose in the factory's error-recovery flow:
+
+| Heading | Purpose | When you'd edit it |
+|---------|---------|--------------------|
+| Role | Scopes *what the agent is*. | Almost never. |
+| Inputs | Declares what the agent is allowed to read. | When you add a new source of truth (e.g., adding `CLAUDE.md` as Architect input in L2). |
+| Output Format | Contract for the next stage. | When the downstream agent complains about missing fields. |
+| Quality Gate | Binary pass/fail rules the agent self-checks. | When output quality slips. Add a rule, re-sling. |
+| Process | Ordered steps the agent follows. | When the agent skips a step (e.g., forgets to cross-reference). |
+| Config Discipline | Reminder that behavior changes via config, not chat. | Never (it's the same across all packs). |
+
+When the factory misbehaves, you diagnose by asking: *which of these six sections needs to change?* That's why the shape is rigid.
+
 ---
 
 ## Part 2: Understand the 6 Agents (~10 min)
+
+> **Goal:** Develop a clear understanding of each specialist's responsibility and contribution, forming the reference you will draw on when adapting them to your own project.
 
 Now that you've seen the shape, let's walk through each agent's role with concrete artifact examples. For each agent you'll see: a tiny input example, a tiny output example, how it reads `PROJECT_MANIFEST.md`, and a two-line skeleton of its prompt.
 
@@ -555,7 +576,7 @@ with evidence), Release Notes, References.
 3. Release notes are present and user-facing
 ```
 
-### Insight: Why is Reviewer separate from Deployer?
+### Inline Insight: Why is Reviewer separate from Deployer?
 
 It's tempting to collapse these into one "shipping" agent. Don't.
 
@@ -568,9 +589,13 @@ Separating them means the Reviewer's subjectivity stays in one prompt (Review St
 
 ## Part 3: Map Your Project (~15 min)
 
+> **Goal:** Apply what you now know about each specialist to your own project, producing an initial design that reflects how a software factory would deliver features for it.
+
 Now you design your own factory. You'll fill in the same pipeline shape, but with your project's paths, formats, and constraints.
 
 ### Step 1: Pick Your Feature
+
+> **Agent Guide:** Push the participant to pick a feature with both frontend and backend work — single-layer features don't exercise enough of the pipeline. If they can't name a real architectural question the feature raises, pick a different feature; the Architect stage exists to answer real trade-offs, not rubber-stamp.
 
 Write one sentence describing a feature you'll trace through all six stages. Keep it small (implementable in ~2 hours of real coding) and make sure it has at least one open architectural question.
 
@@ -587,6 +612,8 @@ For Fired Up Pizza: *"Add a loyalty points system where customers earn 1 point p
 **What's happening here:** The architectural question is what distinguishes a feature needing the full 6-agent pipeline from one that could skip the Architect. If you can't identify a real decision, pick a different feature — you'll be bored by L2.
 
 ### Step 2: Draft the Per-Agent Table
+
+> **Agent Guide:** For each row, insist on a file path for "what it produces" — abstract names like "the plan" or "the design" aren't allowed. Also flag duplicate artifacts: if two stages produce or consume the same file, that's a missing boundary, split them.
 
 Paste this template into your editor and fill in each row. This *is* your design deliverable — keep it terse.
 
@@ -662,9 +689,21 @@ EOF
 
 Commit it. This file becomes the reference document L2's facilitator re-reads at the start of each lab.
 
+### Inline Insight: Why ADRs come before design specs
+
+A common failure mode is "Designer writes the spec; Coder discovers a fatal architectural flaw; spec is rewritten." This burns two agent-runs per discovery.
+
+The Architect goes *before* the Designer specifically to prevent this. The ADR is the cheap, small, reversible artifact that locks down the shape before we spend tokens on detailed props tables. If Designer and Coder produce garbage, you first suspect a bad ADR — then fix it — rather than re-spec'ing in place.
+
+If you're running without an Architect, you've effectively asked the Designer to make architectural decisions inline. That's fine for cosmetic features (button colors) but catastrophic for anything involving storage, concurrency, or external integrations.
+
 ---
 
 ## Part 4: Define Handoff Contracts (~10 min)
+
+> **Goal:** Make the transitions between specialists explicit, ensuring that every stage produces exactly what the next one requires to do its job.
+
+> **Agent Guide:** As the participant reads each handoff row, ask: "Could a stranger pick up the consumed artifact and produce the next one without asking a question?" If not, the fields list is incomplete. For the Reviewer handoff specifically, ask which checks are specific to this project — things a generic linter can't catch. Those define the Reviewer's unique value.
 
 The 6 agents are connected by 5 handoffs. Each handoff is a **contract**: Agent A produces a specific artifact; Agent B reads it as authoritative and is not allowed to relitigate.
 
@@ -753,7 +792,7 @@ Use this template per handoff:
 
 Append them to `docs/factory-wiring.md` so L2 can read them. In L2, Part 1 Step 3, you'll turn these contracts into concrete edits to `packs/planner/prompts/planner.md.tmpl` (Output Format) and `packs/architect/prompts/architect.md.tmpl` (Inputs + Quality Gate).
 
-### Insight: Config over ad-hoc chat corrections
+### Inline Insight: Config over ad-hoc chat corrections
 
 When an agent produces bad output, there are two ways to respond:
 
@@ -762,7 +801,7 @@ When an agent produces bad output, there are two ways to respond:
 
 This is the single biggest discipline shift from "using an LLM as a tool" to "running a software factory." L2, L3, and L4 all require this discipline to stick; W2 is where you internalize it before the stakes rise.
 
-### Insight: Artifacts are the only memory
+### Inline Insight: Artifacts are the only memory
 
 Agents do not share memory across beads. When the Architect runs, it does not remember what the Planner said in chat — it reads the work package. When the Reviewer runs, it does not remember the Coder's reasoning — it reads the diff and the spec.
 
@@ -771,15 +810,11 @@ This has two practical consequences:
 1. **If a fact matters, it must be in a file.** "The Planner said in chat that refunds are out of scope" is useless to the Architect. "The work package's Scope Boundary section lists refunds under OUT" is authoritative.
 2. **Cross-references are load-bearing.** The Architect appends the ADR path to the work package specifically so the Designer, reading the work package, finds the ADR. Break the cross-reference chain and you break the handoff.
 
-### Insight: Helpfulness is a factory killer
-
-When the Coder "improves" the spec instead of following it, the Reviewer finds hidden divergence. When the Designer reopens scope the Planner closed, the Architect duplicates work. Every one of these helpfulnesses feels productive in the moment and poisons the pipeline downstream.
-
-Each agent's job is to trust its inputs and refuse to revise them. Scope creep starts as good intentions. Every handoff contract needs a MUST NOT clause for exactly this reason.
-
 ---
 
 ## Part 5: Understand the `actual adr-bot` Layer (~5 min)
+
+> **Goal:** Understand how industry best practices can be brought into your factory automatically, so your specialists begin grounded in patterns the field has already validated rather than rediscovering them from scratch.
 
 Your Architect agent writes ADRs. You have two ways to source ADR content:
 
@@ -934,6 +969,8 @@ Tailored ADRs (in `CLAUDE.md`) are baselines. Hand-written ADRs (in `docs/adr/`)
 ---
 
 ## Concept Check (before moving to L2)
+
+> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
 
 - Why each agent reads files, not chat history, for handoff. (Chat memory is lost across sessions; files are durable.)
 - Why the artifact per stage is singular — one work package, one ADR, one spec. (Keeps the interface auditable.)
