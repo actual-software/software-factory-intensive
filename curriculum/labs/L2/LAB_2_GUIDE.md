@@ -90,7 +90,7 @@ If you're working against your own project, substitute your own feature — but 
 
 ---
 
-## Part 0: Read the Shipped Packs (~5 min)
+## Part 0: Read the Shipped Packs (5 min)
 
 > **Goal:** Inspect the specialists you are about to install, so you begin configuration with a clear understanding of what they already do before adapting them to your project.
 
@@ -203,7 +203,7 @@ You're done reading. Now install.
 
 ---
 
-## Part 1: Install the Planner Agent (~10 min)
+## Part 1: Install the Planner Agent (10 min)
 
 > **Goal:** Bring the first specialist of your factory online, establishing the stage that translates raw feature requests into structured work the rest of the factory can act on.
 
@@ -283,7 +283,7 @@ git commit -m "chore(planner): customize planner prompt for project conventions"
 
 ---
 
-## Part 2: Install the Architect Agent (~10 min)
+## Part 2: Install the Architect Agent (10 min)
 
 > **Goal:** Add the specialist responsible for early architectural decisions, ensuring the rest of your factory works from choices that have been made deliberately rather than discovered late.
 
@@ -438,7 +438,7 @@ git commit -m "chore(architect): customize architect prompt with tailored-ADR in
 
 ---
 
-## Part 3: Create and Run the Planner (~20 min)
+## Part 3: Create and Run the Planner (20 min)
 
 > **Goal:** Put the Planner to work on a real feature, and evaluate whether its output is structured enough to hand off to every specialist that will follow.
 
@@ -666,7 +666,7 @@ Closed bead: my-factory-a1b2c3
 
 ---
 
-## Part 4: Create and Run the Architect (~20 min)
+## Part 4: Create and Run the Architect (20 min)
 
 > **Goal:** Put the Architect to work on the Planner's output, and evaluate whether the resulting decisions are precise enough to guide the later stages of your factory.
 
@@ -892,7 +892,7 @@ bd close my-factory-d4e5f6 --comment "ADR completed: docs/adr/0001-loyalty-point
 
 ---
 
-## Part 5: Commit, Review, and Document (~10 min)
+## Part 5: Commit, Review, and Document (10 min)
 
 > **Goal:** Capture and review the artifacts produced in this lab, so the decisions made now continue to inform your factory's work in later sessions.
 

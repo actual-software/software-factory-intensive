@@ -8,6 +8,7 @@ Issues that surface while installing, configuring, or running a Gas City factory
 - [Issue: `gc rig add` fails with a missing `.gc/...` file](#issue-gc-rig-add-fails-with-a-missing-gc-file)
 - [Issue: `gc rig add` reports "path does not exist"](#issue-gc-rig-add-reports-path-does-not-exist)
 - [Issue: `gc start` succeeds but agents show as dead / red](#issue-gc-start-succeeds-but-agents-show-as-dead--red)
+- [Issue: `gc start` fails with "standalone controller already running..."](#issue-gc-start-fails-with-standalone-controller-already-running)
 - [Issue: `gc dashboard serve` fails with "address already in use"](#issue-gc-dashboard-serve-fails-with-address-already-in-use)
 - [Issue: Two agents race on the same file in the rig](#issue-two-agents-race-on-the-same-file-in-the-rig)
 - [Issue: Bead stuck on `ready-to-build`; no Coder session starts](#issue-bead-stuck-on-ready-to-build-no-coder-session-starts)
@@ -82,6 +83,20 @@ gc rig add "$(pwd)"
 3. `gc restart`.
 
 If agents still come up dead, `gc doctor --fix --city <factory-dir>` often surfaces the misconfiguration directly.
+
+---
+
+## Issue: `gc start` fails with "standalone controller already running..."
+
+**Symptom:** `gc start` fails with an error like `gc start: standalone controller already running for ~/Projects/factory/workshop_w1/w1-gc-factory (PID 12345); stop it before registering with the supervisor`
+
+**Cause:** The standalone controller is already running for the factory.
+
+**Fix:**
+
+```bash
+gc stop
+```
 
 ---
 

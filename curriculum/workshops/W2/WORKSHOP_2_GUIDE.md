@@ -129,7 +129,7 @@ If you're working against your own project, substitute a comparable feature. It 
 
 ---
 
-## Part 1: Read the Shipped Packs (~5 min)
+## Part 1: Read the Shipped Packs (5 min)
 
 > **Goal:** Become familiar with the common structure that every agent in a software factory follows, so you can read, evaluate, and later adapt any specialist using the same mental model.
 
@@ -220,7 +220,7 @@ When the factory misbehaves, you diagnose by asking: *which of these six section
 
 ---
 
-## Part 2: Understand the 6 Agents (~10 min)
+## Part 2: Understand the 6 Agents (10 min)
 
 > **Goal:** Develop a clear understanding of each specialist's responsibility and contribution, forming the reference you will draw on when adapting them to your own project.
 
@@ -587,7 +587,7 @@ Separating them means the Reviewer's subjectivity stays in one prompt (Review St
 
 ---
 
-## Part 3: Map Your Project (~15 min)
+## Part 3: Map Your Project (15 min)
 
 > **Goal:** Apply what you now know about each specialist to your own project, producing an initial design that reflects how a software factory would deliver features for it.
 
@@ -699,7 +699,7 @@ If you're running without an Architect, you've effectively asked the Designer to
 
 ---
 
-## Part 4: Define Handoff Contracts (~10 min)
+## Part 4: Define Handoff Contracts (10 min)
 
 > **Goal:** Make the transitions between specialists explicit, ensuring that every stage produces exactly what the next one requires to do its job.
 
@@ -812,7 +812,7 @@ This has two practical consequences:
 
 ---
 
-## Part 5: Understand the `actual adr-bot` Layer (~5 min)
+## Part 5: Understand the `actual adr-bot` Layer (5 min)
 
 > **Goal:** Understand how industry best practices can be brought into your factory automatically, so your specialists begin grounded in patterns the field has already validated rather than rediscovering them from scratch.
 

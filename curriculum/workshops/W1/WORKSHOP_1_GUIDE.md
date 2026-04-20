@@ -66,7 +66,7 @@ Through this workshop you will:
 
 Every transition is triggered by a label flip on a task bead by an agent.
 
-## Part 1: Read about the labeled beads protocol (~5 min)
+## Part 1: Read about the labeled beads protocol (10 min)
 
 > **Goal:** Understand the basic coordination principles that allow agents to collaborate on shared work, establishing the conceptual foundation for inter-agent communication that underpins software factories.
 
@@ -84,7 +84,7 @@ You do not need to memorize these labels, but you should understand what they ar
 >
 > The six labels aren't metadata — they're the assembly line. Without them, every handoff would need a human saying "Architect, Planner is done, you're up." The protocol is what lets specialists coordinate without a conductor. It's the invisible infrastructure that makes autonomy possible; every workshop and lab after this one runs on the same rails.
 
-## Part 2: Install the `factory-activity-agent` Skill (~10 min)
+## Part 2: Install the `factory-activity-agent` Skill (10 min)
 
 > **Goal:** Install the common tooling you will rely on throughout the curriculum, so that every subsequent session begins from a consistent, known-good starting point.
 
@@ -130,7 +130,7 @@ You will run each of these commands in many activities moving forward. Try explo
 /factory-activity-agent list W1 --dry-run
 ```
 
-## Part 3: Install the Fired Up Pizza Factory (~15 min)
+## Part 3: Install the Fired Up Pizza Factory (10 min)
 
 > **Goal:** Bring up a reference factory and confirm it operates correctly, establishing a working baseline you can compare against when configuring factories for your own projects later in the curriculum.
 
@@ -167,7 +167,7 @@ As long as you see agents listed and the rig configured correctly, you can proce
 /factory-activity-agent doctor W1
 ```
 
-## Part 4: Walk a Feature Task Through the Factory (~15 min)
+## Part 4: Walk a Feature Task Through the Factory (15 min)
 
 > **Goal:** Learn how a feature task progresses through each stage of the factory line, forming a clear understanding of the path from initial request to final delivered feature.
 
@@ -221,6 +221,8 @@ cd ~/Projects/factory/workshop_w1/w1-gc-factory
 gc start
 ```
 
+If you run into an error like `standalone controller already running...`, please read the troubleshooting guide in [`troubleshooting/gas-city.md`](../../../troubleshooting/gas-city.md).
+
 Then, watch the task move through the factory:
 
 ```bash
@@ -248,7 +250,7 @@ Concretely, here is what you'll see. Label values are what to expect *on the tas
 
 Once the task is closed, you can inspect the completed work in the `~/Projects/factory/workshop_w1/w1-project/` directory. The contents of the task (from `bd show <id>`) should point to the completed work in the project.
 
-## Part 5: Observability — How to Watch a Factory Run (~10 min)
+## Part 5: Observability — How to Watch a Factory Run (10 min)
 
 > **Goal:** Become familiar with the primary observability surfaces of a running factory, so you can independently monitor its progress and diagnose issues throughout the remainder of the curriculum.
 
@@ -288,7 +290,7 @@ gc events --follow                 # stream label transitions and session lifecy
 
 `gc events --follow` is the most useful flag of the three — it's the verbose log of every label flip and agent wake. If the factory stalls, this is where you look first.
 
-## Part 6: Add Your Own Feature Request (~5 min, optional)
+## Part 6: Add Your Own Feature Request (5 min, optional)
 
 > **Goal:** Close the loop by adding a task to the backlog yourself — proving the factory accepts new work at any time, not just at install, and that authoring a ticket is the entire shape of your contribution.
 

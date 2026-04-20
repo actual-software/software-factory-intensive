@@ -139,7 +139,7 @@ And the skeleton you'll start from:
 
 ---
 
-## Step 1: Initialize Your City and Register Your Rig (~10 min)
+## Step 1: Initialize Your City and Register Your Rig (10 min)
 
 > **Goal:** Establish the foundation that allows a software factory to operate against your own project, so subsequent steps can begin from a working environment.
 
@@ -232,7 +232,7 @@ Your `CLAUDE.md` goes at your project repo's root — you'll draft it in Step 4.
 
 ---
 
-## Step 2: (Optional) Connect External Services via the Workshop Pack (~10 min)
+## Step 2: (Optional) Connect External Services via the Workshop Pack (10 min)
 
 > **Goal:** Extend your environment with the shared services your factory can draw on, preparing the ground for richer forms of automation in later labs.
 
@@ -293,7 +293,7 @@ The full map of what the pack configures is in [`packs/workshop/README.md`](../.
 
 ---
 
-## Step 3: Declare a `dev-agent` in `city.toml` (~5 min)
+## Step 3: Declare a `dev-agent` in `city.toml` (5 min)
 
 > **Goal:** Bring a first specialist into your factory, translating the design you produced in the workshops into a concrete, running agent.
 
@@ -367,7 +367,7 @@ For L1, you don't need any of those. The four fields you have are enough.
 
 ---
 
-## Step 4: Write Your `CLAUDE.md` (~15 min)
+## Step 4: Write Your `CLAUDE.md` (15 min)
 
 > **Goal:** Articulate your project's context, expectations, and conventions as durable configuration that every future run can build on.
 
@@ -496,7 +496,7 @@ The only exception is per-bead context — "implement this specific feature, not
 
 ---
 
-## Step 5: Pick a Small Test Story (~5 min)
+## Step 5: Pick a Small Test Story (5 min)
 
 > **Goal:** Select a first feature that is representative of your project but small enough to surface how your factory will need to adapt, before the stakes rise in later labs.
 
@@ -543,7 +543,7 @@ You'll discover this yourself in Step 8. Don't front-run the fix — see the fai
 
 ---
 
-## Step 6: Create a Bead for the Story (~5 min)
+## Step 6: Create a Bead for the Story (5 min)
 
 > **Goal:** Express your first real feature request in a form your factory can consume, beginning the shift from chat-based instruction to structured delivery.
 
@@ -604,7 +604,7 @@ The description you just passed has five subtle properties worth naming:
 
 ---
 
-## Step 7: Sling the Bead and Watch (~15 min)
+## Step 7: Sling the Bead and Watch (15 min)
 
 > **Goal:** Witness your factory deliver its first feature for your own project, confirming that the configuration you have assembled is sufficient to produce real work.
 
@@ -665,7 +665,7 @@ If the sequence skips steps 2, 3, or 5, you've found a gap in `CLAUDE.md`. Most 
 
 ---
 
-## Step 8: Review Output and Iterate (~10 min)
+## Step 8: Review Output and Iterate (10 min)
 
 > **Goal:** Evaluate your factory's first result, and practice the discipline of improving its output by refining configuration rather than stepping in to edit the result yourself.
 
@@ -709,7 +709,7 @@ Proceed to Step 9.
 
 ---
 
-## Step 9: Write Your `DECISIONS.md` Entry (~5 min)
+## Step 9: Write Your `DECISIONS.md` Entry (5 min)
 
 > **Goal:** Record the reasoning behind the choices you made this session, so that future work by you or your factory begins with a clear understanding of why things are the way they are.
 

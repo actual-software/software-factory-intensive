@@ -108,7 +108,7 @@ The Loyalty Points feature satisfies all three: the storage decision is a real a
 
 ---
 
-## Part 0: Read the Shipped Coordination Primitives (~5 min)
+## Part 0: Read the Shipped Coordination Primitives (5 min)
 
 > **Goal:** Become familiar with the primitives that allow specialists to operate in parallel without interfering with one another, establishing the foundation for the coordination plan you will draft next.
 
@@ -172,7 +172,7 @@ Your `orchestrator.yaml` will compose three coordination concepts, each mapped t
 
 ---
 
-### Concept 1: Sequential Chaining (~5 min)
+### Concept 1: Sequential Chaining (5 min)
 
 **When:** Stage B cannot start until Stage A has produced its artifact. Order matters; output of Stage N is the input of Stage N+1.
 
@@ -234,7 +234,7 @@ pipeline:
 
 ---
 
-### Concept 2: Human Gates (~5 min)
+### Concept 2: Human Gates (5 min)
 
 **When:** The next stage has consequences that are hard or impossible to reverse, and no amount of agent improvement makes the decision safe to automate.
 
@@ -317,7 +317,7 @@ This exercise is the single most important deliverable of Concept 2. **Write the
 
 ---
 
-### Concept 3: Cross-Agent State (Beads as State) (~5 min)
+### Concept 3: Cross-Agent State (Beads as State) (5 min)
 
 **When:** Stage B needs to know something that Stage A discovered. There is no shared memory, no global variable, no in-flight handshake. **All cross-agent state lives in beads, artifacts, or commits.**
 
@@ -404,7 +404,7 @@ If the Designer's spec contradicts the ADR, the bug is in the Designer's prompt 
 
 ---
 
-## Workshop Activity — Part 1: Draft Your orchestrator.yaml (~15 min)
+## Workshop Activity — Part 1: Draft Your orchestrator.yaml (15 min)
 
 > **Goal:** Produce a durable, explicit plan describing how work moves through your factory, so coordination is governed by shared configuration rather than improvised case-by-case decisions.
 
@@ -678,7 +678,7 @@ If your row doesn't match this pattern for one of these stages, you've diverged 
 
 ---
 
-## Workshop Activity — Part 2: Self-Review (~10 min)
+## Workshop Activity — Part 2: Self-Review (10 min)
 
 > **Goal:** Pressure-test your coordination plan against realistic failure and edge cases, strengthening it before any specialists are built against it.
 

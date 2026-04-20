@@ -114,7 +114,7 @@ We'll thread this "missing try/catch" pattern through the workshop as our reacti
 
 ---
 
-## Part 0: Read the `feedback-loops/` Skeleton (~5 min)
+## Part 0: Read the `feedback-loops/` Skeleton (5 min)
 
 > **Goal:** Become familiar with the shape a feedback loop takes, so that every improvement you design in this session fits into a recognizable and reviewable form.
 
@@ -162,7 +162,7 @@ You'll meet this file properly in C1, but the concept matters here: after every 
 
 ---
 
-## Part 1: Design Your Signal → Target → Action Map (~15 min)
+## Part 1: Design Your Signal → Target → Action Map (15 min)
 
 > **Goal:** Translate general notions of "quality" into an explicit map of what signals matter, where each one originates, and which part of the factory should change in response.
 
@@ -247,7 +247,7 @@ If a row says "whenever this happens", rewrite it as "on the first occurrence" a
 
 ---
 
-## Part 2: Reactive Loops — Single-Run Signals (~8 min)
+## Part 2: Reactive Loops — Single-Run Signals (8 min)
 
 > **Goal:** Learn how to design loops that respond to signals raised within a single factory run, allowing your factory to self-correct without waiting for broader patterns to emerge.
 
@@ -376,7 +376,7 @@ The count should be higher than before the rule. If it's the same, the prompt up
 
 ---
 
-## Part 3: Aggregate Loops — Pattern-Across-Runs Signals (~8 min)
+## Part 3: Aggregate Loops — Pattern-Across-Runs Signals (8 min)
 
 > **Goal:** Learn how to design loops that respond to recurring patterns across many factory runs, enabling improvements that would be invisible at the scale of any individual run.
 
@@ -493,7 +493,7 @@ This record is what lets a future reviewer (or a future you) decide whether the 
 
 ---
 
-## Part 4: External Loops — Production and User Signals (~8 min)
+## Part 4: External Loops — Production and User Signals (8 min)
 
 > **Goal:** Learn how to design loops that respond to feedback from beyond the factory itself, allowing production and user signals to shape how your factory behaves.
 
@@ -623,7 +623,7 @@ Note we did *not* actually create the bead in this step — the rule file docume
 
 ---
 
-## Part 5: Encode One Rule and Tie It All Together (~6 min)
+## Part 5: Encode One Rule and Tie It All Together (6 min)
 
 > **Goal:** Commit your first feedback rule and witness its effect end-to-end, closing the loop between the signal you defined, the target you identified, and the specialists that will now act on it.
 
@@ -845,8 +845,8 @@ Note: we never auto-commit config changes from a cron-driven order. The order's 
 
 | Category | Trigger source | Threshold type | Target | Cost | When to use |
 |----------|---------------|----------------|--------|------|-------------|
-| **Reactive** | Single run's review report or gate file | Small N (1–3 occurrences) | One agent prompt file | Low (~10 min) | Mechanical, recurring findings with clear prompt fix |
-| **Aggregate** | Pattern across 5+ runs | Large N + time window (e.g., 3 in 10 gates) | Project manifest or multiple prompts | Medium (~20 min) | Cross-cutting conventions that multiple agents need |
+| **Reactive** | Single run's review report or gate file | Small N (1–3 occurrences) | One agent prompt file | Low (10 min) | Mechanical, recurring findings with clear prompt fix |
+| **Aggregate** | Pattern across 5+ runs | Large N + time window (e.g., 3 in 10 gates) | Project manifest or multiple prompts | Medium (20 min) | Cross-cutting conventions that multiple agents need |
 | **External** | Production event, user bug, SRE incident | 1 occurrence with corroborating data | New bead to Planner (full pipeline re-run) | High (full factory trip, $5–$20 LLM) | Real user harm or high-trust observability signal |
 
 ---

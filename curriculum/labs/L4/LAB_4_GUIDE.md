@@ -111,7 +111,7 @@ In L4 the Reviewer reads all of this plus the diff on the feature branch, and th
 
 ---
 
-## Part 0: Read the Shipped Packs (~5 min)
+## Part 0: Read the Shipped Packs (5 min)
 
 > **Goal:** Inspect the final two specialists you are about to install, so you begin configuration with a clear understanding of how they evaluate and gate the work your factory has already produced.
 
@@ -239,7 +239,7 @@ Identical shape to the Reviewer pack, differing only in `name`, `description`, `
 
 ---
 
-## Part 1: Install the Packs (~10 min)
+## Part 1: Install the Packs (10 min)
 
 > **Goal:** Bring the last two specialists of your factory online, preparing the ground for an end-to-end pipeline that can evaluate its own output.
 
@@ -327,7 +327,7 @@ If you don't see `reviewer` or `deployer` here, the pack didn't register. Check 
 
 ---
 
-## Part 2: Declare Agents in city.toml (~5 min)
+## Part 2: Declare Agents in city.toml (5 min)
 
 > **Goal:** Wire the new specialists into your factory so that they can be invoked alongside every specialist you have installed in prior labs.
 
@@ -393,7 +393,7 @@ git commit -m "chore(city): declare reviewer + deployer agents"
 
 ---
 
-## Part 3: Sling to the Reviewer (~15 min)
+## Part 3: Sling to the Reviewer (15 min)
 
 > **Goal:** Subject your factory's implementation to the Reviewer's scrutiny, and evaluate whether the resulting feedback is specific enough to guide meaningful improvements.
 
@@ -726,7 +726,7 @@ Every finding you resolve via config is a systemic improvement — the next feat
 
 ---
 
-## Part 5: Sling to the Deployer (~10 min)
+## Part 5: Sling to the Deployer (10 min)
 
 > **Goal:** Submit the reviewed work for final evaluation, and confirm that your factory can make a release decision grounded in criteria declared in advance rather than improvised in the moment.
 

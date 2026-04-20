@@ -117,7 +117,7 @@ If you're working against your own project, pick a small component or API endpoi
 
 ---
 
-## Part 0: Read the Shipped Packs (~5 min)
+## Part 0: Read the Shipped Packs (5 min)
 
 > **Goal:** Inspect the two new specialists you are about to install, building on the reading discipline from L2 so you begin configuration with a clear understanding of what each one already does.
 
@@ -254,7 +254,7 @@ You're done reading. Now install.
 
 ---
 
-## Part 1: Install the Designer Agent (~10 min)
+## Part 1: Install the Designer Agent (10 min)
 
 > **Goal:** Bring online the specialist that turns architectural intent into detailed specifications, bridging the gap between a design and a form your factory can implement against.
 
@@ -361,7 +361,7 @@ git commit -m "chore(designer): customize designer prompt for project convention
 
 ---
 
-## Part 2: Install the Coder Agent (~10 min)
+## Part 2: Install the Coder Agent (10 min)
 
 > **Goal:** Bring online the specialist responsible for turning specifications into working code, completing the path from feature request to implementation.
 
@@ -466,7 +466,7 @@ git commit -m "chore(coder): customize coder prompt with project quality gates"
 
 ---
 
-## Part 3: Create and Run the Designer (~20 min)
+## Part 3: Create and Run the Designer (20 min)
 
 > **Goal:** Put the Designer to work on the artifacts your factory produced in L2, and evaluate whether its specification is precise enough for the Coder to implement without further guidance.
 
@@ -664,7 +664,7 @@ bd close my-factory-design123 --comment "Component spec committed: design/loyalt
 
 ---
 
-## Part 4: Create and Run the Coder (~25 min)
+## Part 4: Create and Run the Coder (25 min)
 
 > **Goal:** Put the Coder to work on the Designer's specification, and evaluate whether the resulting implementation faithfully reflects every earlier stage of your factory.
 
@@ -801,7 +801,7 @@ bd close my-factory-impl456 --comment "Implementation committed on feature branc
 
 ---
 
-## Part 5: Run Tests & Iterate Via Config (~10 min)
+## Part 5: Run Tests & Iterate Via Config (10 min)
 
 > **Goal:** Exercise the feature your factory has produced, and practice the discipline of improving quality by refining configuration rather than editing the code directly.
 

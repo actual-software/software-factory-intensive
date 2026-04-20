@@ -197,7 +197,7 @@ The Factory Run Report is not a post-mortem artifact you fill in at the end. It'
 
 Below is the full run, broken into six agent-stage sub-steps plus a pre-run setup block. Each agent stage has: duration estimate, exact command, what to watch, expected artifact, common failure modes + config fix.
 
-### Step 0: Pre-Run Setup (~5 min)
+### Step 0: Pre-Run Setup (5 min)
 
 > **Goal:** Prepare your factory and your run record so the capstone proceeds from a clean, well-documented starting point.
 
@@ -260,7 +260,7 @@ gc events --follow
 gc session list         # refresh as needed
 ```
 
-### Step 1: Planner (~10 min)
+### Step 1: Planner (10 min)
 
 > **Goal:** Observe your factory turning an unfamiliar feature request into a structured plan, and confirm the plan reflects your project rather than any previously rehearsed example.
 
@@ -297,7 +297,7 @@ Close the Planner bead when the work package passes its Quality Gate:
 bd close my-factory-c1a2p3 --comment "Work package: work-packages/order-history.md"
 ```
 
-### Step 2: Architect (~10 min)
+### Step 2: Architect (10 min)
 
 > **Goal:** Observe your factory reasoning about the architectural implications of this feature, and confirm the decisions it records are specific to your project rather than generic.
 
@@ -346,7 +346,7 @@ gc watch architect
 
 Close the Architect bead when the ADR passes its Quality Gate.
 
-### Step 3: Designer (~10 min)
+### Step 3: Designer (10 min)
 
 > **Goal:** Observe your factory translating architectural intent into a concrete specification, and confirm it is detailed enough for implementation to proceed without further input.
 
@@ -380,7 +380,7 @@ gc watch designer
 
 Close the Designer bead.
 
-### Step 4: Coder (~20 min)
+### Step 4: Coder (20 min)
 
 > **Goal:** Observe your factory producing an implementation that matches the specification, and confirm that the committed code is something you would accept into your own project.
 
@@ -421,7 +421,7 @@ gc watch coder
 
 Close the Coder bead when its quality gates pass.
 
-### Step 5: Reviewer (~10 min)
+### Step 5: Reviewer (10 min)
 
 > **Goal:** Observe your factory critiquing its own implementation against the standards you have encoded, and confirm that the findings are actionable rather than generic.
 
@@ -462,7 +462,7 @@ If the review is CHANGES REQUESTED: do **not** manually fix the code. Update the
 
 Close the Reviewer bead.
 
-### Step 6: Deployer (~10 min)
+### Step 6: Deployer (10 min)
 
 > **Goal:** Observe your factory making a final release judgement, and confirm that the decision rests on criteria you declared ahead of time rather than improvised in the moment.
 
@@ -500,7 +500,7 @@ gc watch devops
 
 Close the Deployer bead.
 
-### Step 7: Close the Run (~5 min)
+### Step 7: Close the Run (5 min)
 
 > **Goal:** Capture what you have learned from this end-to-end run, so the insights surfaced in the capstone carry forward into how you continue using your factory.
 
@@ -633,7 +633,7 @@ Every upstream artifact is referenced by every downstream artifact — verified 
 
 ## What Didn't Go Well
 
-1. The Architect missed `CLAUDE.md` on the first run — the prompt had the tailored-ADR awareness **almost** right but not literally. Cost: one extra sling (~5 min).
+1. The Architect missed `CLAUDE.md` on the first run — the prompt had the tailored-ADR awareness **almost** right but not literally. Cost: one extra sling (5 min).
 2. The Coder used non-existent `@/lib` path aliases, caught by a test failure, not by the Reviewer. Add a feedback rule: "if build fails with module-not-found, append import-path rule to coder prompt."
 
 ## Lessons Learned (carry into daily use)
