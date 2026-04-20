@@ -106,13 +106,19 @@ agent sessions). You MUST run this command, not skip it.
 2. **Research.** Survey the existing codebase, tech stack, ADRs, and
    constraints. Identify what's already in place. Write findings to
    the root bead notes.
-3. **Design.** Write the system design document at
+3. **Design.** Write the formal architecture document at
    `docs/architecture/<topic>.md` covering:
-   - Technology stack selection with trade-off analysis
-   - Database schema design (tables, relationships, indexes)
-   - API/endpoint design (routes, request/response shapes)
-   - Component/module architecture (directory layout, boundaries)
-   - Infrastructure decisions (deployment, caching, queues)
+   - Requirements (functional FR-nn and non-functional NFR-nn)
+   - Constraints table (type: technical / business / regulatory)
+   - Framework selections (layer, name, version, rationale)
+   - Library inventory (purpose, version, license)
+   - Data model as a VS Code-renderable Mermaid `erDiagram`
+   - Use cases as VS Code-renderable Mermaid `flowchart TD` diagrams (one per use case)
+   - Action flows as VS Code-renderable Mermaid `sequenceDiagram` diagrams with `autonumber` (one per API action), each followed by a numbered prose list describing every step
+   - Security controls table (auth, authz, encryption, input validation, secrets)
+   - Integrations table (direction, protocol, auth method, SLA notes)
+   - Risks table (likelihood, impact, mitigation)
+   - Trade-offs & Alternatives Considered
 4. **ADR sync (actual-adr-sync) — MANDATORY.** Run:
    ```bash
    cd "{{ .RigRoot }}"
