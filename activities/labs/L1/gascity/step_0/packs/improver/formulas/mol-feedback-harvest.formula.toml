@@ -1,0 +1,248 @@
+description = """
+Feedback harvest — 4 steps from raw runtime signals to labelled
+upstream beads. Runs on a cooldown schedule (daily by default).
+
+## Variables
+
+| Variable | Source | Description |
+|----------|--------|-------------|
+| since | caller | Time window for signal collection (default: "24h") |
+| feedback_dir | caller | Where to write the daily summary (default: docs/feedback) |
+"""
+formula = "mol-feedback-harvest"
+version = 1
+
+[vars]
+[vars.since]
+description = "Collection window, e.g., '24h', '7d'"
+default = "24h"
+
+[vars.feedback_dir]
+description = "Directory for daily feedback summaries"
+default = "docs/feedback"
+
+[vars.skip_adr_sync]
+description = "Set to 'true' to skip the actual-adr-sync step (useful in rigs without the actual CLI installed)"
+default = "false"
+
+[[steps]]
+id = "collect"
+title = "Collect runtime signals from the project application"
+description = """
+**SCOPE: Project application only.** Do NOT inspect gc controller
+logs, Dolt server logs, beads database errors, tmux session output,
+or Gas City infrastructure. Those are platform concerns.
+
+Signals you look for in the **project application** (any that are
+accessible — no signal is required):
+
+1. **Error-tracker** (Sentry, Rollbar, etc.) — new error
+   signatures in the last {{since}}.
+2. **Metrics** (Prometheus, Datadog, Grafana) — SLO burn or
+   anomalies on latency / error rate / saturation in the last
+   {{since}}.
+3. **App logs** — application ERROR / WARN rates, crash loops.
+   Do NOT read .gc/ or .beads/ logs.
+4. **User feedback** — support tickets, GitHub issues labelled
+   `user-report`, Discord / Slack pain-point posts.
+5. **CI** — recent flaky test signals in the project test suite.
+6. **Dependency vulnerabilities** — new CVEs against pinned deps.
+
+**Write raw collected data to {{feedback_dir}}/<today>.raw.md.**
+If no signal source is accessible, write a "no signals collected"
+stub and continue — the cycle must always produce a summary.
+
+```bash
+TODAY=$(date -u +%Y-%m-%d)
+mkdir -p {{feedback_dir}}
+cat > "{{feedback_dir}}/$TODAY.raw.md" <<EOF
+# Raw signals for $TODAY (window: {{since}})
+
+## Errors
+<dump of error-tracker output, or "no access">
+
+## Metrics
+<dump of metrics output, or "no access">
+
+## Logs
+<dump of log tail, or "no access">
+
+## User feedback
+<dump of support feed, or "no access">
+
+## CI
+<dump of flaky test report, or "no access">
+
+## Deps
+<dump of vuln scanner, or "no access">
+EOF
+```
+
+**Exit criteria:** Raw file exists.
+"""
+
+[[steps]]
+id = "classify"
+title = "Classify each signal into a type and severity"
+needs = ["collect"]
+description = """
+Read the raw file. For each distinct signal, write one row in the
+classification table.
+
+Types:
+- `bug` — behavior deviating from acceptance criteria
+- `perf` — performance regression
+- `ux` — UX paper cut or usability complaint
+- `docs` — documentation gap
+- `arch` — systemic / cross-cutting concern
+- `security` — vulnerability or suspicious pattern
+- `test-gap` — observed failure mode uncovered by tests
+
+Severity: p0 / p1 / p2.
+
+Write to `{{feedback_dir}}/<today>.md`:
+
+```markdown
+# Feedback harvest $TODAY
+
+| # | Type | Severity | Signal | Proposed action | Upstream agent |
+|---|------|----------|--------|-----------------|-----------------|
+| 1 | bug | p1 | <summary> | <1-sentence action> | builder |
+| 2 | arch | p2 | <summary> | <1-sentence action> | architect |
+...
+```
+
+**Exit criteria:** Classified summary file exists.
+"""
+
+[[steps]]
+id = "propose"
+title = "Draft a bead for every actionable row"
+needs = ["classify"]
+description = """
+For every row in the classification table, draft a bead in a scratch
+format. Do not create the beads yet — the file-beads step does that.
+
+For each draft, decide:
+- Title (clear, one-line, action-shaped)
+- Upstream label (one of needs-architecture, needs-pm,
+  needs-design, needs-tests, ready-to-build, needs-review)
+- Severity label (p0 / p1 / p2)
+- Body (evidence link, reproduction steps, observed vs expected,
+  suggested action)
+
+Append to the summary file under a `## Proposed beads` section.
+
+**Exit criteria:** Every actionable row has a drafted bead entry.
+"""
+
+[[steps]]
+id = "actual-adr-sync"
+title = "Sync ADRs to CLAUDE.md/AGENTS.md via the actual skill"
+needs = ["propose"]
+description = """
+Run `actual adr-bot` to sync the rig's CLAUDE.md/AGENTS.md with its
+ADRs after proposing feedback-driven improvements. Uses `--no-tailor`
+to avoid spawning an AI subprocess inside the agent session. **DO NOT
+skip this step because you think it needs an interactive terminal —
+it does NOT when `--force --no-tui` are passed. You MUST actually run
+the command.**
+
+**Skip this step ONLY if `{{skip_adr_sync}}` is "true".**
+
+**1. Change to the rig root and check the `actual` binary:**
+```bash
+cd "$RIG_ROOT"
+if ! command -v actual >/dev/null 2>&1; then
+    bd update $ROOT_ID --notes "<existing notes>
+adr_sync: skipped — actual CLI not installed"
+    exit 0
+fi
+```
+
+**2. Check the git tree is clean:**
+```bash
+if [ -n "$(git status --porcelain)" ]; then
+    bd update $ROOT_ID --notes "<existing notes>
+adr_sync: skipped — dirty worktree"
+    exit 0
+fi
+```
+
+**3. Dry-run:**
+```bash
+actual adr-bot --dry-run --full --force --no-tui --no-tailor
+```
+Read the diff carefully. Is it small and sensible? Or is it a large
+divergence from an unrelated ADR drift?
+
+**4a. Small, sensible diff → commit it:**
+```bash
+actual adr-bot --force --no-tui --no-tailor
+actual status
+git add CLAUDE.md AGENTS.md
+git commit -m "actual-improver: sync ADRs after feedback harvest"
+```
+
+**4b. Large divergence → file a divergence bead and STOP:**
+```bash
+DIVERGENCE_ID=$(bd create \\
+    --title "ADR divergence: feedback harvest" \\
+    --label source:actual-improver \\
+    --label type:divergence \\
+    --notes "Dry-run diff was non-trivial. Review manually." \\
+    --json | jq -r '.id')
+bd dep add $ROOT_ID --blocked-by $DIVERGENCE_ID
+```
+Record `adr_sync: divergence_filed` in the root bead notes.
+
+**Exit criteria:** Either ADRs committed, sync skipped with a
+documented reason, or a divergence bead filed.
+"""
+
+[[steps]]
+id = "file-beads"
+title = "Create the beads, close the source needs-improve beads, mail"
+needs = ["actual-adr-sync"]
+description = """
+**1. Create each drafted bead with a routing label:**
+```bash
+while read -r row; do
+    # Parse the draft row into title, upstream_label, severity, body.
+    NEW_ID=$(bd create \\
+        --title "<title>" \\
+        --label "<upstream-label>" \\
+        --label "<severity>" \\
+        --label "source:actual-improver" \\
+        --notes "<body>" \\
+        --json | jq -r '.id')
+    echo "filed: $NEW_ID"
+done
+```
+
+Label routing map:
+- systemic/architectural → `--label needs-architecture`
+- new feature work → `--label needs-pm`
+- UX paper cuts → `--label needs-design`
+- test gaps → `--label needs-tests`
+- direct fixes → `--label ready-to-build`
+- audit concerns → `--label needs-review`
+
+**2. Close any source beads** that motivated this cycle:
+```bash
+bd close <source-bead-id> --reason "feedback harvested $(date -u +%Y-%m-%d)"
+```
+
+**3. Mail each downstream agent that received new work:**
+```bash
+for agent in architect pm designer validator builder reviewer; do
+    count=$(bd list --label=source:actual-improver --label=needs-$agent --limit=50 --json 2>/dev/null | jq 'length')
+    if [ "$count" -gt 0 ] 2>/dev/null; then
+        gc mail send "$agent" "Improver filed $count new $agent item(s) from today's harvest"
+    fi
+done
+```
+
+**Exit criteria:** Drafted beads exist with routing labels;
+source beads closed; downstream agents notified via mail.
+"""

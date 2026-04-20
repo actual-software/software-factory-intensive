@@ -1,0 +1,119 @@
+description = "Deacon patrol: route labelled beads, check health, loop."
+formula = "mol-deacon-patrol"
+version = 1
+
+[[steps]]
+id = "route-needs-plan"
+title = "Dispatch needs-plan beads to planner"
+description = """
+Find all open beads with label needs-plan that have no assignee:
+  gc bd --rig "$RIG" list --label=needs-plan --status=open --no-assignee --json
+For each bead, sling to the planner then assign it to prevent re-dispatch:
+  gc sling "$RIG/planner" "Pick up bead <id>: <title>"
+  gc bd --rig "$RIG" update <id> --assignee="$RIG/planner"
+Log how many were dispatched.
+"""
+
+[[steps]]
+id = "route-needs-architecture"
+title = "Dispatch needs-architecture beads to architect"
+description = """
+Find all open beads with label needs-architecture that have no assignee:
+  gc bd --rig "$RIG" list --label=needs-architecture --status=open --no-assignee --json
+For each bead, sling to the architect then assign it to prevent re-dispatch:
+  gc sling "$RIG/architect" "Pick up bead <id>: <title>"
+  gc bd --rig "$RIG" update <id> --assignee="$RIG/architect"
+Log how many were dispatched.
+"""
+
+[[steps]]
+id = "route-needs-pm"
+title = "Dispatch needs-pm beads to pm"
+description = """
+Find all open beads with label needs-pm that have no assignee:
+  gc bd --rig "$RIG" list --label=needs-pm --status=open --no-assignee --json
+For each bead, sling to the pm then assign it to prevent re-dispatch:
+  gc sling "$RIG/pm" "Pick up bead <id>: <title>"
+  gc bd --rig "$RIG" update <id> --assignee="$RIG/pm"
+Log how many were dispatched.
+"""
+
+[[steps]]
+id = "route-needs-design"
+title = "Dispatch needs-design beads to designer"
+description = """
+Find all open beads with label needs-design that have no assignee:
+  gc bd --rig "$RIG" list --label=needs-design --status=open --no-assignee --json
+For each bead, sling to the designer then assign it to prevent re-dispatch:
+  gc sling "$RIG/designer" "Pick up bead <id>: <title>"
+  gc bd --rig "$RIG" update <id> --assignee="$RIG/designer"
+Log how many were dispatched.
+"""
+
+[[steps]]
+id = "route-needs-tests"
+title = "Dispatch needs-tests beads to validator"
+description = """
+Find all open beads with label needs-tests that have no assignee:
+  gc bd --rig "$RIG" list --label=needs-tests --status=open --no-assignee --json
+For each bead, sling to the validator then assign it to prevent re-dispatch:
+  gc sling "$RIG/validator" "Pick up bead <id>: <title>"
+  gc bd --rig "$RIG" update <id> --assignee="$RIG/validator"
+Log how many were dispatched.
+"""
+
+[[steps]]
+id = "route-ready-to-build"
+title = "Dispatch ready-to-build beads to builder using mol-tdd-build"
+description = """
+Find all open beads with label ready-to-build that have no assignee:
+  gc bd --rig "$RIG" list --label=ready-to-build --status=open --no-assignee --json
+For each bead, sling to the builder with the TDD formula, then assign it to prevent re-dispatch:
+  gc sling "$RIG/builder" "$BEAD_ID" --on mol-tdd-build
+  gc bd --rig "$RIG" update <id> --assignee="$RIG/builder"
+Log how many were dispatched.
+"""
+
+[[steps]]
+id = "route-needs-review"
+title = "Dispatch needs-review beads to reviewer"
+description = """
+Find all open beads with label needs-review that have no assignee:
+  gc bd --rig "$RIG" list --label=needs-review --status=open --no-assignee --json
+For each bead, sling to the reviewer then assign it to prevent re-dispatch:
+  gc sling "$RIG/reviewer" "Pick up bead <id>: <title>"
+  gc bd --rig "$RIG" update <id> --assignee="$RIG/reviewer"
+Log how many were dispatched.
+"""
+
+[[steps]]
+id = "route-needs-deploy"
+title = "Dispatch needs-deploy beads to deployer"
+description = """
+Find all open beads with label needs-deploy that have no assignee:
+  gc bd --rig "$RIG" list --label=needs-deploy --status=open --no-assignee --json
+For each bead, sling to the deployer then assign it to prevent re-dispatch:
+  gc sling "$RIG/deployer" "Pick up bead <id>: <title>"
+  gc bd --rig "$RIG" update <id> --assignee="$RIG/deployer"
+Log how many were dispatched.
+"""
+
+[[steps]]
+id = "health-check"
+title = "Check factory agent status"
+description = """
+Run gc status and report:
+- Which agents are running vs idle vs stopped
+- Any agents in an error state
+If an agent has in_progress beads but no active session, log a warning.
+"""
+
+[[steps]]
+id = "loop"
+title = "Pour next patrol iteration"
+description = """
+Patrol complete. If any beads were dispatched or health issues found, log a summary.
+Pour next patrol iteration:
+  bd mol pour mol-deacon-patrol
+Then sleep — do not spin immediately.
+"""
