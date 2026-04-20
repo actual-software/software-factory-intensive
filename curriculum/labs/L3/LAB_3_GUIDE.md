@@ -65,25 +65,11 @@ Creates `~/Projects/factory/lab_l3/l3-project/` and `~/Projects/factory/lab_l3/l
 ### Step 2: Carry forward everything that anchors the new stages
 
 ```bash
-# Manifest + upstream artifacts (from L2)
-cp ~/Projects/factory/lab_l2/l2-project/docs/PROJECT_MANIFEST.md \
-   ~/Projects/factory/lab_l3/l3-project/docs/PROJECT_MANIFEST.md
-
-cp -R ~/Projects/factory/lab_l2/l2-project/work-packages/ \
-      ~/Projects/factory/lab_l3/l3-project/work-packages/
-
-cp -R ~/Projects/factory/lab_l2/l2-project/docs/adr/ \
-      ~/Projects/factory/lab_l3/l3-project/docs/adr/
-
-# Source tree
+# Everything from L2 (source, manifest, work-packages/, docs/adr/,
+# factory-pipeline.md, factory-iterations.md, coordination-channels.md).
+# The bulk copy creates any missing directories.
 cp -R ~/Projects/factory/lab_l2/l2-project/. \
       ~/Projects/factory/lab_l3/l3-project/
-
-# Iteration log + capability map
-cp ~/Projects/factory/lab_l2/l2-project/docs/factory-iterations.md \
-   ~/Projects/factory/lab_l3/l3-project/docs/factory-iterations.md
-cp ~/Projects/factory/lab_l2/l2-project/docs/factory-pipeline.md \
-   ~/Projects/factory/lab_l3/l3-project/docs/factory-pipeline.md
 ```
 
 ### Step 3: Verify the Designer and Coder are up

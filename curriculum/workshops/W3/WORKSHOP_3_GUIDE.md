@@ -32,24 +32,24 @@ Through this workshop you will:
 
 ```
                 ┌──────────────────────────┐
-                │     Feature Request       │
+                │     Feature Request      │
                 └────────────┬─────────────┘
                              │
                              ▼
   ┌──────────────────────────────────────────────────────────────┐
-  │                                                                │
-  │   mail ─────────▶   point-to-point notify                      │
-  │                     "you're up"                                │
-  │                                                                │
-  │   work items ──▶   shared queue + status                       │
-  │                     "this ticket is ready"                     │
-  │                                                                │
-  │   files ────────▶   durable artifacts                          │
-  │                     "read my work package"                     │
-  │                                                                │
-  │   external ────▶   bridges to non-factory systems              │
-  │                     "Linear issue labelled 'factory-ready'"    │
-  │                                                                │
+  │                                                              │
+  │   mail ─────────▶   point-to-point notify                    │
+  │                     "you're up"                              │
+  │                                                              │
+  │   work items ───▶   shared queue + status                    │
+  │                     "this ticket is ready"                   │
+  │                                                              │
+  │   files ────────▶   durable artifacts                        │
+  │                     "read my work package"                   │
+  │                                                              │
+  │   external ─────▶   bridges to non-factory systems           │
+  │                     "Linear issue labelled 'factory-ready'"  │
+  │                                                              │
   └──────────────────────────────────────────────────────────────┘
                              │
                              ▼
@@ -76,6 +76,7 @@ This scaffolds `~/Projects/factory/workshop_w3/w3-project/` and `~/Projects/fact
 You'll reference the project you connected to the factory in L1:
 
 ```bash
+mkdir -p ~/Projects/factory/workshop_w3/w3-project/docs
 cp ~/Projects/factory/lab_l1/l1-project/docs/PROJECT_MANIFEST.md \
    ~/Projects/factory/workshop_w3/w3-project/docs/PROJECT_MANIFEST.md
 

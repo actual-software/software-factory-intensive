@@ -69,27 +69,11 @@ Creates `~/Projects/factory/lab_l4/l4-project/` and `~/Projects/factory/lab_l4/l
 ### Step 2: Carry forward L3 artifacts
 
 ```bash
-cp ~/Projects/factory/lab_l3/l3-project/docs/PROJECT_MANIFEST.md \
-   ~/Projects/factory/lab_l4/l4-project/docs/PROJECT_MANIFEST.md
-
-cp -R ~/Projects/factory/lab_l3/l3-project/work-packages/ \
-      ~/Projects/factory/lab_l4/l4-project/work-packages/
-
-cp -R ~/Projects/factory/lab_l3/l3-project/docs/adr/ \
-      ~/Projects/factory/lab_l4/l4-project/docs/adr/
-
-cp -R ~/Projects/factory/lab_l3/l3-project/design/ \
-      ~/Projects/factory/lab_l4/l4-project/design/
-
-# Bring the source + feature branch forward
+# Everything from L3 (source, feature branch, manifest, work-packages/,
+# docs/adr/, design/, factory-pipeline.md, factory-iterations.md,
+# coordination-channels.md). The bulk copy creates any missing directories.
 cp -R ~/Projects/factory/lab_l3/l3-project/. \
       ~/Projects/factory/lab_l4/l4-project/
-
-# Iteration log + capability map
-cp ~/Projects/factory/lab_l3/l3-project/docs/factory-iterations.md \
-   ~/Projects/factory/lab_l4/l4-project/docs/factory-iterations.md
-cp ~/Projects/factory/lab_l3/l3-project/docs/factory-pipeline.md \
-   ~/Projects/factory/lab_l4/l4-project/docs/factory-pipeline.md
 ```
 
 ### Step 3: Verify all six stages are up

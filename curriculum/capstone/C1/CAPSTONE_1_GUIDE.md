@@ -73,16 +73,18 @@ Creates `~/Projects/factory/capstone_c1/c1-project/` and `~/Projects/factory/cap
 This is the only session that accumulates every prior artifact. Copy them in full:
 
 ```bash
-# Source + all produced artifacts
+# 1) Source + all produced artifacts from L4 (the bulk copy creates
+#    c1-project/docs/ and every other directory under l4-project/).
 cp -R ~/Projects/factory/lab_l4/l4-project/. \
       ~/Projects/factory/capstone_c1/c1-project/
 
-# Improvement criteria from W4
+# 2) Improvement criteria from W4 (only file that lives outside the L4 tree).
+mkdir -p ~/Projects/factory/capstone_c1/c1-project/docs
 cp ~/Projects/factory/workshop_w4/w4-project/docs/improvement-criteria.md \
    ~/Projects/factory/capstone_c1/c1-project/docs/improvement-criteria.md
 
-# If any pack customization in L2–L4 wasn't mirrored into the C1 factory's
-# packs directory, copy those now.  Check with:
+# 3) If any pack customization in L2–L4 wasn't mirrored into the C1 factory's
+#    packs directory, copy those now. Check with:
 diff -qr ~/Projects/factory/lab_l4/l4-gc-factory/packs/ \
          ~/Projects/factory/capstone_c1/c1-gc-factory/packs/
 ```

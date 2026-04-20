@@ -28,35 +28,35 @@ Through this workshop you will:
 ## The Loop You're Building
 
 ```
-             ┌───────────────────────────────────────┐
-             │          Factory Run (N)                │
-             │   Planner → ... → Deployer              │
-             └────────────────┬────────────────────────┘
-                              │  emits signals
-                              ▼
-  ┌───────────────────────────────────────────────────────┐
+  ┌───────────────────────────────────────┐
+  │          Factory Run (N)              │
+  │   Planner → ... → Deployer            │
+  └────────────────┬──────────────────────┘
+                   │  emits signals
+                   ▼
+  ┌────────────────────────────────────────────────────────┐
   │                     Signals                            │
-  │                                                         │
-  │  • Review findings       review-reports/<slug>.md       │
-  │  • Release-gate failures release-gates/<slug>.md        │
-  │  • Iteration count       factory-iterations.md          │
-  │  • Rollback / deploy     CI logs, incident reports      │
-  │  • Production bugs       user feedback, error tracking  │
-  └────────────────┬─────────────────────────────────────┘
+  │                                                        │
+  │  • Review findings       review-reports/<slug>.md      │
+  │  • Release-gate failures release-gates/<slug>.md       │
+  │  • Iteration count       factory-iterations.md         │
+  │  • Rollback / deploy     CI logs, incident reports     │
+  │  • Production bugs       user feedback, error tracking │
+  └────────────────┬───────────────────────────────────────┘
                    │  filtered by improvement criteria
                    ▼
-  ┌───────────────────────────────────────────────────────┐
-  │              Config Change (one edit)                   │
-  │                                                         │
-  │  • Prompt edit (pack)                                   │
-  │  • Manifest section edit (standards, criteria, inputs)  │
-  │  • Coordination channel addition                        │
-  │  • Capability / MCP addition                            │
-  └────────────────┬──────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────┐
+  │                Config Change (one edit)                │
+  │                                                        │
+  │  • Prompt edit (pack)                                  │
+  │  • Manifest section edit (standards, criteria, inputs) │
+  │  • Coordination channel addition                       │
+  │  • Capability / MCP addition                           │
+  └────────────────┬───────────────────────────────────────┘
                    │  take effect on next run
                    ▼
-  ┌───────────────────────────────────────────────────────┐
-  │          Factory Run (N+1)  — measurably better          │
+  ┌────────────────────────────────────────────────────────┐
+  │          Factory Run (N+1)  — measurably better        │
   └────────────────────────────────────────────────────────┘
 ```
 
@@ -74,20 +74,23 @@ Through this workshop you will:
 ### Step 2: Carry forward the L2–L4 signal sources
 
 ```bash
+mkdir -p ~/Projects/factory/workshop_w4/w4-project/docs
+
 # Iteration log (records every config-over-chat edit)
 cp ~/Projects/factory/lab_l4/l4-project/docs/factory-iterations.md \
    ~/Projects/factory/workshop_w4/w4-project/docs/factory-iterations.md
 
-# Review + release artifacts (the richest sources of signal)
+# Manifest (your current standards / criteria)
+cp ~/Projects/factory/lab_l4/l4-project/docs/PROJECT_MANIFEST.md \
+   ~/Projects/factory/workshop_w4/w4-project/docs/PROJECT_MANIFEST.md
+
+# Review + release artifacts (the richest sources of signal).
+# cp -R creates these directories if they don't already exist.
 cp -R ~/Projects/factory/lab_l4/l4-project/review-reports/ \
       ~/Projects/factory/workshop_w4/w4-project/review-reports/
 
 cp -R ~/Projects/factory/lab_l4/l4-project/release-gates/ \
       ~/Projects/factory/workshop_w4/w4-project/release-gates/
-
-# Manifest (your current standards / criteria)
-cp ~/Projects/factory/lab_l4/l4-project/docs/PROJECT_MANIFEST.md \
-   ~/Projects/factory/workshop_w4/w4-project/docs/PROJECT_MANIFEST.md
 ```
 
 ### Step 3: Keep L4 installed and running

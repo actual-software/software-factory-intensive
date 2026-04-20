@@ -33,9 +33,9 @@ Through this workshop you will:
          │  distribute capabilities across 6 specialist stages
          ▼
 ┌──────────────────────────────────────────────────────────────┐
-│  Feature Request                                              │
-│        │                                                      │
-│        ▼                                                      │
+│  Feature Request                                             │
+│        │                                                     │
+│        ▼                                                     │
 │  ┌───────────┐   plan   ┌───────────┐   decide   ┌──────────┐│
 │  │  Planner  │─────────▶│ Architect │───────────▶│ Designer ││
 │  └───────────┘          └───────────┘            └────┬─────┘│
@@ -44,8 +44,8 @@ Through this workshop you will:
 │  ┌───────────┐   gate   ┌───────────┐   review   ┌──────────┐│
 │  │  Deployer │◀─────────│  Reviewer │◀───────────│  Coder   ││
 │  └─────┬─────┘          └───────────┘            └──────────┘│
-│        │                                                      │
-└────────┼──────────────────────────────────────────────────────┘
+│        │                                                     │
+└────────┼─────────────────────────────────────────────────────┘
          ▼
    Functional Software
 ```
@@ -71,19 +71,21 @@ Do not delete your W1 installation yet. You'll reference the Fired Up Pizza fact
 
 > If you've already torn down W1, reinstall it with `/factory-activity-agent install W1` — the scaffolds at `w1-project/src/`, `w1-project/docs/PROJECT_MANIFEST.md`, and the installed packs under `w1-gc-factory/packs/actual/` are the reference you'll compare yourself against.
 
-### Step 3: Open the W2 workspace
+### Step 3: Open the W2 workspace and create the deliverable file
 
 ```bash
 cd ~/Projects/factory/workshop_w2/w2-project
+mkdir -p docs
+touch docs/factory-pipeline.md
 ```
 
-This is where you'll write `factory-pipeline.md`. No code, no agents to manage — just a single design document.
+`docs/factory-pipeline.md` is the single design document you'll write in this workshop. No code, no agents to manage. Later sessions read it from `docs/factory-pipeline.md` — keep it there.
 
 ## Part 2: Inventory Your Individual AI Workflow (10 min)
 
 > **Goal:** Produce a concrete list of the capabilities you already rely on so you can place them deliberately in Part 4, rather than losing them when you hand off to a factory.
 
-Open `factory-pipeline.md` and, under a heading `## Current Workflow Inventory`, write a one-line entry for every capability that currently contributes to how you ship code. Be specific: a name the next agent (or you, in three months) could act on.
+Open `docs/factory-pipeline.md` and, under a heading `## Current Workflow Inventory`, write a one-line entry for every capability that currently contributes to how you ship code. Be specific: a name the next agent (or you, in three months) could act on.
 
 Use these buckets as prompts — skip any that don't apply, and add your own when needed:
 
@@ -132,7 +134,7 @@ Keep this in mind as you map your inventory: every capability must land on a spe
 
 > **Goal:** Produce a stage-by-stage assignment for every capability in your inventory, so the remainder of the curriculum has a clear starting configuration per specialist.
 
-In `factory-pipeline.md`, add a section `## Pipeline Mapping`. Fill in the table below — one row per stage — with:
+In `docs/factory-pipeline.md`, add a section `## Pipeline Mapping`. Fill in the table below — one row per stage — with:
 
 - **Model**: which model best matches this stage's work style
 - **Tools / MCPs**: which of your inventoried integrations this stage needs
@@ -182,7 +184,7 @@ A short example:
 | No staging DB access from agent        | Coder, Reviewer | Close in L3  |
 ```
 
-Commit `factory-pipeline.md`. This file is what you'll hand to each subsequent session — L1 will read it to decide what to install, L2–L4 will read it per agent.
+Commit `docs/factory-pipeline.md`. This file is what you'll hand to each subsequent session — L1 will read it to decide what to install, L2–L4 will read it per agent.
 
 ## Common Issues and Solutions
 
@@ -195,7 +197,7 @@ Commit `factory-pipeline.md`. This file is what you'll hand to each subsequent s
 
 Before leaving this workshop, verify all of these:
 
-- [ ] `~/Projects/factory/workshop_w2/w2-project/factory-pipeline.md` exists and is committed
+- [ ] `~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md` exists and is committed
 - [ ] Every capability you inventoried appears in the mapping table or the shared knowledge base section
 - [ ] Every stage row has at least `Model` and `Output` filled in
 - [ ] Every `Gap` has a decision (close now / close in L1–L4 / accept)
@@ -204,7 +206,7 @@ Before leaving this workshop, verify all of these:
 
 | Artifact | Location | What It Holds |
 |----------|----------|---------------|
-| `factory-pipeline.md` | `~/Projects/factory/workshop_w2/w2-project/factory-pipeline.md` | Inventory of your workflow, stage-by-stage mapping, gap list |
+| `factory-pipeline.md` | `~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md` | Inventory of your workflow, stage-by-stage mapping, gap list |
 | W2 workspace | `~/Projects/factory/workshop_w2/` | Scratch factory + project for this design session |
 | Reference factory (from W1) | `~/Projects/factory/workshop_w1/` | Worked example of each stage's configuration |
 

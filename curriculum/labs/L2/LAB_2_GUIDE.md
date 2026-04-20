@@ -63,21 +63,18 @@ This scaffolds `~/Projects/factory/lab_l2/l2-project/` and `~/Projects/factory/l
 ### Step 2: Pull forward L1 + W3 artifacts
 
 ```bash
-# Manifest (from L1) — the agents' grounding document
-cp ~/Projects/factory/lab_l1/l1-project/docs/PROJECT_MANIFEST.md \
-   ~/Projects/factory/lab_l2/l2-project/docs/PROJECT_MANIFEST.md
-
-# Coordination channels doc (from W3) — tells you which handoffs are already wired
-cp ~/Projects/factory/workshop_w3/w3-project/docs/coordination-channels.md \
-   ~/Projects/factory/lab_l2/l2-project/docs/coordination-channels.md
-
-# Factory-pipeline map (from W2) — the capability source for Part 3
-cp ~/Projects/factory/lab_l1/l1-project/docs/factory-pipeline.md \
-   ~/Projects/factory/lab_l2/l2-project/docs/factory-pipeline.md
-
-# Source code — L2 acts on your real project
+# 1) Everything from L1 (source, docs/PROJECT_MANIFEST.md, docs/factory-pipeline.md,
+#    work-packages/, etc.) — the bulk copy creates any missing directories.
 cp -R ~/Projects/factory/lab_l1/l1-project/. \
       ~/Projects/factory/lab_l2/l2-project/
+
+# 2) Overlay W3's updates: the coordination channels doc, plus any manifest
+#    edits you made in W3 when you added a new channel.
+mkdir -p ~/Projects/factory/lab_l2/l2-project/docs
+cp ~/Projects/factory/workshop_w3/w3-project/docs/coordination-channels.md \
+   ~/Projects/factory/lab_l2/l2-project/docs/coordination-channels.md
+cp ~/Projects/factory/workshop_w3/w3-project/docs/PROJECT_MANIFEST.md \
+   ~/Projects/factory/lab_l2/l2-project/docs/PROJECT_MANIFEST.md
 ```
 
 ### Step 3: Verify the Planner and Architect are up

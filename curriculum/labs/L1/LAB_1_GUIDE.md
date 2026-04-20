@@ -65,23 +65,21 @@ This scaffolds `~/Projects/factory/lab_l1/l1-project/` (the project workspace th
 
 ### Step 2: Point the workspace at your project
 
-L1 starts with a blank project workspace on purpose — you bring the code. Copy or link your project into the workspace:
+L1 starts with a mostly-empty project workspace on purpose — you bring the code. Pour your project into it alongside the scaffolding the install created:
 
 ```bash
-# Option A: copy (safest — factory mutations stay isolated)
 cp -R ~/path/to/your-repo/. ~/Projects/factory/lab_l1/l1-project/
-
-# Option B: symlink (fastest — changes flow back to the original repo)
-rm -rf ~/Projects/factory/lab_l1/l1-project
-ln -s ~/path/to/your-repo ~/Projects/factory/lab_l1/l1-project
 ```
+
+This merges your code into the installed workspace. Do **not** `rm -rf` the installed workspace or replace it with a symlink — the install registered the path with the factory (the `gc rig add` step), so deleting or swapping it out leaves the registration dangling.
 
 ### Step 3: Bring forward your W2 deliverable
 
 Your `factory-pipeline.md` is the capability map you'll translate into manifest content in Part 2. Copy it into the L1 project workspace:
 
 ```bash
-cp ~/Projects/factory/workshop_w2/w2-project/factory-pipeline.md \
+mkdir -p ~/Projects/factory/lab_l1/l1-project/docs
+cp ~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md \
    ~/Projects/factory/lab_l1/l1-project/docs/factory-pipeline.md
 ```
 
@@ -103,6 +101,7 @@ Every agent in the factory consults `docs/PROJECT_MANIFEST.md` first. A thin or 
 ### Step 1: Start from the template
 
 ```bash
+mkdir -p ~/Projects/factory/lab_l1/l1-project/docs
 cp ~/Projects/actual-software/software-factory-intensive/curriculum/PROJECT_MANIFEST_TEMPLATE.md \
    ~/Projects/factory/lab_l1/l1-project/docs/PROJECT_MANIFEST.md
 ```
