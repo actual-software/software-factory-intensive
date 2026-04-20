@@ -80,7 +80,7 @@ Restart the coding agent (or `gc restart` for factory agents — see [Troublesho
 
 ### Alternative: swap to a second account with `aisw`
 
-If you have a second *subscription* account (e.g. a personal and a work Claude Max), [`aisw`](https://burakdede.github.io/aisw/) can fail over to it without touching API keys. `aisw` is a standalone account manager for Claude Code, Codex CLI, and Gemini CLI — install via `brew install aisw`, the shell installer, or `cargo install aisw`. It stores named profiles under `~/.aisw/` and swaps a CLI's active credentials on demand.
+If you have a second *subscription* account (e.g. a personal and a work Claude Max), [`aisw`](https://burakdede.github.io/aisw/) can fail over to it without touching API keys. `aisw` is a standalone account manager for Claude Code, Codex CLI, and Gemini CLI — install via `brew install aisw`, the shell installer, or `cargo install aisw`. It stores named profiles under `~/.aisw/` and swaps a CLI's active credentials on demand. See [Medium - Setting Up Multiple Claude Code Accounts on Your Local Machine](https://medium.com/@buwanekasumanasekara/setting-up-multiple-claude-code-accounts-on-your-local-machine-f8769a36d1b1) for more information.
 
 One-time setup for a second Claude Max account:
 
@@ -112,8 +112,6 @@ Fail over during a quota hit:
 3. Restart the coding agent so it picks up the new credentials — exit and relaunch Claude Code / Codex / Gemini (or `gc restart` for factory agents).
 
 Reach for `aisw` when you prefer subscription-only usage (predictable cost) and already have a spare account; reach for API billing when you don't, or when you only need to unblock for a few minutes.
-
-For more information on multi-account setup, including a step-by-step walkthrough for adding a second Claude Code account, see [`prerequisites/coding_agent_switcher.md`](../prerequisites/coding_agent_switcher.md).
 
 ---
 

@@ -24,7 +24,7 @@ Issues with the `bd` (beads) issue tracker that the factory uses to coordinate a
    ```bash
    bd label list <id>
    ```
-   Compare to the canonical vocabulary (see [LABELED_BEADS.md](../LABELED_BEADS.md)). If the label is off by capitalization / whitespace, remove it and re-add the canonical value:
+   Compare to the canonical vocabulary (see [docs/labeled-beads.md](../docs/labeled-beads.md)). If the label is off by capitalization / whitespace, remove it and re-add the canonical value:
    ```bash
    bd label remove <id> "<bad-label>"
    bd label add <id> needs-plan

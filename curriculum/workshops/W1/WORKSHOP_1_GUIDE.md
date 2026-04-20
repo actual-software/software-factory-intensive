@@ -72,7 +72,7 @@ Every transition is triggered by a label flip on a task bead by an agent.
 
 Software factories implemented with Gas City use a graph-based DAG framework called `beads` to manage task dependencies and status. These "beads" are the basic units of work in the factory, and are the objects that are manipulated by the agents in the process of producing software. They can include priorities, dependencies on other tasks, notes from agents, and other metadata. For more information on beads, see [gastownhall/beads](https://github.com/gastownhall/beads).
 
-For the purpose of this workshop, a simple lable protocol is added on top of the beads framework to manage task status and handoff. Every question W1 raises — *"why did the Architect wake?" "why did the task move to `ready-to-build`?" "what does the Coder look at to know what to build?"* — is answered in [`software-factory/LABELED_BEADS.md`](../../../LABELED_BEADS.md). Read it before installing anything.
+For the purpose of this workshop, a simple lable protocol is added on top of the beads framework to manage task status and handoff. Every question W1 raises — *"why did the Architect wake?" "why did the task move to `ready-to-build`?" "what does the Coder look at to know what to build?"* — is answered in [`docs/labeled-beads.md`](../../../docs/labeled-beads.md). Read it before installing anything.
 
 1. The **six canonical labels** table (`needs-architecture`, `needs-plan`, `needs-design`, `ready-to-build`, `needs-review`, `ready-to-ship`).
 2. The **example lifecycle** walkthrough — the single worked example of a bead walking the factory.
@@ -92,7 +92,7 @@ The **factory-activity-agent** is the tooling you'll use across every workshop a
 
 ### Step 1: Install the skill into your coding agent
 
-Follow the installation steps in [`docs/factory-activity-agent-commands.md`](../../../docs/factory-activity-agent-commands.md#installation) to symlink (or copy) the skill into your coding agent's skills directory. The guide covers Claude Code and Codex, and gives you three options for where to place it (user-level vs project-level, symlink vs copy).
+Follow the installation steps in [`docs/factory-activity-agent.md`](../../../docs/factory-activity-agent.md#installation) to symlink (or copy) the skill into your coding agent's skills directory. The guide covers Claude Code and Codex, and gives you three options for where to place it (user-level vs project-level, symlink vs copy).
 
 You only do this once — every session after W1 assumes the skill is on your path.
 
@@ -114,7 +114,7 @@ The factory-activity-agent is a wrapper over `gc` and `python` scaffolding. You'
 
 Every command takes a `--dry-run` flag that prints what it *would* do without executing — the fastest way to explore one is to run it with `--dry-run` and read the commands it prints.
 
-For the detailed reference on what each command does under the hood, when to reach for it, and which `gc` or script calls it delegates to, see [`docs/factory-activity-agent-commands.md`](../../../docs/factory-activity-agent-commands.md). Keep it open in a tab; you'll come back to it throughout the curriculum.
+For the detailed reference on what each command does under the hood, when to reach for it, and which `gc` or script calls it delegates to, see [`docs/factory-activity-agent.md`](../../../docs/factory-activity-agent.md). Keep it open in a tab; you'll come back to it throughout the curriculum.
 
 ### Step 4: Commit the commands to muscle memory
 
@@ -195,6 +195,23 @@ First look at the tasks in the project:
 # See what the current tasks are in the project
 bd list --all
 bd show <task-id>
+```
+
+If the tasks are loaded correctly, you should see something like this:
+
+```bash
+ ~/Projects/factory/workshop_w1/w1-project $ bd list --all
+○ wp-269 ● P0 Pizza customization
+○ wp-k04 ● P0 Shopping cart
+○ wp-roo ● P0 Menu display page
+○ wp-dzh ● P1 Order status tracking
+○ wp-ulo ● P1 Order placement
+○ wp-lju ● P2 Order history page
+
+--------------------------------------------------------------------------------
+Total: 6 issues (6 open, 0 in progress)
+
+Status: ○ open  ◐ in_progress  ● blocked  ✓ closed  ❄ deferred
 ```
 
 Next, start the factory so the agents can start working (from the **factory** directory):

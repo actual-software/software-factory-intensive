@@ -6,29 +6,16 @@ If you are building agents in this workshop, **labels are the contract**. Your a
 
 ---
 
-## Why labels replaced durable markdowns
-
-Early iterations of the software factory passed context between agents via long-lived markdown documents. Each stage read a doc, appended its section, and saved it. That worked for a linear, single-threaded flow but fell apart as the factory grew:
-
-1. **Coordination surface was huge.** Every agent needed to know every doc path, every section contract, and every "what's done vs. what's pending" state spread across multiple files.
-2. **State was duplicated.** The same fact (e.g. "design is complete") lived in a doc, in git, and in a participant's head — and drifted.
-3. **Parallelism was hard.** Two agents writing to the same doc collided. Two beads in different stages couldn't be distinguished without parsing the doc's internal state.
-4. **Handoffs were implicit.** An agent didn't know when it was "up" — it had to scan docs for cues.
-
-Labels fix all four. A bead is one unit of work; its labels are its state; `bd ready --label <name>` is a natural queue per agent; each agent's config points at exactly one inbound label. The factory becomes a state machine whose edges are label transitions, and the coordination surface shrinks to just the label vocabulary.
-
----
-
 ## The six canonical labels
 
 Every software factory built in this curriculum uses these six labels. They map one-to-one to the six essential agents.
 
-| Label              | Meaning                                                              | Who adds it                     | Who consumes it |
-|--------------------|----------------------------------------------------------------------|---------------------------------|-----------------|
-| `needs-architecture` | Work requires architectural decisions before planning can proceed  | Planner (on drift) or human    | Architect       |
-| `needs-plan`         | Work requires breakdown into smaller, buildable pieces             | Architect or human             | Planner         |
-| `needs-design`       | Work requires UI/UX or component design before implementation      | Planner (or Architect)         | Designer        |
-| `ready-to-build`     | Specs complete; implementation can start                           | Designer (or Planner, on skip) | Coder           |
+| Label                | Meaning                                                            | Who adds it                     | Who consumes it |
+|----------------------|--------------------------------------------------------------------|---------------------------------|-----------------|
+| `needs-architecture` | Work requires architectural decisions before planning can proceed  | Planner (on drift) or human     | Architect       |
+| `needs-plan`         | Work requires breakdown into smaller, buildable pieces             | Architect or human              | Planner         |
+| `needs-design`       | Work requires UI/UX or component design before implementation      | Planner (or Architect)          | Designer        |
+| `ready-to-build`     | Specs complete; implementation can start                           | Designer (or Planner, on skip)  | Coder           |
 | `needs-review`       | Implementation complete; awaiting code review                      | Coder                           | Reviewer        |
 | `ready-to-ship`      | Review passed; deployment is unblocked                             | Reviewer                        | Deployer        |
 

@@ -37,6 +37,7 @@ Refer to the Gas City [Installation Guide](https://github.com/gastownhall/gascit
 
 If your version differs, install the pinned version:
 ```bash
+brew update
 brew tap-new $USER/local
 brew extract --version=0.14.1 gastownhall/gascity/gascity $USER/local
 brew install gascity@0.14.1
@@ -118,6 +119,7 @@ When an agent produces wrong output, update its config file and re-run — don't
 software-factory-intensive/
 ├── activities/                      # Activities directory for participants to do their work
 ├── curriculum/                      # Read-only directory for the curriculum walkthroughs
+├── docs/                            # Documentation for the curriculum
 ├── images/                          # Images for the curriculum
 ├── packs/                           # Packs containing agents and configurations for the curriculum
 │   ├── all/                         # Composite 6-agent factory
@@ -137,7 +139,6 @@ software-factory-intensive/
 ├── scripts/                         # Scripts for the curriculum
 ├── skills
 │   └── factory-activity-agent/      # /factory-activity-agent skill to manage the curriculum
-├── LABELED_BEADS.md                 # Label reference for beads handoff process
 ├── PROJECT_OVERVIEW_TEMPLATE.md     # Template for the project overview (you fill in)
 ├── README.md                        # You are here
 └── troubleshooting/                 # Topic-scoped troubleshooting guides (gas city, cli coding agents, beads, tmux)
