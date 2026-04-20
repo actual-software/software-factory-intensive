@@ -687,16 +687,12 @@ def install(activity, dry_run=False):
     # orphaned session beads created during the restart.
     wait_for_reconciler(factory_dir, dry_run=dry_run)
 
-    # --- Step 6: Patch convoy ---
-    # Use gc bd to ensure gc manages the Dolt lifecycle (no rogue servers).
+    # --- Step 6: Register custom bead types ---
+    # gc doctor --fix registers all required types (molecule, session, convoy, etc.)
     # Must run after gc start so the Dolt server is available.
-    print("\n##### Patch convoy")
+    print("\n##### Register custom bead types")
     run(
-        ["gc", "bd", "config", "set", "types.custom", "convoy"],
-        cwd=str(factory_dir), dry_run=dry_run, check=False,
-    )
-    run(
-        ["gc", "bd", "--rig", alias_lower + "-project", "config", "set", "types.custom", "convoy"],
+        ["gc", "doctor", "--fix"],
         cwd=str(factory_dir), dry_run=dry_run, check=False,
     )
 

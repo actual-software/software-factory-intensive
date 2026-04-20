@@ -1,10 +1,11 @@
-name = "mol-deacon-patrol"
 description = "Deacon patrol: route labelled beads, check health, loop."
+formula = "mol-deacon-patrol"
+version = 1
 
 [[steps]]
 id = "route-needs-plan"
-description = "Dispatch needs-plan beads to planner"
-prompt = """
+title = "Dispatch needs-plan beads to planner"
+description = """
 Find all open beads with label needs-plan that have no assignee:
   gc bd --rig "$RIG" list --label=needs-plan --status=open --no-assignee --json
 For each bead, sling to the planner then assign it to prevent re-dispatch:
@@ -15,8 +16,8 @@ Log how many were dispatched.
 
 [[steps]]
 id = "route-needs-architecture"
-description = "Dispatch needs-architecture beads to architect"
-prompt = """
+title = "Dispatch needs-architecture beads to architect"
+description = """
 Find all open beads with label needs-architecture that have no assignee:
   gc bd --rig "$RIG" list --label=needs-architecture --status=open --no-assignee --json
 For each bead, sling to the architect then assign it to prevent re-dispatch:
@@ -27,8 +28,8 @@ Log how many were dispatched.
 
 [[steps]]
 id = "route-needs-pm"
-description = "Dispatch needs-pm beads to pm"
-prompt = """
+title = "Dispatch needs-pm beads to pm"
+description = """
 Find all open beads with label needs-pm that have no assignee:
   gc bd --rig "$RIG" list --label=needs-pm --status=open --no-assignee --json
 For each bead, sling to the pm then assign it to prevent re-dispatch:
@@ -39,8 +40,8 @@ Log how many were dispatched.
 
 [[steps]]
 id = "route-needs-design"
-description = "Dispatch needs-design beads to designer"
-prompt = """
+title = "Dispatch needs-design beads to designer"
+description = """
 Find all open beads with label needs-design that have no assignee:
   gc bd --rig "$RIG" list --label=needs-design --status=open --no-assignee --json
 For each bead, sling to the designer then assign it to prevent re-dispatch:
@@ -51,8 +52,8 @@ Log how many were dispatched.
 
 [[steps]]
 id = "route-needs-tests"
-description = "Dispatch needs-tests beads to validator"
-prompt = """
+title = "Dispatch needs-tests beads to validator"
+description = """
 Find all open beads with label needs-tests that have no assignee:
   gc bd --rig "$RIG" list --label=needs-tests --status=open --no-assignee --json
 For each bead, sling to the validator then assign it to prevent re-dispatch:
@@ -63,8 +64,8 @@ Log how many were dispatched.
 
 [[steps]]
 id = "route-ready-to-build"
-description = "Dispatch ready-to-build beads to builder using mol-tdd-build"
-prompt = """
+title = "Dispatch ready-to-build beads to builder using mol-tdd-build"
+description = """
 Find all open beads with label ready-to-build that have no assignee:
   gc bd --rig "$RIG" list --label=ready-to-build --status=open --no-assignee --json
 For each bead, sling to the builder with the TDD formula, then assign it to prevent re-dispatch:
@@ -75,8 +76,8 @@ Log how many were dispatched.
 
 [[steps]]
 id = "route-needs-review"
-description = "Dispatch needs-review beads to reviewer"
-prompt = """
+title = "Dispatch needs-review beads to reviewer"
+description = """
 Find all open beads with label needs-review that have no assignee:
   gc bd --rig "$RIG" list --label=needs-review --status=open --no-assignee --json
 For each bead, sling to the reviewer then assign it to prevent re-dispatch:
@@ -87,8 +88,8 @@ Log how many were dispatched.
 
 [[steps]]
 id = "route-needs-deploy"
-description = "Dispatch needs-deploy beads to deployer"
-prompt = """
+title = "Dispatch needs-deploy beads to deployer"
+description = """
 Find all open beads with label needs-deploy that have no assignee:
   gc bd --rig "$RIG" list --label=needs-deploy --status=open --no-assignee --json
 For each bead, sling to the deployer then assign it to prevent re-dispatch:
@@ -99,8 +100,8 @@ Log how many were dispatched.
 
 [[steps]]
 id = "health-check"
-description = "Check factory agent status"
-prompt = """
+title = "Check factory agent status"
+description = """
 Run gc status and report:
 - Which agents are running vs idle vs stopped
 - Any agents in an error state
@@ -109,8 +110,8 @@ If an agent has in_progress beads but no active session, log a warning.
 
 [[steps]]
 id = "loop"
-description = "Pour next patrol iteration"
-prompt = """
+title = "Pour next patrol iteration"
+description = """
 Patrol complete. If any beads were dispatched or health issues found, log a summary.
 Pour next patrol iteration:
   bd mol pour mol-deacon-patrol
