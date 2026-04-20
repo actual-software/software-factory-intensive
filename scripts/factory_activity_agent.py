@@ -749,7 +749,7 @@ def install(activity, dry_run=False):
         run(["mkdir", "-p", str(rig_docs)], dry_run=dry_run)
         run(["rsync", "-a", f"{docs_src}/", f"{rig_docs}/"], dry_run=dry_run)
 
-    # For W1 (Fired-Up Pizza), seed the rig with the initial ticket set and
+    # For W1 (Fired Up Pizza), seed the rig with the initial ticket set and
     # the import script so the workshop guide can exercise the full
     # tickets.md → bd create --label needs-plan → Planner flow.
     if activity == "W1":
