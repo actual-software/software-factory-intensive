@@ -25,23 +25,23 @@ Through this lab you will:
 
 ```
    feature request source (from L1)
-             │
-             ▼
+              │
+              ▼
    ┌────────────────────┐
-   │   Planner (L2)      │    ←  skill/CLI: e.g. backlog MCP,
-   │                     │        `actual`, a team-specific
-   │   produces:         │        research tool
-   │   work-packages/    │
-   │     <slug>.md       │
+   │   Planner (L2)     │    ←  skill/CLI: e.g. backlog MCP,
+   │                    │       `actual`, a team-specific
+   │   produces:        │       research tool
+   │   work-packages/   │
+   │     <slug>.md      │
    └──────────┬─────────┘
               │  handoff (via files + work items)
               ▼
    ┌────────────────────┐
-   │  Architect (L2)     │    ←  skill/CLI: e.g. ADR seeding
-   │                     │        (`actual adr-bot`), a
-   │   produces:         │        standards-library MCP
-   │   docs/adr/         │
-   │     NNNN-<slug>.md  │
+   │  Architect (L2)    │    ←  skill/CLI: e.g. ADR seeding
+   │                    │       (`actual adr-bot`), a
+   │   produces:        │       standards-library MCP
+   │   docs/adr/        │
+   │     NNNN-<slug>.md │
    └────────────────────┘
 ```
 

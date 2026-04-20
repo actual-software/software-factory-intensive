@@ -28,23 +28,23 @@ Through this lab you will:
                   │
                   ▼
 ┌──────────────────────────────────────────────────────────┐
-│                   PROJECT_MANIFEST.md                      │
-│  Overview · Tech Stack · Domain Model · Conventions        │
-│  Review Standards · Release Criteria · Task Inputs         │
+│                   PROJECT_MANIFEST.md                    │
+│  Overview · Tech Stack · Domain Model · Conventions      │
+│  Review Standards · Release Criteria · Task Inputs       │
 └───────┬──────────────────────────────────────────────────┘
         │  every agent reads this before acting
         ▼
 ┌──────────────────────────────────────────────────────────┐
-│   Six-agent factory installed against YOUR project         │
-│                                                            │
-│   Planner ──▶ Architect ──▶ Designer ──▶ Coder            │
-│       ▲                                     │             │
-│       │                                     ▼             │
-│  input sources                        Reviewer ──▶ Deployer│
-│  (from W2 mapping)                                        │
-│  • backlog / tickets                                      │
-│  • knowledge base                                         │
-│  • external integrations                                  │
+│   Six-agent factory installed against YOUR project       │
+│                                                          │
+│   Planner ──▶ Architect ──▶ Designer ──▶ Coder           │
+│       ▲                                     │            │
+│       │                                     ▼            │
+│  input sources                     Reviewer ──▶ Deployer │
+│  (from W2 mapping)                                       │
+│  • backlog / tickets                                     │
+│  • knowledge base                                        │
+│  • external integrations                                 │
 └──────────────────────────────────────────────────────────┘
 ```
 

@@ -27,32 +27,32 @@ Through this capstone you will:
 ## What the Run Produces
 
 ```
- Unfamiliar feature request (from a real source)
-                │
-                ▼
-  ┌──────────────────────────────────────────────────────┐
-  │   The full factory, already assembled:                │
-  │                                                        │
-  │   Planner → Architect → Designer →                     │
-  │                                                        │
-  │   Coder → Reviewer → Deployer                          │
-  │                                                        │
-  │   (plus the coordination channels from W3 and         │
-  │    the capabilities attached in L2–L4)                │
-  └──────────────────────┬───────────────────────────────┘
-                         │
-                         ▼
-        ┌────────────────────────────────────────┐
-        │    Feature delivered + audit record      │
-        │                                          │
-        │   work-packages/<slug>.md                │
-        │   docs/adr/NNNN-<slug>.md                │
-        │   design/<slug>-spec.md                  │
-        │   src/** + tests on feature branch       │
-        │   review-reports/<slug>-review.md        │
-        │   release-gates/<slug>-gate.md           │
-        │   docs/c1-run-report.md  (audit)         │
-        └────────────────────────────────────────┘
+   Unfamiliar feature request (from a real source)
+                        │
+                        ▼
+  ┌───────────────────────────────────────────────┐
+  │   The full factory, already assembled:        │
+  │                                               │
+  │   Planner → Architect → Designer →            │
+  │                                               │
+  │   Coder → Reviewer → Deployer                 │
+  │                                               │
+  │   (plus the coordination channels from W3 and │
+  │    the capabilities attached in L2–L4)        │
+  └─────────────────────┬─────────────────────────┘
+                        │
+                        ▼
+     ┌────────────────────────────────────────┐
+     │    Feature delivered + audit record    │
+     │                                        │
+     │   work-packages/<slug>.md              │
+     │   docs/adr/NNNN-<slug>.md              │
+     │   design/<slug>-spec.md                │
+     │   src/** + tests on feature branch     │
+     |   review-reports/<slug>-review.md      │
+     │   release-gates/<slug>-gate.md         │
+     │   docs/c1-run-report.md  (audit)       │
+     └────────────────────────────────────────┘
 ```
 
 ## Part 1: Install the C1 Factory (10 min)

@@ -24,26 +24,26 @@ Through this lab you will:
 ## What You'll Build
 
 ```
-  work-packages/<slug>.md    docs/adr/NNNN-<slug>.md
-        (from L2)                  (from L2)
-             │                         │
-             └────────────┬───────────┘
-                          ▼
+    work-packages/<slug>.md   docs/adr/NNNN-<slug>.md
+           (from L2)                (from L2)
+                │                      │
+                └──────────┬───────────┘
+                           ▼
                 ┌──────────────────────┐
-                │   Designer (L3)       │  ←  MCP: e.g. Figma,
-                │                       │     design-system repo,
-                │   produces:           │     a screenshot tool
-                │   design/<slug>-      │
-                │     spec.md           │
+                │   Designer (L3)      │  ←  MCP: e.g. Figma,
+                │                      │     design-system repo,
+                │   produces:          │     a screenshot tool
+                │   design/<slug>-     │
+                │     spec.md          │
                 └──────────┬───────────┘
                            │  handoff (file)
                            ▼
                 ┌──────────────────────┐
-                │   Coder (L3)          │  ←  MCP: e.g. GitHub,
-                │                       │     Postgres (staging),
-                │   produces:           │     Context7, Sentry
-                │   src/** + tests      │
-                │   on feature branch   │
+                │   Coder (L3)         │  ←  MCP: e.g. GitHub,
+                │                      │     Postgres (staging),
+                │   produces:          │     Context7, Sentry
+                │   src/** + tests     │
+                │   on feature branch  │
                 └──────────────────────┘
 ```
 

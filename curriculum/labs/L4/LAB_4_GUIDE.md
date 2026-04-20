@@ -31,20 +31,20 @@ Through this lab you will:
                      │
                      ▼
           ┌──────────────────────┐
-          │  Reviewer (L4)        │  ← reads: PROJECT_MANIFEST.md
-          │                       │          (Review Standards section)
-          │  produces:            │
-          │  review-reports/      │
-          │    <slug>-review.md   │
+          │  Reviewer (L4)       │  ← reads: PROJECT_MANIFEST.md
+          │                      │           (Review Standards section)
+          │  produces:           │
+          │  review-reports/     │
+          │    <slug>-review.md  │
           └──────────┬───────────┘
                      │  verdict: APPROVE (else loop back to Coder)
                      ▼
           ┌──────────────────────┐
-          │  Deployer (L4)        │  ← reads: PROJECT_MANIFEST.md
-          │                       │          (Release Criteria section)
-          │  produces:            │
-          │  release-gates/       │
-          │    <slug>-gate.md     │
+          │  Deployer (L4)       │  ← reads: PROJECT_MANIFEST.md
+          │                      │           (Release Criteria section)
+          │  produces:           │
+          │  release-gates/      │
+          │    <slug>-gate.md    │
           └──────────────────────┘
                      │
                      ▼
