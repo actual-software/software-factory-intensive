@@ -971,7 +971,7 @@ You don't need to build the orchestrator in L4 — you just need to have `orches
 
 ---
 
-## Common Issues & Solutions
+## Common Issues and Solutions
 
 ### Issue 1: Reviewer too lenient (approves everything)
 

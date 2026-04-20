@@ -683,7 +683,7 @@ This commit log is your factory's self-improvement history. Every commit with pr
 
 ---
 
-## Common Issues & Solutions
+## Common Issues and Solutions
 
 | Issue | Symptom | Resolution |
 |-------|---------|------------|

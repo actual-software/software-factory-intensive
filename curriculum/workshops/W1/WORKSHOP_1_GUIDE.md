@@ -88,7 +88,7 @@ You do not need to memorize these labels, but you should understand what they ar
 
 > **Goal:** Install the common tooling you will rely on throughout the curriculum, so that every subsequent session begins from a consistent, known-good starting point.
 
-The **factory-activity-agent** is the tooling you'll use across every W/L session for setup, teardown, status, and diagnosis. Install it once now; every session after this assumes it is on your path. In this repo it lives under [`skills/factory-activity-agent/`](../../../skills/factory-activity-agent/); [`SKILL.md`](../../../skills/factory-activity-agent/SKILL.md) is the canonical entry, with Bash helpers under [`scripts/`](../../../skills/factory-activity-agent/scripts/) and `install` / `delete` implemented by [`scripts/factory_activity_agent.py`](../../../scripts/factory_activity_agent.py) at the repo root.
+The **factory-activity-agent** is the tooling you'll use across every workshop and lab for setup, teardown, status, and diagnosis. Install it once now; every session after this assumes it is on your path. In this repo it lives under [`skills/factory-activity-agent/`](../../../skills/factory-activity-agent/); [`SKILL.md`](../../../skills/factory-activity-agent/SKILL.md) is the canonical entry, with Bash helpers under [`scripts/`](../../../skills/factory-activity-agent/scripts/) and `install` / `delete` implemented by [`scripts/factory_activity_agent.py`](../../../scripts/factory_activity_agent.py) at the repo root.
 
 ### Step 1: Install the skill into your coding agent
 
@@ -102,7 +102,7 @@ Restart your coding agent and run `/factory-activity-agent list` in its session 
 
 ### Step 3: Learn the seven commands you'll use throughout the curriculum
 
-The factory-activity-agent is a wrapper over `gc` + Python scaffolding. You'll re-use these commands across most sessions in the curriculum, so it's worth knowing what's in the toolbox before you start pulling things out of it:
+The factory-activity-agent is a wrapper over `gc` and `python` scaffolding. You'll re-use these commands across most sessions in the curriculum, so it's worth knowing what's in the toolbox before you start pulling things out of it:
 
 - `/factory-activity-agent install <activity>` — stand up a factory for a curriculum activity
 - `/factory-activity-agent delete <activity>` — tear down a factory
@@ -219,7 +219,7 @@ Or, you can observe the agents and tasks in-action via the dashboard:
 
 Concretely, here is what you'll see. Label values are what to expect *on the task*; the bullet underneath is the agent action each label transition describes.
 
-1. **Start** — task has `needs-plan`. Planner wakes, reads the task bead + `docs/PROJECT_MANIFEST.md` + existing task beads, and either (a) decomposes it into child beads each labelled for the next stage, or (b) sets `needs-architecture` if it decides new rules are required first.
+1. **Start** — task has `needs-plan`. Planner wakes, reads the task bead, `docs/PROJECT_MANIFEST.md`, and existing task beads, and either (a) decomposes it into child beads each labelled for the next stage, or (b) sets `needs-architecture` if it decides new rules are required first.
 2. **Post-Plan** — child tasks appear with `needs-design` (UI parts), `needs-architecture` (backend parts), or `ready-to-build` (backend parts). The Designer, Architect, and Builder agents all wake and run in parallel to implement the child tasks.
 3. **Builder picks up work** — the Builder agent picks up the work and begins implementing it. Once complete, tasks are flipped to `needs-review`.
 4. **Reviewer verdict** — the Reviewer agent reviews the output and either approves it (flips to `ready-to-ship`) or sends it back with notes (flips back to `ready-to-build`).
@@ -258,7 +258,7 @@ bd label list-all                  # label vocabulary currently in use
 
 These are the commands the agents themselves use; seeing the same output gives you the agents' view of the world.
 
-### Surface 3 — gc sessions + events
+### Surface 3 — Gas City sessions and events
 
 Best for: drilling into what an agent is doing in a live session.
 
@@ -266,7 +266,7 @@ Best for: drilling into what an agent is doing in a live session.
 gc status                          # all agents, one-line per
 gc session list                    # every live session with its state
 gc session peek <rig>/<agent>      # snapshot of the agent's tmux session
-gc events --follow                 # stream label transitions + session lifecycle
+gc events --follow                 # stream label transitions and session lifecycle
 ```
 
 `gc events --follow` is the most useful flag of the three — it's the verbose log of every label flip and agent wake. If the factory stalls, this is where you look first.
@@ -296,7 +296,7 @@ There is no limit on how many tasks you sling — each one is another order the 
 >
 > A reasonable thing to want on your first hands-on is to type *something* — to feel productive. W1 deliberately denies that. The whole point is that **the factory types for you**: you place a ticket, the agents take it from there. If you find yourself wanting to "just open `src/menu/MenuPage.tsx` and tweak that one line," notice the feeling — it's the exact habit the workshop exists to unbuild. The place for your customization is the agent packs in L2–L4, not the source code in `src/`. W1 is where you see that the customization location has moved.
 
-## Common Issues & Solutions
+## Common Issues and Solutions
 
 If you hit a problem during W1, jump to the relevant topic-scoped guide in [`troubleshooting/`](../../../troubleshooting/README.md), such as [Troubleshooting Gas City (`gc`)](../../../troubleshooting/gas-city.md) or [Troubleshooting beads (`bd`)](../../../troubleshooting/beads.md).
 
@@ -321,6 +321,6 @@ Before leaving this workshop, verify all of these:
 
 ## Next Steps
 
-**[W2](../W2/README.md)** turns the lens inward: *how* do the agents do their job? You'll trace a new feature through the six packs, read each agent's prompt template + formula, and start building the mental model you'll need in L1/L2 when the packs become *your* configuration to edit.
+**[W2](../W2/README.md)** turns the lens inward: *how* do the agents do their job? You'll trace a new feature through the six packs, read each agent's prompt template and formula, and start building the mental model you'll need in L1/L2 when the packs become *your* configuration to edit.
 
 **[L1](../L1/README.md)** is where the factory becomes *yours*. You'll register your own project as the workspace rig, point the six shipped packs at it, and watch the same cycle you just saw run against *your* codebase's first feature task.

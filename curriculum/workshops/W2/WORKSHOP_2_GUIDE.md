@@ -922,7 +922,7 @@ Ask yourself: *if I replaced `docs/PROJECT_MANIFEST.md` in Fired Up Pizza with m
 
 ---
 
-## Common Issues & Solutions
+## Common Issues and Solutions
 
 Real problems you'll hit during and after W2:
 

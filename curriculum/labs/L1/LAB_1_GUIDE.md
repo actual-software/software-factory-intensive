@@ -892,7 +892,7 @@ Create three small beads in sequence, sling each, close each. You're testing tha
 
 ---
 
-## Common Issues & Solutions
+## Common Issues and Solutions
 
 ### Issue 1: Agent ignores `CLAUDE.md` entirely
 **Solution:** Confirm `CLAUDE.md` is in the repo root, not a subdirectory. Check with `gc watch dev-agent` — the first thing the agent reads should be `CLAUDE.md`. If not, your provider config in `city.toml` may not be set to `claude`, or the agent may be running in the wrong `dir`.

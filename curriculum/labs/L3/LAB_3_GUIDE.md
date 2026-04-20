@@ -934,7 +934,7 @@ When you fix a Coder issue in `packs/builder/prompts/builder.md.tmpl`, that fix 
 
 ---
 
-## Common Issues & Solutions
+## Common Issues and Solutions
 
 ### Issue 1: Designer produces a spec without a Location path
 **Symptom:** Spec has props, state, layout — but the Location section is empty or says `TBD`.

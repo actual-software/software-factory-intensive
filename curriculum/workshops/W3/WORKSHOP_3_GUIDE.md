@@ -739,7 +739,7 @@ If your project's answer has a row with "nobody, but it's not terminal," cut tha
 
 ---
 
-## Common Issues & Solutions
+## Common Issues and Solutions
 
 | Issue | Symptom | Fix |
 |---|---|---|

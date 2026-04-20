@@ -877,7 +877,7 @@ For the deploy-despite-changes-requested case: make the Deployer prompt's Proces
 
 ---
 
-## Common Issues & Solutions
+## Common Issues and Solutions
 
 A compact reference for what tends to go wrong across the whole factory during a real run. When you hit one of these, look up the fix here, apply it, re-sling, and log it in the run report.
 
