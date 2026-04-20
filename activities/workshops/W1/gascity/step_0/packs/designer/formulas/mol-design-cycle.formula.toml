@@ -116,7 +116,7 @@ Excalidraw MCP server. NEVER use ASCII art boxes or text-art layouts.
      ```
   c. Export to PNG:
      ```bash
-     excalidraw-export-cli docs/designs/{{slug}}-<screen-name>.excalidraw \
+     excalidraw-export docs/designs/{{slug}}-<screen-name>.excalidraw \
                            docs/designs/{{slug}}-<screen-name>.png
      ```
   d. Clear the canvas before drawing the next screen.

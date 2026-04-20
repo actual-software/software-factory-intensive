@@ -10,8 +10,8 @@ run() {
 run "mcpServers.excalidraw present in .mcp.json" \
   "jq -e '.mcpServers.excalidraw' '$PACK/overlays/default/.mcp.json'"
 
-run "excalidraw-export-cli allowed in permissions" \
-  "jq -e '[.permissions.allow[] | select(contains(\"excalidraw-export-cli\"))] | length > 0' '$PACK/overlays/default/.claude/settings.json'"
+run "excalidraw-export allowed in permissions" \
+  "jq -e '[.permissions.allow[] | select(contains(\"excalidraw-export\"))] | length > 0' '$PACK/overlays/default/.claude/settings.json'"
 
 run "excalidraw-diagrams skill exists" \
   "test -f '$PACK/overlays/default/.claude/skills/excalidraw-diagrams/SKILL.md'"

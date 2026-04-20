@@ -52,7 +52,7 @@ If multiple screens: save each as a separate `.excalidraw`, clear canvas between
 
 ### Step 6: Export to PNG (MANDATORY)
 ```bash
-excalidraw-export-cli docs/designs/<slug>-<screen>.excalidraw docs/designs/<slug>-<screen>.png
+excalidraw-export docs/designs/<slug>-<screen>.excalidraw docs/designs/<slug>-<screen>.png
 ```
 
 ### Step 7: Reference BOTH formats in the design doc (MANDATORY)
