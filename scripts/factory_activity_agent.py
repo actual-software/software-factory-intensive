@@ -39,7 +39,12 @@ CATEGORY_GUIDE_PREFIX = {
 
 
 def find_guide(activity):
-    """Find the GUIDE.md file for an activity. Returns (Path, content) or (None, None)."""
+    """Find the GUIDE.md file for an activity. Returns (Path, content) or (None, None).
+
+    Prefers curriculum/<category>/<activity>/ (the canonical participant-facing
+    guide) over activities/<category>/<activity>/ (which sometimes carries
+    legacy content).
+    """
     category, _ = ACTIVITY_MAP[activity]
     prefix = CATEGORY_GUIDE_PREFIX.get(category)
     if not prefix:
@@ -47,14 +52,19 @@ def find_guide(activity):
     # Extract the number from the activity (e.g. "W2" -> "2", "L3" -> "3")
     number = activity[1:]
     guide_name = f"{prefix}_{number}_GUIDE.md"
-    guide_path = SFI_DIR / "activities" / category / activity / guide_name
-    if guide_path.exists():
-        return guide_path, guide_path.read_text()
-    # Fallback: glob for any *GUIDE*.md in the activity directory
-    activity_dir = SFI_DIR / "activities" / category / activity
-    guides = list(activity_dir.glob("*GUIDE*"))
-    if guides:
-        return guides[0], guides[0].read_text()
+    search_roots = [
+        SFI_DIR / "curriculum" / category / activity,
+        SFI_DIR / "activities" / category / activity,
+    ]
+    for root in search_roots:
+        guide_path = root / guide_name
+        if guide_path.exists():
+            return guide_path, guide_path.read_text()
+    # Fallback: glob for any *GUIDE*.md in either directory
+    for root in search_roots:
+        guides = list(root.glob("*GUIDE*"))
+        if guides:
+            return guides[0], guides[0].read_text()
     return None, None
 
 
@@ -558,7 +568,7 @@ bash skills/factory-activity-agent/scripts/install.sh {activity}
 
 
 def install(activity, dry_run=False):
-    _, _, alias_lower, project_dir, factory_dir, packs_src = resolve_paths(activity)
+    category, _, alias_lower, project_dir, factory_dir, packs_src = resolve_paths(activity)
 
     # Validate packs source exists
     if not packs_src.exists():
@@ -723,6 +733,30 @@ def install(activity, dry_run=False):
         print(f"[dry-run] Copy {guide_path} -> {project_dir / guide_filename}")
     else:
         print(f"  Warning: No GUIDE.md found for {activity}, skipping guide injection")
+
+    # Seed activity-specific docs (e.g. PROJECT_MANIFEST.md) into the rig.
+    # Any files under activities/<category>/<activity>/docs/ are copied into
+    # the rig's docs/ folder so agents (Planner, Architect, etc.) can read
+    # them as soon as the factory wakes.
+    docs_src = SFI_DIR / "activities" / category / activity / "docs"
+    if docs_src.exists():
+        print("\n##### Seed Activity Docs")
+        rig_docs = project_dir / "docs"
+        run(["mkdir", "-p", str(rig_docs)], dry_run=dry_run)
+        run(["rsync", "-a", f"{docs_src}/", f"{rig_docs}/"], dry_run=dry_run)
+
+    # For W1 (Fired Up Pizza), seed the rig with the initial ticket set and
+    # the import script so the workshop guide can exercise the full
+    # tickets.md → bd create --label needs-plan → Planner flow.
+    if activity == "W1":
+        print("\n##### Seed Ticket Set")
+        tickets_src = SFI_DIR / "reference-project" / "fired-up-pizza" / "tickets.md"
+        import_src = SFI_DIR / "packs" / "fired-up-pizza" / "scripts" / "import-tickets.sh"
+        scripts_dir = project_dir / "scripts"
+        run(["mkdir", "-p", str(scripts_dir)], dry_run=dry_run)
+        run(["cp", str(tickets_src), str(project_dir / "tickets.md")], dry_run=dry_run)
+        run(["cp", str(import_src), str(scripts_dir / "import-tickets.sh")], dry_run=dry_run)
+        run(["chmod", "+x", str(scripts_dir / "import-tickets.sh")], dry_run=dry_run)
 
     print("\n##### Generate README.md")
     readme_content = generate_readme(activity, alias_lower, guide_filename, guide_content)
