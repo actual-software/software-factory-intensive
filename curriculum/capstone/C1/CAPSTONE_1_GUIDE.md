@@ -31,10 +31,6 @@ If you skipped an earlier lab, add the shipped path for that pack — the capsto
 
 ---
 
-> **Agent Guide** — If an AI coding agent is guiding you through this capstone, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. This is the one session where "I'll finish it later" is disallowed — the Factory Run Report, feature branch, and retrospective **must** be committed before the session ends, whether or not the run reaches the Deployer. An agent reading this README should start by opening `my-factory/PROJECT_MANIFEST.md` and glancing at `orchestrator.yaml`; the capstone is driven by the participant's own config.
-
----
-
 ## Architecture Diagram
 
 ```
@@ -201,8 +197,6 @@ Below is the full run, broken into six agent-stage sub-steps plus a pre-run setu
 
 > **Goal:** Prepare your factory and your run record so the capstone proceeds from a clean, well-documented starting point.
 
-> **Agent Guide:** Before typing anything, have the participant say the feature, the bead title, and the description out loud. For their own project, push for medium complexity in a *different area of the codebase* than the L2–L4 runs — a rehearsed feature tests memory, a new feature tests the factory. Also open the run report in a split pane now; it's updated live, not at the end.
-
 Create the feature bead and start the live run report.
 
 ```bash
@@ -263,8 +257,6 @@ gc session list         # refresh as needed
 ### Step 1: Planner (10 min)
 
 > **Goal:** Observe your factory turning an unfamiliar feature request into a structured plan, and confirm the plan reflects your project rather than any previously rehearsed example.
-
-> **Agent Guide:** Before every sling in this run, ask: "What artifact does this agent produce, and where will it land?" The participant should name the path — that's the pipeline's contract. If they can't name it, open the pack's prompt template together and read the Output section before slinging.
 
 **Command:**
 
@@ -384,8 +376,6 @@ Close the Designer bead.
 
 > **Goal:** Observe your factory producing an implementation that matches the specification, and confirm that the committed code is something you would accept into your own project.
 
-> **Agent Guide:** This is where the factory most commonly stalls. If the Coder fails, the Designer spec is almost always the cause — missing edge cases or an ambiguous Location path. Fix `packs/designer/prompts/designer.md.tmpl`, re-sling Designer, then Coder. Also: every single time the participant is tempted to hand-edit code to make tests pass, stop them. Roll it back. Update the Builder prompt. Re-sling. No exceptions in the capstone.
-
 **Command:**
 
 ```bash
@@ -503,8 +493,6 @@ Close the Deployer bead.
 ### Step 7: Close the Run (5 min)
 
 > **Goal:** Capture what you have learned from this end-to-end run, so the insights surfaced in the capstone carry forward into how you continue using your factory.
-
-> **Agent Guide:** Do not let the participant skip this step, even if time is tight and the run is partial. A partial report with honest state is an audit trail; a discarded partial run is wasted learning. The report, feature branch, and retrospective must all be committed before the session ends.
 
 Regardless of how far you got:
 
@@ -932,8 +920,6 @@ Prompts aren't compiled, so "syntax" means markdown or whitespace. Most common: 
 ---
 
 ## Concept Check (before closing the capstone)
-
-> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
 
 - Why the capstone uses a feature they haven't seen before. (A rehearsed feature tests memory; a new feature tests the factory.)
 - Why ad-hoc prompts break the factory's contract. (Every ad-hoc correction is a prompt update that should have happened but didn't — the next bead inherits the missing rule.)

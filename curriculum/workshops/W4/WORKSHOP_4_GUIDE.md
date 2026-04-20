@@ -16,10 +16,6 @@ Pack naming: references to *Coder* and *Deployer* in this README map to the ship
 
 ---
 
-> **Agent Guide** — If an AI coding agent is guiding you through this session, look for **`> Agent Guide: …`** callouts inline at specific steps. They are additive to the step instructions — you still do the work. An agent reading this README should start by skimming any existing `review-reports/`, `release-gates/`, and `DECISIONS.md` from the participant's L2–L4 runs. Real signals from their own factory produce much better feedback rules than hypothetical ones — if those directories are empty, fall back to the reference project.
-
----
-
 ## Architecture Diagram
 
 ```
@@ -166,8 +162,6 @@ You'll meet this file properly in C1, but the concept matters here: after every 
 
 > **Goal:** Translate general notions of "quality" into an explicit map of what signals matter, where each one originates, and which part of the factory should change in response.
 
-> **Agent Guide:** Before the participant writes any rule, ask: "Which review finding or test failure recurred across multiple beads?" Recurrence is the key — one-off problems don't justify automation. If they can't name a recurring signal, push back on adding a rule for it. Also insist on all four fields per candidate rule: signal, threshold, target file, specific change. If any of the four is vague, the rule will never fire correctly.
-
 Every feedback rule has the same three parts:
 
 ```
@@ -250,8 +244,6 @@ If a row says "whenever this happens", rewrite it as "on the first occurrence" a
 ## Part 2: Reactive Loops — Single-Run Signals (8 min)
 
 > **Goal:** Learn how to design loops that respond to signals raised within a single factory run, allowing your factory to self-correct without waiting for broader patterns to emerge.
-
-> **Agent Guide:** Before the rule file is written, ask: "What's the harm case?" What happens if the signal fires for the wrong reason and ships a bad prompt update? If the participant can't name the harm, they can't name the mitigation — and the rule shouldn't be written yet.
 
 A reactive loop fires on a signal from a single factory run. The source is usually the Reviewer (a finding) or the Deployer (a failed gate). The target is almost always an agent prompt. The action is always a small prompt edit.
 
@@ -627,8 +619,6 @@ Note we did *not* actually create the bead in this step — the rule file docume
 
 > **Goal:** Commit your first feedback rule and witness its effect end-to-end, closing the loop between the signal you defined, the target you identified, and the specialists that will now act on it.
 
-> **Agent Guide:** Before the participant picks, ask: "Is this rule safe to apply automatically, or does it need human review first?" Default to human review unless the rule is purely additive and trivially reversible. Also flag any rule that modifies code instead of a prompt — that's a manual fix dressed up as automation.
-
 You now have three rule files:
 
 ```
@@ -852,8 +842,6 @@ Note: we never auto-commit config changes from a cron-driven order. The order's 
 ---
 
 ## Concept Check (before moving to C1)
-
-> **Agent Guide:** Before declaring the session complete, ask the participant to explain — in their own words, without re-reading — each bullet below. If they can't, revisit the matching section before running the Exit Criteria check.
 
 - The Signal → Target → Action structure and why all three are required for a rule to be operational.
 - Why every automated rule needs a kill switch and a harm case. (Automation compounds — so do its mistakes.)
