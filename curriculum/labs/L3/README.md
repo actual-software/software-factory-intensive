@@ -1,6 +1,6 @@
 # L3 · Deploy Designer + Coder Agents
 
-> **What you'll build:** Two more specialized AI agents managed by Gas City — a Designer that turns the work package + ADR from L2 into a concrete component spec, and a Coder that reads the spec and produces a committed implementation with passing tests. By the end of this lab, you'll have extended your L2 pipeline with two more stages and shipped a working feature branch.
+> **Goal:** Extend your software factory with the next two specialists, and demonstrate that it can now carry a planned feature from concept through to a committed implementation.
 
 | | |
 |---|---|

@@ -1,6 +1,6 @@
 # W3 · Architect Multi-Agent Coordination
 
-> **Goal:** Learn how to orchestrate multiple agents working together in Gas City — understanding when agents run sequentially, where human gates fire, how state moves between agents via beads, and how to capture all of this in a single declarative `orchestrator.yaml` committed alongside your pack configs.
+> **Goal:** Learn how work and decisions flow between the specialists in a software factory, and capture that coordination as a reusable plan you can rely on throughout the remaining labs.
 
 | | |
 |---|---|

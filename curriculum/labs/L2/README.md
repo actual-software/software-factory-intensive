@@ -1,6 +1,6 @@
 # L2 · Deploy Planner + Architect Agents
 
-> **What you'll build:** Two specialized AI agents managed by Gas City — a Planner that breaks feature requests into structured work packages, and an Architect that reviews those packages and produces Architecture Decision Records (ADRs). By the end of this lab, you'll sling a feature request through both agents and commit the artifacts they produce.
+> **Goal:** Deploy the first two specialists of your software factory, and demonstrate that they can take a feature request and produce the structured plans and architectural decisions downstream agents will later rely on.
 
 | | |
 |---|---|

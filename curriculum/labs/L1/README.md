@@ -1,6 +1,6 @@
 # L1 · Build a Structured Development Loop
 
-> **Goal:** Install Gas City, add your project as a rig, convert your W1 workflow card into a working `CLAUDE.md`, and sling your first real bead to an agent. By the end, the agent implements a small feature and commits it without you typing into the chat.
+> **Goal:** Apply what you learned in the workshops to your own project, and demonstrate it by having a software factory deliver your first real feature without typing instructions into a chat.
 
 | | |
 |---|---|

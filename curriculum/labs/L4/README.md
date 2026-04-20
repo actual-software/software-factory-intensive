@@ -1,6 +1,6 @@
 # L4 · Deploy Reviewer + Deployer Agents
 
-> **What you'll build:** The final two stages of your factory pipeline — a Reviewer that reads the Coder's output against the spec, work package, and review policy to produce a review report; and a Deployer that evaluates binary release criteria to produce a release gate record. By the end of this lab you will have a complete 6-agent pipeline, and you will have practiced the core discipline of L4: **fixing review findings by editing the Coder prompt, not the code.**
+> **Goal:** Complete your software factory by adding its final two specialists, and practice the central discipline of the curriculum: improving quality by refining the instructions your agents follow rather than the work they produce.
 
 | | |
 |---|---|

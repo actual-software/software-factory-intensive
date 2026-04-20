@@ -1,6 +1,6 @@
 # W4 · Create Continuous Improvement Loops
 
-> **What you'll build:** A set of feedback rules that let your factory learn from its own signals — reviewer findings, deploy gate failures, production incidents, and user reports — and automatically update the agent prompts, project manifest, or gate criteria that caused the problem. By the end of this workshop, you'll have one or more `feedback-loops/*.md` rule files committed, at least one agent prompt updated to encode a learning, and a clear mental model of which loops are safe to automate vs. which must escalate to a human.
+> **Goal:** Understand how a software factory can learn from its own signals, and design feedback mechanisms that allow it to improve the quality of its output over time without continuous human supervision.
 
 | | |
 |---|---|

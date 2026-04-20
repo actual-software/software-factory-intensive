@@ -19,7 +19,7 @@ current_priority=""
 
 flush() {
     if [ -n "$current_title" ]; then
-        bd create "$current_title" -d "$current_body" --priority "$current_priority" 2>/dev/null && \
+        bd create "$current_title" -d "$current_body" --priority "$current_priority" --labels needs-plan 2>/dev/null && \
             count=$((count + 1)) || \
             echo "  Warning: failed to create '$current_title'"
     fi

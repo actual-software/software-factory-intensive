@@ -1,6 +1,7 @@
 # W1 · Run the 6-Agent Software Factory
 
-> **Goal:** Prepare your environment to be software factory-ready, and demonstrate it with a fully functional model software factory — a real task flowing end-to-end through autonomous agents without human intervention.
+> **Goal:**
+Prepare your environment to be software factory-ready, and demonstrate it by running a multi-agent software factory that delivers basic software features without human intervention.
 
 | | |
 |---|---|
@@ -12,11 +13,15 @@
 
 ## Overview
 
-You will take a machine with `gc` and this repo and end with a **running six-agent Gas City factory** that uses the **Fired-Up Pizza** app as its rig: one human sling at the start, then autonomous label flips and handoffs through Planner, Architect, Designer, Builder, Reviewer, and Deployer until work ships.
+In this workshop, you'll get hands-on with a six-agent software factory using `gas city` and this repo. The high-level goal: demonstrate how feature requests flow autonomously through Planner, Architect, Designer, Builder, Reviewer, and Deployer for the **Fired-Up Pizza** app—each agent flipping labels and handing off work without manual intervention.
 
-**Part 1** has you read [`LABELED_BEADS.md`](../../../LABELED_BEADS.md) first so every later question — *why did this agent wake?* *why this label?* — has an answer. **Part 2** installs the [`factory-activity-agent`](../../../skills/factory-activity-agent/) skill and the seven slash commands you reuse for every W/L session. **Part 3** runs `install W1`, which creates two directories under `~/Projects/factory/workshop_w1/`: the **factory** (`w1-gc-factory`, Gas City + packs) and the **rig** (`w1-project`, git repo and code). **Part 4** is the proof: sling one bead and watch it traverse the pipeline. **Part 5** cements observability — dashboard, `bd`, and `gc` sessions/events — so you know where to look when something stalls.
+You'll explore:
+- The logic behind agent wakeups and label transitions (`LABELED_BEADS.md`)
+- The core agent orchestration tools (`factory-activity-agent` skill, slash commands)
+- Observing the complete, automated pipeline as one bead moves through every stage
+- Using the dashboard, `bd`, and `gc` to monitor, debug, and understand factory state
 
-Together, those steps produce the stated deliverable: environment ready for the curriculum, plus a concrete end-to-end run you can inspect in the dashboard and in `bd show`.
+These steps link the abstract goal of automated software delivery to concrete tools you can use to build, observe, and analyze every stage of the process.
 
 ---
 
@@ -70,7 +75,7 @@ Every transition is a **label flip on the same bead**. No `gc sling` is run by h
 
 ## Part 1: Read the Labeled-Beads Protocol (~5 min)
 
-> **Goal:** Understand the shared protocol that lets multiple autonomous agents collaborate without stepping on each other, so the rest of the session is legible rather than magic.
+> **Goal:** Understand the basic coordination principles that allow agents to collaborate on shared work, establishing the conceptual foundation for inter-agent communicationthat underpins software factories.
 
 Every question W1 raises — *"why did the Architect wake?" "why did the bead move to `ready-to-build`?" "what does the Coder look at to know it's up?"* — is answered in [`software-factory/LABELED_BEADS.md`](../../../LABELED_BEADS.md). Read it before installing anything.
 
@@ -88,7 +93,7 @@ You do not need to memorize these labels, but you should understand what they ar
 
 ## Part 2: Install the `factory-activity-agent` Skill (~10 min)
 
-> **Goal:** Equip your environment with the shared tooling you'll use to set up, tear down, and diagnose every factory across the curriculum — one install now, no repeated setup later.
+> **Goal:** Install the common tooling you will rely on throughout the curriculum, so that every subsequent session begins from a consistent, known-good starting point.
 
 The **factory-activity-agent** is the tooling you'll use across every W/L session for setup, teardown, status, and diagnosis. Install it once now; every session after this assumes it is on your path. In this repo it lives under [`skills/factory-activity-agent/`](../../../skills/factory-activity-agent/); [`SKILL.md`](../../../skills/factory-activity-agent/SKILL.md) is the canonical entry, with Bash helpers under [`scripts/`](../../../skills/factory-activity-agent/scripts/) and `install` / `delete` implemented by [`scripts/factory_activity_agent.py`](../../../scripts/factory_activity_agent.py) at the repo root.
 
@@ -136,7 +141,7 @@ You will run each of these commands in many activities moving forward. Try explo
 
 ## Part 3: Install the Fired-Up Pizza Factory (~15 min)
 
-> **Goal:** Stand up a working reference factory on your machine that you can point at a real project and verify end-to-end before trusting it with your own work.
+> **Goal:** Bring up a reference factory and confirm it operates correctly, establishing a working baseline you can compare against when configuring factories for your own projects later in the curriculum.
 
 ### Step 1: Install the Fired-Up Pizza factory
 
@@ -146,7 +151,7 @@ With the commands above, you can now install the Fired-Up Pizza factory.
 /factory-activity-agent install W1
 ```
 
-This copies the W1 workshop Gas City packs from `activities/workshops/W1/gascity/step_0/packs/` into your factory workspace and wires the rig. For a browsable view of the **fired-up-pizza** composite packaging in-repo, see [`packs/fired-up-pizza/`](../../../packs/fired-up-pizza/). The curriculum’s **reference** app (what the rig is modeled on) lives at [`reference-project/fired-up-pizza/`](../../../reference-project/fired-up-pizza/) — React + TypeScript + SQLite, with `docs/PROJECT_MANIFEST.md`, `tickets.md`, and `package.json`; your installed rig under `~/Projects/factory/workshop_w1/w1-project/` is the working copy the agents mutate.
+This copies the W1 workshop Gas City packs from `activities/workshops/W1/gascity/step_0/packs/` into your factory workspace and wires the rig. For a browsable view of the **fired-up-pizza** composite packaging in-repo, see [`packs/fired-up-pizza/`](../../../packs/fired-up-pizza/). The curriculum’s **reference** app (what the rig is modeled on) lives at [`reference-project/fired-up-pizza/`](../../../reference-project/fired-up-pizza/), with `docs/PROJECT_MANIFEST.md`, `tickets.md`, and `package.json`; your installed rig under `~/Projects/factory/workshop_w1/w1-project/` is the working copy the agents mutate.
 
 ### Step 2: Move into the project workspace directory
 
@@ -175,18 +180,24 @@ As long as you see agnets listed and the rig configured correctly, you can proce
 
 ## Part 4: Walk a Feature Bead Through the Factory (~15 min)
 
-> **Goal:** See a real task travel end-to-end through an autonomous team — from initial request to shipped work — with your only action being to hand off the task at the start.
+> **Goal:** Learn how a feature request progresses through each stage of the factory line, forming a clear understanding of the path from initial request to final delivered feature.
 
-### Step 1: Assign a task to the Planner agent
+### Step 1: Import the Fired-Up Pizza ticket backlog
 
-You are going to "sling" a bead to the Planner agent. Slinging a bead is another way of saying "assign a task to an agent".
+The rig was seeded with two files during install:
+
+- `tickets.md` — the initial FUP-1 … FUP-6 backlog, copied from [`reference-project/fired-up-pizza/tickets.md`](../../../reference-project/fired-up-pizza/tickets.md).
+- `scripts/import-tickets.sh` — a thin wrapper that parses `tickets.md` and calls `bd create` for each entry, copied from [`packs/fired-up-pizza/scripts/import-tickets.sh`](../../../packs/fired-up-pizza/scripts/import-tickets.sh).
+
+Run the import from the rig:
 
 ```bash
-# In your agent session, run:
-/factory-activity-agent sling w1-project/planner "Create SPA nextjs for Fired Up Pizza an online pizza ordering application where customers can build custom pizzas, select a pickup or delivery time, and place orders — all within a single-page experience. No payment processing is required; all transactions are handled on-site at pickup/delivery."
+cd ~/Projects/factory/workshop_w1/w1-project
+bash scripts/import-tickets.sh tickets.md
+bd list
 ```
 
-This will assign the bead to the Planner agent and start the session. The Planner will wake and begin processing the task.
+Each ticket is created with `--labels needs-plan`, so every bead lands on the Planner's order gate (`bd ready --label=needs-plan`) the moment the factory wakes. `bd list` should now show six beads titled after FUP-1 through FUP-6. No `gc sling` is needed — the label is the handoff.
 
 ### Step 2: Watch the bead move through the factory
 
@@ -238,7 +249,7 @@ Once the bead is closed, you can inspect the completed work in the `~/Projects/f
 
 ## Part 5: Observability — How to Watch a Factory Run (~10 min)
 
-> **Goal:** Build the situational awareness you need to see what a running factory is doing — so when something stalls or surprises you, you know where to look.
+> **Goal:** Become familiar with the primary observation surfaces of a running factory, so you can independently monitor its progress and diagnose issues throughout the remainder of the curriculum.
 
 You kept the dashboard open during Part 4; now use the last few minutes to internalize the three observability surfaces you can reach for across every remaining session outside of the `/factory-activity-agent` commands.
 

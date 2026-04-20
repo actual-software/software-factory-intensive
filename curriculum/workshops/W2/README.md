@@ -1,6 +1,6 @@
 # W2 · Design the 6-Agent Software Factory
 
-> **Goal:** Understand the complete architecture of a 6-agent software factory and design how agents hand off work through the pipeline — producing a factory design doc you can turn directly into pack customizations in L2, L3, and L4.
+> **Goal:** Understand how the specialists in a software factory coordinate their work, and translate that understanding into a design for the factory you will bring to life over the remainder of the curriculum.
 
 | | |
 |---|---|

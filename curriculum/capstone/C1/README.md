@@ -1,6 +1,6 @@
 # C1 · Run the Software Factory End-to-End
 
-> **What you'll do:** Take a brand-new feature request (one you have not seen in any prior lab) and run it through all six agents of your factory — Planner → Architect → Designer → Coder → Reviewer → Deployer — driven entirely by the configuration you've built across W1–W4 and L1–L4. You will not type a single ad-hoc prompt. Every fix happens through a config edit. The deliverable is a committed feature branch, a completed Factory Run Report, and a retrospective card — even if you don't reach the Deployer in ~90 minutes.
+> **Goal:** Bring together everything you have built across the workshops and labs by running an unfamiliar feature request through your complete software factory, guided entirely by the configuration you have assembled rather than by real-time human direction.
 
 | | |
 |---|---|
