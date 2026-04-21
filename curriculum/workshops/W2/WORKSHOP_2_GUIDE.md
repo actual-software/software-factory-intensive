@@ -6,21 +6,19 @@
 |---|---|
 | **Estimated duration** | ~45 minutes |
 | **Type** | WORKSHOP |
-| **Deliverable** | `factory-pipeline.md` that encapsulates all of your current agent toolsets, memory, model selections, and other capabilities mapped to the software factory pipeline |
+| **Deliverable** | `factory-pipeline.md` that encapsulates all of your current agent toolsets, memory, model selections, and other capabilities mapped to the software factory pipeline, plus an updated `PROJECT_MANIFEST.md` |
 
 ## Overview
 
-When you code solo with an AI assistant, you've already accumulated more than a single chat window: a preferred model (or mix of models), a set of skills or slash commands, one or more MCP servers, a memory file, a knowledge base, some keybindings, a personal playbook in your head. **A software factory is the same set of capabilities — but distributed across six specialists, hardened into config, and run without a human mediating handoffs.**
+When you code solo with an AI assistant, you've already accumulated more than a single chat window: a preferred model (or mix of models), a set of skills or slash commands, one or more MCP servers, a memory file, a knowledge base, some keybindings, a personal playbook in your head. **A software factory is the same set of capabilities — but distributed across specialist agents, hardened into config, and running without a human mediating handoffs.**
 
-W2 is the bridge from "I drive an AI" to "an AI pipeline runs without me." You will not install or customize agents yet (that begins in L1); you will audit what you already have, see what each factory stage consumes and produces, and decide what belongs where.
+W2 is the bridge from "I drive an AI" to "I maintain an autonomous software production line". You will not install or customize agents yet (that begins in L1); you will audit what you already have, see what each factory stage consumes and produces, and decide what belongs where.
 
 Through this workshop you will:
 - Inventory the capabilities that power your current solo workflow
 - Read the six factory stages (Planner, Architect, Designer, Coder, Reviewer, Deployer) through the lens of *what each stage needs to do its job*
 - Map each of your capabilities onto the pipeline stage(s) that should own it
 - Surface gaps — capabilities no agent currently owns — so L1–L4 can close them
-
-> **Fired Up Pizza reference:** Every concept in this workshop has a worked example in the reference project. If you want to see a completed mapping, skim [`reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md`](../../../reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md) and [`reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md`](../../../reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md). Use it sparingly — the point of W2 is to map *your* workflow, not to re-document the reference.
 
 ## The Pipeline You're Mapping Onto
 

@@ -69,15 +69,9 @@ up automatically when the agent starts.
 To re-vendor after upstream releases a new version:
 
 ```bash
-<<<<<<< HEAD
-cd examples/actual/architect && ./scripts/sync-actual-skill.sh
-cd examples/actual/planner   && ./scripts/sync-actual-skill.sh
-cd examples/actual/builder   && ./scripts/sync-actual-skill.sh
-=======
 cd packs/architect && ./scripts/sync-actual-skill.sh
 cd packs/planner   && ./scripts/sync-actual-skill.sh
 cd packs/builder   && ./scripts/sync-actual-skill.sh
->>>>>>> origin
 ```
 
 The three packs use the skill slightly differently:
@@ -155,20 +149,11 @@ honors Gas City's core invariant: **ZERO hardcoded roles**.
 ## How to run
 
 ```bash
-<<<<<<< HEAD
 # 1. Register at least one rig (your project repo)
 gc rig add /path/to/your/project
 
 # 2. Start the factory — this brings up all 8 agents
 gc start examples/actual/
-=======
-# 1. Register at least one rig (your project repo), from your Gas City
-#    workspace (e.g. `my-factory/`):
-gc rig add ../../path/to/your-project
-
-# 2. Start the factory — this brings up whichever agents you've included
-gc start
->>>>>>> origin
 
 # 3. File a goal to kick things off
 bd create --title "Build user profiles" --label needs-architecture
@@ -186,11 +171,7 @@ Each leaf pack works on its own. To use just one:
 # in your own city.toml
 [workspace]
 name = "mycity"
-<<<<<<< HEAD
 includes = ["/abs/path/to/examples/actual/builder"]
-=======
-includes = ["../packs/builder"]
->>>>>>> origin
 ```
 
 ## Principles honored
