@@ -211,7 +211,7 @@ Before leaving this workshop, verify all of these:
 
 ## Next Steps
 
-**[L1](../../labs/L1/LAB_1_GUIDE.md)** is where the factory becomes yours. You'll install a six-agent factory against your own project and connect each agent to the `PROJECT_MANIFEST` using the inputs, tools, and knowledge sources you mapped here.
+**[L1](../../labs/L1/LAB_1_GUIDE.md)** is where the factory becomes yours. You'll install a 6-agent factory against your own project and connect each agent to the `PROJECT_MANIFEST` using the inputs, tools, and knowledge sources you mapped here.
 
 **[W3](../W3/WORKSHOP_3_GUIDE.md)** continues the design track by examining how the six agents coordinate — mail, beads, files, and external services as coordination channels — and adding one to your factory.
 

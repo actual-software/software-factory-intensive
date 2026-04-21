@@ -35,7 +35,7 @@ Through this workshop you will:
 
 ```
   ┌──────────────────────────────────────────────────────────────────┐
-  │                       Six-Agent Factory                          │
+  │                       6-agent Factory                          │
   │     Planner · Architect · Designer · Coder · Reviewer · Deployer │
   └───┬──────────────┬─────────────┬─────────────┬────────────┬──────┘
       │              │             │             │            │

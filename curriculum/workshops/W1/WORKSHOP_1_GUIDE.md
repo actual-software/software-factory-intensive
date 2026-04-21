@@ -7,14 +7,14 @@ Prepare your environment to be software factory-ready, and demonstrate it by run
 |---|---|
 | **Estimated duration** | ~60 minutes |
 | **Type** | Workshop |
-| **Deliverable** | A running Fired Up Pizza factory on your machine, with at least one task visibly re-labelled by each of the six agents and inspectable via the dashboard |
+| **Deliverable** | A running Fired Up Pizza factory on your machine, with a set of initial tasks being processed by agents |
 
 ## Overview
 
-In this workshop, you'll get hands-on with a six-agent software factory using the Gas City framework and this repo. The high-level goal: demonstrate how feature requests flow through Planner, Architect, Designer, Builder, Reviewer, and Deployer for the **Fired Up Pizza** project, with each agent using labels to manage task status and handing off work without human intervention.
+In this workshop, you'll get hands-on with a 6-agent software factory using the Gas City framework and this repo. The high-level goal: demonstrate how feature requests flow through Planner, Architect, Designer, Builder (Coder), Reviewer, and Deployer for the **Fired Up Pizza** project, with each agent using labels to manage task status and handing off work without human intervention.
 
 Through this workshop you will:
-- Explore the Fired Up Pizza project and its six-agent software factory
+- Explore the Fired Up Pizza project and its 6-agent software factory
 - Understand the basic logic behind agent wakeups and task assignment
 - Learn to use core agent orchestration tools (`factory-activity-agent` skill, slash commands)
 - Observe the complete automated pipeline as one task moves through every stage

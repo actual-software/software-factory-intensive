@@ -12,7 +12,7 @@
 
 ## Overview
 
-L1 connected a six-agent factory to your project and gave the Planner a live input source. L2 is the first lab that starts **customizing** specialists. You'll install the Planner and Architect, attach a real capability to each (a skill, an MCP, a CLI), and demonstrate that those capabilities change the quality of the artifacts the stages produce.
+L1 connected a 6-agent factory to your project and gave the Planner a live input source. L2 is the first lab that starts **customizing** specialists. You'll install the Planner and Architect, attach a real capability to each (a skill, an MCP, a CLI), and demonstrate that those capabilities change the quality of the artifacts the stages produce.
 
 Through this lab you will:
 - Install and run the Planner and Architect against your project

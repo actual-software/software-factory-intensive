@@ -6,14 +6,14 @@
 |---|---|
 | **Estimated duration** | ~60 minutes |
 | **Type** | LAB |
-| **Deliverable** | Working six-agent software factory applied to your software project, with the `PROJECT_MANIFEST.md` and setup of the inputs on the Planner agent (feature requests, knowledge bases, and other artifacts) |
+| **Deliverable** | Working 6-agent software factory applied to your software project, with the `PROJECT_MANIFEST.md` and setup of the inputs on the Planner agent (feature requests, knowledge bases, and other artifacts) |
 
 ## Overview
 
 W1 ran a factory against a reference project that was already fully wired. W2 mapped the capabilities from your individual workflow onto the six stages and produced a `factory-pipeline.md`. L1 is where those two halves meet: you install a factory against **your project**, fill in the `PROJECT_MANIFEST.md` that grounds every agent, and connect the Planner's input sources so the factory can ingest real work instead of seeded tickets.
 
 Through this lab you will:
-- Install a six-agent factory workspace against your own project
+- Install a 6-agent factory workspace against your own project
 - Author a `PROJECT_MANIFEST.md` from your project overview + W2 capability map
 - Wire the Planner's input sources (feature requests, knowledge bases, external systems) into the factory so it can acquire planning inputs automatically
 - Verify each agent can read the manifest and that the Planner can pull a task from the sources you configured
@@ -34,7 +34,7 @@ Through this lab you will:
         │  every agent reads this before acting
         ▼
 ┌──────────────────────────────────────────────────────────┐
-│   Six-agent factory installed against YOUR project       │
+│   6-agent factory installed against YOUR project       │
 │                                                          │
 │   Planner ──▶ Architect ──▶ Designer ──▶ Coder           │
 │       ▲                                     │            │
@@ -270,7 +270,7 @@ Before leaving this lab, verify all of these:
 
 | Artifact | Location | What It Does |
 |----------|----------|--------------|
-| L1 factory | `~/Projects/factory/lab_l1/l1-gc-factory/` | Six-agent factory pointed at your project workspace |
+| L1 factory | `~/Projects/factory/lab_l1/l1-gc-factory/` | 6-agent factory pointed at your project workspace |
 | L1 project workspace | `~/Projects/factory/lab_l1/l1-project/` | Your code plus the manifest, work packages, and factory-pipeline doc |
 | `docs/PROJECT_MANIFEST.md` | Inside the project workspace | Single source of truth every agent reads before acting |
 | `docs/factory-pipeline.md` (from W2) | Inside the project workspace | Capability map the manifest was reconciled against |

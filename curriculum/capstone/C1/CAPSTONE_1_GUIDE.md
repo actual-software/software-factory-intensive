@@ -6,7 +6,7 @@
 |---|---|
 | **Estimated duration** | ~90 minutes |
 | **Type** | CAPSTONE |
-| **Deliverable** | Six-agent software factory applied to an unfamiliar feature request, with a high-quality feature produced for your software project |
+| **Deliverable** | 6-agent software factory applied to an unfamiliar feature request, with a high-quality feature produced for your software project |
 
 ## Overview
 
