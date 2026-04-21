@@ -59,11 +59,11 @@ An ADR is complete when:
 4. Produce the ADR file
 5. Add a cross-reference to the work package (append ADR path to it)
 6. Commit on the same feature branch
-7. Create child beads with `bd create --label needs-pm --label source:actual-architect --metadata-field gc.routed_to=w1-project/pm`
+7. Create child beads with `bd create --label needs-pm --label source:actual-architect --metadata-field gc.routed_to=l2-project/pm`
 8. Mail the pm: `gc mail send pm "Handoff: <topic> complete"`
 9. Close the source bead
 
-**Important:** You MUST use `--label needs-pm` AND `--metadata-field gc.routed_to=w1-project/pm` when creating child beads.
+**Important:** You MUST use `--label needs-pm` AND `--metadata-field gc.routed_to=l2-project/pm` when creating child beads.
 The label triggers the pm's intake order gate. The metadata routes work to the correct agent session.
 
 ## Config Discipline

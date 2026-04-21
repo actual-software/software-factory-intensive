@@ -20,8 +20,8 @@ Create a bead with `needs-plan` label in the rig db. This triggers the `planner-
 order gate, which starts the planner automatically.
 
 ```bash
-cd ~/Projects/factory/lab_l1/l1-gc-factory
-gc bd --rig l1-project create \
+cd ~/Projects/factory/lab_l2/l2-gc-factory
+gc bd --rig l2-project create \
   --title "" \
   --label needs-plan
 ```
@@ -30,4 +30,4 @@ gc bd --rig l1-project create \
 
 ##### Gas City Prompts and Commands
 
-`~/Projects/factory/lab_l1/l1-project/README.md`
+`~/Projects/factory/lab_l2/l2-project/README.md`
