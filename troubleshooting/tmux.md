@@ -24,7 +24,7 @@ Issues with `tmux` (and related full-screen terminal apps like `vim` and `less`)
 6. Near the bottom, check the **Scroll alternate screen** checkbox.
 7. Close Settings. The change applies immediately in new `tmux` sessions; detach and reattach an existing session if it doesn't pick up the new behavior.
 
-<img src="../images/troubleshooting/macos-terminal-scroll-alternate-screen.png" alt='macOS Terminal Settings → Profiles → Keyboard pane with a red box highlighting the "Scroll alternate screen" checkbox' style="width:50%; height:auto;" />
+<img src="../images/macos-terminal-scroll-alternate-screen.png" alt='macOS Terminal Settings → Profiles → Keyboard pane with a red box highlighting the "Scroll alternate screen" checkbox' style="width:50%; height:auto;" />
 
 **Fix (iTerm2):** iTerm2 has the same setting under **Settings → Profiles → Terminal → "Save lines to scrollback when an app status line is present"** and **"Scroll wheel sends arrow keys when in alternate screen mode"** — toggle the latter *off* for the same effect.
 

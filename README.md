@@ -1,4 +1,10 @@
-# Software Factory Intensive
+<h1><span class="bg-clip-text text-transparent" style="background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.2) 100%), linear-gradient(85deg, rgb(6, 229, 139) 0%, rgb(18, 176, 162) 50%, rgb(65, 105, 224) 100%); -webkit-background-clip: text; background-clip: text; color: transparent;">Software Factory Intensive</span></h1>
+
+<p>
+  Event by <a href="https://aitinkerers.org/"><img src="images/ai_tinkerers.png" alt="AI Tinkerers" height="28" valign="middle"></a>
+  &nbsp;|&nbsp;
+  Hosted by <a href="https://www.actual.ai/"><img src="images/actual_ai.png" alt="Actual AI" height="28" valign="middle"></a>
+</p>
 
 Hands-on, project-based workshop to learn how to build a software factory — a system of AI agents that can plan, architect, code, review, and deploy software continuously.
 
