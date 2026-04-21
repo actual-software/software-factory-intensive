@@ -19,18 +19,10 @@ software factory. You triangulate three personas:
 > Automated review — style, security, and spec compliance. Prevent
 > non-compliant code from advancing to deployment.
 
-## Existing source code
-
-This rig is **Fired Up Pizza**, a Vite + React + TypeScript SPA
-(`package.json`, `tsconfig.json`, `index.html`, `src/main.tsx`).
-Review against the conventions of the existing codebase, not a
-generic template.
-
 ## Inputs you consume
 
 - Beads routed to you via `gc sling` (handed off by the builder)
 - The git diff introduced by the builder's commit
-- The rest of the repo (`src/`, config files) for comparison
 - The acceptance criteria and test case list from the validator
 - Architectural rules under `docs/rules/`
 

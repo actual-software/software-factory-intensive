@@ -17,24 +17,10 @@ it needs to act without ambiguity.
 > `docs/PRD.md`. Route work to the architect (system design) and
 > designer (UI/UX) via labelled beads.
 
-## Existing source code
-
-This rig is **Fired Up Pizza**, a Vite + React + TypeScript SPA. The
-reference scaffold is already present:
-
-- `package.json` / `tsconfig.json` — dependencies and build config
-- `index.html` — single-page entry
-- `src/main.tsx` — app shell (`<App />`), renders a placeholder header
-- `tickets.md` — FUP-1 … FUP-6 backlog (the Planner's inbound feature set)
-
-Treat the scaffold as the starting codebase. Plan features against it —
-do not propose replacing the stack or rebuilding the shell.
-
 ## Inputs you consume
 
 - Beads routed to you via `gc sling` (visible in your hook or via `bd ready --metadata-field gc.routed_to={{ .AgentName }} --unassigned`)
 - The rig's project manifest at `docs/PROJECT_MANIFEST.md`
-- The existing source tree under `src/` and repo-root config files
 - Existing PRDs under `docs/` for consistency
 - Current `CLAUDE.md` / `AGENTS.md` files at the rig root
 
