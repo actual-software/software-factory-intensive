@@ -16,7 +16,7 @@ The Software Factory Intensive is a 9-session curriculum teaching multi-agent sy
 | 6 | Lab | L3 | Deploy Designer + Coder agents |
 | 7 | Lab | L4 | Deploy Reviewer + DevOps agents |
 | 8 | Workshop | W4 | Create continuous improvement loops |
-| 9 | Capstone | L5 / C1 | Run the software factory end-to-end on a real feature |
+| 9 | Capstone | C1 | Run the software factory end-to-end on a real feature |
 
 ## Activity Details
 
@@ -110,10 +110,10 @@ The Software Factory Intensive is a 9-session curriculum teaching multi-agent sy
   - Participants have developed and tested custom Reviewer and DevOps agents for their factory.
   - Participants have aligned their project/product manifest with what their agents enforce (definitions of done, gates, checks).
 
-### L5 / C1 — Run the Software Factory End-to-End
+### C1 — Run the Software Factory End-to-End
 
 - **Category:** capstone
-- **Slug:** `capstone_c1` (also referred to as `lab_l5` in the schedule)
+- **Slug:** `capstone_c1`
 - **Focus:** Combine every custom agent into a single factory and run it end-to-end to deliver a complete feature from clearly-defined requirements
 - **Packs source:** `activities/capstone/C1/gascity/step_0/packs/`
 - **Prerequisites:** All prior workshops and labs (W1–W4, L1–L4)
