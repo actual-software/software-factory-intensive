@@ -40,3 +40,9 @@ overlay_dir = "overlays/default"
 idle_timeout = "2h"
 min_active_sessions = 0
 max_active_sessions = 1
+work_query = "gc bd --rig w1-project list --label=needs-design --status=open --json 2>/dev/null"
+
+[[named_session]]
+template = "designer"
+scope = "rig"
+mode = "on_demand"

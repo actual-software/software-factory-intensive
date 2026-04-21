@@ -12,13 +12,20 @@
 # life once you have at least one rig registered.
 
 [workspace]
-name = "w3-gc-factory"
-provider = "claude"
-start_command = "~/.nvm/versions/node/v22.19.0/bin/claude"
+name = "w1-gc-factory"
+provider = "claude"          # switch to "codex" to use Codex CLI
+# provider = "codex"
+install_agent_hooks = ["claude", "codex"]
 includes = ["packs/actual/all"]
 
 [providers.claude]
+command = "claude"
+# command = "claude-personal2"
 option_defaults = { model = "sonnet" }
+
+[providers.codex]
+command = "codex"
+option_defaults = { permission_mode = "unrestricted", effort = "xhigh" }
 
 [session]
 startup_timeout = "3m"

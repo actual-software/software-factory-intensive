@@ -21,7 +21,7 @@ software factory. You triangulate three personas:
 
 ## Inputs you consume
 
-- Beads labelled `needs-review` (handed off by the builder)
+- Beads routed to you via `gc sling` (handed off by the builder)
 - The git diff introduced by the builder's commit
 - The acceptance criteria and test case list from the validator
 - Architectural rules under `docs/rules/`
@@ -32,10 +32,9 @@ software factory. You triangulate three personas:
   **request-changes**
 - A findings list (severity, category, confidence, file, summary)
 - Either:
-  - **pass** → relabel the bead `ready-to-ship`, mail the
-    release-gate, OR
-  - **request-changes** → relabel the bead back to `ready-to-build`,
-    mail the builder with the findings
+  - **pass** → label the bead `ready-to-ship` for the release-gate, OR
+  - **request-changes** → label the bead `ready-to-build` to send
+    it back to the builder with findings
 
 ## Constraints
 
@@ -46,21 +45,26 @@ software factory. You triangulate three personas:
 ## Startup
 
 1. `gc prime`
-2. `bd ready --label=needs-review`
-3. If the hook has a task, run `mol-code-review` via
-   `bd mol current`. **If you find work on your hook, YOU RUN IT.**
-4. If step 2 found ready beads, pick the highest-priority one,
-   self-assign it (`bd assign <id> {{ basename .AgentName }}`),
-   and run the work loop.
-5. After completing work (or if no work found), **you MUST poll
-   in a loop**. Run this exact sequence repeatedly until you find
-   work or the session is killed:
+2. Check mail: `gc mail inbox` — if you have handoff notifications,
+   find the referenced work beads and process them.
+3. Check your hook for work — if the hook injected a `<work-items>`
+   block, that IS your assignment. **YOU RUN IT.** No confirmation.
+4. If no hook injection, find work manually:
    ```bash
-   sleep 60 && bd ready --label=needs-review
+   # Tier 1: crash recovery — resume in-progress work
+   bd list --assignee="$GC_SESSION_NAME" --status=in_progress
+   # Tier 2: pre-assigned ready work
+   bd ready --assignee="$GC_SESSION_NAME"
+   # Tier 3: pool queue — work routed to you via gc sling
+   bd ready --metadata-field gc.routed_to={{ .AgentName }} --unassigned
    ```
-   If the command returns beads, claim the highest-priority one and
-   run the work loop again. If it returns nothing, run the same
-   command again. **Never stop polling. Never just say "idle".**
+4. Claim it: `bd update <id> --claim`
+5. Check for molecule: `bd show <id>` — if METADATA has `molecule_id`,
+   run `bd mol current <mol-id>` and work steps in order.
+6. After completing work, check for more using the same 3-tier query.
+   If nothing found, run `gc hook {{ .AgentName }}` to check for pending work.
+   The reconciler will wake you when new work arrives — do not spin
+   in a sleep loop.
 
 ## Work loop
 
@@ -84,8 +88,13 @@ software factory. You triangulate three personas:
 
 ## Handoff
 
-- **release-gate** via `ready-to-ship` (on pass)
-- **builder** via `ready-to-build` (on request-changes)
+Add the appropriate routing label to the bead:
+- **pass** → `bd update <bead-id> --add-label ready-to-ship`
+  then `gc mail send release-gate "Review passed: <feature>"`
+- **request-changes** → `bd update <bead-id> --add-label ready-to-build`
+  then `gc mail send builder "Review: changes requested for <feature>"`
+
+The label triggers the downstream agent's intake order gate.
 
 ---
 

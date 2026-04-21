@@ -1,6 +1,4 @@
-# Software Factory Intensive - Workshop - L2
-
-https://github.com/actual-software/software-factory-intensive
+# Software Factory Intensive - Lab - L2
 
 ## Setup
 
@@ -9,98 +7,60 @@ https://github.com/actual-software/software-factory-intensive
 ```bash
 mkdir -p ~/Projects/actual-software/
 pushd -p ~/Projects/actual-software
-git clone git@github.com:actual-software/software-factory-intensive.git
+git clone https://github.com/actual-software/software-factory-intensive.git
 ```
 
-#### Setup Factory - Workshop - L2
+## Generate Fired Up Pizza
 
-##### Init Factory and Project
+#### Setup Project
 
-```bash
-mkdir -p ~/Projects/factory/lab_l2/l2-project
-pushd ~/Projects/factory/lab_l2/l2-project
-git init
+In Claude Code session in root of software-factory-intensive
 
-gc init ~/Projects/factory/lab_l2/l2-gc-factory
+Prompt:
+```
+/factory-activity-agent install l2
 ```
 
-Select `3. custom`
+#### Uninstall
 
-```bash
-Welcome to Gas City SDK!
+If needed.
 
-Choose a config template:
-  1. tutorial  — default coding agent (default)
-  2. gastown   — multi-agent orchestration pack
-  3. custom    — empty workspace, configure it yourself
-Template [1]: 3
+Prompt:
+```
+/factory-activity-agent delete l2
 ```
 
-##### Configure Factory
+#### Setup Project Manifest
 
 ```bash
-pushd ~/Projects/factory/lab_l2/l2-gc-factory
-cp ~/Projects/actual-software/software-factory-intensive/activites/labs/L2/gascity/step_0/packs/city.toml ~/Projects/factory/lab_l2/l2-gc-factory
-rsync -av ~/Projects/actual-software/software-factory-intensive/activites/labs/L2/gascity/step_0/packs/ ~/Projects/factory/lab_l2/l2-gc-factory/packs/actual/
+mkdir -p ~/Projects/factory/lab_l2/l2-project/docs/
+cp ~/Projects/actual-software/software-factory-intensive/activities/lab/L2/docs/PROJECT_MANIFEST.md ~/Projects/factory/lab_l2/l2-project/docs/
+ls -al ~/Projects/factory/lab_l2/l2-project/docs/
 ```
 
-##### Register City
+#### Stop and Start Gascity
 
 ```bash
-gc stop
-gc register <full_path>/Projects/factory/lab_l2/l2-gc-factory
-
-gc service restart
-gc status
-gc doctor --fix
-```
-
-##### Add "Rig" ie Project Source Repo to Factory
-
-```bash
-pushd ~/Projects/factory/lab_l2/l2-gc-factory
-gc rig add <full_path>/Projects/factory/lab_l2/l2-project
-```
-
-Update city.toml with the includes as in this example:
-
-```bash
-[[rigs]]
-name = "w2-project"
-path = "<full_path/Projects/factory/lab_l2/l2-project"
-includes = ["packs/actual/all"]
-```
-
-##### Patch "convoy" in Factory and Project
-
-```bash
-pushd ~/Projects/factory/lab_l2/l2-gc-factory && bd config set types.custom "convoy"
-pushd ~/Projects/factory/lab_l2/l2-project && bd config set types.custom "convoy"
-```
-
-##### Restart Factory
-
-```bash
-pushd ~/Projects/factory/lab_l2/l2-gc-factory
+cd ~/Projects/factory/lab_l2/l2-gc-factory
 gc stop
 gc start
-gc restart
 ```
 
-##### Startup Gascity Dashboard
+#### Send Task to Factory
+
+Create a bead with `needs-plan` label in the rig db. This triggers the `planner-intake`
+order gate, which starts the planner automatically.
 
 ```bash
-pushd ~/Projects/factory/lab_l2/l2-gc-factory
-gc dashboard serve
+cd ~/Projects/factory/lab_l2/l2-gc-factory
+gc bd --rig l2-project create \
+  --title "" \
+  --label needs-plan
 ```
 
-Open Gascity Dashboard in Browser
+#### Further Resources
 
-* http://localhost:8080
+##### Gas City Prompts and Commands
 
-##### Generate Task to Verify Factory
+`~/Projects/factory/lab_l2/l2-project/README.md`
 
-```bash
-pushd ~/Projects/factory/lab_l2/l2-project
-gc sling l2-project/architect "Create a script that prints hello world"
-```

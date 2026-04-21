@@ -18,8 +18,8 @@ Anchor personas are defined in
 - Uses the bundled **actual** skill to run `actual adr-bot` and keep
   `CLAUDE.md` / `AGENTS.md` in sync with the rig's ADRs
 - Writes one-page guardrail rules under `.actual/rules/<topic>.md`
-- Hands off to the **planner** by creating child beads with the
-  `needs-plan` label
+- Hands off to the **pm** by creating child beads with the
+  `needs-pm` label
 
 ## What it does NOT do
 
@@ -78,7 +78,7 @@ Review and commit the diff.
 ## Handoff protocol
 
 ```
-architect (this pack)  →  planner  →  designer/validator  →  builder
+architect (this pack)  →  pm  →  designer/validator  →  builder
                                                                 ↓
                                                              reviewer
                                                                 ↓

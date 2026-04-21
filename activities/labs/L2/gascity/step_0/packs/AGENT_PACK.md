@@ -29,7 +29,7 @@ examples/actual/
 ├── README.md            # you are here
 ├── city.toml            # runnable sample workspace
 ├── architect/           # Principal-Engineer persona
-├── planner/             # Product-Manager + Program-Manager persona
+├── pm/                  # Product-Manager + Program-Manager persona
 │                        # (ships the tracker-to-beads bridge skill)
 ├── designer/            # UI/UX-Designer + Accessibility-Engineer persona
 ├── validator/           # QA-Engineer persona
@@ -49,7 +49,7 @@ The agent voices are anchored to the built-in personas from
 | Pack | Anchor persona(s) |
 |------|-------------------|
 | architect | `principal-engineer` + `solutions-architect` |
-| planner | `product-manager` + `program-manager` |
+| pm | `product-manager` + `program-manager` |
 | designer | `ui-ux-designer` + `accessibility-engineer` |
 | validator | `qa-engineer` |
 | builder | `backend-engineer` + `frontend-engineer` |
@@ -59,8 +59,9 @@ The agent voices are anchored to the built-in personas from
 
 ## The actual-skill integration
 
-Three packs — **architect**, **planner**, **builder** — vendor the
-upstream [actual-software/actual-skill](https://github.com/actual-software/actual-skill)
+Five packs — **architect**, **designer**, **improver**, **pm**,
+**builder** — vendor the upstream
+[actual-software/actual-skill](https://github.com/actual-software/actual-skill)
 Claude Code companion for the `actual` CLI
 (ADR-powered CLAUDE.md/AGENTS.md generator). The skill sits under
 each pack's `overlays/default/.claude/skills/actual/` and is picked
@@ -70,39 +71,50 @@ To re-vendor after upstream releases a new version:
 
 ```bash
 cd examples/actual/architect && ./scripts/sync-actual-skill.sh
-cd examples/actual/planner   && ./scripts/sync-actual-skill.sh
+cd examples/actual/designer  && ./scripts/sync-actual-skill.sh
+cd examples/actual/improver  && ./scripts/sync-actual-skill.sh
+cd examples/actual/pm        && ./scripts/sync-actual-skill.sh
 cd examples/actual/builder   && ./scripts/sync-actual-skill.sh
 ```
 
-The three packs use the skill slightly differently:
+The five packs use the skill slightly differently:
 
-- **architect** runs `actual adr-bot --dry-run --full` to keep ADRs
-  and generated rules in sync
-- **planner** reads `CLAUDE.md` / `AGENTS.md` for architectural
+- **architect** runs `actual adr-bot --force --no-tui --no-tailor`
+  to keep ADRs and generated rules in sync after architecture work
+- **designer** runs `actual adr-bot --force --no-tui --no-tailor`
+  to sync ADRs after completing design cycles
+- **improver** runs `actual adr-bot --force --no-tui --no-tailor`
+  to sync ADRs after feedback harvest cycles
+- **pm** reads `CLAUDE.md` / `AGENTS.md` for architectural
   context when breaking down work
 - **builder** runs `actual status` before coding to verify the rig
   is not in ADR drift (and hands the work back to the architect if
   it is)
 
-## The tracker → beads bridge (planner only)
+**Note:** The `--no-tailor` flag is required in agent environments
+because the default `claude-cli` runner hangs when spawned inside
+an existing Claude Code session. If `ANTHROPIC_API_KEY` is available,
+agents can use `--runner anthropic-api` instead for tailored output.
 
-The planner pack also ships a second, pack-local skill:
+## The tracker → beads bridge (pm only)
+
+The pm pack also ships a second, pack-local skill:
 `tracker-to-beads`. This skill probes `.claude/skills/` for any
 sibling matching `jira`, `linear`, `github-issues`, or `tracker-*`
 and calls its `list-issues` verb to materialize each external issue
 as a bead. The mapping is recorded idempotently in
-`.actual/planner/tracker-sync.json`.
+`.actual/pm/tracker-sync.json`.
 
 **The builder downstream only ever reads beads** — tracker
 credentials, API quirks, and rate limits are entirely the sibling
 tracker skill's problem. The rest of the factory is tracker-agnostic.
 
 If no tracker skill is installed, the step is a no-op and the
-planner just breaks down whatever beads already exist. Users run
+pm just breaks down whatever beads already exist. Users run
 the factory in pure bd-first mode, hybrid mode, or tracker-first
 mode without touching any config.
 
-See [`planner/README.md`](planner/README.md) for the sibling-skill
+See [`pm/README.md`](pm/README.md) for the sibling-skill
 contract (`scripts/list-issues.sh` printing a JSON array).
 
 ## Handoff protocol
@@ -111,8 +123,8 @@ There is **no master orchestrator**. Each pack's order gate matches
 on a bead label; the flow is emergent from labels, not hardcoded:
 
 ```
-           needs-architecture           needs-plan
-(user) ────────────────────► architect ──────────► planner
+           needs-architecture           needs-pm
+(user) ────────────────────► architect ──────────► pm
                                  ▲                    │
                                  │ (drift hand-back)  │
                                  │                    ▼
@@ -161,7 +173,7 @@ bd create --title "Build user profiles" --label needs-architecture
 
 The architect's order gate will match, wake the architect, which
 runs `mol-architect-review`, produces rules and child beads labelled
-`needs-plan`, which wakes the planner, and so on.
+`needs-pm`, which wakes the pm, and so on.
 
 ## Standalone use
 

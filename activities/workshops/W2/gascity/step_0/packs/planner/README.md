@@ -1,88 +1,33 @@
 # actual-planner
 
-The **Plan / Work-Breakdown** agent of the Actual Software Factory.
-One of eight Agent-Operation packs under `examples/actual/`. Maps to
-the "Plan" operation at https://www.actual.ai/softwarefactory.
+The **Planner** agent of the Actual Software Factory. One of the
+Agent-Operation packs under `examples/actual/`. Maps to the first
+stage of the pipeline — translating feature requests into formal
+Product Requirements Documents.
 
 ## Persona
 
-Product Manager + Program Manager. Writes user stories with
-measurable acceptance criteria. Tracks dependencies. Flags risks
-early. Never writes implementation code. Anchor personas are defined
-in `actual-factory/extensions/factory-vscode/shared/actual-agents/built-in-agents.ts`.
+Product Manager. Translates feature requests into clear, measurable
+requirements. References the project manifest for all technical
+constraints. Ensures downstream agents have the context they need.
+Anchor personas are defined in
+`actual-factory/extensions/factory-vscode/shared/actual-agents/built-in-agents.ts`.
 
 ## What it does
 
-- Reads beads labelled `needs-plan` (from the architect or from a
-  user)
-- Optionally imports issues from an external tracker (Jira / Linear /
-  GitHub Issues / any `tracker-*` skill) via the bundled
-  `tracker-to-beads` skill
-- Breaks each goal into 3-10 child beads with measurable acceptance
-  criteria
-- Wires a dependency graph with `bd dep add`
-- Labels children for routing:
-  - `needs-design` → **designer**
-  - `needs-tests` → **validator**
-  - `ready-to-build` → **builder**
-- Writes a human-readable plan under `.actual/plans/<slug>.md`
+- Reads beads labelled `needs-plan`
+- Reads `docs/PROJECT_MANIFEST.md` for tech stack, domain model,
+  conventions, and project scope
+- Writes a formal PRD at `docs/PRD.md`
+- Hands off to the **architect** by creating child beads with the
+  `needs-architecture` label
+- Hands off to the **designer** by creating child beads with the
+  `needs-design` label
 
-## The two skills this pack ships
+## What it does NOT do
 
-### 1. `actual` (vendored from upstream)
-
-The standard [actual-software/actual-skill](https://github.com/actual-software/actual-skill)
-companion for the `actual` CLI. The planner uses it to read the rig's
-current `CLAUDE.md` / `AGENTS.md` for architectural context.
-
-To re-vendor:
-```bash
-./scripts/sync-actual-skill.sh
-```
-
-### 2. `tracker-to-beads` (pack-local)
-
-Bridges external trackers into `bd`. **The builder downstream only
-ever reads beads**, so everything that comes from a tracker must pass
-through this conversion.
-
-The skill probes `.claude/skills/` for any sibling matching:
-
-- `jira`
-- `linear`
-- `github-issues`
-- `tracker-*`
-
-If none are found, import is a no-op and the planner just processes
-whatever `needs-plan` beads already exist. If one or more are found,
-the skill invokes their `list-issues` verb and materializes each
-issue as a bead, recording the mapping in
-`.actual/planner/tracker-sync.json` so re-runs are idempotent.
-
-**Tracker skill contract.** Any sibling tracker skill wanting to
-integrate must expose `scripts/list-issues.sh` (or `list-issues`)
-that prints a JSON array to stdout:
-
-```json
-[
-  {
-    "id": "PROJ-123",
-    "title": "Add user profiles",
-    "url": "https://...",
-    "body": "full markdown body",
-    "labels": ["frontend", "p1"]
-  }
-]
-```
-
-Any tracker whose script exits non-zero or prints invalid JSON is
-ignored with a warning. The planner **never** fails its formula for
-tracker reasons.
-
-Manual import (bypassing the formula):
-```bash
-./commands/tracker-sync.sh
-```
+Write implementation code. Make architecture decisions. Design UI/UX.
+Decompose work into tasks. Run CI. Review PRs.
 
 ## How to run
 
@@ -92,28 +37,46 @@ gc rig add /path/to/your/project
 gc start examples/actual/
 ```
 
-Standalone:
-```toml
-# city.toml
-[workspace]
-includes = ["examples/actual/planner"]
-```
-
-Manual dispatch:
+Standalone (just this agent):
 ```bash
-gc sling <rig>/planner --on mol-plan-breakdown --var slug=user-profiles
+# add to a city.toml:
+# [workspace]
+# includes = ["examples/actual/planner"]
 ```
 
-## What it does NOT do
+Manual dispatch of the formula against a specific bead:
+```bash
+gc sling <rig>/planner --on mol-planner-prd \
+    --var slug=user-profiles
+```
 
-- Write code, design UI, author tests, or make architecture decisions.
-- Handle tracker authentication (sibling tracker skills own that).
-- Re-create beads that already exist in the sync manifest.
+## Pack contents
 
-## Handoff
+| File | Purpose |
+|------|---------|
+| `pack.toml` | Agent + formulas + orders + doctor + commands declaration |
+| `prompts/planner.md.tmpl` | The Product-Manager persona prompt |
+| `prompts/planner.md` | Standalone prompt (no gc template vars) |
+| `formulas/mol-planner-prd.formula.toml` | 4-step PRD workflow |
+| `formulas/orders/planner-intake/order.toml` | Condition-gated auto-dispatch |
+| `doctor/check-planner.sh` | Verifies `bd`, `gc`, `git`, `jq` |
+| `commands/status.sh` | Shows planner work queue |
+| `scripts/sync-actual-skill.sh` | Author tool: re-vendor upstream actual-skill |
+| `overlays/default/.claude/skills/actual/` | Vendored upstream actual-skill |
 
-- **designer** via `needs-design`
-- **validator** via `needs-tests`
-- **builder** via `ready-to-build`
-- **architect** via `needs-architecture` (if the planner discovers an
-  architectural question mid-breakdown and has to hand it back up)
+## Handoff protocol
+
+```
+planner (this pack)  →  architect  →  pm  →  designer/validator  →  builder
+                     →  designer                                       ↓
+                                                                    reviewer
+                                                                       ↓
+                                                                 release-gate
+                                                                       ↓
+                                                                   improver
+                                                                       ↓
+                                                                  (loop back)
+```
+
+Each step advances via a label change on the bead. No Go code, no
+hardcoded pipeline — just beads and label-matching order gates.

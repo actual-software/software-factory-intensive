@@ -3,7 +3,7 @@
 #
 # Harvests runtime signals (metrics, errors, user feedback) after a
 # release and feeds them back into the factory as new beads for the
-# right upstream agent — architect, planner, designer, validator,
+# right upstream agent — architect, pm, designer, validator,
 # builder, or reviewer.
 #
 # Wakes on a cooldown schedule (daily) rather than a label condition,
@@ -42,8 +42,13 @@ scope = "rig"
 wake_mode = "fresh"
 work_dir = ".gc/agents/{{.Rig}}/improver"
 prompt_template = "prompts/improver.md.tmpl"
-nudge = "Run 'gc prime', then check bd ready --label=needs-improve and run mol-feedback-harvest."
+nudge = "Check your hook for work and act on it."
 overlay_dir = "overlays/default"
 idle_timeout = "2h"
 min_active_sessions = 0
 max_active_sessions = 1
+
+[[named_session]]
+template = "improver"
+scope = "rig"
+mode = "on_demand"

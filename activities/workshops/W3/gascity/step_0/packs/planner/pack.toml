@@ -35,5 +35,11 @@ prompt_template = "prompts/planner.md.tmpl"
 nudge = "Check your hook for work and act on it."
 overlay_dir = "overlays/default"
 idle_timeout = "2h"
-min_active_sessions = 1
+min_active_sessions = 0
 max_active_sessions = 1
+work_query = "gc bd --rig w1-project list --label=needs-plan --status=open --json 2>/dev/null"
+
+[[named_session]]
+template = "planner"
+scope = "rig"
+mode = "on_demand"

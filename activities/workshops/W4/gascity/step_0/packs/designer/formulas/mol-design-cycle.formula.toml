@@ -1,0 +1,293 @@
+description = """
+Design cycle — triage then either fast-path or full design.
+
+## Contract
+
+1. Caller slings with a root bead labelled `needs-design`.
+2. Designer triages: does this task require UI/UX design work?
+   - **No design needed:** close root bead, create `needs-pm` child bead(s), done.
+   - **Design needed:** produce wireframe + a11y audit in `docs/designs/<slug>.md`,
+     then create `needs-pm` child bead(s) for the resulting design work.
+
+## Variables
+
+| Variable | Source | Description |
+|----------|--------|-------------|
+| slug | caller | Short slug for the design artifact filename |
+"""
+formula = "mol-design-cycle"
+version = 1
+
+[vars]
+[vars.slug]
+description = "Short slug for the design artifact under docs/designs/"
+required = true
+
+[vars.skip_adr_sync]
+description = "Set to 'true' to skip the actual-adr-sync step (useful in rigs without the actual CLI installed)"
+default = "false"
+
+[[steps]]
+id = "triage"
+title = "Decide: does this task need UI/UX design work?"
+description = """
+**1. Read the root bead and its context:**
+```bash
+ROOT_ID=$(bd mol current --json | jq -r '.molecule_id')
+bd show $ROOT_ID
+```
+
+**2. Read the parent PRD and architecture doc if referenced in notes.**
+
+**3. Decide: does this task require UI/UX design?**
+
+Design IS needed if the task involves:
+- New screens, pages, or user-facing flows
+- New components, forms, or visual layouts
+- Changes to user interaction patterns
+
+Design is NOT needed if the task involves:
+- Pure backend/infrastructure work (APIs, DBs, CI, configs)
+- Non-visual refactoring or performance work
+- Tasks already fully specified with no UI implications
+
+**4a. If NO design needed — fast-path to pm:**
+```bash
+bd update $ROOT_ID --notes "design_decision: no_design_needed — <one-line reason>"
+
+IMPL_ID=$(bd create \\
+    --title "<implementation task title>" \\
+    --label needs-pm \\
+    --label source:actual-designer \\
+    --notes "Fast-pathed from designer: no UI/UX design required. See root bead $ROOT_ID." \\
+    --json | jq -r '.id')
+bd dep add $IMPL_ID --blocked-by $ROOT_ID
+
+bd close $ROOT_ID --reason "no design needed, implementation bead $IMPL_ID created"
+gc mail send pm "Handoff: $ROOT_ID required no design. Implementation bead $IMPL_ID labelled needs-pm."
+```
+
+**STOP here if no design needed. Do not execute subsequent steps.**
+
+**4b. If design IS needed — record decision and continue:**
+```bash
+bd update $ROOT_ID --notes "design_decision: design_required — <one-line reason>"
+```
+
+**Exit criteria:** Decision recorded in bead notes. Either fast-path
+complete (root closed, needs-pm bead created) or design work proceeds.
+"""
+
+[[steps]]
+id = "intake"
+title = "Map the user journey"
+needs = ["triage"]
+description = """
+**1. Root bead + parent plan:**
+```bash
+ROOT_ID=$(bd mol current --json | jq -r '.molecule_id')
+bd show $ROOT_ID
+PLAN_SLUG=$(bd show $ROOT_ID --json | jq -r '.labels[] | select(startswith("plan:")) | sub("plan:";"")')
+[ -n "$PLAN_SLUG" ] && [ -f "docs/plans/$PLAN_SLUG.md" ] && cat "docs/plans/$PLAN_SLUG.md"
+```
+
+**2. Survey existing components** — grep for existing storybook
+entries, component files, or design tokens. Re-use aggressively.
+
+**Exit criteria:** You can name the primary user action and every
+screen or component it touches.
+"""
+
+[[steps]]
+id = "wireframe"
+title = "Create Excalidraw wireframes and write the design doc"
+needs = ["intake"]
+description = """
+Create visual wireframes using the `excalidraw-diagrams` skill and the
+Excalidraw MCP server. NEVER use ASCII art boxes or text-art layouts.
+
+**1. For each screen in the design, use the excalidraw-diagrams skill:**
+
+  a. Draw on the Excalidraw canvas using `mcp__excalidraw__create_element`
+  b. Save the scene:
+     ```bash
+     # get_resource {"resource": "scene"} then Write tool:
+     # docs/designs/{{slug}}-<screen-name>.excalidraw
+     ```
+  c. Export to PNG:
+     ```bash
+     excalidraw-export docs/designs/{{slug}}-<screen-name>.excalidraw \
+                           docs/designs/{{slug}}-<screen-name>.png
+     ```
+  d. Clear the canvas before drawing the next screen.
+
+**2. Draft `docs/designs/{{slug}}.md`:**
+
+```markdown
+# Design: {{slug}}
+
+Root: $ROOT_ID
+Generated: <YYYY-MM-DD>
+
+## User journey
+
+1. <step 1>
+2. <step 2>
+
+## Screens
+
+### Screen: <Name>
+![<Name>](./{{slug}}-<screen-name>.png)
+[Edit in Excalidraw](./{{slug}}-<screen-name>.excalidraw)
+
+Components reused: <list from the design system>
+New components needed: <list, or "none">
+
+## Interactions
+
+| Event | Target | Result |
+|-------|--------|--------|
+| ... | ... | ... |
+```
+
+**3. Validate before closing step:**
+```bash
+DIR=docs/designs
+FAIL=0
+for f in "$DIR/{{slug}}"*.excalidraw; do
+  [ -s "$f" ] && echo "OK: $f" || { echo "FAIL: $f missing"; FAIL=1; }
+  PNG="${f%.excalidraw}.png"
+  [ -s "$PNG" ] && echo "OK: $PNG" || { echo "FAIL: $PNG missing"; FAIL=1; }
+done
+grep -q '\\.excalidraw' "$DIR/{{slug}}.md" || { echo "FAIL: no excalidraw link in doc"; FAIL=1; }
+[ $FAIL -eq 0 ] && echo "Validation passed" || { echo "Fix errors above"; exit 1; }
+```
+
+Commit the files if the worktree was otherwise clean.
+
+**Exit criteria:** Design doc exists, all `.excalidraw` + `.png` files
+on disk, doc embeds PNGs inline and links `.excalidraw` sources.
+Validation script exits 0.
+"""
+
+[[steps]]
+id = "a11y-check"
+title = "Walk the design and record accessibility notes"
+needs = ["wireframe"]
+description = """
+Add an accessibility section to the same design file:
+
+```markdown
+## Accessibility (WCAG 2.1 AA)
+
+- **Focus order:** <describe or reference heading hierarchy>
+- **ARIA roles:** <list>
+- **Keyboard navigation:** <what shortcuts, what gets focus>
+- **Color contrast:** <note any colors that need contrast checks>
+- **Screen-reader labels:** <list of labels, alt text, aria-labels>
+- **Risks:** <any known a11y gaps the builder must avoid>
+```
+
+Never ship a design without this section.
+
+**Exit criteria:** A11y section exists in the design file.
+"""
+
+[[steps]]
+id = "actual-adr-sync"
+title = "Sync ADRs to CLAUDE.md/AGENTS.md via the actual skill"
+needs = ["a11y-check"]
+description = """
+Run `actual adr-bot` to sync the rig's CLAUDE.md/AGENTS.md with its
+ADRs after design work. Uses `--no-tailor` to avoid spawning an AI
+subprocess inside the agent session. **DO NOT skip this step because
+you think it needs an interactive terminal — it does NOT when
+`--force --no-tui` are passed. You MUST actually run the command.**
+
+**Skip this step ONLY if `{{skip_adr_sync}}` is "true".**
+
+**1. Change to the rig root and check the `actual` binary:**
+```bash
+cd "$RIG_ROOT"
+if ! command -v actual >/dev/null 2>&1; then
+    bd update $ROOT_ID --notes "<existing notes>
+adr_sync: skipped — actual CLI not installed"
+    exit 0
+fi
+```
+
+**2. Check the git tree is clean:**
+```bash
+if [ -n "$(git status --porcelain)" ]; then
+    bd update $ROOT_ID --notes "<existing notes>
+adr_sync: skipped — dirty worktree"
+    exit 0
+fi
+```
+
+**3. Dry-run:**
+```bash
+actual adr-bot --dry-run --full --force --no-tui --no-tailor
+```
+Read the diff carefully. Is it small and sensible? Or is it a large
+divergence from an unrelated ADR drift?
+
+**4a. Small, sensible diff → commit it:**
+```bash
+actual adr-bot --force --no-tui --no-tailor
+actual status
+git add CLAUDE.md AGENTS.md
+git commit -m "actual-designer: sync ADRs after design cycle"
+```
+
+**4b. Large divergence → file a divergence bead and STOP:**
+```bash
+DIVERGENCE_ID=$(bd create \\
+    --title "ADR divergence: design cycle" \\
+    --label source:actual-designer \\
+    --label type:divergence \\
+    --notes "Dry-run diff was non-trivial. Review manually." \\
+    --json | jq -r '.id')
+bd dep add $ROOT_ID --blocked-by $DIVERGENCE_ID
+```
+Record `adr_sync: divergence_filed` in the root bead notes.
+
+**Exit criteria:** Either ADRs committed, sync skipped with a
+documented reason, or a divergence bead filed.
+"""
+
+[[steps]]
+id = "handoff"
+title = "Create implementation beads and hand off to pm"
+needs = ["actual-adr-sync"]
+description = """
+Create new `needs-pm` child beads for each piece of implementation
+work implied by the design. Close the root design bead.
+
+**1. For each distinct implementation task from the design, create a child bead:**
+```bash
+IMPL_ID=$(bd create \\
+    --title "<implementation task from the design>" \\
+    --label needs-pm \\
+    --label source:actual-designer \\
+    --notes "Derived from design: docs/designs/{{slug}}.md
+See root bead $ROOT_ID for full context." \\
+    --json | jq -r '.id')
+bd dep add $IMPL_ID --blocked-by $ROOT_ID
+```
+
+Repeat for each distinct implementation task.
+
+**2. Close the root design bead:**
+```bash
+bd close $ROOT_ID --reason "design complete: docs/designs/{{slug}}.md"
+```
+
+**3. Notify pm:**
+```bash
+gc mail send pm "Handoff: design {{slug}} complete, implementation beads labelled needs-pm"
+```
+
+**Exit criteria:** Root bead closed, at least one child bead created
+with `needs-pm` label, pm notified.
+"""

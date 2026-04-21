@@ -40,8 +40,15 @@ scope = "rig"
 wake_mode = "fresh"
 work_dir = ".gc/agents/{{.Rig}}/architect"
 prompt_template = "prompts/architect.md.tmpl"
-nudge = "Run 'gc prime', then check bd ready --label=needs-architecture for work."
+nudge = "Check your hook for work and act on it."
 overlay_dir = "overlays/default"
+# option_defaults = { model = "opus" }
 idle_timeout = "2h"
 min_active_sessions = 0
 max_active_sessions = 1
+work_query = "gc bd --rig w1-project list --label=needs-architecture --status=open --json 2>/dev/null"
+
+[[named_session]]
+template = "architect"
+scope = "rig"
+mode = "on_demand"

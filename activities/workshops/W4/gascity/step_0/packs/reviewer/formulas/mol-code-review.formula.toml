@@ -1,0 +1,187 @@
+description = """
+Code review — 5 steps from a `needs-review` bead to a pass/reject
+verdict handed off to the release-gate or back to the builder.
+
+## Variables
+
+| Variable | Source | Description |
+|----------|--------|-------------|
+| test_cmd | caller | Override for the test runner (default: auto-detect) |
+"""
+formula = "mol-code-review"
+version = 1
+
+[vars]
+[vars.test_cmd]
+description = "Command to run the test suite. Empty means auto-detect."
+default = ""
+
+[[steps]]
+id = "intake"
+title = "Read the bead, the diff, and the applicable rules"
+description = """
+**1. Root bead:**
+```bash
+ROOT_ID=$(bd mol current --json | jq -r '.molecule_id')
+bd show $ROOT_ID
+```
+
+**2. Show the builder's diff:**
+```bash
+# Commits tagged with this bead ID are the review target.
+git log --grep "$ROOT_ID" --format=%H | head -5
+git log --grep "$ROOT_ID" -p | head -500
+```
+
+**3. Read applicable rules:**
+```bash
+ls docs/rules/*.md 2>/dev/null | xargs cat 2>/dev/null || true
+```
+
+**Exit criteria:** You have the diff, the rules, and the acceptance
+criteria in front of you.
+"""
+
+[[steps]]
+id = "style"
+title = "Style and lint check"
+needs = ["intake"]
+description = """
+Run the rig's standard lint / format / vet for the changed files.
+
+| Language | Command |
+|----------|---------|
+| Go | `gofmt -l <files>` + `go vet ./...` |
+| TypeScript/JavaScript | `npx prettier --check <files>` + `npx eslint <files>` |
+| Python | `ruff check <files>` or `flake8 <files>` |
+| Rust | `cargo fmt -- --check` + `cargo clippy` |
+
+Flag only real issues. No taste battles.
+
+Record findings:
+```bash
+bd update $ROOT_ID --notes "<existing notes>
+style_findings:
+- <severity> <file:line> <summary>
+..."
+```
+
+**Exit criteria:** Style findings recorded (possibly none).
+"""
+
+[[steps]]
+id = "security"
+title = "Security review against OWASP Top 10"
+needs = ["style"]
+description = """
+Walk the diff with a security lens. For each hunk, ask:
+
+1. **Injection.** Any concatenated SQL / shell / HTML / JSON /
+   template strings? Use parameterized queries / proper escapers.
+2. **Broken auth.** New endpoints missing auth checks? Secrets in
+   logs? Session handling changes?
+3. **Sensitive data exposure.** PII / credentials / tokens in logs,
+   error messages, telemetry?
+4. **XXE / SSRF / deserialization.** Any user-controlled URLs, XML,
+   YAML, pickle, etc.?
+5. **Broken access control.** Any new resource fetches that don't
+   scope by user / tenant / permission?
+6. **Misconfig.** New defaults that weaken security (permissive
+   CORS, disabled TLS verify, debug flags, etc.)?
+7. **XSS.** Any new HTML rendering without escaping?
+8. **Known-vulnerable deps.** New dependencies added? If yes,
+   quickly check their provenance.
+9. **Insufficient logging.** New security-sensitive operations
+   should be logged.
+
+Record findings with severity (blocker / major / minor) and cite
+file:line.
+
+```bash
+bd update $ROOT_ID --notes "<existing notes>
+security_findings:
+- blocker src/auth.go:42 missing auth check
+..."
+```
+
+**Exit criteria:** Security findings recorded.
+"""
+
+[[steps]]
+id = "spec"
+title = "Spec compliance — run the validator's tests"
+needs = ["security"]
+description = """
+The validator wrote failing tests before the builder started. Those
+tests should now pass.
+
+**1. Run them:**
+```bash
+TEST_CMD="{{test_cmd}}"
+if [ -z "$TEST_CMD" ]; then
+    if [ -f go.mod ]; then TEST_CMD="go test ./..."
+    elif [ -f package.json ]; then TEST_CMD="npm test --silent"
+    elif [ -f Cargo.toml ]; then TEST_CMD="cargo test"
+    elif [ -f pyproject.toml ] || [ -f setup.py ]; then TEST_CMD="pytest -q"
+    else TEST_CMD="echo 'no test runner detected'; false"
+    fi
+fi
+$TEST_CMD 2>&1 | tee /tmp/actual-reviewer-test.log
+```
+
+**2. Verify each acceptance criterion is exercised** by at least
+one test, by name or by description.
+
+Record:
+```bash
+bd update $ROOT_ID --notes "<existing notes>
+spec_findings:
+- tests_green: <true|false>
+- uncovered_criteria: <list or none>"
+```
+
+**Exit criteria:** Spec findings recorded.
+"""
+
+[[steps]]
+id = "verdict"
+title = "Decide pass or request-changes"
+needs = ["spec"]
+description = """
+**1. Decision rule:**
+- Any blocker in security_findings → **request-changes**.
+- Any `tests_green: false` → **request-changes**.
+- Any `uncovered_criteria` other than "none" → **request-changes**.
+- Otherwise → **pass**.
+
+**2a. On pass:**
+```bash
+bd update $ROOT_ID \\
+    --add-label ready-to-ship \\
+    --remove-label needs-review \\
+    --notes "<existing notes>
+verdict: pass"
+
+# Mail the release-gate so it wakes and picks up the ready-to-ship bead.
+gc mail send release-gate "Handoff: $ROOT_ID passed review"
+```
+
+**2b. On request-changes:**
+```bash
+# Collect findings into a single comment-style summary.
+SUMMARY=$(bd show $ROOT_ID --json | jq -r '.notes' | grep -E '^(style|security|spec)_findings:' -A 10)
+
+bd update $ROOT_ID \\
+    --add-label ready-to-build \\
+    --remove-label needs-review \\
+    --notes "<existing notes>
+verdict: request-changes
+review_round: $(( $(bd show $ROOT_ID --json | jq -r '.notes' | grep -c '^review_round:' || echo 0) + 1 ))"
+
+# Mail the builder so it wakes and picks up the request-changes bead.
+gc mail send builder "Review requested changes on $ROOT_ID"
+```
+
+**Exit criteria:** Verdict recorded; bead relabelled to the right
+downstream; mail sent.
+"""
