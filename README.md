@@ -39,7 +39,7 @@ If your version differs, install the pinned version:
 ```bash
 brew update
 brew tap-new $USER/local
-brew extract --version=0.14.1 gastownhall/gascity/gascity $USER/local
+brew extract --force --version=0.14.1 gastownhall/gascity/gascity $USER/local
 brew install gascity@0.14.1
 ```
 
