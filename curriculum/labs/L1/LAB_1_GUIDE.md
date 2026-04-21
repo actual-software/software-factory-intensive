@@ -7,6 +7,7 @@
 | **Estimated duration** | ~60 minutes |
 | **Type** | LAB |
 | **Deliverable** | Working six-agent software factory applied to your software project, with the `PROJECT_MANIFEST.md` and setup of the inputs on the Planner agent (feature requests, knowledge bases, and other artifacts) |
+
 ## Overview
 
 W1 ran a factory against a reference project that was already fully wired. W2 mapped the capabilities from your individual workflow onto the six stages and produced a `factory-pipeline.md`. L1 is where those two halves meet: you install a factory against **your project**, fill in the `PROJECT_MANIFEST.md` that grounds every agent, and connect the Planner's input sources so the factory can ingest real work instead of seeded tickets.

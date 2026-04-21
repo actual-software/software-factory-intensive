@@ -10,15 +10,6 @@ Hands-on, project-based workshop to learn how to build a software factory — a 
 
 ---
 
-## Community & Support
-
-Stuck on a step, want to share what you've built, or looking to collaborate with other participants? Join the **Actual AI User Community** Slack:
-
-- **Join the community slack:** [actualaiusercommunity.slack.com](https://join.slack.com/t/actualaiusercommunity/shared_invite/zt-3vibgzapf-ywx0Db29mZ4lhtQJGzZfGQ)
-- **Real-time help:** once you're in, join [#sfi-help-desk](https://actualaiusercommunity.slack.com/archives/C0ATHDM0NUD) for live support on the curriculum.
-
----
-
 ## Before You Arrive
 
 ### 1. Confirm Machine Requirements
@@ -58,6 +49,8 @@ git clone https://github.com/actual-software/software-factory-intensive.git ~/Pr
 ### 5. Software Project Overview
 
 You should bring a real software project to build your factory around. Before starting the curriculum, write a **Project Overview** for it using [`PROJECT_OVERVIEW_TEMPLATE.md`](PROJECT_OVERVIEW_TEMPLATE.md) — a loosely structured document that answers a few questions about the project. Your local coding agent will generate the Project Manifest and Software Factory Manifest from this document. You can see [`reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md`](reference-project/docs/PROJECT_OVERVIEW.md) for a completed example.
+
+During the intensive, you will use a [Manifest Generator Skill](https://github.com/audiojak/manifest-generator) to go from your project overview to a coherent, structured `PROJECT_MANIFEST.md` file that the software factory agents read from.
 
 ---
 
