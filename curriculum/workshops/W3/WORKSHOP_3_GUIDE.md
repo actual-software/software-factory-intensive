@@ -1,16 +1,16 @@
 # W3 · Architect Multi-Agent Coordination
 
-> **Goal:** Learn how coordination channels move work between specialists in a software factory, and demonstrate your understanding by updating the `PROJECT_MANIFEST.md` to suite your project's needs.
+> **Goal:** Learn how coordination channels move work between specialists in a software factory, and demonstrate your understanding by producing a `docs/coordination-channels.md` file that describes the preferred coordination channels between agents in your factory, and any protocols for interaction.
 
 | | |
 |---|---|
 | **Estimated duration** | ~45 minutes |
 | **Type** | WORKSHOP |
-| **Deliverable** | A `## Coordination Channels` section in `docs/PROJECT_MANIFEST.md` that inventories the available channels and records your factory's preferred channel for each stage-to-stage handoff |
+| **Deliverable** | A `docs/coordination-channels.md` file that describes the preferred coordination channels between agents in your factory, and any protocols for interaction between agents |
 
 ## Overview
 
-W1 showed a factory moving a task through six specialists. W2 mapped *what* each specialist needs to do its job. W3 asks the next question: **how do they hand off to each other without a human in the loop?**
+W1 showed a factory moving a task through a generic 6-agent factory. W2 demonstrated some of the configuration required for project-specific work. W3 asks the next question: **how do the agents coordinate work between each other without a human in the loop?**
 
 Task status transitions are the primary answer you already saw, but they are not the only one. A production factory uses several coordination channels because no single mechanism solves every handoff:
 
@@ -25,17 +25,14 @@ Gas City exposes each of these as a named primitive. Pick the wrong one for a ha
 Through this workshop you will:
 - Read about the coordination channels shipped with the curriculum and the role each one plays
 - Install the W3 factory and exercise every channel with live commands — see how each one actually behaves
-- Decide which channel you prefer for each meaningful handoff between agents in your factory, with a fallback named for each
-- Record those preferences in `docs/PROJECT_MANIFEST.md` so L2–L4 inherit them
-- *(Optional)* wire in one configuration change if your preferences don't match the shipped defaults
-
-> **Fired Up Pizza reference:** The shipped packs under [`packs/`](../../../packs/) and [`activities/workshops/W3/gascity/step_0/packs/`](../../../activities/workshops/W3/gascity/step_0/packs/) contain working examples of every channel you will meet in this workshop. When you want a concrete syntax reference, open one of the `formulas/orders/*.toml` files or a pack's `prompts/*.md.tmpl` — they show the channels in production form.
+- Decide which channel you prefer for each meaningful handoff between agents in your factory
+- Record those preferences in `docs/coordination-channels.md` so L2–L4 inherit them
 
 ## Coordination Channels in This Factory
 
 ```
   ┌──────────────────────────────────────────────────────────────────┐
-  │                       6-agent Factory                          │
+  │                       6-agent Factory                            │
   │     Planner · Architect · Designer · Coder · Reviewer · Deployer │
   └───┬──────────────┬─────────────┬─────────────┬────────────┬──────┘
       │              │             │             │            │
@@ -69,7 +66,7 @@ These are the channels this curriculum ships with; a mature factory may add othe
 
 > **Goal:** Build the mental model of each channel's trigger, payload, and persistence so you can exercise them in Part 3 and pick preferences for each handoff in Parts 4 and 5.
 
-The authoritative walkthrough of each primitive lives in the upstream Gas City tutorials. Read these five before you install — each is short and focused:
+The Gas City tutorials contain very concise examples of each primitive in the context of software factories. Read these five before you proceed with Part 2 — each is short and focused:
 
 1. [`03-sessions.md`](https://github.com/gastownhall/gascity/blob/main/docs/tutorials/03-sessions.md) — polecats vs. crew sessions, `gc session attach` / `peek` / `logs` / `nudge`. The **session attach** channel.
 2. [`04-communication.md`](https://github.com/gastownhall/gascity/blob/main/docs/tutorials/04-communication.md) — `gc mail send`, `gc mail inbox`, and why mail is distinct from session nudges. The **mail** channel.
@@ -83,7 +80,7 @@ You do not need to memorize commands. What you *do* need to leave Part 1 with is
 - Which channel **persists across crashes** but does not wake the recipient on its own?
 - Which channel **fires when no task exists yet** — e.g., "every morning at 6am" or "when a file appears"?
 - Which channel is the **recovery mechanism** that catches missed wakeups?
-- Which channel is the **default handoff** inside a well-configured pipeline, and why?
+- Which channel is the **default handoff for tasks** in a well-configured factory, and why?
 
 If any of those feels fuzzy, re-read the relevant tutorial. The rest of the workshop assumes you can name the right primitive when you see the handoff.
 
@@ -102,29 +99,30 @@ If any of those feels fuzzy, re-read the relevant tutorial. The rest of the work
 /factory-activity-agent install W3
 ```
 
-This scaffolds `~/Projects/factory/workshop_w3/w3-project/` (the rig) and `~/Projects/factory/workshop_w3/w3-gc-factory/` (the factory), and carries forward your `docs/PROJECT_MANIFEST.md` and `docs/factory-pipeline.md` from L1. You will extend the manifest with a `## Coordination Channels` section in Part 5.
+### Step 2: Copy the relevant documents from previous sessions
 
-If you have not completed L1 yet, the carry-forward is silently skipped and you will work against the reference Fired Up Pizza manifest. That is acceptable for the concepts; you will re-run the documentation step against your own project in L2.
+```bash
+cp ~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md \
+   ~/Projects/factory/workshop_w3/w3-project/docs/factory-pipeline.md
+```
 
-### Step 2: Start the factory and open the dashboard
+```bash
+cp ~/PROJECT_MANIFEST.md ~/Projects/factory/workshop_w3/w3-project/docs/PROJECT_MANIFEST.md
+```
+
+### Step 3: Start the factory
 
 ```bash
 cd ~/Projects/factory/workshop_w3/w3-gc-factory
 gc start
-
-# In your agent session:
-/factory-activity-agent dashboard W3
 ```
 
-Keep the dashboard at `http://localhost:8080` open alongside your terminal for Part 3 — it is the fastest way to see a channel's effect in realtime.
-
-### Step 3: Confirm each channel is reachable
+### Step 4: Confirm each channel is reachable
 
 Before moving on, verify every primitive responds:
 
 ```bash
-cd ~/Projects/factory/workshop_w3/w3-project
-
+# In the factory (w3-gc-factory), run:
 bd list --all                       # tasks channel
 gc mail inbox                       # mail channel
 gc order list                       # orders channel
@@ -138,17 +136,32 @@ If any of those errors out, run `/factory-activity-agent doctor W3` before conti
 
 > **Goal:** Exercise every channel end-to-end on your running factory so you have concrete experience with its timing, persistence, addressing, and observability — the basis for the preferences you will record in Part 5.
 
+### Step 1: Seed the factory with two tasks
+
 Seed the factory with two tasks so there is enough work in flight to see channels carry real handoffs (not just a single bead):
 
 ```bash
-cd ~/Projects/factory/workshop_w3/w3-project
-/factory-activity-agent sling w3-project/planner "Create a script that prints hello world"
-/factory-activity-agent sling w3-project/planner "Add a README section explaining the script"
+# In the factory (w3-gc-factory), run:
+gc bd --rig w3-project create \
+  --title "Create a script that prints hello world" \
+  --label needs-plan
 ```
 
-Each channel below has a **Demonstrate** block (commands to run) and a **What to notice** block (what the demonstration should reveal about that channel's trade-offs). Jot a one-line note for each — "tasks felt like X", "mail felt like Y" — you will reuse these notes in Part 4 when you pick preferences.
+```bash
+gc bd --rig w3-project create \
+  --title "Add a README section explaining the script" \
+  --label needs-plan
+```
 
-### Channel 1: Tasks — the shared work store
+### Step 2: Create a notes document for coordination preferences
+
+```bash
+touch ~/Projects/factory/workshop_w3/w3-project/docs/coordination-channels.md
+```
+
+Each of Steps 3–7 exercises one channel. Every one has a **Demonstrate** block (commands to run) and a **What to notice** block (what the demonstration should reveal about that channel's trade-offs). Jot a one-line note for each channel in `docs/coordination-channels.md` — "tasks felt like X", "mail felt like Y" — you will reuse these notes in Part 4 when you pick preferences.
+
+### Step 3: Exercise the Tasks channel — the shared work store
 
 **Demonstrate:**
 
@@ -163,7 +176,7 @@ watch -n 2 'bd list --all'          # Ctrl-C to stop
 
 **What to notice:** every agent note appears inline on the task and every handoff is a status transition — no human dispatched the Architect or Reviewer for either task, and two tasks move through the pipeline concurrently without colliding. The status transition *is* the handoff; no separate "notification" exists. This is the pull-model, broadcast-visible backbone. (*Beads* are the storage format; *tasks* are the concept the labels express.)
 
-### Channel 2: Mail — durable async messages
+### Step 4: Exercise the Mail channel — durable async messages
 
 **Demonstrate:**
 
@@ -179,9 +192,9 @@ gc mail send w3-project/builder -s "Heads up" -m "Run tests twice before flippin
 gc session peek w3-project/builder --lines 5   # still on the same turn
 ```
 
-**What to notice:** mail arrives in an inbox and waits. The builder's current turn is not interrupted; the message is surfaced on its next turn via hooks. Contrast with a status transition, which an order gate would match on *immediately*. Mail is the right choice when you want a durable message with no implied work unit — and the wrong choice when you need the recipient to act *now*.
+**What to notice:** mail arrives in an inbox and waits. The builder's current turn is not interrupted; the message is surfaced on its next turn via hooks. Contrast with a status transition, which an order gate could match on *immediately*. Mail is the right choice when you want a durable message with no implied work unit — and the wrong choice when you need the recipient to act *now*.
 
-### Channel 3: Orders — scheduled and event-driven wakes
+### Step 5: Exercise the Orders channel — scheduled and event-driven wakes
 
 **Demonstrate:**
 
@@ -193,14 +206,14 @@ gc order run <order-name>           # force one to fire for demonstration
 gc order history <order-name>
 ```
 
-Open `packs/actual/reviewer/formulas/orders/reviewer-intake/order.toml` to see the smallest useful order:
+Open `~/Projects/factory/workshop_w3/w3-gc-factory/packs/actual/reviewer/formulas/orders/reviewer-intake/order.toml` to see the smallest useful order:
 
 ```toml
 [order]
-description = "Wake the reviewer when any task is labelled needs-review"
+description = "Wake the reviewer when any bead is labelled needs-review"
 formula = "mol-code-review"
 gate = "condition"
-check = "bd ready --label=needs-review --limit=1 | grep -q ."
+check = "gc bd --rig w1-project list --label=needs-review --status=open --no-assignee --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"
 pool = "reviewer"
 ```
 
@@ -210,9 +223,21 @@ Then inspect a cooldown-gated one (the improver's daily feedback harvest) and co
 gc order show improver-cooldown     # interval = "24h", no check command
 ```
 
+The output should look like this:
+
+```bash
+Order:  improver-cooldown
+Description: Run the feedback harvest on a daily cooldown
+Formula:     mol-feedback-harvest
+Gate:        cooldown
+Interval:    24h
+Target:      improver
+Source:      ~/Users/austin~/Projects/factory/workshop_w2/w2-gc-factory/packs/actual/improver/formulas/orders/improver-cooldown/order.toml
+```
+
 **What to notice:** every agent you saw wake in W1 was triggered by an order with a **condition** gate — the task's status label is the predicate the order checks. **Cooldown** orders fire on a clock instead of a condition. Both shapes let the factory run without a human dispatcher — condition for reactive work, cooldown/cron for proactive sweeps.
 
-### Channel 4: Nudge — recovering missed work
+### Step 6: Exercise the Nudge channel — recovering missed work
 
 **Demonstrate:**
 
@@ -227,7 +252,7 @@ gc session peek <session-id> --lines 10
 
 **What to notice:** `gc session nudge` drops a message into a running tmux without the overhead of an attach — cheaper than attach, more direct than mail. `gc nudge` (no target) is the supervisor-level sweep that delivers anything an agent missed while suspended or restarted. Both are recovery tools; seeing them in a routine handoff is a smell.
 
-### Channel 5: Session attach — direct human prompting
+### Step 7: Exercise the Session attach channel — direct human prompting
 
 **Demonstrate:**
 
@@ -243,7 +268,7 @@ gc session logs <session-id> --tail 20
 >
 > Tasks → `bd show` / dashboard columns. Mail → `gc mail inbox`. Orders → `gc order history`. Nudges → `gc nudge`. Session attach → `gc session logs`. When the factory stalls, the channel you picked for the stalled handoff tells you which surface to open first. A handoff with no corresponding surface is a handoff that will stall silently.
 
-## Part 4: Choose coordination preferences for your factory (10 min)
+## Part 4: Choose coordination preferences for your factory (5 min)
 
 > **Goal:** Decide — based on what you just experienced in Part 3 — which channel you want carrying which handoff in your factory, and where each one's fallback is. The act of choosing is the deliverable; wiring a change is optional.
 
@@ -323,18 +348,29 @@ Whether or not you wired a change, every preference you recorded must survive th
 >
 > An order that checks every minute is an agent that wakes every minute. A nudge sweep that fires every 5m is a supervisor that spends time every 5m. The most common factory failure is not "the handoff never ran" — it is "every handoff runs too often and the factory saturates on bookkeeping." When you pick an interval, ask the inverse question: *what happens if this fires ten times in a row with nothing to do?*
 
-## Part 5: Document your coordination preferences in `PROJECT_MANIFEST.md` (5 min)
+## Part 5: Document your coordination preferences in `docs/coordination-channels.md` (5 min)
 
 > **Goal:** Capture the preferences you chose in Part 4 directly in the project manifest so every agent — and every subsequent lab — reads the same source of truth for how stages hand off in *your* factory.
 
-Open `~/Projects/factory/workshop_w3/w3-project/docs/PROJECT_MANIFEST.md` (carried forward from L1) and add a new top-level section. The manifest is already the document every agent reads before acting, so coordination decisions belong there rather than in a sidecar file.
+### Step 1: Create the coordination channels document
+
+Create `~/Projects/factory/workshop_w3/w3-project/docs/coordination-channels.md` and add a top-level section:
+
+```bash
+touch ~/Projects/factory/workshop_w3/w3-project/docs/coordination-channels.md
+```
+
+### Step 2: Add the content to the file
+
+Add the following content to the file and fill out:
 
 ```markdown
-## Coordination Channels
+# Coordination Channels
 
 Agents in this factory coordinate through the named channels below. Every
 handoff between stages maps to exactly one primary channel, with a fallback
 named for when the primary is unavailable.
+```
 
 ### Channel Inventory
 
@@ -365,43 +401,16 @@ if the primary is unavailable.
 | Any agent → Human            | Mail to mayor                      | Session attach | ... |
 | <project-specific handoff>   | ...                                | ...            | ... |
 
-### Channel Selection Guidelines
-
-The principles this factory applies when a handoff's channel is ambiguous:
-
-- Prefer **tasks** whenever a work unit already exists; status transitions
-  are the cheapest, most auditable handoff.
-- Use **orders** when no work unit exists yet (scheduled polls, cleanup
-  sweeps) or when a wake should fire on a sharper predicate than "status
-  present".
-- Use **mail** for durable notes with no implied action — never as a
-  substitute for a task that would otherwise exist.
-- Use **nudge** and **session attach** only for recovery and debugging;
-  both are smells if they appear in a routine handoff.
-
-### New Channel Added in W3 *(optional — only if you wired a change in Part 4 Step 3)*
-
-- **Handoff it solves:** <one sentence>
-- **Primitive chosen:** <order / mail / nudge / …>
-- **File edited:** `<path>`
-- **How to exercise:** `<command>`
-
-### Failure-Mode Checklist
-
-- [ ] Canonical source of truth named for every fact a channel carries
-- [ ] Interval / gate tuned so idle cost is bounded
-- [ ] No reciprocal mail / order flow that could loop
 ```
 
-Commit the manifest. L2–L4 read `docs/PROJECT_MANIFEST.md` at the start of every run, so the Coordination Channels section you just added is automatically in scope for every subsequent lab.
+### Step 3: Commit the document
 
-## Common Issues and Solutions
+Commit the document to your repository:
 
-- **"`gc order run <name>` returns `not found`."** The order lives inside a pack that is not included by your `city.toml`. Check `gc config` and confirm the pack path is in `includes`.
-- **"My new cooldown order never fires."** `gc order check` tells you when the next eligible fire is. If the cooldown is shorter than the factory has been up, the check command itself may be failing — run it manually and confirm it exits 0.
-- **"Two agents keep mailing each other."** You have built a loop. Open both prompts, find the reciprocal `gc mail send`, and replace one side with a task dependency or a condition order. Do not ship a mail flow without reading *both* sides.
-- **"The reviewer still wakes on unrelated tasks."** The condition gate in the reviewer's order is too loose. Tighten the `check` command (add `--status=open`, add a dependency filter) and re-run.
-- **"Session attach shows no output."** The session is idle, not dead. Peek first (`gc session peek`) before attaching; `gc session logs --tail` gives the conversation, not the tmux scroll.
+```bash
+git add docs/coordination-channels.md
+git commit -m "Add Coordination Channels document"
+```
 
 ## Exit Criteria
 
@@ -409,21 +418,8 @@ Before leaving this workshop, verify all of these:
 
 - [ ] You can articulate, in one sentence each, when to reach for tasks, mail, orders, nudges, and session attach.
 - [ ] You demonstrated every channel on the running W3 factory with a real command (a task, a `gc mail send`, `gc order run`, `gc session nudge`, and a `gc session attach`).
-- [ ] `docs/PROJECT_MANIFEST.md` has a `## Coordination Channels` section containing the channel inventory, a **Preferences by Handoff** table covering every stage pair in your pipeline, channel-selection guidelines, and the failure-mode checklist.
-- [ ] *(Optional)* If you wired a configuration change in Part 4 Step 3, you can point at an artifact (`gc order history`, `gc mail inbox`, or a task state) that proves the new channel carried a handoff, and the **New Channel Added in W3** block is filled in.
-
-## Quick Reference: What You Built
-
-| Artifact | Location | What It Holds |
-|----------|----------|---------------|
-| Updated `PROJECT_MANIFEST.md` | `~/Projects/factory/workshop_w3/w3-project/docs/PROJECT_MANIFEST.md` | `## Coordination Channels`: inventory, Preferences by Handoff table, selection guidelines, failure-mode checklist |
-| Hands-on experience with every channel | The W3 factory's event log, mail inbox, order history, session tmux | Concrete behavior grounding the preferences you recorded |
-| *(Optional)* One new channel wired in | `packs/actual/<agent>/…` or `prompts/<agent>.md.tmpl` | Order, mail flow, condition gate, or scheduled nudge |
-| W3 workspace | `~/Projects/factory/workshop_w3/` | Rig + factory you exercised every channel against |
+- [ ] `docs/coordination-channels.md` has a `# Coordination Channels` section containing the channel inventory, a **Preferences by Handoff** table covering every stage pair in your pipeline.
 
 ## Next Steps
 
-**[L2](../../labs/L2/LAB_2_GUIDE.md)** is the first lab that customizes specialists — Planner and Architect — and it reads the Coordination Channels section of your `docs/PROJECT_MANIFEST.md` to know which channel to reach for when those two stages hand off. Bring:
-
-- [ ] `docs/PROJECT_MANIFEST.md` committed, with the `## Coordination Channels` section filled in — including the Preferences by Handoff table covering every stage pair in your pipeline
-- [ ] A running W3 factory you can tear down or keep alongside L2 for reference
+**[L2](../../labs/L2/LAB_2_GUIDE.md)** is the first lab that truly customizes agents — Planner and Architect. The work done here will be valuable to ensure you are configuring the best coordination channels for your agents.

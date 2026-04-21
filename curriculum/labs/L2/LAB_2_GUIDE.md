@@ -2,8 +2,6 @@
 
 > **Goal:** Understand the role of the Planner and Architect agents in the software factory, and explore the unique configurations that best adapt these agents to our specific software project.
 
-==
-
 | | |
 |---|---|
 | **Estimated duration** | ~75 minutes |
@@ -19,8 +17,6 @@ Through this lab you will:
 - Equip each with at least one skill or CLI capability from your W2 inventory
 - Trace a single feature from its source through Planner → Architect, producing a work package and an ADR grounded in your project's manifest
 - Make at least one iteration of the "edit the config, not the chat" discipline — catch a failure, fix it in the pack, re-run
-
-> **Fired Up Pizza reference:** The reference project ships a completed Planner + Architect in the W1 factory. If you want a concrete example of a finished work package + ADR pair, see [`reference-project/fired-up-pizza/work-packages/`](../../../reference-project/fired-up-pizza/work-packages/) and [`reference-project/fired-up-pizza/docs/adr/`](../../../reference-project/fired-up-pizza/docs/adr/). Use it as shape reference only — the capabilities you attach here should reflect *your* team's tools.
 
 ## What You'll Build
 
@@ -176,11 +172,14 @@ Pick something your team actually wants delivered, with **at least one open arch
 Use the same pickup mechanism you wired in L1:
 
 ```bash
-/factory-activity-agent sling L2 planner \
-  "Pick <feature> from the sources in PROJECT_MANIFEST.md and produce a work package."
-```
+gc bd --rig l2-project create \
+  --title "<feature>" \
+  --label needs-plan
 
-Watch the session in the dashboard. When it finishes, read `work-packages/<slug>.md`.
+/factory-activity-agent sling L2 planner \
+  "Dry run: use the <capability> you were given and report what you can read. Do not produce a work package." \
+  --label needs-plan
+```
 
 ### Step 3: Sling the Architect
 
@@ -190,8 +189,6 @@ The Planner should have created a downstream work item and (depending on your ch
 /factory-activity-agent sling L2 architect \
   "Produce the ADR for the latest work package."
 ```
-
-Read `docs/adr/NNNN-<slug>.md`. It should cite the work package by path, list at least two options with trade-offs, and state consequences.
 
 ### Step 4: Practice the config-over-chat discipline
 
@@ -204,40 +201,14 @@ At least one of the two artifacts will have a problem — stories that don't ref
 
 Log the iteration briefly in `docs/factory-iterations.md` — one line per edit, the change in one sentence, the file path. This log becomes the evidence that customization is working and the seed for W4's improvement loops.
 
-## Common Issues and Solutions
-
-- **"The Planner ignores my new MCP capability."** The prompt edit didn't persist or the factory wasn't restarted. Read the file from `packs/planner/prompts/planner.md.tmpl` in the running factory (not just your editor) and confirm the diff is there.
-- **"The Architect writes an ADR that duplicates something in `CLAUDE.md`."** That's exactly what `actual adr-bot` prevents. Run it, restart the factory, and re-sling. The Architect reads `CLAUDE.md` first and will not re-litigate decisions already there.
-- **"My capability is an MCP but authentication only persists in my local session."** Authenticate from inside the agent's own tmux session once (`gc session peek <rig>/<stage>`), then restart. Credentials are session-bound for most MCPs.
-- **"The work package is too generic."** Usually a thin manifest. Open `docs/PROJECT_MANIFEST.md → Domain Model` and add the specifics the Planner is missing. Re-sling.
-
 ## Exit Criteria
 
 Before leaving this lab, verify all of these:
 
 - [ ] `/factory-activity-agent status L2` shows `planner` and `architect` running
 - [ ] Each agent has at least one skill or CLI capability named in its prompt and exercised in a dry-run
-- [ ] `work-packages/<slug>.md` and `docs/adr/NNNN-<slug>.md` exist for one real feature
 - [ ] The ADR cites the work package path and lists ≥2 options with trade-offs
-- [ ] `docs/factory-iterations.md` records at least one config-over-chat iteration
-
-## Quick Reference: What You Built
-
-| Artifact | Location | What It Does |
-|----------|----------|--------------|
-| L2 factory | `~/Projects/factory/lab_l2/l2-gc-factory/` | Factory with Planner + Architect active |
-| Planner capability | `packs/planner/prompts/planner.md.tmpl` | Your team's tool wired into scoping |
-| Architect capability | `packs/architect/prompts/architect.md.tmpl` | Your team's tool wired into decision-making |
-| Work package | `work-packages/<slug>.md` | Scoped feature, grounded in the manifest |
-| ADR | `docs/adr/NNNN-<slug>.md` | Technical decision, grounded in the work package |
-| Iteration log | `docs/factory-iterations.md` | Evidence of config-over-chat discipline |
 
 ## Next Steps
 
 **[L3](../L3/LAB_3_GUIDE.md)** adds the Designer and Coder against the same project and requires each to be equipped with at least one MCP server. The Designer reads your ADRs and produces specs; the Coder implements them.
-
-Bring to L3:
-
-- [ ] A running L2 factory with the artifacts from Part 4 committed
-- [ ] The iteration log from Part 4 Step 4
-- [ ] An updated `docs/factory-pipeline.md` with the Planner and Architect capabilities reflected in their rows

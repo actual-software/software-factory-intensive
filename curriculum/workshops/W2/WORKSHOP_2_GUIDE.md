@@ -60,6 +60,12 @@ Each stage needs: **a task to act on**, **knowledge sources to consult**, **tool
 /factory-activity-agent install W2
 ```
 
+### Step 2: Copy the `PROJECT_MANIFEST.md` file from your W1 workspace into the W2 workspace
+
+```bash
+cp ~/PROJECT_MANIFEST.md ~/Projects/factory/workshop_w2/w2-project/docs/PROJECT_MANIFEST.md
+```
+
 ### Step 2: Open the W2 project workspace and create the deliverable file
 
 ```bash
