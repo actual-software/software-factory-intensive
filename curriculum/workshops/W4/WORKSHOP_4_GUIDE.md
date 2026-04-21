@@ -1,4 +1,6 @@
-# W4 · Create Continuous Improvement Loops
+# W4 · Create Continuous Improvement Loops [UNDER CONSTRUCTION]
+
+> **Note:** This workshop is under construction. It will be updated in the future.
 
 > **Goal:** Understand how a software factory can learn from its own signals, and demonstrate your understanding by demonstrating an improvement in the factory from a participant-defined set of improvement criteria.
 

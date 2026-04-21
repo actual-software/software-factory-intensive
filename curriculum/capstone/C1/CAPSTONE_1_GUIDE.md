@@ -1,4 +1,6 @@
-# C1 · Run the Software Factory End-to-End
+# C1 · Run the Software Factory End-to-End [UNDER CONSTRUCTION]
+
+> **Note:** This capstone is under construction. It will be updated in the future.
 
 > **Goal:** Demonstrate your understanding of the software factory pipeline by running an unfamiliar feature request through your complete software factory, guided entirely by the configuration you have assembled.
 

@@ -1,4 +1,6 @@
-# L4 · Deploy Reviewer + Deployer Agents
+# L4 · Deploy Reviewer + Deployer Agents [UNDER CONSTRUCTION]
+
+> **Note:** This lab is under construction. It will be updated in the future.
 
 > **Goal:** Complete your software factory by adding its final two specialists, and tie the output back to the `PROJECT_MANIFEST.md` as a reference for the Review and Release criteria.
 

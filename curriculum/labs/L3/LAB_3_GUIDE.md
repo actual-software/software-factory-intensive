@@ -1,4 +1,6 @@
-# L3 · Deploy Designer + Coder Agents
+# L3 · Deploy Designer + Coder Agents [UNDER CONSTRUCTION]
+
+> **Note:** This lab is under construction. It will be updated in the future.
 
 > **Goal:** Extend your software factory with the next two specialists, and demonstrate that it can now carry a planned feature from concept through to a committed implementation.
 
