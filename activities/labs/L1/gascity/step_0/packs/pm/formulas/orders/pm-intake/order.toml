@@ -2,5 +2,5 @@
 description = "Wake the pm when any bead is labelled needs-pm"
 formula = "mol-plan-breakdown"
 gate = "condition"
-check = "gc bd --rig w1-project list --label=needs-pm --status=open --no-assignee --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"
+check = "gc bd --rig l1-project list --label=needs-pm --status=open --no-assignee --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"
 pool = "pm"

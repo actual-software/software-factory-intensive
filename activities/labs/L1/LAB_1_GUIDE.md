@@ -24,7 +24,7 @@ Author your `PROJECT_MANIFEST.md` for your project. Make example project_manifes
 #### Stop and Start Gascity
 
 ```bash
-cd ~/Projects/factory/lab_w1/w1-gc-factory
+cd ~/Projects/factory/lab_l1/l1-gc-factory
 gc stop
 gc start
 ```

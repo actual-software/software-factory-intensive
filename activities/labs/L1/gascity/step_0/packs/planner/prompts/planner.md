@@ -70,13 +70,13 @@ A PRD is complete when:
    ```bash
    bd create --title "..." --description "..." \
      --label needs-architecture --label source:actual-planner \
-     --metadata-field gc.routed_to=w1-project/architect
+     --metadata-field gc.routed_to=l1-project/architect
    ```
 6. Create design beads:
    ```bash
    bd create --title "..." --description "..." \
      --label needs-design --label source:actual-planner \
-     --metadata-field gc.routed_to=w1-project/designer
+     --metadata-field gc.routed_to=l1-project/designer
    ```
 7. Close the root bead
 
