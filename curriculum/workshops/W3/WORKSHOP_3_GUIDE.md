@@ -348,6 +348,10 @@ Whether or not you wired a change, every preference you recorded must survive th
 >
 > An order that checks every minute is an agent that wakes every minute. A nudge sweep that fires every 5m is a supervisor that spends time every 5m. The most common factory failure is not "the handoff never ran" — it is "every handoff runs too often and the factory saturates on bookkeeping." When you pick an interval, ask the inverse question: *what happens if this fires ten times in a row with nothing to do?*
 
+![Runaway loop example: two agents mailing each other in a cycle with no stop condition](../../../images/runaway_loop_example.png)
+
+*Figure: A runaway loop in action — agent A's prompt mails B, B's prompt mails A, and neither side has a stop condition. Every cycle is idle cost with no work produced.*
+
 ## Part 5: Document your coordination preferences in `docs/coordination-channels.md` (5 min)
 
 > **Goal:** Capture the preferences you chose in Part 4 directly in the project manifest so every agent — and every subsequent lab — reads the same source of truth for how stages hand off in *your* factory.
