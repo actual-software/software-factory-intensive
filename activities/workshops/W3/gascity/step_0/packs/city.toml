@@ -12,7 +12,7 @@
 # life once you have at least one rig registered.
 
 [workspace]
-name = "w1-gc-factory"
+name = "w3-gc-factory"
 provider = "claude"          # switch to "codex" to use Codex CLI
 # provider = "codex"
 install_agent_hooks = ["claude", "codex"]
