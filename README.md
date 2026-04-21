@@ -122,15 +122,15 @@ When an agent produces wrong output, update its config file and re-run — don't
 
 | ID | Type | Estimated Duration | Title |
 |----|------|--------------------|-------|
-| [W1](curriculum/workshops/W1/) | Workshop | ~60 min | Run the 6-Agent Software Factory |
-| [W2](curriculum/workshops/W2/) | Workshop | ~45 min | From Individual AI Workflow to Software Factory Pipeline |
-| [L1](curriculum/labs/L1/) | Lab | ~60 min | Build a Structured Development Loop |
-| [W3](curriculum/workshops/W3/) | Workshop | ~45 min | Architect Multi-Agent Coordination |
-| [L2](curriculum/labs/L2/) | Lab | ~75 min | Deploy Planner + Architect Agents |
-| [L3](curriculum/labs/L3/) | Lab | ~75 min | Deploy Designer + Coder Agents |
-| [L4](curriculum/labs/L4/) | Lab | ~75 min | Deploy Reviewer + Deployer Agents |
-| [W4](curriculum/workshops/W4/) | Workshop | ~45 min | Create Continuous Improvement Loops |
-| [L5](curriculum/labs/L5/) | Capstone Lab | ~90 min | Run the Software Factory End-to-End |
+| [W1](curriculum/workshops/W1/WORKSHOP_1_GUIDE.md) | Workshop | ~60 min | Run the 6-Agent Software Factory |
+| [W2](curriculum/workshops/W2/WORKSHOP_2_GUIDE.md) | Workshop | ~45 min | From Individual AI Workflow to Software Factory Pipeline |
+| [L1](curriculum/labs/L1/LAB_1_GUIDE.md) | Lab | ~60 min | Build a Structured Development Loop |
+| [W3](curriculum/workshops/W3/WORKSHOP_3_GUIDE.md) | Workshop | ~45 min | Architect Multi-Agent Coordination |
+| [L2](curriculum/labs/L2/LAB_2_GUIDE.md) | Lab | ~75 min | Deploy Planner + Architect Agents |
+| [L3](curriculum/labs/L3/LAB_3_GUIDE.md) | Lab | ~75 min | Deploy Designer + Coder Agents |
+| [L4](curriculum/labs/L4/LAB_4_GUIDE.md) | Lab | ~75 min | Deploy Reviewer + Deployer Agents |
+| [W4](curriculum/workshops/W4/WORKSHOP_4_GUIDE.md) | Workshop | ~45 min | Create Continuous Improvement Loops |
+| [C1](curriculum/capstone/C1/CAPSTONE_1_GUIDE.md) | Capstone Lab | ~90 min | Run the Software Factory End-to-End |
 
 ---
 
