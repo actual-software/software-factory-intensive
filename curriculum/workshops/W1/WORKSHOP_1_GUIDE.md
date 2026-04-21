@@ -70,9 +70,9 @@ Every transition is triggered by a label flip on a task bead by an agent.
 
 > **Goal:** Understand the basic coordination principles that allow agents to collaborate on shared work, establishing the conceptual foundation for inter-agent communication that underpins software factories.
 
-Software factories implemented with Gas City use a graph-based DAG framework called `beads` to manage task dependencies and status. These "beads" are the basic units of work in the factory, and are the objects that are manipulated by the agents in the process of producing software. They can include priorities, dependencies on other tasks, notes from agents, and other metadata. For more information on beads, see [gastownhall/beads](https://github.com/gastownhall/beads).
+Software factories implemented with Gas City use a graph-based framework called `beads` to manage task dependencies and status. These "beads" are the basic unit of work in the factory, and are manipulated by the agents in the process of producing software. They can include priorities, dependencies on other tasks, notes from agents, and other metadata. For more information on beads, see [gastownhall/beads](https://github.com/gastownhall/beads).
 
-For the purpose of this workshop, a simple lable protocol is added on top of the beads framework to manage task status and handoff. Every question W1 raises — *"why did the Architect wake?" "why did the task move to `ready-to-build`?" "what does the Coder look at to know what to build?"* — is answered in [`docs/labeled-beads.md`](../../../docs/labeled-beads.md). Read it before installing anything.
+For the purpose of this workshop, a simple label protocol is added on top of the beads framework to manage task status and handoff. Every question W1 raises — *"why did the Architect wake?" "why did the task move to `ready-to-build`?" "what does the Coder look at to know what to build?"* — is answered in [`docs/labeled-beads.md`](../../../docs/labeled-beads.md). Read it before installing anything.
 
 1. The **six canonical labels** table (`needs-architecture`, `needs-plan`, `needs-design`, `ready-to-build`, `needs-review`, `ready-to-ship`).
 2. The **example lifecycle** walkthrough — the single worked example of a bead walking the factory.
@@ -178,22 +178,21 @@ The project workspace was seeded with two files during install:
 - `tickets.md` — the initial FUP-1 … FUP-6 backlog, copied from [`reference-project/fired-up-pizza/tickets.md`](../../../reference-project/fired-up-pizza/tickets.md).
 - `scripts/import-tickets.sh` — a thin wrapper that parses `tickets.md` and calls `bd create` for each entry, copied from [`packs/fired-up-pizza/scripts/import-tickets.sh`](../../../packs/fired-up-pizza/scripts/import-tickets.sh).
 
-Go to the factory directory and run the import:
+Inside the factory directory, run this to import the list of tickets:
 
 ```bash
 bash ./../w1-project/scripts/import-tickets.sh ../w1-project/tickets.md
 ```
 
-Each ticket is created with `--labels needs-plan`, so every task lands on the Planner's order gate (`bd ready --label=needs-plan`) the moment the factory wakes. `bd list` should now show six tasks titled after FUP-1 through FUP-6. No need to prompt the Planner, since the label is the trigger for the agent to wake and start working.
-
-### Step 2: Observe the tasks queued in the project
-
-First look at the tasks in the project:
+### Step 2: Switch to the project directory and observe the tasks queued in the project
 
 ```bash
+cd ~/Projects/factory/workshop_w1/w1-project
 bd list --all
 bd show <task-id>
 ```
+
+Each ticket is created with `--labels needs-plan`, so every task lands on the Planner's order gate (`bd ready --label=needs-plan`) the moment the factory wakes. `bd list` should now show six tasks titled after FUP-1 through FUP-6. No need to prompt the Planner, since the label is the trigger for the agent to wake and start working.
 
 If the tasks are loaded correctly, you should see something like this:
 
@@ -215,6 +214,7 @@ Status: ○ open  ◐ in_progress  ● blocked  ✓ closed  ❄ deferred
 Next, start the factory so the agents can start working (from the **factory** directory):
 
 ```bash
+cd ~/Projects/factory/workshop_w1/w1-gc-factory
 gc start
 ```
 
@@ -294,13 +294,15 @@ gc events --follow                 # stream label transitions and session lifecy
 The factory is still running. Pick any small feature you wish Fired Up Pizza had — a "today's special" banner, a loyalty-points badge, a nearest-store lookup — and hand it to the Planner the same way the workshop sling works elsewhere in the curriculum:
 
 ```bash
-# In your agent session, run:
-/factory-activity-agent sling w1-project/planner "Add a 'today's special' banner that appears above the menu, text sourced from a single entry in docs/PROJECT_MANIFEST.md."
+cd ~/Projects/factory/workshop_w1/w1-gc-factory
+gc bd --rig w1-project create \
+  --title "<YOUR_FEATURE_REQUEST>" \
+  --label needs-plan
 ```
 
 What to expect:
 
-1. `/factory-activity-agent sling <activity> <task>` creates a new task with the prompt as its description and routes it to the Planner, which labels it `needs-plan`.
+1. `gc bd create` creates a new task with the title as its description and routes it to the Planner with the `needs-plan` label.
 2. The Planner wakes, decomposes the request, and hands child tasks to Architect / Designer / Builder just like it did for FUP-1.
 3. Your task flows through the same five transitions you watched in Part 4 — alongside any FUP-* tasks still in flight.
 
@@ -322,18 +324,7 @@ Before leaving this workshop, verify all of these:
 
 - [ ] `~/.claude/skills/factory-activity-agent` (or `~/.codex/skills/factory-activity-agent` or other agent's skills directory) resolves to the repo
 - [ ] `/factory-activity-agent status` responds with accurate factory information and lists your factory directory under *Installed Activities* / *Registered Cities*
-- [ ] `/factory-activity-agent dashboard` shows six agents as running (idle or working — not dead)
-- [ ] At least one output produced by the factory
-
-**W1 is the foundation for everything that follows.** W2 (next) shifts you from "watching the reference factory run" to "understanding what the agents consume and emit so you can configure them for your own project." L1 installs the factory on your project. L2–L4 customize each agent pack.
-
-## Quick Reference: What You Built
-
-| Component | Location | What It Does |
-|-----------|----------|--------------|
-| `/factory-activity-agent` skill | `~/.claude/skills/factory-activity-agent` → repo [`skills/factory-activity-agent/`](../../../skills/factory-activity-agent/) | Slash command; `install` / `delete` via [`scripts/factory_activity_agent.py`](../../../scripts/factory_activity_agent.py); other verbs via Bash helpers in [`skills/factory-activity-agent/scripts/`](../../../skills/factory-activity-agent/scripts/) |
-| Fired Up Pizza **project workspace** ("rig" in Gas City terms) | `~/Projects/factory/workshop_w1/w1-project/` | Git repo — source, `.beads/`, deliverables |
-| Fired Up Pizza **factory** ("city" in Gas City terms) | `~/Projects/factory/workshop_w1/w1-gc-factory/` | `city.toml`, synced packs, supervisor — run `gc` here unless noted |
+- [ ] `/factory-activity-agent dashboard` shows agents in progress on tasks
 
 ## Next Steps
 

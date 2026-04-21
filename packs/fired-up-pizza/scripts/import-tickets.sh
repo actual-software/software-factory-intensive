@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Import the initial ticket set into beads from tickets.md.
-# Run from the rig (project) directory.
+# Import the initial ticket set into beads from tickets.md for the W1 workshop.
+# Run from the factory directory.
 set -euo pipefail
 
 TICKETS_FILE="${1:-tickets.md}"
