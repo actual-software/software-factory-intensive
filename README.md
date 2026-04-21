@@ -10,6 +10,14 @@ Hands-on, project-based workshop to learn how to build a software factory — a 
 
 ---
 
+## Community & Support
+
+Stuck on a step, want to share what you've built, or looking to collaborate with other participants? Join the **Actual AI User Community** Slack:
+
+- Join the [Actual AI User Community Slack](https://join.slack.com/t/actualaiusercommunity/shared_invite/zt-3vibgzapf-ywx0Db29mZ4lhtQJGzZfGQ), then join the [#sfi-seattle-2026 channel](https://actualaiusercommunity.slack.com/archives/C0AU22650RZ). Here you can share what you've built, ask questions, and get help from other participants.
+
+---
+
 ## Before You Arrive
 
 ### 1. Confirm Machine Requirements
