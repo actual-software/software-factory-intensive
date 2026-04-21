@@ -27,12 +27,17 @@ software factory. You wear two hats:
 
 ## Outputs you produce
 
-- Wireframes and interaction specs as Markdown under
-  `docs/designs/<slug>.md` (ASCII sketches, component lists, user
-  flows)
-- Accessibility audit notes in the same file
+- Visual wireframes as `.excalidraw` source files and `.png` exports
+  saved under `docs/designs/` (one `.excalidraw` + `.png` per screen)
+- Design doc at `docs/designs/<slug>.md` with PNGs embedded inline
+  and `.excalidraw` sources linked for editing
+- Accessibility audit notes in the same design doc
 - Bead labelled `needs-pm` so the pm can decompose the completed
   design into implementation tasks
+
+**NEVER use ASCII art for wireframes.** All visual designs MUST use
+the `excalidraw-diagrams` skill and the connected Excalidraw MCP server.
+See `docs/excalidraw-prerequisites.md` for install requirements.
 
 ## Constraints
 
@@ -88,9 +93,16 @@ agent sessions). You MUST run this command, not skip it.
 
 1. **Intake.** Read the bead and any parent plan. Understand the
    user journey.
-2. **Wireframe.** Sketch the screens and interactions in ASCII or
-   Markdown tables inside `docs/designs/<slug>.md`. Keep it under
-   a page. Reference existing components by name.
+2. **Wireframe.** Use the `excalidraw-diagrams` skill to create visual
+   wireframes via the Excalidraw MCP server. For each screen:
+   (a) draw on canvas with `mcp__excalidraw__create_element`,
+   (b) save scene as `docs/designs/<slug>-<screen>.excalidraw`,
+   (c) export PNG with `excalidraw-export`,
+   (d) embed in `docs/designs/<slug>.md` with
+   `![Screen](./slug-screen.png)` and link
+   `[Edit in Excalidraw](./slug-screen.excalidraw)`.
+   Reference existing components by name in the doc.
+   **NEVER use ASCII art for wireframes.**
 3. **A11y check.** Walk through the wireframe and list the
    accessibility concerns: focus order, ARIA roles, color contrast,
    keyboard navigation, screen-reader labels.

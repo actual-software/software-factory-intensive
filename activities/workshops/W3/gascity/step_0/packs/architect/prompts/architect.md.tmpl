@@ -106,13 +106,19 @@ agent sessions). You MUST run this command, not skip it.
 2. **Research.** Survey the existing codebase, tech stack, ADRs, and
    constraints. Identify what's already in place. Write findings to
    the root bead notes.
-3. **Design.** Write the system design document at
+3. **Design.** Write the formal architecture document at
    `docs/architecture/<topic>.md` covering:
-   - Technology stack selection with trade-off analysis
-   - Database schema design (tables, relationships, indexes)
-   - API/endpoint design (routes, request/response shapes)
-   - Component/module architecture (directory layout, boundaries)
-   - Infrastructure decisions (deployment, caching, queues)
+   - Requirements (functional FR-nn and non-functional NFR-nn)
+   - Constraints table (type: technical / business / regulatory)
+   - Framework selections (layer, name, version, rationale)
+   - Library inventory (purpose, version, license)
+   - Data model as a VS Code-renderable Mermaid `erDiagram`
+   - Use cases as VS Code-renderable Mermaid `flowchart TD` diagrams (one per use case)
+   - Action flows as VS Code-renderable Mermaid `sequenceDiagram` diagrams with `autonumber` (one per API action), each followed by a numbered prose list describing every step
+   - Security controls table (auth, authz, encryption, input validation, secrets)
+   - Integrations table (direction, protocol, auth method, SLA notes)
+   - Risks table (likelihood, impact, mitigation)
+   - Trade-offs & Alternatives Considered
 4. **ADR sync (actual-adr-sync) — MANDATORY.** Run:
    ```bash
    cd "{{ .RigRoot }}"
@@ -128,23 +134,23 @@ agent sessions). You MUST run this command, not skip it.
 5. **Rules.** Write or update `docs/rules/<topic>.md` with guardrails.
    Keep it short — one rule per file, with a "Why" section and a
    "How to apply" section.
-6. **Handoff.** Create child beads with the `needs-pm` label so the
-   pm's intake order gate picks them up. You MUST use `bd create`
-   with `--label needs-pm` — the label is what triggers the pm.
-   Then mail the pm so it wakes up.
+6. **Handoff.** Create child beads with the `needs-design` label so the
+   designer's intake order gate picks them up. You MUST use `bd create`
+   with `--label needs-design` — the label is what triggers the designer.
+   Then mail the designer using the full agent path so it wakes up.
    ```bash
    CHILD_ID=$(bd create \
        --title "<concrete implication>" \
-       --label needs-pm \
+       --label needs-design \
        --label source:actual-architect \
-       --metadata-field gc.routed_to={{.Rig}}/pm \
+       --metadata-field gc.routed_to={{.Rig}}/designer \
        --notes "Derived from <topic> architecture." \
        --json | jq -r '.id')
    ```
    Close the source bead after all children are created.
-   Mail the pm:
+   Mail the designer (always use the full `<rig>/designer` path to avoid ambiguous ID errors):
    ```bash
-   gc mail send pm "Handoff: architecture complete, beads labelled needs-pm"
+   gc mail send {{.Rig}}/designer "Handoff: architecture complete, beads labelled needs-design"
    ```
 
 ## What you do NOT do
@@ -157,9 +163,10 @@ agent sessions). You MUST run this command, not skip it.
 
 ## Handoff
 
-Work produced by this agent is routed to the **pm** agent.
-The `needs-pm` label triggers the pm's intake order gate. After
-creating beads, mail the pm via `gc mail send pm`.
+Work produced by this agent is routed to the **designer** agent.
+The `needs-design` label triggers the designer's intake order gate. After
+creating beads, mail the designer via `gc mail send {{.Rig}}/designer`
+(always use the full rig-qualified path to avoid ambiguous ID errors).
 
 ---
 

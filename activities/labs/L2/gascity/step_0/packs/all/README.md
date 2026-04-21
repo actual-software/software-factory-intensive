@@ -25,7 +25,7 @@ includes = ["/abs/path/to/gascity/examples/actual/all"]
 | Operation | Pack | Label gate |
 |-----------|------|------------|
 | Architect | `../architect` | `needs-architecture` |
-| Plan / Work Breakdown | `../planner` | `needs-plan` |
+| Plan / Work Breakdown | `../pm` | `needs-pm` |
 | UI/UX Design | `../designer` | `needs-design` |
 | Validate / Test Cases | `../validator` | `needs-tests` |
 | Build Code | `../builder` | `ready-to-build` |
@@ -39,7 +39,7 @@ includes = ["/abs/path/to/gascity/examples/actual/all"]
 (user or tracker issue)
     │
     ▼  needs-architecture
-architect  ───────────►  needs-plan  ─►  planner
+architect  ───────────►  needs-pm  ─►  pm
     ▲                                      │
     │ (hand-back)                          ▼
     │                          needs-design / needs-tests / ready-to-build

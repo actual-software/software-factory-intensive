@@ -4,9 +4,9 @@ graph of child beads.
 
 ## Contract
 
-1. Caller slings with a root bead labelled `needs-plan`.
-2. Planner pulls in any tracker issues (no-op if none).
-3. Planner clarifies acceptance criteria, decomposes the goal,
+1. Caller slings with a root bead labelled `needs-pm`.
+2. PM pulls in any tracker issues (no-op if none).
+3. PM clarifies acceptance criteria, decomposes the goal,
    wires dependencies, labels children for downstream agents.
 4. On completion, child beads with `needs-design`, `needs-tests`, or
    `ready-to-build` exist.
@@ -82,8 +82,8 @@ fi
 
 **2. Record the result in the root bead notes:**
 ```bash
-if [ -f .actual/planner/tracker-sync.json ]; then
-    COUNT=$(jq '.mappings | length' .actual/planner/tracker-sync.json)
+if [ -f .actual/pm/tracker-sync.json ]; then
+    COUNT=$(jq '.mappings | length' .actual/pm/tracker-sync.json)
     bd update $ROOT_ID --notes "<existing notes>
 tracker_sync: ok ($COUNT issues mapped)"
 else
@@ -121,10 +121,10 @@ criteria confidently, STOP and file a clarification bead:**
 CLARIFY_ID=$(bd create \\
     --title "Clarify: $(bd show $ROOT_ID --json | jq -r .title)" \\
     --label needs-info \\
-    --notes "Planner cannot proceed without: <specific questions>" \\
+    --notes "PM cannot proceed without: <specific questions>" \\
     --json | jq -r '.id')
 bd dep add $ROOT_ID --blocked-by $CLARIFY_ID
-gc mail send mayor "Planner blocked: $ROOT_ID needs clarification"
+gc mail send mayor "PM blocked: $ROOT_ID needs clarification"
 exit 0
 ```
 
@@ -152,7 +152,7 @@ that a single downstream agent can complete.
 CHILD_ID=$(bd create \\
     --title "<concrete user-story title>" \\
     --label <needs-design|needs-tests|ready-to-build> \\
-    --label source:actual-planner \\
+    --label source:actual-pm \\
     --label plan:{{slug}} \\
     --notes "Acceptance:
 - <criterion 1>
@@ -233,8 +233,8 @@ description = """
 if [ -z "$(git status --porcelain docs/plans)" ]; then
     : # already clean — nothing to do
 else
-    git add docs/plans/{{slug}}.md .actual/planner/tracker-sync.json 2>/dev/null || true
-    git commit -m "actual-planner: plan for {{slug}} (refs $ROOT_ID)"
+    git add docs/plans/{{slug}}.md .actual/pm/tracker-sync.json 2>/dev/null || true
+    git commit -m "actual-pm: plan for {{slug}} (refs $ROOT_ID)"
 fi
 ```
 
@@ -246,12 +246,16 @@ bd close $ROOT_ID --reason "plan complete: docs/plans/{{slug}}.md"
 **3. Downstream agents pick up work automatically via labels:**
 ```bash
 # The labels trigger the corresponding intake orders automatically:
-#   needs-design   → designer-intake
-#   needs-tests    → validator-intake
-#   ready-to-build → builder-intake
-# Do NOT gc mail send — it creates duplicate sessions.
-# Wake any downstream agents whose beads just unblocked.
-sh packs/actual/all/scripts/wake-downstream.sh &
+# Mail downstream agents that received work:
+if bd list --label needs-design --label plan:{{slug}} --limit=1 | grep -q .; then
+    gc mail send designer "Handoff: {{slug}} has design work"
+fi
+if bd list --label needs-tests --label plan:{{slug}} --limit=1 | grep -q .; then
+    gc mail send validator "Handoff: {{slug}} has test work"
+fi
+if bd list --label ready-to-build --label plan:{{slug}} --limit=1 | grep -q .; then
+    gc mail send builder "Handoff: {{slug}} has build work"
+fi
 ```
 
 **Exit criteria:** Root bead closed; plan file committed (if

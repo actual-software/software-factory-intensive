@@ -34,8 +34,8 @@ bd show $ROOT_ID
 ```
 
 **2. Extract acceptance criteria** from the bead notes. If none
-exist, the planner made a mistake — file it back with label
-`needs-plan` and stop.
+exist, the pm made a mistake — file it back with label
+`needs-pm` and stop.
 
 **3. Survey existing tests** to match framework and style:
 ```bash
@@ -112,10 +112,8 @@ bd update $ROOT_ID \\
     --notes "<existing notes>
 test_files: <list of committed paths>"
 
-# The ready-to-build label triggers builder-intake order automatically.
-# Do NOT gc mail send — it creates duplicate sessions.
-# Wake downstream agents.
-sh packs/actual/all/scripts/wake-downstream.sh &
+# Mail the builder so it wakes and picks up the ready-to-build bead.
+gc mail send builder "Handoff: $ROOT_ID has failing acceptance tests"
 ```
 
 **Exit criteria:** Bead relabelled; builder picks up work via intake order.

@@ -2,5 +2,5 @@
 description = "Wake the validator when any bead is labelled needs-tests"
 formula = "mol-acceptance-tests"
 gate = "condition"
-check = "[ -n \"$GC_RIG\" ] && gc bd --rig \"$GC_RIG\" list --label=needs-tests --status=open --no-assignee --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"
+check = "gc bd --rig w1-project list --label=needs-tests --status=open --no-assignee --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"
 pool = "validator"

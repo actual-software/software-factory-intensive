@@ -9,7 +9,8 @@ skill to keep ADRs in sync with generated CLAUDE.md/AGENTS.md files.
 
 1. Caller slings with a bead id (passed implicitly via `bd mol current`).
 2. Architect reads steps, executes each in order.
-3. On completion, child beads labelled `needs-plan` exist for the planner.
+3. On completion, a child bead labelled `needs-design` ALWAYS exists for the designer.
+   The designer decides whether to design or fast-path to `needs-pm`.
 
 ## Variables
 
@@ -102,60 +103,154 @@ assessment: <1-paragraph summary>"
 
 [[steps]]
 id = "design"
-title = "Write the system design document"
+title = "Write the formal architecture document"
 needs = ["research"]
 description = """
-Produce the comprehensive system design covering technology choices,
-schema, APIs, and component architecture.
+Produce a comprehensive, formal architecture document covering
+requirements, data model, use cases, action flows, security,
+integrations, and risks — all with VS Code-renderable Mermaid diagrams.
 
 **1. Write `docs/architecture/{{topic}}.md`:**
 
 Structure:
 ```markdown
-# System Design: {{topic}}
+# Architecture: {{topic}}
 
 Root: $ROOT_ID
 Generated: <YYYY-MM-DD>
 
 ## Overview
 
-<1-2 paragraph summary of the system being designed>
+<1-2 paragraph summary of the system being designed and the problem it solves>
 
-## Technology Stack
+## Requirements
 
-| Layer | Choice | Rationale |
-|-------|--------|-----------|
-| Language/Runtime | ... | ... |
-| Framework | ... | ... |
-| Database | ... | ... |
-| Auth | ... | ... |
-| Deployment | ... | ... |
+### Functional Requirements
 
-## Database Schema
+- **FR-01**: <requirement>
+- **FR-02**: <requirement>
 
-<Tables, relationships, indexes. ERD in ASCII or Mermaid.>
+### Non-Functional Requirements
 
-## API Design
+- **NFR-01**: <performance/scale/availability requirement>
+- **NFR-02**: <requirement>
 
-<Key endpoints/routes, request/response shapes.>
+## Constraints
 
-## Component Architecture
+| Constraint | Type | Rationale |
+|------------|------|-----------|
+| <constraint> | technical / business / regulatory | <why it exists> |
 
-<Directory layout, module boundaries, data flow.>
+## Framework
+
+| Layer | Framework | Version | Rationale |
+|-------|-----------|---------|-----------|
+| Backend | <e.g. FastAPI> | <x.y> | <why chosen> |
+| Frontend | <e.g. React> | <x.y> | <why chosen> |
+| Auth | <e.g. OAuth2/OIDC> | — | <why chosen> |
+
+## Libraries
+
+| Library | Purpose | Version | License |
+|---------|---------|---------|---------|
+| <lib> | <what it does> | <x.y.z> | MIT/Apache/… |
+
+## Data Model
+
+```mermaid
+erDiagram
+    ENTITY_A {
+        int id PK
+        string name
+        datetime created_at
+    }
+    ENTITY_B {
+        int id PK
+        int entity_a_id FK
+        string status
+    }
+    ENTITY_A ||--o{ ENTITY_B : "has"
+```
+
+<Narrative explaining key entities, relationships, and indexing strategy>
+
+## Use Cases
+
+<One flowchart per use case. Use flowchart TD syntax for VS Code compatibility.>
+
+### UC-01: <Use Case Name>
+
+```mermaid
+flowchart TD
+    A([Actor]) --> B[Step 1]
+    B --> C{Decision?}
+    C -->|Yes| D[Happy path]
+    C -->|No| E[Error path]
+    D --> F([End])
+    E --> F
+```
+
+## Action Flows
+
+<One sequence diagram per significant action or API call. Use autonumber
+and follow each diagram with a numbered prose description of every step.>
+
+### AF-01: <Action Name>
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant User
+    participant API
+    participant DB
+    User->>API: POST /resource
+    API->>DB: INSERT INTO ...
+    DB-->>API: row id
+    API-->>User: 201 Created {id}
+```
+
+1. User submits the create request to the API.
+2. API persists a new row in the database.
+3. Database returns the generated row ID.
+4. API responds with 201 Created and the new resource ID.
+
+## Security
+
+| Concern | Control | Implementation Detail |
+|---------|---------|----------------------|
+| Authentication | <e.g. JWT Bearer> | <how tokens are issued/validated> |
+| Authorization | <e.g. RBAC> | <role definitions, enforcement point> |
+| Data at rest | <e.g. AES-256> | <which fields/stores are encrypted> |
+| Data in transit | TLS 1.2+ | <termination point> |
+| Input validation | <e.g. Pydantic/zod> | <where validation occurs> |
+| Secrets management | <e.g. env vars / Vault> | <how secrets are stored> |
+
+## Integrations
+
+| System | Direction | Protocol | Auth Method | Notes |
+|--------|-----------|----------|-------------|-------|
+| <ext system> | inbound / outbound | REST / gRPC / webhook | API key / OAuth | <retry, timeout, SLA> |
+
+## Risks
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| <risk description> | High / Med / Low | High / Med / Low | <what reduces the risk> |
 
 ## Trade-offs & Alternatives Considered
 
-<What was rejected and why.>
+<For each major decision, describe what was rejected and why>
 ```
 
 **2. Stage and commit (if git tree was clean):**
 ```bash
 mkdir -p docs/architecture
 git add docs/architecture/{{topic}}.md
-git commit -m "actual-architect: system design for {{topic}} (refs $ROOT_ID)"
+git commit -m "actual-architect: architecture document for {{topic}} (refs $ROOT_ID)"
 ```
 
-**Exit criteria:** Design document written to `docs/architecture/{{topic}}.md`.
+**Exit criteria:** Architecture document written to `docs/architecture/{{topic}}.md`
+with all sections present and Mermaid diagrams using correct VS Code-compatible syntax.
 """
 
 [[steps]]
@@ -164,10 +259,11 @@ title = "Sync ADRs to CLAUDE.md/AGENTS.md via the actual skill"
 needs = ["design"]
 description = """
 Run `actual adr-bot` to sync the rig's CLAUDE.md/AGENTS.md with its
-ADRs. The `--force --no-tui` flags make it work in non-interactive
-agent environments. **DO NOT skip this step because you think it
-needs an interactive terminal — it does NOT when `--force --no-tui`
-are passed. You MUST actually run the command.**
+ADRs. Uses `--no-tailor` to avoid spawning an AI subprocess inside
+the agent session (the default `claude-cli` runner hangs when called
+from within a Claude Code session). **DO NOT skip this step because
+you think it needs an interactive terminal — it does NOT when
+`--force --no-tui` are passed. You MUST actually run the command.**
 
 **Skip this step ONLY if `{{skip_adr_sync}}` is "true".**
 
@@ -195,7 +291,7 @@ fi
 
 **3. Dry-run:**
 ```bash
-actual adr-bot --dry-run --full --force --no-tui
+actual adr-bot --dry-run --full --force --no-tui --no-tailor
 ```
 Read the diff carefully. Is it small and sensible (e.g., one added
 rule matching the current topic)? Or is it a large divergence from an
@@ -203,7 +299,7 @@ unrelated ADR drift?
 
 **4a. Small, sensible diff → commit it:**
 ```bash
-actual adr-bot --force --no-tui
+actual adr-bot --force --no-tui --no-tailor
 actual status
 git add CLAUDE.md AGENTS.md docs/adr docs/rules
 git commit -m "actual-architect: sync ADRs for {{topic}}"
@@ -273,17 +369,17 @@ git commit -m "actual-architect: add rule for {{topic}} (refs $ROOT_ID)"
 
 [[steps]]
 id = "handoff"
-title = "Create downstream work beads and hand off to planner"
+title = "Create downstream work beads and hand off to designer"
 needs = ["rules"]
 description = """
-Convert the architectural decision into concrete next-action beads
-for the planner.
+Convert the architectural decision into a design bead. The designer
+decides whether to design or fast-path to pm.
 
-**1. For each implication of the new rule, create a child bead:**
+**1. For each implication of the architecture, create a child bead:**
 ```bash
 CHILD_ID=$(bd create \\
-    --title "<concrete implication>" \\
-    --label needs-plan \\
+    --title "<concrete task implied by the architecture>" \\
+    --label needs-design \\
     --label source:actual-architect \\
     --notes "Derived from {{topic}} architecture. See docs/architecture/{{topic}}.md and docs/rules/{{topic}}.md" \\
     --json | jq -r '.id')
@@ -295,14 +391,15 @@ bd dep add $CHILD_ID --blocked-by $ROOT_ID
 bd close $ROOT_ID --reason "architecture complete, see docs/architecture/{{topic}}.md"
 ```
 
-**3. The planner picks up work automatically:**
+**3. Notify the designer:**
 ```bash
-# The needs-plan label triggers planner-intake order automatically.
-# Do NOT gc mail send — it creates duplicate sessions.
-# Wake any downstream agents whose beads just unblocked.
-sh packs/actual/all/scripts/wake-downstream.sh &
+gc mail send designer "Handoff: {{topic}} architecture complete, child beads labelled needs-design"
 ```
 
+**ROUTING RULE:** The architect ONLY creates `needs-design` beads. Do NOT
+create `needs-pm` or `ready-to-build` beads. The designer owns all
+decisions after architecture.
+
 **Exit criteria:** Root bead closed, at least one child bead created
-with `needs-plan` label.
+with `needs-design` label, designer notified.
 """

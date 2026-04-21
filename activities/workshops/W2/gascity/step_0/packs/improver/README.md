@@ -19,7 +19,7 @@ factory rather than implementing fixes itself.
 - Files one upstream bead per actionable signal, labelled for the
   right agent:
   - `needs-architecture` → architect
-  - `needs-plan` → planner
+  - `needs-pm` → pm
   - `needs-design` → designer
   - `needs-tests` → validator
   - `ready-to-build` → builder

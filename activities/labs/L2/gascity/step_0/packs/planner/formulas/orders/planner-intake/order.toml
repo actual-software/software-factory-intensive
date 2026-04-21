@@ -1,6 +1,6 @@
 [order]
 description = "Wake the planner when any bead is labelled needs-plan"
-formula = "mol-plan-breakdown"
+formula = "mol-planner-prd"
 gate = "condition"
-check = "bd ready --label=needs-plan --limit=1 | grep -q ."
+check = "gc bd --rig w1-project list --label=needs-plan --status=open --no-assignee --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"
 pool = "planner"

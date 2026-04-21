@@ -9,7 +9,7 @@ https://github.com/actual-software/software-factory-intensive
 ```bash
 mkdir -p ~/Projects/actual-software/
 pushd -p ~/Projects/actual-software
-git clone git@github.com:actual-software/software-factory-intensive.git
+git clone https://github.com/actual-software/software-factory-intensive.git
 ```
 
 #### Setup Factory - Workshop - W2

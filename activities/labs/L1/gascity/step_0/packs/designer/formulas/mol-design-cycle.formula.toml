@@ -100,10 +100,28 @@ screen or component it touches.
 
 [[steps]]
 id = "wireframe"
-title = "Write the wireframe and interaction spec"
+title = "Create Excalidraw wireframes and write the design doc"
 needs = ["intake"]
 description = """
-Draft `docs/designs/{{slug}}.md` with:
+Create visual wireframes using the `excalidraw-diagrams` skill and the
+Excalidraw MCP server. NEVER use ASCII art boxes or text-art layouts.
+
+**1. For each screen in the design, use the excalidraw-diagrams skill:**
+
+  a. Draw on the Excalidraw canvas using `mcp__excalidraw__create_element`
+  b. Save the scene:
+     ```bash
+     # get_resource {"resource": "scene"} then Write tool:
+     # docs/designs/{{slug}}-<screen-name>.excalidraw
+     ```
+  c. Export to PNG:
+     ```bash
+     excalidraw-export docs/designs/{{slug}}-<screen-name>.excalidraw \
+                           docs/designs/{{slug}}-<screen-name>.png
+     ```
+  d. Clear the canvas before drawing the next screen.
+
+**2. Draft `docs/designs/{{slug}}.md`:**
 
 ```markdown
 # Design: {{slug}}
@@ -118,15 +136,9 @@ Generated: <YYYY-MM-DD>
 
 ## Screens
 
-### Screen 1: <name>
-
-```
-+--------------------+
-| Header             |
-+--------------------+
-| ... ASCII sketch . |
-+--------------------+
-```
+### Screen: <Name>
+![<Name>](./{{slug}}-<screen-name>.png)
+[Edit in Excalidraw](./{{slug}}-<screen-name>.excalidraw)
 
 Components reused: <list from the design system>
 New components needed: <list, or "none">
@@ -138,10 +150,24 @@ New components needed: <list, or "none">
 | ... | ... | ... |
 ```
 
-Commit the file if the worktree was otherwise clean.
+**3. Validate before closing step:**
+```bash
+DIR=docs/designs
+FAIL=0
+for f in "$DIR/{{slug}}"*.excalidraw; do
+  [ -s "$f" ] && echo "OK: $f" || { echo "FAIL: $f missing"; FAIL=1; }
+  PNG="${f%.excalidraw}.png"
+  [ -s "$PNG" ] && echo "OK: $PNG" || { echo "FAIL: $PNG missing"; FAIL=1; }
+done
+grep -q '\\.excalidraw' "$DIR/{{slug}}.md" || { echo "FAIL: no excalidraw link in doc"; FAIL=1; }
+[ $FAIL -eq 0 ] && echo "Validation passed" || { echo "Fix errors above"; exit 1; }
+```
 
-**Exit criteria:** Wireframe file exists and is committed (or noted
-as uncommitted due to dirty tree).
+Commit the files if the worktree was otherwise clean.
+
+**Exit criteria:** Design doc exists, all `.excalidraw` + `.png` files
+on disk, doc embeds PNGs inline and links `.excalidraw` sources.
+Validation script exits 0.
 """
 
 [[steps]]

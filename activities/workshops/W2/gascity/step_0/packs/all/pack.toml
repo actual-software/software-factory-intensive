@@ -7,7 +7,7 @@
 # `includes = ["examples/actual/all"]` line in their city.toml.
 #
 # The "pipeline" is NOT hardcoded here. Each leaf pack's order gate
-# matches on a bead label (needs-architecture, needs-plan, etc.)
+# matches on a bead label (needs-architecture, needs-pm, etc.)
 # and wakes on its own. The flow is emergent from labels, not
 # prescribed by Go or by this file.
 
@@ -15,8 +15,10 @@
 name = "actual-factory"
 schema = 1
 includes = [
-    "../architect",
+    "../supervisor",
     "../planner",
+    "../architect",
+    "../pm",
     "../designer",
     "../validator",
     "../builder",

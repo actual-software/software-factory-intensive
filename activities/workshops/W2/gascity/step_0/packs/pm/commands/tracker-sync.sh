@@ -16,6 +16,6 @@ done
 
 echo "tracker-to-beads skill not found in:" >&2
 printf '  %s\n' "${script_candidates[@]}" >&2
-echo "install it by running the planner agent at least once, or symlink" >&2
-echo "the planner's overlay skills dir into your Claude Code skills dir." >&2
+echo "install it by running the pm agent at least once, or symlink" >&2
+echo "the pm's overlay skills dir into your Claude Code skills dir." >&2
 exit 1

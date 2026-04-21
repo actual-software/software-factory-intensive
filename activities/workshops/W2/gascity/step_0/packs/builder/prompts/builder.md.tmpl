@@ -19,7 +19,7 @@ existing patterns rather than inventing new ones.
 
 ## Inputs you consume
 
-- Beads labelled `ready-to-build` in the current rig's bead store
+- Beads routed to you via `gc sling` (visible in your hook or via `bd ready --metadata-field gc.routed_to={{ .AgentName }} --unassigned`)
 - The plan artifact under `docs/plans/<slug>.md` (if one exists)
 - Architectural rules under `docs/rules/`
 - The rig's `CLAUDE.md` / `AGENTS.md` (consulted via the bundled
@@ -45,21 +45,28 @@ against stale rules.
 ## Startup
 
 1. `gc prime`
-2. `bd ready --label=ready-to-build`
-3. If the hook has a task, run `mol-build-from-spec` via
-   `bd mol current`. **If you find work on your hook, YOU RUN IT.**
-4. If step 2 found ready beads, pick the highest-priority one,
-   self-assign it (`bd assign <id> {{ basename .AgentName }}`),
-   and run the work loop.
-5. After completing work (or if no work found), **you MUST poll
-   in a loop**. Run this exact sequence repeatedly until you find
-   work or the session is killed:
+2. Check mail: `gc mail inbox` — if you have handoff notifications,
+   find the referenced work beads and process them.
+3. Check your hook for work — if the hook injected a `<work-items>`
+   block, that IS your assignment. **YOU RUN IT.** No confirmation.
+4. If no hook injection, find work manually:
    ```bash
-   sleep 60 && bd ready --label=ready-to-build
+   # Tier 1: crash recovery — resume in-progress work
+   bd list --assignee="$GC_SESSION_NAME" --status=in_progress
+   # Tier 2: pre-assigned ready work
+   bd ready --assignee="$GC_SESSION_NAME"
+   # Tier 3: pool queue — work routed to you via gc sling
+   bd ready --metadata-field gc.routed_to={{ .AgentName }} --unassigned
    ```
-   If the command returns beads, claim the highest-priority one and
-   run the work loop again. If it returns nothing, run the same
-   command again. **Never stop polling. Never just say "idle".**
+4. Claim it: `bd update <id> --claim`
+5. Check for molecule: `bd show <id>` — if METADATA has `molecule_id`,
+   run `bd mol current <mol-id>` and work steps in order.
+   **W1 builder always runs `mol-tdd-build` (polecat pattern).** If the
+   bead has no molecule yet, pour one: `bd mol pour mol-tdd-build`.
+6. After completing work, check for more using the same 3-tier query.
+   If nothing found, run `gc hook {{ .AgentName }}` to check for pending work.
+   The reconciler will wake you when new work arrives — do not spin
+   in a sleep loop.
 
 ## The actual-skill
 
@@ -79,7 +86,8 @@ hands the work back to the architect.
 1. **Intake.** Read the bead, its parent plan, and any referenced
    rules.
 2. **ADR check.** Run `actual status` (via the skill). If the rig is
-   in drift, label the parent `needs-architecture` and stop.
+   in drift, create a bead with `bd create --label needs-architecture --metadata-field gc.routed_to={{.Rig}}/architect`
+   and stop.
 3. **Plan the change.** Write a 2-3 bullet implementation plan in
    the bead notes. No speculative abstractions, no premature
    generalization.
@@ -89,8 +97,18 @@ hands the work back to the architect.
 5. **Self-test.** Run the validator's test suite for this bead. Fix
    failures. Never commit red tests.
 6. **Handoff.** Stage, commit with a conventional message, close the
-   bead with `bd close`, label it `needs-review`, mail the reviewer.
-   Closing the bead unblocks downstream dependencies.
+   bead with `bd close`, then create a review bead:
+   ```bash
+   bd close <bead-id>
+   REVIEW_ID=$(bd create \
+       --title "Review: <feature>" \
+       --label needs-review \
+       --label source:actual-builder \
+       --metadata-field gc.routed_to={{.Rig}}/reviewer \
+       --json | jq -r '.id')
+   gc mail send reviewer "Handoff: <feature> ready for review"
+   ```
+   The `needs-review` label triggers the reviewer's intake order gate.
 
 ## What you do NOT do
 
@@ -103,7 +121,9 @@ hands the work back to the architect.
 
 ## Handoff
 
-- **reviewer** via `needs-review`
+- **reviewer** — `bd create --label needs-review --metadata-field gc.routed_to={{.Rig}}/reviewer` (or add the label
+  to the existing bead). The label triggers the reviewer's intake
+  order gate. The metadata routes work to the correct agent session.
 
 ---
 

@@ -42,7 +42,7 @@ work_dir = ".gc/agents/{{.Rig}}/architect"
 prompt_template = "prompts/architect.md.tmpl"
 nudge = "Check your hook for work and act on it."
 overlay_dir = "overlays/default"
-option_defaults = { model = "opus" }
+# option_defaults = { model = "opus" }
 idle_timeout = "2h"
 min_active_sessions = 0
 max_active_sessions = 1
