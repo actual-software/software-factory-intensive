@@ -160,7 +160,8 @@ software-factory-intensive/
 ├── scripts/                         # Scripts for the curriculum
 ├── skills
 │   └── factory-activity-agent/      # /factory-activity-agent skill to manage the curriculum
-├── PROJECT_OVERVIEW_TEMPLATE.md     # Template for the project overview (you fill in)
+├── PROJECT_MANIFEST_TEMPLATE.md     # Template for the project manifest (filled in by the manifest generator skill)
+├── PROJECT_OVERVIEW_TEMPLATE.md     # Template for the project overview (filled in by you)
 ├── README.md                        # You are here
 └── troubleshooting/                 # Topic-scoped troubleshooting guides (gas city, cli coding agents, beads, tmux)
 ```
