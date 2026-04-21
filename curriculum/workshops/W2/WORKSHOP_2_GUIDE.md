@@ -6,7 +6,7 @@
 |---|---|
 | **Estimated duration** | ~45 minutes |
 | **Type** | WORKSHOP |
-| **Deliverable** | `factory-pipeline.md` that encapsulates all of your current agent toolsets, memory, model selections, and other capabilities mapped to the software factory pipeline, plus an updated `PROJECT_MANIFEST.md` |
+| **Deliverable** | `factory-pipeline.md` that encapsulates all of your current agent toolsets, memory, model selections, and other capabilities mapped to the software factory pipeline |
 
 ## Overview
 
@@ -51,7 +51,7 @@ Each stage needs: **a task to act on**, **knowledge sources to consult**, **tool
 
 ## Part 1: Install the W2 workspace (5 min)
 
-> **Goal:** Stand up a scratch workspace to hold your `factory-pipeline.md` deliverable, using the same install/delete pattern you'll use for every subsequent session.
+> **Goal:** Stand up a scratch workspace to hold your `factory-pipeline.md` deliverable.
 
 ### Step 1: Install W2
 
@@ -60,15 +60,7 @@ Each stage needs: **a task to act on**, **knowledge sources to consult**, **tool
 /factory-activity-agent install W2
 ```
 
-This scaffolds `~/Projects/factory/workshop_w2/w2-project/` (where your deliverable lives) and `~/Projects/factory/workshop_w2/w2-gc-factory/` (a minimal factory you can use to inspect the shipped packs if you want to cross-reference them in Part 2).
-
-### Step 2: Keep W1 open alongside
-
-Do not delete your W1 installation yet. You'll reference the Fired Up Pizza factory at `~/Projects/factory/workshop_w1/w1-project/` whenever you need a concrete example of what a capability looks like in place.
-
-> If you've already torn down W1, reinstall it with `/factory-activity-agent install W1` — the scaffolds at `w1-project/src/`, `w1-project/docs/PROJECT_MANIFEST.md`, and the installed packs under `w1-gc-factory/packs/actual/` are the reference you'll compare yourself against.
-
-### Step 3: Open the W2 workspace and create the deliverable file
+### Step 2: Open the W2 project workspace and create the deliverable file
 
 ```bash
 cd ~/Projects/factory/workshop_w2/w2-project
@@ -96,17 +88,23 @@ Use these buckets as prompts — skip any that don't apply, and add your own whe
 | **Tools / CLIs** | Non-AI tools you lean on between agent turns | `gh`, `rg`, `jq`, a custom `scripts/` folder, a pre-commit hook |
 | **Playbook / rules** | Unwritten routines you always apply | "Always run typecheck before committing", "Always write an ADR for storage choices" |
 
-> The goal is breadth, not depth. You're listing *what you have*, not explaining how it works. Aim for 15–30 entries total.
+> **Insight: Ask your agent to help you with this step.**
+>
+> Your agent can help you with this step by asking pointed questions about your workflow and helping you list the capabilities. Try copying the prompt below into your agent's chat and see how it does:
 
-## Part 3: Read the Pipeline Through the Capability Lens (10 min)
+```
+You are a helpful assistant that helps me list the capabilities that I rely on in my individual AI workflow. Please read ~/Projects/factory/workshop_w2/w2-project/WORKSHOP_2_GUIDE.md and ask me questions to help me with Part 2 of the workshop to fill out ~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md. Please ask the questions one at a time and wait for my response before asking the next question.
+```
+
+## Part 3: Read the Pipeline Through the Capability Lens (20 min)
 
 > **Goal:** Understand what each factory stage needs in terms of inputs, tools, memory, and outputs, so you can decide in Part 4 which of *your* capabilities should flow to which stage.
 
-Every stage in a software factory has the same shape — a specialist with a narrow mandate, a small input set, a single output artifact, and a well-defined handoff. The capabilities you inventoried in Part 2 are what let each stage do its job.
+Every stage in a software factory has the same shape — a specialist with a narrow mandate, a small input set, and a well-defined handoff. The capabilities you inventoried in Part 2 are what let each stage do its job.
 
 Scan the rows below. For each stage, the *Inputs / Tools / Memory* column is where your inventory items will land in Part 4.
 
-| Stage | Produces | Inputs / Tools / Memory it draws on |
+| Agent | Produces | Inputs / Tools / Memory it draws on |
 |-------|----------|-------------------------------------|
 | **Planner** | A work package — goal, stories, acceptance criteria, scope boundary | Feature request, project manifest, backlog, ticket history; a reasoning-strong model; memory of past scoping decisions |
 | **Architect** | An ADR per open decision | Work package, existing ADRs, tech-stack reference, industry patterns; research-capable model; ADR-seeding tooling (e.g. `actual adr-bot`) |
@@ -115,7 +113,9 @@ Scan the rows below. For each stage, the *Inputs / Tools / Memory* column is whe
 | **Reviewer** | A review report with a verdict | Diff, spec, acceptance criteria, project review standards; careful-reasoning model; security-scan tooling; memory of past violations |
 | **Deployer** | A release gate report (PASS/FAIL per criterion) | Review report, branch state, release criteria, CI signals; deterministic model or scripted checks; deploy/PR MCPs |
 
-> **Framework aside:** When acting on the shipped reference, each stage is implemented as a Gas City *pack* with its own `prompts/<name>.md.tmpl` and `pack.toml`. You'll edit those files in L2–L4. For now, treat "stage" as the concept and "pack" as one possible implementation.
+> **Insight: When acting on the shipped reference, each agent is implemented as its own configurable module.**
+>
+> Even though the factory is a complete system, each agent can be broken down to a set of capabilities that can be implemented as a unique module. Some capabilities may be shared between agents, but more specialized tools will usually rest under a single agent. In Gas City in particular, these configurable sets of capabilities are bundled into *packs*.
 
 ### The capability shift from solo to factory
 
@@ -123,32 +123,18 @@ In a solo workflow, *you* move knowledge across stages in your head. In a factor
 
 - **Inputs are files, not chat memory.** A stage cannot remember what the prior stage "said" — it reads an artifact.
 - **Tools are declared, not summoned.** A stage's available MCPs and CLIs are configured up front, not picked ad-hoc.
-- **Memory is versioned.** Lessons don't live in a conversation; they live in `CLAUDE.md` / `AGENTS.md` or per-stage prompts.
+- **Agent communication must be explicit.** The factory does not have a human mediator — each agent must understand how to communicate its needs and decisions to other agents in the factory.
 
-Keep this in mind as you map your inventory: every capability must land on a specific stage *and* must have a durable home.
+Keep this in mind as you map your inventory: every capability must land on a specific agent *and* must have a durable home. Now, please fill out the table below with the capabilities you inventoried in Part 2:
 
-## Part 4: Map Your Capabilities onto the Pipeline (15 min)
-
-> **Goal:** Produce a stage-by-stage assignment for every capability in your inventory, so the remainder of the curriculum has a clear starting configuration per specialist.
-
-In `docs/factory-pipeline.md`, add a section `## Pipeline Mapping`. Fill in the table below — one row per stage — with:
-
-- **Model**: which model best matches this stage's work style
-- **Tools / MCPs**: which of your inventoried integrations this stage needs
-- **Knowledge / memory**: which durable references this stage reads
-- **Output**: the artifact this stage hands off
-- **Gap**: anything the stage needs that your current workflow doesn't yet provide
-
-```markdown
-| Stage     | Model | Tools / MCPs | Knowledge / memory | Output | Gap |
-|-----------|-------|--------------|--------------------|--------|-----|
-| Planner   |       |              |                    | work-packages/<slug>.md         |   |
-| Architect |       |              |                    | docs/adr/NNNN-<slug>.md         |   |
-| Designer  |       |              |                    | design/<slug>-spec.md           |   |
-| Coder     |       |              |                    | src/** + tests                   |   |
-| Reviewer  |       |              |                    | review-reports/<slug>-review.md |   |
-| Deployer  |       |              |                    | release-gates/<slug>-gate.md    |   |
-```
+| Agent     | Model | Tools / MCPs | Knowledge / memory | Connections |
+|-----------|-------|--------------|--------------------|-------------|
+| Planner   |       |              |                    |             |
+| Architect |       |              |                    |             |
+| Designer  |       |              |                    |             |
+| Coder     |       |              |                    |             |
+| Reviewer  |       |              |                    |             |
+| Deployer  |       |              |                    |             |
 
 Rules of thumb while you fill it in:
 
@@ -156,65 +142,45 @@ Rules of thumb while you fill it in:
 2. **Prefer the narrowest stage.** A linter belongs to the Coder, not "every stage." A security scanner belongs to the Reviewer, not the Coder.
 3. **Memory decisions are project-level, not stage-level.** `CLAUDE.md`, `docs/PROJECT_MANIFEST.md`, and an ADR folder are shared — note them once, under a `## Shared Knowledge Base` subsection, and reference them from each stage's row.
 
-> **Anchor to reference:** When you're unsure where to place something, look at how the W1 Fired Up Pizza factory wires equivalent capabilities — the installed packs under `~/Projects/factory/workshop_w1/w1-gc-factory/packs/actual/<agent>/` show each stage's consumed inputs, tool permissions, and output locations.
+> **Insight: If you're unsure how to fill out the table, check out the Fired Up Pizza reference at [../../../reference-project/fired-up-pizza/docs/factory-pipeline.md](../../../reference-project/fired-up-pizza/docs/factory-pipeline.md) for a complete example.**
+>
+> It's alright if you don't know where exactly to place all capabilities, you can simply focus on the essentials first and come back to the rest later.
 
-## Part 5: Surface and Log the Gaps (5 min)
+## Part 4: Surface any final gaps in your factory-pipeline.md (10 min)
 
-> **Goal:** Name the capabilities your current workflow doesn't yet provide, so L1 can start from a known list of holes rather than discovering them mid-run.
+> **Goal:** Name the capabilities your current workflow doesn't yet provide, so your software factory can start from a known list of holes rather than discovering them mid-run.
 
-Under a section `## Gaps and Actions`, list every row in your mapping table where the **Gap** column is non-empty. For each gap, decide:
+### Step 1: Identify missing capabilities
 
-- **Close now**: something you can add before L1 (e.g. install a specific MCP server)
-- **Close in L1–L4**: an agent-specific capability you'll wire in during a later session
-- **Accept**: something you've consciously decided is out of scope for this curriculum
+Under a new section `## Missing Capabilities`, list any capabilities that either don't have a home in the table above or are not currently available in your workflow. For each missing capability, explore:
 
-A short example:
+- Is it an essential capability that your software factory must have?
+- Is it a structure only needed by a single agent?
+- How can you implement it in a way that is shared between agents?
+- Or, how can you implement it in a way that is agent-specific?
 
-```markdown
-## Gaps and Actions
+Once you've explored the missing capability, add it to the table with a note detailing a tentative implementation strategy.
 
-| Gap | Stage | When to close |
-|-----|-------|---------------|
-| No security scanner configured        | Reviewer | Close in L4  |
-| No ADR seed via `actual adr-bot`       | Architect | Close now (optional) |
-| No Figma MCP; Designer has no visuals  | Designer | Accept (no UI work this cycle) |
-| No staging DB access from agent        | Coder, Reviewer | Close in L3  |
+### Step 2: Commit the deliverable
+
+```bash
+git add docs/factory-pipeline.md
+git commit -m "Add missing capabilities to factory-pipeline.md"
 ```
 
-Commit `docs/factory-pipeline.md`. This file is what you'll hand to each subsequent session — L1 will read it to decide what to install, L2–L4 will read it per agent.
-
-## Common Issues and Solutions
-
-- **"My inventory is mostly empty."** You're probably underselling your workflow — memory files, model choices, and implicit playbooks count. Re-scan the Part 2 buckets once more.
-- **"The same MCP lands on three stages."** That's fine if it's truly shared (GitHub is); it's a smell if it's because you haven't decided who owns it. Pick one primary stage and list the others as secondary consumers.
-- **"I don't know which model to put on Planner vs Coder."** Default to stronger/slower on Planner + Architect + Reviewer; faster/cheaper on Coder + Deployer. You can revise this in L2–L4 once you see each stage in action.
-- **"My project has no Designer work."** Leave the Designer row blank with a note — L3 will either install a minimal designer or you'll skip the pack entirely.
+Commit `docs/factory-pipeline.md`. This file is what you'll use to guide your software factory implementation for the remainder of the curriculum.
 
 ## Exit Criteria
 
 Before leaving this workshop, verify all of these:
 
 - [ ] `~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md` exists and is committed
-- [ ] Every capability you inventoried appears in the mapping table or the shared knowledge base section
-- [ ] Every stage row has at least `Model` and `Output` filled in
-- [ ] Every `Gap` has a decision (close now / close in L1–L4 / accept)
-
-## Quick Reference: What You Built
-
-| Artifact | Location | What It Holds |
-|----------|----------|---------------|
-| `factory-pipeline.md` | `~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md` | Inventory of your workflow, stage-by-stage mapping, gap list |
-| W2 workspace | `~/Projects/factory/workshop_w2/` | Scratch factory + project for this design session |
-| Reference factory (from W1) | `~/Projects/factory/workshop_w1/` | Worked example of each stage's configuration |
+- [ ] Every capability you inventoried appears in the mapping table or the missing capabilities section
+- [ ] Every agent row has at least `Model` and `Connections` filled in
+- [ ] Every missing capability has a note detailing a tentative implementation strategy
 
 ## Next Steps
 
 **[L1](../../labs/L1/LAB_1_GUIDE.md)** is where the factory becomes yours. You'll install a 6-agent factory against your own project and connect each agent to the `PROJECT_MANIFEST` using the inputs, tools, and knowledge sources you mapped here.
 
-**[W3](../W3/WORKSHOP_3_GUIDE.md)** continues the design track by examining how the six agents coordinate — mail, beads, files, and external services as coordination channels — and adding one to your factory.
-
-Bring to L1:
-
-- [ ] `factory-pipeline.md` with every stage row filled in
-- [ ] Your project's overview document (see [`PROJECT_OVERVIEW_TEMPLATE.md`](../../../PROJECT_OVERVIEW_TEMPLATE.md))
-- [ ] A list of gaps you chose to close before L1 (if any)
+**[W3](../W3/WORKSHOP_3_GUIDE.md)** continues the design track by examining how agents coordinate within the factory via various coordination channels.

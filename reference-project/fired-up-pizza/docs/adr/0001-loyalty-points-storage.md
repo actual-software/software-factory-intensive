@@ -108,4 +108,3 @@ The audit trail and the natural handling of rollbacks and future redemptions out
 
 - Work package: `work-packages/loyalty-points-system.md`
 - Project manifest: `docs/PROJECT_MANIFEST.md` (Domain Model + Constraints)
-- Factory wiring: `docs/factory-wiring.md`
