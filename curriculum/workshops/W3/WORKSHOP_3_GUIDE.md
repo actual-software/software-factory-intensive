@@ -232,7 +232,7 @@ Formula:     mol-feedback-harvest
 Gate:        cooldown
 Interval:    24h
 Target:      improver
-Source:      ~/Users/austin~/Projects/factory/workshop_w2/w2-gc-factory/packs/actual/improver/formulas/orders/improver-cooldown/order.toml
+Source:      ~/Projects/factory/workshop_w2/w2-gc-factory/packs/actual/improver/formulas/orders/improver-cooldown/order.toml
 ```
 
 **What to notice:** every agent you saw wake in W1 was triggered by an order with a **condition** gate — the task's status label is the predicate the order checks. **Cooldown** orders fire on a clock instead of a condition. Both shapes let the factory run without a human dispatcher — condition for reactive work, cooldown/cron for proactive sweeps.
