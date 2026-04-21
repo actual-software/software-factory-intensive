@@ -37,48 +37,6 @@ CATEGORY_GUIDE_PREFIX = {
     "baseline": "BASELINE",
 }
 
-# Per-session carry-forward rules: which artifacts to copy from previously
-# installed sessions' project workspaces into the one being installed.
-#
-# Each rule is (prior_activity, src_rel, dst_rel) where:
-#   prior_activity — the activity whose <alias>-project/ directory is the source
-#   src_rel        — path relative to that project dir; "" or a trailing "/"
-#                    means copy as a directory (contents merged into dst)
-#   dst_rel        — path relative to the project dir being installed
-#
-# Rules execute in order; later rules overlay earlier ones. If a prior
-# session's workspace is not installed, its rules are silently skipped.
-CARRY_FORWARD = {
-    "L1": [
-        ("W2", "docs/factory-pipeline.md", "docs/factory-pipeline.md"),
-    ],
-    "W3": [
-        ("L1", "docs/PROJECT_MANIFEST.md", "docs/PROJECT_MANIFEST.md"),
-        ("L1", "docs/factory-pipeline.md", "docs/factory-pipeline.md"),
-    ],
-    "L2": [
-        ("L1", "", ""),
-        ("W3", "docs/coordination-channels.md", "docs/coordination-channels.md"),
-        ("W3", "docs/PROJECT_MANIFEST.md", "docs/PROJECT_MANIFEST.md"),
-    ],
-    "L3": [
-        ("L2", "", ""),
-    ],
-    "L4": [
-        ("L3", "", ""),
-    ],
-    "W4": [
-        ("L4", "docs/factory-iterations.md", "docs/factory-iterations.md"),
-        ("L4", "docs/PROJECT_MANIFEST.md", "docs/PROJECT_MANIFEST.md"),
-        ("L4", "review-reports/", "review-reports/"),
-        ("L4", "release-gates/", "release-gates/"),
-    ],
-    "C1": [
-        ("L4", "", ""),
-        ("W4", "docs/improvement-criteria.md", "docs/improvement-criteria.md"),
-    ],
-}
-
 
 def find_guide(activity):
     """Find the GUIDE.md file for an activity. Returns (Path, content) or (None, None).
@@ -609,56 +567,6 @@ bash skills/factory-activity-agent/scripts/install.sh {activity}
 """
 
 
-def carry_forward(activity, dry_run=False):
-    """Copy artifacts from previously installed sessions into this session's
-    project workspace, following the rules in CARRY_FORWARD.
-
-    Rules execute in order; later rules overlay earlier ones. Rules whose
-    prior session isn't installed are skipped with a note (not an error) —
-    participants may install out of order.
-    """
-    rules = CARRY_FORWARD.get(activity, [])
-    if not rules:
-        return
-
-    _, _, _, project_dir, _, _ = resolve_paths(activity)
-
-    print("\n##### Carry Forward From Prior Sessions")
-    for prev, src_rel, dst_rel in rules:
-        if prev not in ACTIVITY_MAP:
-            print(f"  Unknown prior activity: {prev}")
-            continue
-        _, prev_slug = ACTIVITY_MAP[prev]
-        prev_alias = prev.lower()
-        prev_project = FACTORY_ROOT / prev_slug / f"{prev_alias}-project"
-
-        if not dry_run and not prev_project.exists():
-            print(
-                f"  Skipping {prev}: {prev_project} not installed "
-                f"(install {prev} first if you want its artifacts carried forward).",
-            )
-            continue
-
-        # Directory copy when src_rel is empty or ends with '/'.
-        is_dir_copy = src_rel == "" or src_rel.endswith("/")
-        src_clean = src_rel.rstrip("/")
-        dst_clean = dst_rel.rstrip("/")
-        src = prev_project / src_clean if src_clean else prev_project
-        dst = project_dir / dst_clean if dst_clean else project_dir
-
-        if is_dir_copy:
-            if not dry_run and not src.exists():
-                print(f"  Skipping {prev}:{src_rel or '.'}: source directory missing.")
-                continue
-            run(["rsync", "-a", f"{src}/", f"{dst}/"], dry_run=dry_run)
-        else:
-            if not dry_run and not src.exists():
-                print(f"  Skipping {prev}:{src_rel}: source file missing.")
-                continue
-            run(["mkdir", "-p", str(dst.parent)], dry_run=dry_run)
-            run(["cp", str(src), str(dst)], dry_run=dry_run)
-
-
 def install(activity, dry_run=False):
     category, _, alias_lower, project_dir, factory_dir, packs_src = resolve_paths(activity)
 
@@ -850,26 +758,6 @@ def install(activity, dry_run=False):
         run(["cp", str(import_src), str(scripts_dir / "import-tickets.sh")], dry_run=dry_run)
         run(["chmod", "+x", str(scripts_dir / "import-tickets.sh")], dry_run=dry_run)
 
-        # W1 also seeds the Fired Up Pizza source scaffold (app shell, build
-        # config) so agents plan/build against an existing codebase rather
-        # than a bare rig. Factory *outputs* (work-packages/, design/,
-        # docs/adr/, review-reports/, release-gates/, feedback-loops/,
-        # DECISIONS.md, etc.) are intentionally NOT seeded — those are
-        # what the factory produces during the run.
-        print("\n##### Seed Reference Source Code")
-        ref_root = SFI_DIR / "reference-project" / "fired-up-pizza"
-        source_files = ["index.html", "package.json", "tsconfig.json"]
-        for fname in source_files:
-            src = ref_root / fname
-            if src.exists():
-                run(["cp", str(src), str(project_dir / fname)], dry_run=dry_run)
-        src_dir = ref_root / "src"
-        if src_dir.exists():
-            run(
-                ["rsync", "-a", f"{src_dir}/", f"{project_dir / 'src'}/"],
-                dry_run=dry_run,
-            )
-
     print("\n##### Generate README.md")
     readme_content = generate_readme(activity, alias_lower, guide_filename, guide_content)
     if dry_run:
@@ -877,14 +765,6 @@ def install(activity, dry_run=False):
     else:
         (project_dir / "README.md").write_text(readme_content)
         print(f"  Wrote README.md -> {project_dir / 'README.md'}")
-
-    # Carry forward artifacts from previously installed sessions so
-    # participants don't have to run cp/rsync by hand.  The bulk rules
-    # (e.g. L2 pulling the full L1 project) will overwrite the README
-    # generated just above with the prior session's README — that's
-    # intentional: the prior session's README reflects the in-progress
-    # project state, which should dominate.
-    carry_forward(activity, dry_run=dry_run)
 
     setup_title = (
         "Set up this project: "
