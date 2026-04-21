@@ -5,9 +5,9 @@
 ### Prep Example Project Manifest
 
 ```bash
-mkdir -p ~/Projects/factory/workshop_l1/l1-project/docs/
-cp ~/Projects/actual-software/software-factory-intensive/activities/workshops/L1/docs/PROJECT_MANIFEST.md ~/Projects/factory/workshop_l1/l1-project/docs/
-ls -al ~/Projects/factory/workshop_l1/l1-project/docs/
+mkdir -p ~/Projects/factory/lab_l2/l2-project/docs/
+cp ~/Projects/actual-software/software-factory-intensive/activities/labs/L2/docs/PROJECT_MANIFEST.md ~/Projects/factory/lab_l2/l2-project/docs/
+ls -al ~/Projects/factory/lab_l2/l2-project/docs/
 ```
 
 Author your `PROJECT_MANIFEST.md` for your project. Make example project_manifest.md specific to your project.
@@ -20,7 +20,7 @@ Create a bead with `needs-plan` label in the rig db. This triggers the `planner-
 order gate, which starts the planner automatically.
 
 ```bash
-cd ~/Projects/factory/workshop_l1/l1-gc-factory
+cd ~/Projects/factory/lab_l1/l1-gc-factory
 gc bd --rig l1-project create \
   --title "" \
   --label needs-plan
@@ -30,4 +30,4 @@ gc bd --rig l1-project create \
 
 ##### Gas City Prompts and Commands
 
-`~/Projects/factory/workshop_l1/l1-project/README.md`
+`~/Projects/factory/lab_l1/l1-project/README.md`

@@ -567,7 +567,7 @@ bash skills/factory-activity-agent/scripts/install.sh {activity}
 """
 
 
-def install(activity, dry_run=False):
+def install(activity, dry_run=False, clone_url=None):
     category, _, alias_lower, project_dir, factory_dir, packs_src = resolve_paths(activity)
 
     # Validate packs source exists
@@ -596,7 +596,10 @@ def install(activity, dry_run=False):
     # --- Step 1: Init Factory and Project ---
     print("\n##### Init Factory and Project")
     run(["mkdir", "-p", str(project_dir)], dry_run=dry_run)
-    run(["git", "init"], cwd=str(project_dir), dry_run=dry_run)
+    if clone_url:
+        run(["git", "clone", clone_url, "."], cwd=str(project_dir), dry_run=dry_run)
+    else:
+        run(["git", "init"], cwd=str(project_dir), dry_run=dry_run)
     run(
         f'echo "3" | gc init {factory_dir}',
         dry_run=dry_run, shell=True,
@@ -1021,6 +1024,12 @@ def main():
         default=None,
         help="Optional mode (dry-run prints commands without executing)",
     )
+    parser.add_argument(
+        "--clone-url",
+        default=None,
+        metavar="URL",
+        help="Git URL to clone instead of running git init",
+    )
 
     args = parser.parse_args()
     dry_run = args.mode == "dry-run"
@@ -1030,7 +1039,7 @@ def main():
         sys.exit(1)
 
     if args.action == "install":
-        install(args.activity, dry_run=dry_run)
+        install(args.activity, dry_run=dry_run, clone_url=args.clone_url)
     elif args.action == "delete":
         delete(args.activity, dry_run=dry_run)
 

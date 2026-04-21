@@ -28,7 +28,7 @@ command = "codex"
 option_defaults = { permission_mode = "unrestricted", effort = "xhigh" }
 
 [session]
-startup_timeout = "3m"
+startup_timeout = "10m"
 
 [daemon]
 patrol_interval = "30s"
