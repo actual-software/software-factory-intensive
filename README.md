@@ -60,13 +60,25 @@ This curriculum is built on top of [Gas City](https://github.com/gastownhall/gas
 
 We use Gas City here because the 6-agent factory is one instance of a much broader pattern. Once you've learned the primitives, you can swap out the specific agent roles and build pipelines for code review, research, data processing, ops automation — the framework doesn't care what the agents do. The goal of the workshop is to make these primitives internalized enough that you can design your own multi-agent systems after you leave.
 
-For the authoritative definitions of every Gas City term used across the curriculum (agent, pack, rig, bead, sling, order, route, formula, overlay, etc.), see the glossary: [Gas City glossary](https://github.com/gastownhall/gascity/blob/main/engdocs/architecture/glossary.md). Skim it once before W1 and keep it open as a reference during the labs.
+For the authoritative definitions of every Gas City term used across the curriculum (agent, pack, rig, bead, sling, order, route, formula, overlay, etc.), see the glossary: [Gas City glossary](https://github.com/gastownhall/gascity/blob/main/engdocs/architecture/glossary.md). Here is the brief summary:
+
+| Gas City Term | Definition | Analogous Term |
+|---------------|------------|----------------|
+| bead | The universal unit of work — everything (tasks, mail, molecules, convoys, epics) is a bead. | Issue / ticket / task |
+| convoy | A container bead that groups related child beads (linked via `ParentID`) as a batch work-tracking unit. | Epic / batch |
+| dog | A maintenance/infrastructure helper — in Gas City usually modeled as an exec order, sometimes a scalable session, that handles background upkeep on behalf of the watchdog. | Daemon / cron worker |
+| formula | A workflow definition that's materialized at runtime into a set of beads. | Workflow / pipeline / recipe |
+| mail | Inter-agent communication implemented as a bead of type `message` (`TaskStore.Create(bead{type:"message"})`). | Message / inbox item |
+| order | A formula or shell-script dispatch fired by a trigger (`cooldown`, `cron`, `condition`, `event`, or `manual`). | Cron job / scheduled task |
+| pack | A reusable configuration bundle (loaded from `pack.toml`) that may include agent definitions, formulas, prompts, and orders. | Plugin / module / package |
+| rig | An external project directory registered with a city; each rig gets its own beads database, agent hooks, and pack expansion. | Workspace / repository |
+| sling | The manual dispatch routing mechanism: find/spawn agent → select formula → create molecule → hook → nudge → log. | Job dispatch / enqueue |
 
 ---
 
 ## The 6-Agent Software Factory
 
-Across 9 sessions you build a factory of six AI agents that turn feature requests into deployed code:
+Across 9 sessions you will build a factory of agents that turn feature requests into deployed software:
 
 ```
 Feature Request → Planner → Architect → Designer → Coder → Reviewer → Deployer → Functional Software → Improver
@@ -74,13 +86,15 @@ Feature Request → Planner → Architect → Designer → Coder → Reviewer �
 
 | Role (curriculum) | Shipped pack | What It Does |
 |-------------------|-------------|---------------------------------------|
-| **Planner** | `packs/planner` | Breaks features into structured work packages |
 | **Architect** | `packs/architect` | Makes technical decisions, produces ADRs |
-| **Designer** | `packs/designer` | Creates component/module specs and documentation |
-| **Coder** | `packs/coder` | Implements code from specs |
-| **Reviewer** | `packs/reviewer` | Reviews code against specs and standards; verifies acceptance-criteria coverage |
+| **Coder** | `packs/builder` | Implements code from specs |
 | **Deployer** | `packs/deployer` | Evaluates release gates and deploys functional software |
-| **Improve** | `packs/improver` | Additional process to collect runtime signals and feed them back into the factory |
+| **Designer** | `packs/designer` | Creates component/module specs and documentation |
+| **Improver** | `packs/improver` | Additional process to collect runtime signals and feed them back into the factory |
+| **Planner** | `packs/planner` | Breaks features into structured work packages |
+| **PM** | `packs/pm` | Shreds architecture and design documents into atomic tasks |
+| **Reviewer** | `packs/reviewer` | Reviews code against specs and standards; verifies acceptance-criteria coverage |
+| **Supervisor** | `packs/supervisor` | Monitors the factory and ensures it is running smoothly |
 
 ## Core Principle: Config Over Prompting
 
@@ -90,7 +104,7 @@ When an agent produces wrong output, update its config file and re-run — don't
 
 ---
 
-## Session Map
+## Session Map (in order of completion)
 
 | ID | Type | Estimated Duration | Title |
 |----|------|--------------------|-------|
@@ -112,7 +126,7 @@ When an agent produces wrong output, update its config file and re-run — don't
 software-factory-intensive/
 ├── activities/                      # Activities directory for participants to do their work
 ├── curriculum/                      # Read-only directory for the curriculum walkthroughs
-├── docs/                            # Documentation for the curriculum
+├── docs/                            # General documentation for the curriculum
 ├── images/                          # Images for the curriculum
 ├── packs/                           # Packs containing agents and configurations for the curriculum
 │   ├── all/                         # Composite 6-agent factory
