@@ -1,4 +1,4 @@
-<h1><span class="bg-clip-text text-transparent" style="background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.2) 100%), linear-gradient(85deg, rgb(6, 229, 139) 0%, rgb(18, 176, 162) 50%, rgb(65, 105, 224) 100%); -webkit-background-clip: text; background-clip: text; color: transparent;">Software Factory Intensive</span></h1>
+<h1><img src="images/software_factory_intensive_title.svg" alt="Software Factory Intensive"></h1>
 
 <p>
   Event by <a href="https://aitinkerers.org/"><img src="images/ai_tinkerers.png" alt="AI Tinkerers" height="28" valign="middle"></a>
@@ -62,7 +62,7 @@ git clone https://github.com/actual-software/software-factory-intensive.git ~/Pr
 
 ### 5. Software Project Overview
 
-You should bring a real software project to build your factory around. Before starting the curriculum, write a **Project Overview** for it using [`PROJECT_OVERVIEW_TEMPLATE.md`](PROJECT_OVERVIEW_TEMPLATE.md) — a loosely structured document that answers a few questions about the project. Your local coding agent will generate the Project Manifest and Software Factory Manifest from this document. You can see [`reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md`](reference-project/docs/PROJECT_OVERVIEW.md) for a completed example.
+You should bring a real software project to build your factory around. Before starting the curriculum, write a **Project Overview** for it using [`PROJECT_OVERVIEW_TEMPLATE.md`](PROJECT_OVERVIEW_TEMPLATE.md) — a loosely structured document that answers a few questions about the project. Your local coding agent will generate the Project Manifest and Software Factory Manifest from this document. You can see [`reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md`](reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md) for a completed example.
 
 During the intensive, you will use a [Manifest Generator Skill](https://github.com/audiojak/manifest-generator) to go from your project overview to a coherent, structured `PROJECT_MANIFEST.md` file that the software factory agents read from.
 
@@ -76,17 +76,17 @@ We use Gas City here because the 6-agent factory is one instance of a much broad
 
 For the authoritative definitions of every Gas City term used across the curriculum (agent, pack, rig, bead, sling, order, route, formula, overlay, etc.), see the glossary: [Gas City glossary](https://github.com/gastownhall/gascity/blob/main/engdocs/architecture/glossary.md). Here is the brief summary:
 
-| Gas City Term | Definition | Analogous Term |
-|---------------|------------|----------------|
-| bead | The universal unit of work — everything (tasks, mail, molecules, convoys, epics) is a bead. | Issue / ticket / task |
-| convoy | A container bead that groups related child beads (linked via `ParentID`) as a batch work-tracking unit. | Epic / batch |
-| dog | A maintenance/infrastructure helper — in Gas City usually modeled as an exec order, sometimes a scalable session, that handles background upkeep on behalf of the watchdog. | Daemon / cron worker |
-| formula | A workflow definition that's materialized at runtime into a set of beads. | Workflow / pipeline / recipe |
-| mail | Inter-agent communication implemented as a bead of type `message` (`TaskStore.Create(bead{type:"message"})`). | Message / inbox item |
-| order | A formula or shell-script dispatch fired by a trigger (`cooldown`, `cron`, `condition`, `event`, or `manual`). | Cron job / scheduled task |
-| pack | A reusable configuration bundle (loaded from `pack.toml`) that may include agent definitions, formulas, prompts, and orders. | Plugin / module / package |
-| rig | An external project directory registered with a city; each rig gets its own beads database, agent hooks, and pack expansion. | Workspace / repository |
-| sling | The manual dispatch routing mechanism: find/spawn agent → select formula → create molecule → hook → nudge → log. | Job dispatch / enqueue |
+| Gas City Term | Analogous Term |
+|---------------|----------------|
+| bead   | Issue / ticket / task |
+| convoy | Epic / batch |
+| dog    | Daemon / cron worker |
+| formula| Workflow / pipeline / recipe |
+| mail   | Message / inbox item |
+| order  | Cron job / scheduled task |
+| pack   | Plugin / module / package |
+| rig    | Workspace / repository |
+| sling  | Job dispatch / enqueue |
 
 ---
 
@@ -98,7 +98,7 @@ Across 9 sessions you will build a factory of agents that turn feature requests 
 Feature Request → Planner → Architect → Designer → Coder → Reviewer → Deployer → Functional Software → Improver
 ```
 
-| Role (curriculum) | Shipped pack | What It Does |
+| Agent Role | Shipped pack | What It Does |
 |-------------------|-------------|---------------------------------------|
 | **Architect** | `packs/architect` | Makes technical decisions, produces ADRs |
 | **Coder** | `packs/builder` | Implements code from specs |
