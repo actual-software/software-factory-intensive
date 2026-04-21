@@ -112,7 +112,9 @@ def generate_readme(activity, alias_lower, guide_filename, guide_content=None):
 
     guide_line = ""
     if guide_filename:
-        guide_line = f"- **[{guide_filename}]({guide_filename})** — Complete activity guide with deliverables and instructions\n"
+        guide_line = f"- **[{guide_filename}](../{guide_filename})** — Complete activity guide with deliverables and instructions (lives one level up, alongside the factory)\n"
+
+    guide_tree_line = f"├── {guide_filename}         # Activity guide (shared by project and factory)\n" if guide_filename else ""
 
     return f"""# {project_name}
 
@@ -126,7 +128,7 @@ factory (`{factory_name}`) with AI agents that plan, design, build, review, and 
 
 ```
 {slug}/
-├── {project_name}/          # This repo — your working project
+{guide_tree_line}├── {project_name}/          # This repo — your working project
 │   ├── README.md            # This file
 │   ├── .gitignore           # Standard ignores
 │   ├── .beads/              # Beads issue tracker database
@@ -723,17 +725,20 @@ def install(activity, dry_run=False, clone_url=None):
     print("\n  Dashboard: http://localhost:8080")
 
     # --- Step 8: Copy GUIDE.md, generate README.md, and sling setup task ---
+    # The guide is placed at the slug-dir level (one above the project) so it
+    # sits alongside the rig and factory dirs instead of inside the project repo.
+    slug_dir = project_dir.parent
     print("\n##### Inject Activity Guide")
     guide_path, guide_content = find_guide(activity)
     guide_filename = None
     if guide_content and not dry_run:
         guide_filename = guide_path.name
-        guide_dest = project_dir / guide_filename
+        guide_dest = slug_dir / guide_filename
         guide_dest.write_text(guide_content)
         print(f"  Copied {guide_filename} -> {guide_dest}")
     elif guide_content and dry_run:
         guide_filename = guide_path.name
-        print(f"[dry-run] Copy {guide_path} -> {project_dir / guide_filename}")
+        print(f"[dry-run] Copy {guide_path} -> {slug_dir / guide_filename}")
     else:
         print(f"  Warning: No GUIDE.md found for {activity}, skipping guide injection")
 
