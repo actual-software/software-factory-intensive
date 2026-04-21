@@ -1,33 +1,32 @@
 # L2 · Deploy Planner + Architect Agents
 
-> **Goal:** Understand the role of the Planner and Architect agents in the software factory, and explore the unique configurations that best adapt these agents to our specific software project.
+> **Goal:** Understand the role of the Planner and Architect agents in the software factory, and explore the unique configurations that best adapt these agents to your specific software project.
 
 | | |
 |---|---|
 | **Estimated duration** | ~75 minutes |
 | **Type** | LAB |
-| **Deliverable** | Working Planner + Architect agents with at least one suppported Skill and/or CLI capability for each |
+| **Deliverable** | Working Planner + Architect agents with at least one suppported Skill and/or CLI capability each |
 
 ## Overview
 
-L1 connected a 6-agent factory to your project and gave the Planner a live input source. L2 is the first lab that starts **customizing** specialists. You'll install the Planner and Architect, attach a real capability to each (a skill, an MCP, a CLI), and demonstrate that those capabilities change the quality of the artifacts the stages produce.
+L1 connected a 6-agent factory to your project and explained how to think about updating the capabilities of your software factory agents. Now, you are going to apply that knowledge to build uniquely-customized Planner and Architect agents with Skills and CLI tools. You'll install the Planner and Architect, attach a real capability to each (a skill, a CLI tool, or both), and demonstrate that those capabilities change the quality of the artifacts the stages produce.
 
-Through this lab you will:
-- Install and run the Planner and Architect against your project
-- Equip each with at least one skill or CLI capability from your W2 inventory
-- Trace a single feature from its source through Planner → Architect, producing a work package and an ADR grounded in your project's manifest
-- Make at least one iteration of the "edit the config, not the chat" discipline — catch a failure, fix it in the pack, re-run
+In this lab you will:
+- Install and run the Planner and Architect against your software project
+- Equip each agent with at least one skill or CLI capability
+- Trace a single feature from its source through Planner → Architect, taking advantage of the custom capabilities you have added to the agents
 
 ## What You'll Build
 
 ```
-   feature request source (from L1)
+   feature request source
               │
               ▼
    ┌────────────────────┐
-   │   Planner (L2)     │    ←  skill/CLI: e.g. backlog MCP,
+   │   Planner (L2)     │    ←  Skill/CLI: e.g. backlog CLI tool,
    │                    │       `actual`, a team-specific
-   │   produces:        │       research tool
+   │   produces:        │       research skill
    │   work-packages/   │
    │     <slug>.md      │
    └──────────┬─────────┘
@@ -36,13 +35,13 @@ Through this lab you will:
    ┌────────────────────┐
    │  Architect (L2)    │    ←  skill/CLI: e.g. ADR seeding
    │                    │       (`actual adr-bot`), a
-   │   produces:        │       standards-library MCP
+   │   produces:        │       standards-library CLI
    │   docs/adr/        │
    │     NNNN-<slug>.md │
    └────────────────────┘
 ```
 
-Each stage now has: **the manifest** (what to honor), **the upstream artifact** (what to work from), and **a capability** (what to reach for beyond the base model). The capability is the part that distinguishes "a generic agent playing the role" from "your team's Planner."
+Each stage will have access to: **the manifest** (what to honor), **the task input** (what to work on), and **a capability** (what to use to accomplish the task). The capability is the part that distinguishes a generic agent "playing the role" from a true customized agent.
 
 ## Part 1: Install the L2 Factory (10 min)
 
@@ -55,24 +54,18 @@ Each stage now has: **the manifest** (what to honor), **the upstream artifact** 
 /factory-activity-agent install L2
 ```
 
-This scaffolds `~/Projects/factory/lab_l2/l2-project/` and `~/Projects/factory/lab_l2/l2-gc-factory/` with the Planner and Architect packs pre-wired into the factory's `city.toml`.
-
-### Step 2: Confirm L1 + W3 artifacts were carried forward
-
-The install step above automatically does this:
-
-1. Bulk-copies everything from `~/Projects/factory/lab_l1/l1-project/` (your project code, `docs/PROJECT_MANIFEST.md`, `docs/factory-pipeline.md`, `work-packages/`, etc.).
-2. Overlays W3's updates — `docs/coordination-channels.md` and the W3-edited `docs/PROJECT_MANIFEST.md` — on top.
-
-Spot-check:
+### Step 2: Carry forward L1 + W3 artifacts
 
 ```bash
-ls ~/Projects/factory/lab_l2/l2-project/docs/
-# Expect: PROJECT_MANIFEST.md, factory-pipeline.md, coordination-channels.md
-ls ~/Projects/factory/lab_l2/l2-project/work-packages/  # from L1
+cp ~/Projects/factory/lab_l1/l1-project/docs/PROJECT_MANIFEST.md \
+   ~/Projects/factory/lab_l2/l2-project/docs/PROJECT_MANIFEST.md
+
+cp ~/Projects/factory/workshop_w3/w3-project/docs/coordination-channels.md \
+   ~/Projects/factory/lab_l2/l2-project/docs/coordination-channels.md
+
 ```
 
-If either L1 or W3 wasn't installed, the matching carry-forward is skipped silently — install whichever is missing before continuing.
+If either L1 or W3 wasn't installed, the matching carry-forward should be skipped — install whichever is missing from the baseline or reference set before continuing.
 
 ### Step 3: Verify the Planner and Architect are up
 
@@ -86,20 +79,18 @@ You should see `planner` and `architect` listed. Other stages are installed but 
 
 > **Goal:** Know the inputs, outputs, and decision shape of each stage so the capability you attach in Part 3 is the right one.
 
-Each pack ships with a prompt template at `packs/<stage>/prompts/<stage>.md.tmpl`. Open both side-by-side in your editor.
+Each pack ships with a prompt template at `packs/<stage>/prompts/<stage>.md.tmpl`. Open both side-by-side in your editor and read the prompts.
 
-| Stage | Prompt file | Reads | Produces | Decides |
-|-------|-------------|-------|----------|---------|
-| **Planner** | [`packs/planner/prompts/planner.md.tmpl`](../../../packs/planner/prompts/planner.md.tmpl) | Feature request, `docs/PROJECT_MANIFEST.md`, prior work packages | `work-packages/<slug>.md` — goal, stories, acceptance criteria, scope | *What is being built, at what boundary?* |
-| **Architect** | [`packs/architect/prompts/architect.md.tmpl`](../../../packs/architect/prompts/architect.md.tmpl) | Work package, manifest, existing ADRs | `docs/adr/NNNN-<slug>.md` — context, options, decision, consequences | *How should open technical questions be resolved?* |
-
-Notice the handoff: the Planner's `Handoff` section creates a downstream work item with a label (e.g. `needs-architecture`) and optionally mails the Architect. That transition is the work-item + mail channels from W3 in action.
+| Stage | Prompt file | Reads | Produces |
+|-------|-------------|-------|----------|
+| **Planner** | [`packs/planner/prompts/planner.md.tmpl`](../../../packs/planner/prompts/planner.md.tmpl) | Feature request, `docs/PROJECT_MANIFEST.md`, prior work packages | Goal, stories, acceptance criteria, scope |
+| **Architect** | [`packs/architect/prompts/architect.md.tmpl`](../../../packs/architect/prompts/architect.md.tmpl) | Work package, manifest, existing ADRs | Context, options, decision, consequences |
 
 ## Part 3: Equip Each Agent With a Capability (20 min)
 
 > **Goal:** Attach at least one skill or CLI capability to each of the two agents so the artifacts they produce reflect your team's actual tools, not just the shipped defaults.
 
-Open `docs/factory-pipeline.md` and read the `Planner` and `Architect` rows you wrote in W2. At least one capability per row should be wireable now.
+Open `docs/PROJECT_MANIFEST.md` and read the `Planner` and `Architect` rows. At least one capability per row should be wireable now.
 
 ### Step 1: Pick the Planner's capability
 
@@ -150,14 +141,16 @@ Edit the Architect prompt the same way — add the capability under `## Inputs y
 Sling a dry-run to each stage that exercises only the new capability:
 
 ```bash
-/factory-activity-agent sling L2 planner \
-  "Dry run: use the <capability> you were given and report what you can read. Do not produce a work package."
+gc bd --rig l2-project create \
+  --title "Dry run: use the <capability> you were given and report what you can read. Do not produce a work package." \
+  --label needs-plan
 
-/factory-activity-agent sling L2 architect \
-  "Dry run: use the <capability> you were given and report what you can read. Do not produce an ADR."
+gc bd --rig l2-project create \
+  --title "Dry run: use the <capability> you were given and report what you can read. Do not produce an ADR." \
+  --label needs-architecture
 ```
 
-If a dry-run fails, fix the wiring before moving to Part 4 — running the full handoff against a broken capability wastes tokens and masks the real failure.
+If a dry-run fails, fix the wiring before moving to Part 4.
 
 ## Part 4: Run a Feature Through Planner → Architect (20 min)
 
@@ -175,19 +168,16 @@ Use the same pickup mechanism you wired in L1:
 gc bd --rig l2-project create \
   --title "<feature>" \
   --label needs-plan
-
-/factory-activity-agent sling L2 planner \
-  "Dry run: use the <capability> you were given and report what you can read. Do not produce a work package." \
-  --label needs-plan
 ```
 
 ### Step 3: Sling the Architect
 
-The Planner should have created a downstream work item and (depending on your channel choices in W3) mailed the Architect. Either way, you can sling explicitly:
+The Planner should have created a downstream work item and (depending on your channel choices in W3) mailed the Architect. Either way, you can sling the Architect explicitly:
 
 ```bash
-/factory-activity-agent sling L2 architect \
-  "Produce the ADR for the latest work package."
+gc bd --rig l2-project create \
+  --title "<feature>" \
+  --label needs-architecture
 ```
 
 ### Step 4: Practice the config-over-chat discipline
@@ -207,7 +197,6 @@ Before leaving this lab, verify all of these:
 
 - [ ] `/factory-activity-agent status L2` shows `planner` and `architect` running
 - [ ] Each agent has at least one skill or CLI capability named in its prompt and exercised in a dry-run
-- [ ] The ADR cites the work package path and lists ≥2 options with trade-offs
 
 ## Next Steps
 
