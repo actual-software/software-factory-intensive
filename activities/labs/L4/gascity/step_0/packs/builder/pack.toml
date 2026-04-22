@@ -1,0 +1,54 @@
+# actual-builder — Build-Code agent for the Actual Software Factory.
+#
+# Takes beads labelled `ready-to-build` and produces working code that
+# satisfies their acceptance criteria and passes the validator's tests.
+#
+# Ships the vendored `actual` skill so the builder can consult the
+# rig's CLAUDE.md/AGENTS.md before writing code — the
+# "actual-adr-check" formula step enforces that ADRs and generated
+# rules are in sync before any implementation work.
+#
+# Persona anchor: backend-engineer + frontend-engineer (generalist
+# voice) from
+# actual-factory/extensions/factory-vscode/shared/actual-agents/built-in-agents.ts
+
+[pack]
+name = "actual-builder"
+schema = 1
+
+[[doctor]]
+name = "check-builder"
+script = "doctor/check-builder.sh"
+description = "Verify builder prerequisites (bd, gc, git, jq)"
+
+[[commands]]
+name = "status"
+description = "Show builder work status for the current rig"
+script = "commands/status.sh"
+
+[[commands]]
+name = "build"
+description = "Manually trigger the build formula against a bead"
+script = "commands/build.sh"
+
+[formulas]
+dir = "formulas"
+
+# ── BUILDER — Generalist engineer voice. Rig-scoped singleton. ──────
+[[agent]]
+name = "builder"
+scope = "rig"
+wake_mode = "fresh"
+work_dir = ".gc/agents/{{.Rig}}/builder"
+prompt_template = "prompts/builder.md.tmpl"
+nudge = "Check your hook for work and act on it."
+overlay_dir = "overlays/default"
+idle_timeout = "2h"
+min_active_sessions = 0
+max_active_sessions = 1
+work_query = "gc bd --rig l4-project list --label=ready-to-build --status=open --json 2>/dev/null"
+
+[[named_session]]
+template = "builder"
+scope = "rig"
+mode = "on_demand"

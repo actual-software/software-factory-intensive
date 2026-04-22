@@ -12,7 +12,7 @@
 # life once you have at least one rig registered.
 
 [workspace]
-name = "base-gc-factory"
+name = "b1-gc-factory"
 provider = "claude"
 start_command = "~/.nvm/versions/node/v22.19.0/bin/claude"
 includes = ["packs/actual/all"]

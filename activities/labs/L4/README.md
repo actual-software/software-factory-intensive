@@ -1,79 +1,42 @@
-# L4 · Deploy Reviewer + Release-Gate Agents — Activity
+# L4 · Build a Structured Development Loop — Activity
 
 **Walkthrough:** [`../../../curriculum/labs/L4/README.md`](../../../curriculum/labs/L4/README.md)
 **Reference examples:**
-* [`../../../reference-project/fired-up-pizza/review-reports/loyalty-points-review.md`](../../../reference-project/fired-up-pizza/review-reports/loyalty-points-review.md)
-* [`../../../reference-project/fired-up-pizza/release-gates/loyalty-points-gate.md`](../../../reference-project/fired-up-pizza/release-gates/loyalty-points-gate.md)
+* [`../../../reference-project/fired-up-pizza/CLAUDE.md`](../../../reference-project/fired-up-pizza/CLAUDE.md)
+* [`../../../reference-project/fired-up-pizza/DECISIONS.md`](../../../reference-project/fired-up-pizza/DECISIONS.md)
 
 ## Deliverables
 
-* One review report (Reviewer output) — lands in your rig at `<your-project>/review-reports/<slug>-review.md`
-* One release gate (Release-Gate output) — lands at `<your-project>/release-gates/<slug>-gate.md`
-* A `notes.md` in this folder: at least one reviewer finding that you resolved by editing the Builder's pack prompt (not by hand-editing code)
+Two files in this folder (mirroring the reference project):
 
-**Naming note:** the curriculum calls this role *Deployer*. The shipped pack is named `release-gate` — same role, same output. Every `packs/deployer` reference in older curriculum material should be read as `packs/release-gate`.
+* `CLAUDE.md` — your filled-in agent-instructions file. Start from the shipped reference structure, fill the Tech Stack / Project Structure / Rules / Release Criteria sections in for *your* project. If you're using a non-Claude assistant, name it `AGENTS.md` instead — the content is identical.
+* `DECISIONS.md` — a log with one entry per `CLAUDE.md` rule change during L4. Date, short description, and the commit SHA that made the change.
 
-## Pack wiring
+You'll also generate your project's `PROJECT_MANIFEST.md` during L4. That file belongs in `../../../my-factory/PROJECT_MANIFEST.md` (template already placed there) — not in this folder.
 
-Packs live at `../../../packs/reviewer/` and `../../../packs/release-gate/`.
+## Workspace wiring
 
-**(a) Use shipped packs as-is:**
+L4 registers `../../../my-factory/` as a Gas City workspace and adds your project repo as a rig. No pack is included yet — the first pack gets added in L2. After L4, `../../../my-factory/city.toml` should have:
 
 ```toml
-# my-factory/city.toml
-includes = [
-    "../packs/planner",          # from L2
-    "../packs/architect",        # from L2
-    "../packs/designer",         # from L3
-    "../packs/builder",          # from L3
-    "../packs/reviewer",
-    "../packs/release-gate",
-]
-```
+[workspace]
+name = "my-factory"
+provider = "claude"
+includes = []
 
-**(b) Customise:**
-
-```bash
-mkdir -p packs
-cp -r ../../../packs/reviewer packs/reviewer
-cp -r ../../../packs/release-gate packs/release-gate
-```
-
-Replace the shipped paths with `../activities/labs/L4/packs/reviewer` and `../activities/labs/L4/packs/release-gate` in `../../../my-factory/city.toml`.
-
-Restart:
-
-```bash
-cd ../../../my-factory
-gc service restart
-gc doctor      # should be green for all six agents
-```
-
-## Running the lab
-
-From your project rig:
-
-```bash
-bd create --title "Review: <feature>" --label needs-review --depends-on <L3-builder-bead>
-gc sling your-project--reviewer <bead-id>
-# ...address findings via Builder prompt edits, then
-bd create --title "Ship: <feature>" --label ready-to-ship --depends-on <reviewer-bead>
-gc sling your-project--release-gate <bead-id>
+[[rigs]]
+name = "your-project"
+path = "../../path/to/your-project"
+includes = []
 ```
 
 ## Exit criteria
 
-* [ ] Review report produced with findings at Low/Medium/High severity
-* [ ] At least one finding was resolved by editing `packs/builder/prompts/builder.md.tmpl` (shipped or your copy) and re-slinging — no hand-edits to code in response to reviewer findings
-* [ ] Release gate emitted with a clear PASS / FAIL verdict plus evidence per required check
-* [ ] `../../../my-factory/city.toml` has all six packs included
+* [ ] `activities/labs/L4/CLAUDE.md` exists with at least 5 project-specific rules
+* [ ] `activities/labs/L4/DECISIONS.md` has an entry per rule change during the lab
+* [ ] `../../../my-factory/PROJECT_MANIFEST.md` filled in (Overview, Tech Stack, Project Structure sections minimum)
+* [ ] `gc status` from `../../../my-factory/` shows your rig registered
 
 ## Skipped this session?
 
-C1 assumes all six agents are running. If you skip L4, add `../packs/reviewer` and `../packs/release-gate` (shipped) to `../../../my-factory/city.toml` directly — the capstone still runs, just without your review-standards customisations.
-
-## Recover from a broken run
-
-* Revert: `git checkout activities/labs/L4/packs/`
-* Swap in the shipped paths `../packs/reviewer` and `../packs/release-gate` in `city.toml`
-* `gc service restart && gc doctor`
+Every later lab reads from `PROJECT_MANIFEST.md`. At the very minimum, copy the reference manifest to `../../../my-factory/PROJECT_MANIFEST.md` and replace the domain-specific sections with your project's. Without a filled manifest, the Planner and Architect have nothing to ground their output on.

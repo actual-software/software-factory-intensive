@@ -583,14 +583,14 @@ def _gc_auto_prefix(name: str) -> str:
 
 
 def _patch_beads_prefix(beads_dir: Path, old: str, new: str, dry_run: bool = False):
-    """Rename the Dolt DB directory and patch config.yaml while the server is stopped.
+    """Rename the Dolt DB directory and patch config files while the server is stopped.
 
     Checks both dolt/ (city-managed DBs) and embeddeddolt/ (rig-managed DBs).
+    Patches config.yaml and metadata.json (which gc reads for dolt_database).
     Safe to call even if the DB dir doesn't exist (e.g. already renamed).
     """
     if old == new:
         return
-    config = beads_dir / "config.yaml"
     for sub in ("dolt", "embeddeddolt"):
         src = beads_dir / sub / old
         if src.exists():
@@ -600,11 +600,13 @@ def _patch_beads_prefix(beads_dir: Path, old: str, new: str, dry_run: bool = Fal
             else:
                 src.rename(dst)
             break
-    if config.exists():
-        if dry_run:
-            print(f"[dry-run] Patch {config}: {old!r} → {new!r}")
-        else:
-            config.write_text(config.read_text().replace(old, new))
+    for fname in ("config.yaml", "metadata.json"):
+        f = beads_dir / fname
+        if f.exists():
+            if dry_run:
+                print(f"[dry-run] Patch {f}: {old!r} → {new!r}")
+            else:
+                f.write_text(f.read_text().replace(old, new))
 
 
 def install(activity, dry_run=False, clone_url=None):
@@ -717,6 +719,15 @@ def install(activity, dry_run=False, clone_url=None):
          "--prefix", _new_rig_pfx],
         cwd=str(factory_dir), dry_run=dry_run, check=False,
     )
+
+    # gc rig add writes the city prefix into the rig's routes.jsonl. Even with
+    # metadata.json already patched, gc may derive the prefix from the directory
+    # name rather than the file. Patch routes.jsonl as a belt-and-suspenders fix.
+    rig_routes = project_dir / ".beads" / "routes.jsonl"
+    if dry_run:
+        print(f"[dry-run] Patch {rig_routes}: {_old_city_pfx!r} → {_new_city_pfx!r}")
+    elif rig_routes.exists():
+        rig_routes.write_text(rig_routes.read_text().replace(_old_city_pfx, _new_city_pfx))
 
     # Patch default_sling_target and [providers.claude] into city.toml.
     # gc rig add marshals and rewrites city.toml, dropping fields from

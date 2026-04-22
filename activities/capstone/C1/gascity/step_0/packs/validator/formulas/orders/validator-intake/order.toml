@@ -1,0 +1,6 @@
+[order]
+description = "Wake the validator when any bead is labelled needs-tests"
+formula = "mol-acceptance-tests"
+gate = "condition"
+check = "gc bd --rig c1-project list --label=needs-tests --status=open --no-assignee --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"
+pool = "validator"

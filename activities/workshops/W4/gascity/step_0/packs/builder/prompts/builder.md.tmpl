@@ -61,7 +61,7 @@ against stale rules.
 4. Claim it: `bd update <id> --claim`
 5. Check for molecule: `bd show <id>` — if METADATA has `molecule_id`,
    run `bd mol current <mol-id>` and work steps in order.
-   **W1 builder always runs `mol-tdd-build` (polecat pattern).** If the
+   **W4 builder always runs `mol-tdd-build` (polecat pattern).** If the
    bead has no molecule yet, pour one: `bd mol pour mol-tdd-build`.
 6. After completing work, check for more using the same 3-tier query.
    If nothing found, run `gc hook {{ .AgentName }}` to check for pending work.

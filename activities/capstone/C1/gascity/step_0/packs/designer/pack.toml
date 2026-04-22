@@ -1,0 +1,48 @@
+# actual-designer — UI/UX Design agent for the Actual Software Factory.
+#
+# Takes beads labelled `needs-design` and produces wireframes,
+# interaction specs, and design-system artifacts consumed by the
+# builder.
+#
+# Persona anchor: ui-ux-designer + accessibility-engineer from
+# actual-factory/extensions/factory-vscode/shared/actual-agents/built-in-agents.ts
+
+[pack]
+name = "actual-designer"
+schema = 1
+
+[[doctor]]
+name = "check-designer"
+script = "doctor/check-designer.sh"
+description = "Verify designer prerequisites (bd, gc, jq)"
+
+[[commands]]
+name = "status"
+description = "Show designer work status for the current rig"
+script = "commands/status.sh"
+
+[[commands]]
+name = "designs"
+description = "List design artifacts under docs/designs/"
+script = "commands/designs.sh"
+
+[formulas]
+dir = "formulas"
+
+[[agent]]
+name = "designer"
+scope = "rig"
+wake_mode = "fresh"
+work_dir = ".gc/agents/{{.Rig}}/designer"
+prompt_template = "prompts/designer.md.tmpl"
+nudge = "Check your hook for work and act on it."
+overlay_dir = "overlays/default"
+idle_timeout = "2h"
+min_active_sessions = 0
+max_active_sessions = 1
+work_query = "gc bd --rig c1-project list --label=needs-design --status=open --json 2>/dev/null"
+
+[[named_session]]
+template = "designer"
+scope = "rig"
+mode = "on_demand"

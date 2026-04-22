@@ -2,5 +2,5 @@
 description = "Wake the designer when any bead is labelled needs-design"
 formula = "mol-design-cycle"
 gate = "condition"
-check = "gc bd --rig w1-project list --label=needs-design --status=open --no-assignee --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"
+check = "gc bd --rig w4-project list --label=needs-design --status=open --no-assignee --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"
 pool = "designer"

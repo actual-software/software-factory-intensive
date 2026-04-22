@@ -1,75 +1,42 @@
-# L3 · Deploy Designer + Builder Agents — Activity
+# L3 · Build a Structured Development Loop — Activity
 
 **Walkthrough:** [`../../../curriculum/labs/L3/README.md`](../../../curriculum/labs/L3/README.md)
-**Reference example:** [`../../../reference-project/fired-up-pizza/design/loyalty-points-spec.md`](../../../reference-project/fired-up-pizza/design/loyalty-points-spec.md)
+**Reference examples:**
+* [`../../../reference-project/fired-up-pizza/CLAUDE.md`](../../../reference-project/fired-up-pizza/CLAUDE.md)
+* [`../../../reference-project/fired-up-pizza/DECISIONS.md`](../../../reference-project/fired-up-pizza/DECISIONS.md)
 
 ## Deliverables
 
-* One design spec (Designer output) — lands in your rig at `<your-project>/design/<slug>-spec.md`
-* Implementation commits (Builder output) — new files under your rig's `src/`, on a feature branch
-* A `notes.md` in this folder: bead IDs, sling counts, and any prompt edits that moved the Builder from failing → passing
+Two files in this folder (mirroring the reference project):
 
-**Naming note:** the curriculum calls this role *Coder*. The shipped pack is named `builder` — same agent, same output. Every `packs/coder` reference in older curriculum material should be read as `packs/builder`.
+* `CLAUDE.md` — your filled-in agent-instructions file. Start from the shipped reference structure, fill the Tech Stack / Project Structure / Rules / Release Criteria sections in for *your* project. If you're using a non-Claude assistant, name it `AGENTS.md` instead — the content is identical.
+* `DECISIONS.md` — a log with one entry per `CLAUDE.md` rule change during L3. Date, short description, and the commit SHA that made the change.
 
-## Pack wiring
+You'll also generate your project's `PROJECT_MANIFEST.md` during L3. That file belongs in `../../../my-factory/PROJECT_MANIFEST.md` (template already placed there) — not in this folder.
 
-Packs live at `../../../packs/designer/` and `../../../packs/builder/`.
+## Workspace wiring
 
-**(a) Use shipped packs as-is:**
+L3 registers `../../../my-factory/` as a Gas City workspace and adds your project repo as a rig. No pack is included yet — the first pack gets added in L2. After L3, `../../../my-factory/city.toml` should have:
 
 ```toml
-# my-factory/city.toml
-includes = [
-    "../packs/planner",        # from L2
-    "../packs/architect",      # from L2
-    "../packs/designer",
-    "../packs/builder",
-]
-```
+[workspace]
+name = "my-factory"
+provider = "claude"
+includes = []
 
-**(b) Customise:**
-
-```bash
-mkdir -p packs
-cp -r ../../../packs/designer packs/designer
-cp -r ../../../packs/builder packs/builder
-```
-
-Then include `../activities/labs/L3/packs/designer` and `../activities/labs/L3/packs/builder` in `../../../my-factory/city.toml` in place of (or in addition to) the shipped paths.
-
-Restart:
-
-```bash
-cd ../../../my-factory
-gc service restart
-gc doctor
-```
-
-## Running the lab
-
-From your project rig:
-
-```bash
-bd create --title "Design: <feature>" --label needs-design --depends-on <L2-architect-bead>
-gc sling your-project--designer <bead-id>
-# ...wait, then hand off to the builder
-bd create --title "Build: <feature>" --label ready-to-build --depends-on <designer-bead>
-gc sling your-project--builder <bead-id>
+[[rigs]]
+name = "your-project"
+path = "../../path/to/your-project"
+includes = []
 ```
 
 ## Exit criteria
 
-* [ ] Design spec written with Props / Interactions / Edge Cases / Test Plan sections
-* [ ] Builder committed working code to a feature branch; `npm test` (or your test runner) passes
-* [ ] Zero manual code edits — every Builder correction was a prompt edit to `packs/builder/prompts/builder.md.tmpl` (shipped or your copy) followed by a re-sling
-* [ ] `../../../my-factory/city.toml` now includes Designer + Builder alongside Planner + Architect
+* [ ] `activities/labs/L3/CLAUDE.md` exists with at least 5 project-specific rules
+* [ ] `activities/labs/L3/DECISIONS.md` has an entry per rule change during the lab
+* [ ] `../../../my-factory/PROJECT_MANIFEST.md` filled in (Overview, Tech Stack, Project Structure sections minimum)
+* [ ] `gc status` from `../../../my-factory/` shows your rig registered
 
 ## Skipped this session?
 
-L4 (review) runs on committed code from some feature branch. If you skipped L3, either copy the reference project's feature branch verbatim into your rig, or reduce L4 to reviewing a trivial hand-written commit — note the deviation in C1's run report.
-
-## Recover from a broken run
-
-* Revert: `git checkout activities/labs/L3/packs/`
-* Swap `../activities/labs/L3/packs/designer` / `builder` in `city.toml` back to `../packs/designer` / `../packs/builder`
-* `gc service restart` — the shipped packs always pass their doctor checks
+Every later lab reads from `PROJECT_MANIFEST.md`. At the very minimum, copy the reference manifest to `../../../my-factory/PROJECT_MANIFEST.md` and replace the domain-specific sections with your project's. Without a filled manifest, the Planner and Architect have nothing to ground their output on.

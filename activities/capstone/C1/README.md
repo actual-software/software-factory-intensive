@@ -1,63 +1,42 @@
-# C1 · Run the Software Factory End-to-End — Activity
+# C1 · Build a Structured Development Loop — Activity
 
-**Walkthrough:** [`../../../curriculum/capstone/C1/README.md`](../../../curriculum/capstone/C1/README.md)
+**Walkthrough:** [`../../../curriculum/labs/C1/README.md`](../../../curriculum/labs/C1/README.md)
 **Reference examples:**
-* [`../../../reference-project/fired-up-pizza/factory-run-report.md`](../../../reference-project/fired-up-pizza/factory-run-report.md)
-* [`../../../reference-project/fired-up-pizza/retrospective-card.md`](../../../reference-project/fired-up-pizza/retrospective-card.md)
+* [`../../../reference-project/fired-up-pizza/CLAUDE.md`](../../../reference-project/fired-up-pizza/CLAUDE.md)
+* [`../../../reference-project/fired-up-pizza/DECISIONS.md`](../../../reference-project/fired-up-pizza/DECISIONS.md)
 
 ## Deliverables
 
-Two files in this folder:
+Two files in this folder (mirroring the reference project):
 
-* `factory-run-report.md` — structured record of the end-to-end run: feature, pipeline results per stage (sling counts, config changes), timeline, ad-hoc-prompt count (target: zero), feedback-rule triggers, success-criteria check, artifacts produced.
-* `retrospective-card.md` — Keep / Change / Question (one short paragraph each) plus a one-line summary for the team.
+* `CLAUDE.md` — your filled-in agent-instructions file. Start from the shipped reference structure, fill the Tech Stack / Project Structure / Rules / Release Criteria sections in for *your* project. If you're using a non-Claude assistant, name it `AGENTS.md` instead — the content is identical.
+* `DECISIONS.md` — a log with one entry per `CLAUDE.md` rule change during C1. Date, short description, and the commit SHA that made the change.
 
-## Pack wiring
+You'll also generate your project's `PROJECT_MANIFEST.md` during C1. That file belongs in `../../../my-factory/PROJECT_MANIFEST.md` (template already placed there) — not in this folder.
 
-By the start of C1, all six packs should already be included in `../../../my-factory/city.toml` from L2 through L4. Confirm with:
+## Workspace wiring
 
-```bash
-cd ../../../my-factory
-gc doctor
-```
-
-All of `check-planner`, `check-architect`, `check-designer`, `check-builder`, `check-reviewer`, and `check-release-gate` should be green.
-
-If any are missing (e.g. you skipped a lab), add the shipped path for that pack before starting the run:
+C1 registers `../../../my-factory/` as a Gas City workspace and adds your project repo as a rig. No pack is included yet — the first pack gets added in L2. After C1, `../../../my-factory/city.toml` should have:
 
 ```toml
-# my-factory/city.toml — append any missing
-includes = [
-    "../packs/planner",
-    "../packs/architect",
-    "../packs/designer",
-    "../packs/builder",
-    "../packs/reviewer",
-    "../packs/release-gate",
-]
+[workspace]
+name = "my-factory"
+provider = "claude"
+includes = []
+
+[[rigs]]
+name = "your-project"
+path = "../../path/to/your-project"
+includes = []
 ```
-
-## Running the capstone
-
-1. Pick a new feature from your backlog (not one used during the labs).
-2. File the root bead: `bd create --title "Feature: <name>" --label needs-plan`.
-3. Sling the Planner and follow the pipeline through to the Release-Gate. Log every sling, every prompt edit, and every ad-hoc chat correction.
-4. At the end, draft `factory-run-report.md` using the reference report as the template.
-5. Write `retrospective-card.md` — one Keep, one Change, one Question.
 
 ## Exit criteria
 
-* [ ] All six pipeline stages produced artifacts in the rig (work package → ADR → design spec → code → review report → release gate)
-* [ ] `factory-run-report.md` and `retrospective-card.md` present in this folder
-* [ ] Ad-hoc prompt count recorded (target: 0 — every correction via pack-prompt edit)
-* [ ] Every prompt edit made during the run is committed alongside the artifact that motivated it
+* [ ] `activities/labs/C1/CLAUDE.md` exists with at least 5 project-specific rules
+* [ ] `activities/labs/C1/DECISIONS.md` has an entry per rule change during the lab
+* [ ] `../../../my-factory/PROJECT_MANIFEST.md` filled in (Overview, Tech Stack, Project Structure sections minimum)
+* [ ] `gc status` from `../../../my-factory/` shows your rig registered
 
-## Skipped sessions upstream?
+## Skipped this session?
 
-The run still works — the factory uses whichever packs you wired in, shipped or customised. Call out the skipped sessions explicitly in the run report under "Prior-session deviations" so the retrospective can identify what to revisit.
-
-## Recover from a broken run mid-capstone
-
-* Abandon the feature branch, reset the bead, and re-sling from the stage that failed.
-* If a pack edit during the run is the cause, `git checkout` that specific file to its pre-run state and re-sling.
-* Record everything in the run report — a capstone that required three resets still teaches more than one that ran cleanly.
+Every later lab reads from `PROJECT_MANIFEST.md`. At the very minimum, copy the reference manifest to `../../../my-factory/PROJECT_MANIFEST.md` and replace the domain-specific sections with your project's. Without a filled manifest, the Planner and Architect have nothing to ground their output on.

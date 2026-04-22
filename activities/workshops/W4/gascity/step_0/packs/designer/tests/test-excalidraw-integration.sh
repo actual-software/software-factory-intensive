@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-PACK="activities/workshops/W1/gascity/step_0/packs/designer"
+PACK="activities/workshops/W4/gascity/step_0/packs/designer"
 FAIL=0
 
 run() {
