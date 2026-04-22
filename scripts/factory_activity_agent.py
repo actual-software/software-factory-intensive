@@ -706,28 +706,15 @@ def install(activity, dry_run=False, clone_url=None):
     print("\n##### Sweep stale sessions")
     close_stale_sessions(factory_dir, dry_run=dry_run)
 
-    # Pre-seed rig beads config with the unique prefix before gc rig add so
-    # bd init picks it up and creates the Dolt DB under the right name.
-    # gc would otherwise derive the same non-unique prefix for all activities
-    # in the same category ('w1-project' → 'wp', 'w2-project' → 'wp').
-    _old_rig_pfx = _gc_auto_prefix(f"{alias_lower}-project")
-    _new_rig_pfx = f"{alias_lower}p"
-    if _old_rig_pfx != _new_rig_pfx:
-        rig_beads = project_dir / ".beads"
-        if dry_run:
-            print(f"[dry-run] Pre-seed {rig_beads}/config.yaml prefix {_new_rig_pfx!r}")
-        else:
-            rig_beads.mkdir(exist_ok=True)
-            (rig_beads / "config.yaml").write_text(
-                f"issue_prefix: {_new_rig_pfx}\n"
-                f"issue-prefix: {_new_rig_pfx}\n"
-                f"dolt.auto-start: false\n"
-            )
-
     print("\n##### Add Rig")
     project_name = f"{alias_lower}-project"
+    # Pass --prefix explicitly so gc rig add uses the unique per-activity prefix
+    # instead of auto-deriving a non-unique one ('w1-project' → 'wp' = 'w2-project').
+    _new_rig_pfx = f"{alias_lower}p"
     run(
-        ["gc", "rig", "add", str(project_dir), "--include", "packs/actual/all"],
+        ["gc", "rig", "add", str(project_dir),
+         "--include", "packs/actual/all",
+         "--prefix", _new_rig_pfx],
         cwd=str(factory_dir), dry_run=dry_run, check=False,
     )
 
@@ -769,19 +756,6 @@ def install(activity, dry_run=False, clone_url=None):
     # Wait for the reconciler to settle so agents are active before we
     # sling work, and catch any orphaned session beads from the restart.
     wait_for_reconciler(factory_dir, dry_run=dry_run)
-
-    # Fallback: if gc rig add ignored the pre-seeded config and initialised
-    # the DB under the old non-unique prefix, rename it now.  This requires
-    # one extra stop/start cycle, but only fires when the pre-seed didn't work.
-    if not dry_run and _old_rig_pfx != _new_rig_pfx:
-        rig_config = project_dir / ".beads" / "config.yaml"
-        if rig_config.exists() and _old_rig_pfx in rig_config.read_text():
-            print(f"\n##### Fix rig beads prefix ({_old_rig_pfx!r} → {_new_rig_pfx!r})")
-            run(["gc", "stop"], cwd=str(factory_dir), check=False)
-            _patch_beads_prefix(project_dir / ".beads", _old_rig_pfx, _new_rig_pfx)
-            _patch_beads_prefix(factory_dir / ".beads", _old_rig_pfx, _new_rig_pfx)
-            run(["gc", "start"], cwd=str(factory_dir), check=False)
-            wait_for_reconciler(factory_dir)
 
     # --- Step 6: Register custom bead types ---
     # gc doctor --fix registers all required types (molecule, session, convoy, etc.)
