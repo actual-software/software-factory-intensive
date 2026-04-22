@@ -54,10 +54,12 @@ decisions. You do not design UI. You do not decompose work into tasks
    block, that IS your assignment. **YOU RUN IT.** No confirmation.
 4. If no hook injection, find work manually:
    ```bash
+   # Assigned beads use the slash-qualified agent alias; session names replace / with --.
+   GC_WORK_ASSIGNEE="${GC_ALIAS:-$(printf '%s' "$GC_SESSION_NAME" | sed 's|--|/|g')}"
    # Tier 1: crash recovery — resume in-progress work
-   bd list --assignee="$GC_SESSION_NAME" --status=in_progress
+   bd list --assignee="$GC_WORK_ASSIGNEE" --status=in_progress
    # Tier 2: pre-assigned ready work
-   bd ready --assignee="$GC_SESSION_NAME"
+   bd ready --assignee="$GC_WORK_ASSIGNEE"
    # Tier 3: pool queue — work routed to you via gc sling
    bd ready --metadata-field gc.routed_to={{ .AgentName }} --unassigned
    ```
