@@ -1,6 +1,6 @@
 # Labeled Beads — Canonical Handoff Protocol
 
-Labels on beads are the handoff mechanism that connects the six agents of the software factory. Instead of each agent writing files or notes and hoping the next agent reads them, each agent watches the bead queue for a label aimed at it, does its work, and re-labels the bead for the next agent.
+Labels on beads are the handoff mechanism that connects the six agents of the software factory for the purpose of this intensive curriculum. Instead of each agent writing files or notes and hoping the next agent reads them, each agent watches the bead queue for a label aimed at it, does its work, and re-labels the bead for the next agent.
 
 If you are building agents in this workshop, **labels are the contract**. Your agents' prompts filter the queue by label; the participant's packs' order gates fire on labels; the reference project's factory walks a feature from "needs-plan" to "ready-to-ship" by flipping labels one at a time.
 

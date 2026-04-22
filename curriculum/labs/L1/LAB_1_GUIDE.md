@@ -8,6 +8,17 @@
 | **Type** | LAB |
 | **Deliverable** | Working 6-agent software factory applied to your software project, with the `PROJECT_MANIFEST.md` and setup of the inputs on the Planner agent (feature requests, knowledge bases, and other artifacts) |
 
+## Deliverable
+
+By the end of this lab, you will have:
+
+- A 6-agent factory at `~/Projects/factory/lab_l1/l1-gc-factory/` registered against your own project rig at `~/Projects/factory/lab_l1/l1-project/`.
+- `docs/PROJECT_MANIFEST.md` in the project workspace, grounding every agent in your project's tech stack, domain model, conventions, and standards.
+- The Planner's input source(s) — feature request location, knowledge bases, and other artifacts — wired so a `needs-plan` bead triggers a real plan against your project, not against Fired Up Pizza.
+- At least one prompt customisation to a factory agent (`packs/<agent>/prompts/<agent>.md.tmpl`) made *because of something you observed* during the first run, demonstrating the config-over-chat discipline.
+
+The manifest and any prompt edits carry forward into L2, L3, and L4.
+
 ## Overview
 
 W1 ran a factory against a reference project that was already fully wired. W2 mapped the capabilities from your individual workflow onto the six stages and produced a `factory-pipeline.md`. L1 is where those two halves meet: you install a factory against **your project**, with the `PROJECT_MANIFEST.md` grounding every agent, and capabilities pulled from the `factory-pipeline.md` mapped to the agents.
@@ -62,32 +73,26 @@ cp -R ~/path/to/your-repo/. ~/Projects/factory/lab_l1/l1-project/
 
 This merges your code into the installed workspace. Do **not** `rm -rf` the installed workspace or replace it with a symlink — the install registered the path with the factory (the `gc rig add` step), so deleting or swapping it out leaves the registration dangling.
 
-### Step 3: Copy the `PROJECT_MANIFEST.md` file from your W2 workspace into the L1 workspace
-
-```bash
-cp ~/Projects/factory/workshop_w1/w1-project/docs/PROJECT_MANIFEST.md \
-   ~/Projects/factory/lab_l1/l1-project/docs/PROJECT_MANIFEST.md
-```
-
-### Step 4: Carry forward the `factory-pipeline.md` file from your W2 workspace
-
-Install the `factory-pipeline.md` file from your W2 workspace into the L1 workspace:
-
-```bash
-cp ~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md \
-   ~/Projects/factory/lab_l1/l1-project/docs/factory-pipeline.md
-```
-
-If W2 wasn't installed, the carry-forward is skipped silently — install W2 first if you want your capability map on hand during Part 2.
-
-### Step 5: Verify the factory is healthy
+### Step 3: Verify the factory is healthy and your central docs were seeded
 
 ```bash
 /factory-activity-agent status L1
 /factory-activity-agent doctor L1
+ls ~/Projects/factory/lab_l1/l1-project/docs/
 ```
 
-You should see all agents listed. No task has been seeded yet — agents will idle until you wire the Planner's inputs in Part 3.
+You should see all six agents listed. The install step automatically copies your **central deliverables folder** (`software-factory-intensive/docs/`) into the workspace's `docs/`, so anything you authored in earlier sessions is already there — most importantly `factory-pipeline.md` from W2.
+
+If `docs/` is empty or missing files you expected, you either haven't authored them yet (do the prior session) or you can populate them with the reference set — see [Backup Project Setup](../../../README.md#backup-project-setup) in the main README.
+
+`PROJECT_MANIFEST.md` is *not* expected to be present yet unless you've already run the [Manifest Generator Skill](https://github.com/audiojak/manifest-generator) against your project overview. If you have, it should appear in the listing alongside `factory-pipeline.md`. If you haven't, generate it now into `~/Projects/actual-software/software-factory-intensive/docs/PROJECT_MANIFEST.md`, then sync it into the running workspace so the L1 agents can read it:
+
+```bash
+cp ~/Projects/actual-software/software-factory-intensive/docs/PROJECT_MANIFEST.md \
+   ~/Projects/factory/lab_l1/l1-project/docs/
+```
+
+No task has been seeded yet — agents will idle until you wire the Planner's inputs in Part 3.
 
 ## Part 2: Send the first task to the factory (20 min)
 

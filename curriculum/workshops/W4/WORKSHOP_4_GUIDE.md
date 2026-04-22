@@ -1,6 +1,4 @@
-# W4 · Create Continuous Improvement Loops [UNDER CONSTRUCTION]
-
-> **Note:** This workshop is under construction. It will be updated in the future.
+# W4 · Create Continuous Improvement Loops
 
 > **Goal:** Understand how a software factory can learn from its own signals, and demonstrate your understanding by demonstrating an improvement in the factory from a participant-defined set of improvement criteria.
 
@@ -9,6 +7,18 @@
 | **Estimated duration** | ~45 minutes |
 | **Type** | WORKSHOP |
 | **Deliverable** | Clear `improvement-criteria.md` that outlines the criteria for improvement of the software factory, and a demonstrable improvement in the factory based on the criteria |
+
+## Deliverable
+
+By the end of this workshop, you will have:
+
+- `~/Projects/factory/workshop_w4/w4-project/docs/improvement-criteria.md`, containing:
+  - `## Signal Inventory` — every signal your factory currently emits, with source and volume so far.
+  - 4–8 **Improvement Criteria**, each with a signal, a direction, a target, a measurement method, and a cadence (per-run / weekly / per-incident / one-off).
+  - `## Loop 1 Result` — the before/after numbers from one full signal → config change → re-run loop.
+- One config edit applied to your L4 factory and re-run against a comparable feature
+
+The improvement-criteria file becomes the audit lens you apply to the C1 capstone run.
 
 ## Overview
 
@@ -72,28 +82,15 @@ Through this workshop you will:
 /factory-activity-agent install W4
 ```
 
-### Step 2: Confirm the L4 signal sources were carried forward
+### Step 2: Confirm your central docs were seeded and pull in the L4 signal sources
 
-The install step above pulls the artifacts W4 needs out of your L4 workspace:
-
-- `docs/factory-iterations.md` — the running config-change log
-- `docs/PROJECT_MANIFEST.md` — your current Review Standards and Release Criteria
-- `review-reports/` — every Reviewer verdict (the richest signal source)
-- `release-gates/` — every Deployer PASS/FAIL record
-
-Spot-check:
+The install step copies your **central deliverables folder** (`software-factory-intensive/docs/`) into the W4 workspace. The docs flow automatically:
 
 ```bash
-ls ~/Projects/factory/workshop_w4/w4-project/review-reports/
-ls ~/Projects/factory/workshop_w4/w4-project/release-gates/
 ls ~/Projects/factory/workshop_w4/w4-project/docs/
 ```
 
-If L4 wasn't installed, the carry-forward is skipped silently — install L4 first so W4 has real signals to work with.
-
-### Step 3: Keep L4 installed and running
-
-You'll return to the L4 factory to exercise the improvement in Part 4. Do not delete L4 yet.
+You should see `PROJECT_MANIFEST.md` (with your L4 Review Standards and Release Criteria), `factory-pipeline.md`, `coordination-channels.md`, `factory-iterations.md`, and the `adr/` directory.
 
 ## Part 2: Catalogue the Signals You Already Have (10 min)
 
@@ -104,9 +101,9 @@ In `docs/improvement-criteria.md`, add:
 ```markdown
 ## Signal Inventory
 
-| Signal | Source | What it tells you | Volume so far |
-|--------|--------|-------------------|---------------|
-|        |        |                   |               |
+| Signal | Source | What it tells you |
+|--------|--------|-------------------|
+|        |        |                   |
 ```
 
 Fill it from the artifacts you brought forward. Typical rows:
@@ -176,6 +173,10 @@ Rules of thumb:
 - **Keep criteria stage-aware.** A Planner criterion, an Architect criterion, a Reviewer criterion — when all your criteria cluster on one stage, you may be neglecting the others.
 - **Include at least one project-outcome criterion** (e.g. "fewer Sentry errors in released features") so the factory's improvements eventually connect to what users experience.
 
+> **Insight: Continuous improvement loops are chaotic and complex.**
+>
+> A self-improving software factory is the ultimate software factory, but it's also the most difficult to tune correctly. Too large of changes can lead to instability and regression, while too small of changes may not be effective. It is important to pick strong signals and connect them to very well-correlated adjustments in the factory's configuration.
+
 ## Part 4: Pick One Signal and Make One Change (10 min)
 
 > **Goal:** Demonstrate the loop once — read a signal, translate it into a config change, and re-run to show the criterion moved.
@@ -196,7 +197,7 @@ Scan your Signal Inventory: where do your review reports and release gates compl
 
 ### Step 3: Make the change and record it
 
-Edit *one* file. Log the change in `docs/factory-iterations.md`:
+Edit *one* file. Log the change in a `docs/factory-iterations.md` file:
 
 ```markdown
 | Date       | Stage    | File                                         | Change                                                              | Expected criterion impact |
@@ -266,7 +267,7 @@ Before leaving this workshop, verify all of these:
 | Artifact | Location | What It Holds |
 |----------|----------|---------------|
 | `improvement-criteria.md` | `~/Projects/factory/workshop_w4/w4-project/docs/` | Signals, criteria, cadences, loop results |
-| Iteration log (extended) | `~/Projects/factory/workshop_w4/w4-project/docs/factory-iterations.md` | Cumulative config edits across L2–W4 |
+| Iteration log  | `~/Projects/factory/workshop_w4/w4-project/docs/factory-iterations.md` | Config changes made to the factory |
 | One config change | In the appropriate pack or manifest | The concrete improvement you applied |
 | One re-run result | Per-feature review report + release gate + entry in `improvement-criteria.md` | Evidence the change moved the criterion |
 

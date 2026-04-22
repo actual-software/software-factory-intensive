@@ -8,6 +8,18 @@
 | **Type** | WORKSHOP |
 | **Deliverable** | A `docs/coordination-channels.md` file that describes the preferred coordination channels between agents in your factory, and any protocols for interaction between agents |
 
+## Deliverable
+
+By the end of this workshop, you will have:
+
+- `~/Projects/factory/workshop_w3/w3-project/docs/coordination-channels.md`, committed, containing:
+  - A **Channel Inventory** table covering the five shipped channels (tasks, mail, orders, nudge, session attach) plus any custom channels you add.
+  - A **Preferences by Handoff** table that names a primary channel and a fallback for every stage pair in your pipeline (Planner→Architect, Planner→Designer, Architect/Designer→Coder, Coder→Reviewer, Reviewer→Coder, Reviewer→Deployer, Any agent→Human, plus any project-specific handoffs).
+- Hands-on experience exercising each of the five channels end-to-end with real `bd`, `gc mail`, `gc order`, `gc nudge`, and `gc session` commands.
+- *(Optional)* one wired configuration change — a new formula or exec order, a new mail flow, a tightened condition gate, or a scheduled nudge.
+
+The channels document carries forward into L2 so the agents you customise inherit a consistent set of handoff rules.
+
 ## Overview
 
 W1 showed a factory moving a task through a generic 6-agent factory. W2 demonstrated some of the configuration required for project-specific work. W3 asks the next question: **how do the agents coordinate work between each other without a human in the loop?**
@@ -99,16 +111,15 @@ If any of those feels fuzzy, re-read the relevant tutorial. The rest of the work
 /factory-activity-agent install W3
 ```
 
-### Step 2: Copy the relevant documents from previous sessions
+The install copies your **central deliverables folder** (`software-factory-intensive/docs/`) into `~/Projects/factory/workshop_w3/w3-project/docs/`, so `factory-pipeline.md` (W2), `PROJECT_MANIFEST.md` (L1 or generated from your overview), and any other deliverables you've authored are already in the workspace.
+
+### Step 2: Verify the central docs landed
 
 ```bash
-cp ~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md \
-   ~/Projects/factory/workshop_w3/w3-project/docs/factory-pipeline.md
+ls ~/Projects/factory/workshop_w3/w3-project/docs/
 ```
 
-```bash
-cp ~/PROJECT_MANIFEST.md ~/Projects/factory/workshop_w3/w3-project/docs/PROJECT_MANIFEST.md
-```
+You should see at minimum `factory-pipeline.md` and `PROJECT_MANIFEST.md`. If anything is missing, see [Backup Project Setup](../../../README.md#backup-project-setup) in the main README to populate the reference deliverables.
 
 ### Step 3: Start the factory
 
@@ -356,12 +367,12 @@ Whether or not you wired a change, every preference you recorded must survive th
 
 > **Goal:** Capture the preferences you chose in Part 4 directly in the project manifest so every agent — and every subsequent lab — reads the same source of truth for how stages hand off in *your* factory.
 
-### Step 1: Create the coordination channels document
+### Step 1: Create the coordination channels document in your central docs folder
 
-Create `~/Projects/factory/workshop_w3/w3-project/docs/coordination-channels.md` and add a top-level section:
+Author the W3 deliverable directly in the central deliverables folder so it carries forward to every later session install:
 
 ```bash
-touch ~/Projects/factory/workshop_w3/w3-project/docs/coordination-channels.md
+touch ~/Projects/actual-software/software-factory-intensive/docs/coordination-channels.md
 ```
 
 ### Step 2: Add the content to the file
@@ -409,12 +420,13 @@ if the primary is unavailable.
 
 ### Step 3: Commit the document
 
-Commit the document to your repository:
-
 ```bash
+cd ~/Projects/actual-software/software-factory-intensive
 git add docs/coordination-channels.md
-git commit -m "Add Coordination Channels document"
+git commit -m "Add coordination-channels.md (W3 deliverable)"
 ```
+
+Commit on your own branch or fork — the curriculum tracks central deliverables in git. Every later session install (L2, L3, L4, W4, C1) will copy `coordination-channels.md` from the central folder into the new workspace's `docs/` automatically.
 
 ## Exit Criteria
 

@@ -8,6 +8,17 @@
 | **Type** | WORKSHOP |
 | **Deliverable** | `factory-pipeline.md` that encapsulates all of your current agent toolsets, memory, model selections, and other capabilities mapped to the software factory pipeline |
 
+## Deliverable
+
+By the end of this workshop, you will have a single committed file:
+
+- `~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md`, containing:
+  - `## Current Workflow Inventory` — every model, skill, MCP, memory file, knowledge source, CLI, and playbook you currently rely on as a solo AI user.
+  - A six-row mapping table assigning each capability to the Planner / Architect / Designer / Coder / Reviewer / Deployer that should own it (with a `## Shared Knowledge Base` subsection for cross-stage items).
+  - `## Missing Capabilities` — capabilities your factory will need but doesn't yet have, each with a tentative implementation strategy.
+
+You will copy this file forward into L1, W3, L2, L3, and L4 — it is the design source the rest of the curriculum customises against.
+
 ## Overview
 
 When you code solo with an AI assistant, you've already accumulated more than a single chat window: a preferred model (or mix of models), a set of skills or slash commands, one or more MCP servers, a memory file, a knowledge base, some keybindings, a personal playbook in your head. **A software factory is the same set of capabilities — but distributed across specialist agents, hardened into config, and running without a human mediating handoffs.**
@@ -60,27 +71,32 @@ Each stage needs: **a task to act on**, **knowledge sources to consult**, **tool
 /factory-activity-agent install W2
 ```
 
-### Step 2: Copy the `PROJECT_MANIFEST.md` file from your W1 workspace into the W2 workspace
+The install copies the contents of `software-factory-intensive/docs/` (your **central deliverables folder** — see [Central Deliverables Folder](../../../README.md#central-deliverables-folder) in the main README) into `~/Projects/factory/workshop_w2/w2-project/docs/`. Since W2 is the first session that authors a cross-session deliverable, the workspace's `docs/` will be effectively empty unless you've seeded it from the [Backup Project Setup](../../../README.md#backup-project-setup).
+
+### Step 2: Verify the workspace was set up correctly
 
 ```bash
-cp ~/PROJECT_MANIFEST.md ~/Projects/factory/workshop_w2/w2-project/docs/PROJECT_MANIFEST.md
+/factory-activity-agent status W2
+ls ~/Projects/factory/workshop_w2/w2-project/docs/
 ```
 
-### Step 2: Open the W2 project workspace and create the deliverable file
+You should see the W2 agents listed and a `docs/` directory ready to receive your deliverable.
+
+### Step 3: Create the deliverable file in your central docs folder
+
+You will author the W2 deliverable directly in the central docs folder so that every later session install picks it up automatically:
 
 ```bash
-cd ~/Projects/factory/workshop_w2/w2-project
-mkdir -p docs
-touch docs/factory-pipeline.md
+touch ~/Projects/actual-software/software-factory-intensive/docs/factory-pipeline.md
 ```
 
-`docs/factory-pipeline.md` is the single design document you'll write in this workshop. No code, no agents to manage. Later sessions read it from `docs/factory-pipeline.md` — keep it there.
+This is a documentation-only workshop — no code, no agents to manage. Subsequent sessions (`L1`, `W3`, `L2`, …) will read your `factory-pipeline.md` from the central folder when they install, and copy it into their own workspace `docs/`.
 
 ## Part 2: Inventory Your Individual AI Workflow (10 min)
 
 > **Goal:** Produce a concrete list of the capabilities you already rely on so you can place them deliberately in Part 4, rather than losing them when you hand off to a factory.
 
-Open `docs/factory-pipeline.md` and, under a heading `## Current Workflow Inventory`, write a one-line entry for every capability that currently contributes to how you ship code. Be specific: a name the next agent (or you, in three months) could act on.
+Open `~/Projects/actual-software/software-factory-intensive/docs/factory-pipeline.md` (your central deliverable from Step 3) and, under a heading `## Current Workflow Inventory`, write a one-line entry for every capability that currently contributes to how you ship code. Be specific: a name the next agent (or you, in three months) could act on.
 
 Use these buckets as prompts — skip any that don't apply, and add your own when needed:
 
@@ -99,7 +115,7 @@ Use these buckets as prompts — skip any that don't apply, and add your own whe
 > Your agent can help you with this step by asking pointed questions about your workflow and helping you list the capabilities. Try copying the prompt below into your agent's chat and see how it does:
 
 ```
-You are a helpful assistant that helps me list the capabilities that I rely on in my individual AI workflow. Please read ~/Projects/factory/workshop_w2/w2-project/WORKSHOP_2_GUIDE.md and ask me questions to help me with Part 2 of the workshop to fill out ~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md. Please ask the questions one at a time and wait for my response before asking the next question.
+You are a helpful assistant that helps me list the capabilities that I rely on in my individual AI workflow. Please read ~/Projects/actual-software/software-factory-intensive/curriculum/workshops/W2/WORKSHOP_2_GUIDE.md and ask me questions to help me with Part 2 of the workshop to fill out ~/Projects/actual-software/software-factory-intensive/docs/factory-pipeline.md. Please ask the questions one at a time and wait for my response before asking the next question.
 ```
 
 ## Part 3: Read the Pipeline Through the Capability Lens (20 min)
@@ -170,17 +186,20 @@ Once you've explored the missing capability, add it to the table with a note det
 ### Step 2: Commit the deliverable
 
 ```bash
+cd ~/Projects/actual-software/software-factory-intensive
 git add docs/factory-pipeline.md
-git commit -m "Add missing capabilities to factory-pipeline.md"
+git commit -m "Add factory-pipeline.md (W2 deliverable)"
 ```
 
-Commit `docs/factory-pipeline.md`. This file is what you'll use to guide your software factory implementation for the remainder of the curriculum.
+Commit on your own branch or fork — the curriculum tracks central deliverables in git so you have a durable history of how this file evolves across the rest of the sessions.
+
+This file is what you'll use to guide your software factory implementation for the remainder of the curriculum. Every later session install copies it from the central folder into its own workspace's `docs/` automatically.
 
 ## Exit Criteria
 
 Before leaving this workshop, verify all of these:
 
-- [ ] `~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md` exists and is committed
+- [ ] `~/Projects/actual-software/software-factory-intensive/docs/factory-pipeline.md` exists in the central deliverables folder and is committed on your branch
 - [ ] Every capability you inventoried appears in the mapping table or the missing capabilities section
 - [ ] Every agent row has at least `Model` and `Connections` filled in
 - [ ] Every missing capability has a note detailing a tentative implementation strategy

@@ -1,6 +1,4 @@
-# L3 · Deploy Designer + Coder Agents [UNDER CONSTRUCTION]
-
-> **Note:** This lab is under construction. It will be updated in the future.
+# L3 · Deploy Designer + Coder Agents
 
 > **Goal:** Extend your software factory with the next two specialists, and demonstrate that it can now carry a planned feature from concept through to a committed implementation.
 
@@ -63,19 +61,28 @@ Each attached MCP is the bridge between the model's generic knowledge and your t
 
 Creates `~/Projects/factory/lab_l3/l3-project/` and `~/Projects/factory/lab_l3/l3-gc-factory/` with the Planner, Architect, Designer, and Coder packs wired.
 
-### Step 2: Confirm L2 artifacts were carried forward
+### Step 2: Confirm your central docs were seeded and pull in the per-feature artifacts
 
-The install step above bulk-copies `~/Projects/factory/lab_l2/l2-project/` into the L3 workspace — source, manifest, work packages, ADRs, iteration log, factory-pipeline, and coordination-channels all flow through.
-
-Spot-check:
+The install step copies your **central deliverables folder** (`software-factory-intensive/docs/`) into the L3 workspace. Spot-check the docs that flow automatically:
 
 ```bash
-ls ~/Projects/factory/lab_l3/l3-project/docs/         # manifest + docs
-ls ~/Projects/factory/lab_l3/l3-project/work-packages/
-ls ~/Projects/factory/lab_l3/l3-project/docs/adr/
+ls ~/Projects/factory/lab_l3/l3-project/docs/         # manifest + factory-pipeline + coordination-channels + adr/ + factory-iterations
 ```
 
-If L2 wasn't installed, the carry-forward is skipped silently — install L2 first.
+You should see `PROJECT_MANIFEST.md`, `factory-pipeline.md`, `coordination-channels.md`, `factory-iterations.md`, and the `adr/` directory with the ADRs you authored in L2.
+
+Per-feature artifacts from L2 — `work-packages/` and your project source — are *not* in `docs/`, so they aren't carried by the central-docs seed. Pull them in by hand if you want to continue the same feature in L3:
+
+```bash
+cp -R ~/Projects/factory/lab_l2/l2-project/work-packages \
+      ~/Projects/factory/lab_l3/l3-project/
+
+# And any project source / config that the Designer and Coder need to operate against:
+cp -R ~/Projects/factory/lab_l2/l2-project/src \
+      ~/Projects/factory/lab_l3/l3-project/
+```
+
+If anything in `docs/` is missing, see [Backup Project Setup](../../../README.md#backup-project-setup) in the main README.
 
 ### Step 3: Verify the Designer and Coder are up
 
@@ -217,8 +224,6 @@ Every command should pass. If they don't, that's the next iteration input.
 
 If the spec is ambiguous, fix the Designer's prompt (`## Constraints` or the relevant step of `## Work loop`). If the code misses an acceptance criterion, fix the Coder's prompt to require a per-AC test mapping. Re-sling the failed stage.
 
-Log each iteration in `docs/factory-iterations.md` — one line, what changed, what prompt file.
-
 ## Common Issues and Solutions
 
 - **"The Designer spec has no real component names."** The design-system MCP isn't actually being consulted. Check that the prompt explicitly directs the agent to use it, not just lists it as an input.
@@ -233,9 +238,7 @@ Before leaving this lab, verify all of these:
 
 - [ ] `/factory-activity-agent status L3` shows `designer` and `builder` running
 - [ ] Each agent has at least one MCP wired and passing a dry-run
-- [ ] `design/<slug>-spec.md` exists, cites the work package + ADR, and names real components
 - [ ] Coder's commits on a feature branch pass the project's own test / lint / build gates
-- [ ] At least one iteration logged in `docs/factory-iterations.md` since L2
 
 ## Quick Reference: What You Built
 

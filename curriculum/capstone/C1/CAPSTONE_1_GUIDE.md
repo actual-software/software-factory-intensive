@@ -1,6 +1,4 @@
-# C1 · Run the Software Factory End-to-End [UNDER CONSTRUCTION]
-
-> **Note:** This capstone is under construction. It will be updated in the future.
+# C1 · Run the Software Factory End-to-End
 
 > **Goal:** Demonstrate your understanding of the software factory pipeline by running an unfamiliar feature request through your complete software factory, guided entirely by the configuration you have assembled.
 
@@ -69,22 +67,31 @@ Through this capstone you will:
 
 Creates `~/Projects/factory/capstone_c1/c1-project/` and `~/Projects/factory/capstone_c1/c1-gc-factory/` with all six packs wired.
 
-### Step 2: Confirm every prior artifact was carried forward
+### Step 2: Confirm your central docs were seeded and pull in every per-feature artifact
 
-The install step above pulls **everything** in. Specifically:
-
-1. Bulk-copies `~/Projects/factory/lab_l4/l4-project/` into the C1 workspace — every stage artifact from the L2→L4 runs plus your source tree.
-2. Overlays `docs/improvement-criteria.md` from W4.
-
-Spot-check:
+The install step copies your **central deliverables folder** (`software-factory-intensive/docs/`) into the C1 workspace. The cross-session docs flow automatically:
 
 ```bash
-ls ~/Projects/factory/capstone_c1/c1-project/docs/         # improvement-criteria.md + manifest
+ls ~/Projects/factory/capstone_c1/c1-project/docs/
+```
+
+You should see every authored deliverable: `PROJECT_MANIFEST.md`, `factory-pipeline.md`, `coordination-channels.md`, `improvement-criteria.md` (from W4), `factory-iterations.md`, and the `adr/` directory.
+
+Per-feature artifacts (`work-packages/`, `design/`, `review-reports/`, `release-gates/`) and your project source live outside `docs/`, so pull them in from L4:
+
+```bash
+for dir in work-packages design review-reports release-gates src; do
+  cp -R ~/Projects/factory/lab_l4/l4-project/$dir \
+        ~/Projects/factory/capstone_c1/c1-project/
+done
+
 ls ~/Projects/factory/capstone_c1/c1-project/design/
 ls ~/Projects/factory/capstone_c1/c1-project/work-packages/
 ls ~/Projects/factory/capstone_c1/c1-project/review-reports/
 ls ~/Projects/factory/capstone_c1/c1-project/release-gates/
 ```
+
+If anything in `docs/` is missing, see [Backup Project Setup](../../../README.md#backup-project-setup) in the main README.
 
 ### Step 3: Mirror any pack customization from L2–L4
 
@@ -172,8 +179,6 @@ You are *not* allowed to:
 - Type implementation content into the agent's chat ("also add an auth check here")
 - Hand-edit the artifact the agent produced
 - Skip a stage (if a stage's artifact is wrong, fix it through that stage, not by bypassing it)
-
-Record each intervention in `docs/factory-iterations.md` exactly as you did in L2–L4.
 
 ### Step 5: Wait for `release-gates/<slug>-gate.md` to land with overall PASS
 
@@ -268,6 +273,3 @@ After C1, the factory is yours to run on real work. The habits that matter most 
 - **Keep the iteration log alive.** Every prompt edit you make in the weeks ahead deserves a line.
 - **Run W4's loop on a cadence.** Pick at least one criterion to review per sprint.
 - **Grow the manifest deliberately.** When a new recurring review finding appears, promote it to a Review Standard. When a new deploy gate becomes mandatory, add it to Release Criteria.
-- **Tear down cleanly.** When you're done with a given workspace, `/factory-activity-agent delete <session>` keeps `~/Projects/factory/` tidy. The configuration you care about lives in your project repo, not in the per-session workspaces.
-
-The curriculum's participant Slack (see the repo README) is where other participants share the configurations that worked for them. If you ship something interesting from your capstone — or get stuck — that's the place.

@@ -1,6 +1,4 @@
-# L4 · Deploy Reviewer + Deployer Agents [UNDER CONSTRUCTION]
-
-> **Note:** This lab is under construction. It will be updated in the future.
+# L4 · Deploy Reviewer + Deployer Agents
 
 > **Goal:** Complete your software factory by adding its final two specialists, and tie the output back to the `PROJECT_MANIFEST.md` as a reference for the Review and Release criteria.
 
@@ -9,6 +7,20 @@
 | **Estimated duration** | ~75 minutes |
 | **Type** | LAB |
 | **Deliverable** | Working Reviewer + Deployer (DevOps) agents, with the `PROJECT_MANIFEST.md` as a reference for the Review and Release criteria |
+
+## Deliverable
+
+By the end of this lab, you will have:
+
+- A factory at `~/Projects/factory/lab_l4/l4-gc-factory/` with **all six stages** running.
+- `docs/PROJECT_MANIFEST.md` populated with:
+  - `## Review Standards` — at least four categories of checkable rules (Style, Security, Correctness, …) plus a severity scale that maps to APPROVE / REQUEST_CHANGES.
+  - `## Release Criteria` — at least six binary PASS/FAIL gates, each with a named evidence source (CI logs, test output, work-package checklist, etc.).
+- Reviewer and Deployer prompts that explicitly cite their manifest section as authoritative (no inventing rules outside the manifest).
+- For one real feature: `review-reports/<slug>-review.md` and `release-gates/<slug>-gate.md`, with every Reviewer finding citing a Review Standards rule and every Deployer row resolving to PASS or FAIL with evidence.
+- Evidence that a manifest edit visibly changes a verdict — proving the manifest is load-bearing, not decorative.
+
+The `review-reports/` and `release-gates/` directories become the primary signal source W4 reads from.
 
 ## Overview
 
@@ -67,19 +79,33 @@ The arrow from the Reviewer to the Coder (if the verdict is REQUEST_CHANGES) is 
 
 Creates `~/Projects/factory/lab_l4/l4-project/` and `~/Projects/factory/lab_l4/l4-gc-factory/` with all six packs wired.
 
-### Step 2: Confirm L3 artifacts were carried forward
+### Step 2: Confirm your central docs were seeded and pull in the per-feature artifacts
 
-The install step above bulk-copies `~/Projects/factory/lab_l3/l3-project/` into the L4 workspace — source and feature branch, manifest, work packages, ADRs, design specs, iteration log, factory-pipeline, and coordination-channels all flow through.
-
-Spot-check:
+The install step copies your **central deliverables folder** (`software-factory-intensive/docs/`) into the L4 workspace. Spot-check what flows automatically:
 
 ```bash
-ls ~/Projects/factory/lab_l4/l4-project/design/
+ls ~/Projects/factory/lab_l4/l4-project/docs/         # manifest + factory-pipeline + coordination-channels + adr/ + factory-iterations
 ls ~/Projects/factory/lab_l4/l4-project/docs/adr/
-git -C ~/Projects/factory/lab_l4/l4-project log --oneline -5   # prior commits present
 ```
 
-If L3 wasn't installed, the carry-forward is skipped silently — install L3 first.
+You should see `PROJECT_MANIFEST.md` (with the L4 additions you'll make in Part 3 still pending), `factory-pipeline.md`, `coordination-channels.md`, `factory-iterations.md`, and the ADRs from L2.
+
+Per-feature artifacts from L3 — the feature branch source, `work-packages/`, and `design/` — live outside `docs/` and are *not* auto-carried. Pull them in so the Reviewer has something to evaluate:
+
+```bash
+cp -R ~/Projects/factory/lab_l3/l3-project/work-packages \
+      ~/Projects/factory/lab_l4/l4-project/
+
+cp -R ~/Projects/factory/lab_l3/l3-project/design \
+      ~/Projects/factory/lab_l4/l4-project/
+
+# Plus the project source + feature branch the Coder produced:
+cp -R ~/Projects/factory/lab_l3/l3-project/src \
+      ~/Projects/factory/lab_l4/l4-project/
+git -C ~/Projects/factory/lab_l4/l4-project log --oneline -5   # confirm the branch state
+```
+
+If anything in `docs/` is missing, see [Backup Project Setup](../../../README.md#backup-project-setup) in the main README.
 
 ### Step 3: Verify all six stages are up
 
@@ -227,9 +253,7 @@ Read `release-gates/<slug>-gate.md`. Every row from Release Criteria must be pre
 
 Change one rule in Review Standards (tighten it — e.g. lower the severity threshold for an existing rule) and re-sling the Reviewer. The verdict should change. If it does not, the Reviewer isn't actually consuming the manifest — fix the prompt wiring before moving on.
 
-Do the same for Release Criteria: add a criterion (e.g. "bundle size delta < 5%") and re-sling the Deployer. The new row must appear in `release-gates/<slug>-gate.md`.
-
-Log both iterations in `docs/factory-iterations.md`.
+Do the same for Release Criteria: add a criterion (e.g. "bundle size delta < 5%") and re-sling the Deployer. The new row should appear in `release-gates/<slug>-gate.md`.
 
 ## Common Issues and Solutions
 

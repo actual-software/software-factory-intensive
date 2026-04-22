@@ -753,6 +753,34 @@ def install(activity, dry_run=False, clone_url=None):
         run(["mkdir", "-p", str(rig_docs)], dry_run=dry_run)
         run(["rsync", "-a", f"{docs_src}/", f"{rig_docs}/"], dry_run=dry_run)
 
+    # Seed central docs (cross-session participant deliverables) into the rig.
+    # The participant edits these in software-factory-intensive/docs/ across
+    # sessions; this step copies them into each new workspace so subsequent
+    # cp-between-workspaces steps in the curriculum guides are unnecessary.
+    #
+    # W1 is special-cased: it runs against the Fired Up Pizza reference
+    # project, so its central source is reference-project/fired-up-pizza/docs/
+    # rather than the participant-edited software-factory-intensive/docs/.
+    #
+    # Reference docs (factory-activity-agent.md, labeled-beads.md) live in
+    # software-factory-intensive/docs/ alongside the deliverables, but they
+    # are curriculum content (not project content) and are excluded from the
+    # seed so agents don't read them as if they were project documentation.
+    if activity == "W1":
+        central_docs_src = SFI_DIR / "reference-project" / "fired-up-pizza" / "docs"
+    else:
+        central_docs_src = SFI_DIR / "docs"
+
+    if central_docs_src.exists():
+        print("\n##### Seed Central Docs")
+        rig_docs = project_dir / "docs"
+        run(["mkdir", "-p", str(rig_docs)], dry_run=dry_run)
+        rsync_cmd = ["rsync", "-a"]
+        for excluded in ("factory-activity-agent.md", "labeled-beads.md"):
+            rsync_cmd.extend(["--exclude", excluded])
+        rsync_cmd.extend([f"{central_docs_src}/", f"{rig_docs}/"])
+        run(rsync_cmd, dry_run=dry_run)
+
     # For W1 (Fired Up Pizza), seed the rig with the initial ticket set and
     # the import script so the workshop guide can exercise the full
     # tickets.md → bd create --label needs-plan → Planner flow.

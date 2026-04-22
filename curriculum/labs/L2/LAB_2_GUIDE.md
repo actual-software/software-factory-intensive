@@ -12,10 +12,12 @@
 
 L1 connected a 6-agent factory to your project and explained how to think about updating the capabilities of your software factory agents. Now, you are going to apply that knowledge to build uniquely-customized Planner and Architect agents with Skills and CLI tools. You'll install the Planner and Architect, attach a real capability to each (a skill, a CLI tool, or both), and demonstrate that those capabilities change the quality of the artifacts the stages produce.
 
-In this lab you will:
-- Install and run the Planner and Architect against your software project
-- Equip each agent with at least one skill or CLI capability
-- Trace a single feature from its source through Planner → Architect, taking advantage of the custom capabilities you have added to the agents
+By the end of this lab, you will have:
+
+- A factory at `~/Projects/factory/lab_l2/l2-gc-factory/` with the **Planner** and **Architect** packs configured against your project (other stages installed but idle).
+- At least one capability wired into each of the two agents:
+  - Planner: a Skill or CLI named under `## Inputs you consume` in `packs/planner/prompts/planner.md.tmpl` (e.g. Linear/Jira MCP, `actual status`, a custom `/scope-check` skill).
+  - Architect: a Skill or CLI named in `packs/architect/prompts/architect.md.tmpl` (e.g. `actual adr-bot`, a standards-library MCP, Context7).
 
 ## What You'll Build
 
@@ -26,22 +28,22 @@ In this lab you will:
    ┌────────────────────┐
    │   Planner (L2)     │    ←  Skill/CLI: e.g. backlog CLI tool,
    │                    │       `actual`, a team-specific
-   │   produces:        │       research skill
+   │   produces:        │       research skill, or other capability
    │   work-packages/   │
    │     <slug>.md      │
    └──────────┬─────────┘
-              │  handoff (via files + work items)
+              │  handoff (via `needs-architecture` label)
               ▼
    ┌────────────────────┐
    │  Architect (L2)    │    ←  skill/CLI: e.g. ADR seeding
    │                    │       (`actual adr-bot`), a
-   │   produces:        │       standards-library CLI
+   │   produces:        │       standards-library CLI, or other capability
    │   docs/adr/        │
    │     NNNN-<slug>.md │
    └────────────────────┘
 ```
 
-Each stage will have access to: **the manifest** (what to honor), **the task input** (what to work on), and **a capability** (what to use to accomplish the task). The capability is the part that distinguishes a generic agent "playing the role" from a true customized agent.
+Each stage will have access to: **the manifest** (what to honor), **the task input** (what to work on), and **a capability** (what to use to accomplish the task). Capabilities are one of the many parts that distinguish generic agents "playing the role" from true customized agents.
 
 ## Part 1: Install the L2 Factory (10 min)
 
@@ -54,26 +56,16 @@ Each stage will have access to: **the manifest** (what to honor), **the task inp
 /factory-activity-agent install L2
 ```
 
-### Step 2: Carry forward L1 + W3 artifacts
-
-```bash
-cp ~/Projects/factory/lab_l1/l1-project/docs/PROJECT_MANIFEST.md \
-   ~/Projects/factory/lab_l2/l2-project/docs/PROJECT_MANIFEST.md
-
-cp ~/Projects/factory/workshop_w3/w3-project/docs/coordination-channels.md \
-   ~/Projects/factory/lab_l2/l2-project/docs/coordination-channels.md
-
-```
-
-If either L1 or W3 wasn't installed, the matching carry-forward should be skipped — install whichever is missing from the baseline or reference set before continuing.
-
-### Step 3: Verify the Planner and Architect are up
+### Step 2: Verify the Planner and Architect are up and your central docs were seeded
 
 ```bash
 /factory-activity-agent status L2
+ls ~/Projects/factory/lab_l2/l2-project/docs/
 ```
 
-You should see `planner` and `architect` listed. Other stages are installed but idle — you'll activate them in L3 and L4.
+You should see `planner` and `architect` in the agent listing (other stages installed but idle — you'll activate them in L3 and L4). The `docs/` listing should include `PROJECT_MANIFEST.md` (from L1), `factory-pipeline.md` (from W2), and `coordination-channels.md` (from W3) — all auto-seeded from your **central deliverables folder** (`software-factory-intensive/docs/`).
+
+If a deliverable is missing, you skipped the prior session — go author it in the central folder, or populate the reference set via [Backup Project Setup](../../../README.md#backup-project-setup) in the main README.
 
 ## Part 2: Read the Planner and Architect (10 min)
 
@@ -188,8 +180,6 @@ At least one of the two artifacts will have a problem — stories that don't ref
 2. Edit the prompt file in the pack.
 3. Restart the factory.
 4. Re-sling the failed stage. The agent should produce the correct artifact on the second run.
-
-Log the iteration briefly in `docs/factory-iterations.md` — one line per edit, the change in one sentence, the file path. This log becomes the evidence that customization is working and the seed for W4's improvement loops.
 
 ## Exit Criteria
 

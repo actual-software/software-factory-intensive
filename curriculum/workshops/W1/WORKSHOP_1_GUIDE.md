@@ -9,6 +9,17 @@ Prepare your environment to be software factory-ready, and demonstrate it by run
 | **Type** | Workshop |
 | **Deliverable** | A running Fired Up Pizza factory on your machine, with a set of initial tasks being processed by agents |
 
+## Deliverable
+
+By the end of this workshop, you will have:
+
+- The `factory-activity-agent` skill installed in your coding agent and reachable as `/factory-activity-agent`.
+- A running 6-agent factory at `~/Projects/factory/workshop_w1/w1-gc-factory/` operating against the Fired Up Pizza reference project at `~/Projects/factory/workshop_w1/w1-project/`.
+- The FUP-1 … FUP-6 backlog imported as beads and visibly moving through Planner → Architect → Designer → Coder → Reviewer → Deployer.
+- Hands-on familiarity with the three observability surfaces (web dashboard, `bd`, `gc events --follow`) you will use for the rest of the curriculum.
+
+W1 runs against the reference project so nothing produced here is required as input to later sessions — the workshop is the warmup. The skill install, however, is assumed by every session after this one.
+
 ## Overview
 
 In this workshop, you'll get hands-on with a 6-agent software factory using the Gas City framework and this repo. The high-level goal: demonstrate how feature requests flow through Planner, Architect, Designer, Builder (Coder), Reviewer, and Deployer for the **Fired Up Pizza** project, with each agent using labels to manage task status and handing off work without human intervention.

@@ -62,9 +62,43 @@ git clone https://github.com/actual-software/software-factory-intensive.git ~/Pr
 
 ### 5. Software Project Overview
 
-You should bring a real software project to build your factory around. Before starting the curriculum, write a **Project Overview** for it using [`PROJECT_OVERVIEW_TEMPLATE.md`](PROJECT_OVERVIEW_TEMPLATE.md) — a loosely structured document that answers a few questions about the project. Your local coding agent will generate the Project Manifest and Software Factory Manifest from this document. You can see [`reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md`](reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md) for a completed example.
+You should bring a real software project to build your factory around. Before starting the curriculum, write a **Project Overview** for it using [`PROJECT_OVERVIEW_TEMPLATE.md`](PROJECT_OVERVIEW_TEMPLATE.md) — a loosely structured document that answers a few questions about the project. Save it as `docs/PROJECT_OVERVIEW.md` inside your local clone of this repo (i.e. `~/Projects/actual-software/software-factory-intensive/docs/PROJECT_OVERVIEW.md`) — that path is the **central deliverables folder** the rest of the curriculum reads from and writes to. You can see [`reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md`](reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md) for a completed example.
 
-During the intensive, you will use a [Manifest Generator Skill](https://github.com/audiojak/manifest-generator) to go from your project overview to a coherent, structured `PROJECT_MANIFEST.md` file that the software factory agents read from.
+### 6. Generate a `PROJECT_MANIFEST.md` and `SOFTWARE_FACTORY_MANIFEST.md`
+
+Download the [Manifest Generator Skill](https://github.com/audiojak/manifest-generator) and run it with your `PROJECT_OVERVIEW.md` file as input. The skill will facilitate the steps to go from your project overview to a coherent, structured `PROJECT_MANIFEST.md` file. The skill will also generate a `SOFTWARE_FACTORY_MANIFEST.md` file that maps out the software factory pipeline. Save the generated manifests as `docs/PROJECT_MANIFEST.md` and `docs/SOFTWARE_FACTORY_MANIFEST.md` in the same central folder.
+
+---
+
+## Central Deliverables Folder
+
+Every cross-session deliverable you author during the curriculum (`PROJECT_MANIFEST.md`, `SOFTWARE_FACTORY_MANIFEST.md`, `factory-pipeline.md`, `coordination-channels.md`, `improvement-criteria.md`, `factory-iterations.md`) lives in one place: **`software-factory-intensive/docs/`** in your local clone of this repo.
+
+When you run `/factory-activity-agent install <session>`, the install script will copy everything from `software-factory-intensive/docs/` into the new session's `~/Projects/factory/<slug>/<workspace>-project/docs/` automatically. This means you do not need to copy documents between session workspaces — you author once at the central path, and every later session install picks the file up.
+
+These deliverables can be tracked in git if you `commit` them on your own branch (or fork) as you author them. That gives you durable history of how each deliverable evolved across sessions, plus the option to share your run with teammates or compare against the reference.
+
+> **Special case — W1**: `W1` runs against the **Fired Up Pizza** reference project. The install script seeds W1's workspace from `reference-project/fired-up-pizza/docs/` instead of `software-factory-intensive/docs/`, so W1 always uses the canonical reference manifest regardless of what you've authored.
+
+## Backup Project Setup
+
+If you don't want to bring your own project — or you want a known-good fallback — use the **Fired Up Pizza** reference project as a substitute. There are two pieces to copy in.
+
+To skip authoring deliverables and use the reference set instead:
+
+```bash
+cp -R /path/to/software-factory-intensive/reference-project/fired-up-pizza/docs/. \
+      /path/to/software-factory-intensive/docs/
+```
+
+You can also cherry-pick. For example, copy only `factory-pipeline.md` if you want to skip W2 but author the rest yourself:
+
+```bash
+cp /path/to/software-factory-intensive/reference-project/fired-up-pizza/docs/factory-pipeline.md \
+   /path/to/software-factory-intensive/docs/
+```
+
+The reference set covers every cross-session deliverable: `PROJECT_OVERVIEW.md`, `PROJECT_MANIFEST.md`, `factory-pipeline.md`, `coordination-channels.md`, `improvement-criteria.md`, `factory-iterations.md`, plus an example `adr/` and `gates/`. From the next install onwards, your session workspaces pick these up automatically.
 
 ---
 
@@ -120,17 +154,20 @@ When an agent produces wrong output, update its config file and re-run — don't
 
 ## Session Map (in order of completion)
 
-| ID | Type | Estimated Duration | Title |
-|----|------|--------------------|-------|
-| [W1](curriculum/workshops/W1/WORKSHOP_1_GUIDE.md) | Workshop | ~60 min | Run the 6-Agent Software Factory |
-| [W2](curriculum/workshops/W2/WORKSHOP_2_GUIDE.md) | Workshop | ~45 min | From Individual AI Workflow to Software Factory Pipeline |
-| [L1](curriculum/labs/L1/LAB_1_GUIDE.md) | Lab | ~60 min | Build a Structured Development Loop |
-| [W3](curriculum/workshops/W3/WORKSHOP_3_GUIDE.md) | Workshop | ~45 min | Architect Multi-Agent Coordination |
-| [L2](curriculum/labs/L2/LAB_2_GUIDE.md) | Lab | ~75 min | Deploy Planner + Architect Agents |
-| [L3](curriculum/labs/L3/LAB_3_GUIDE.md) | Lab | ~75 min | Deploy Designer + Coder Agents |
-| [L4](curriculum/labs/L4/LAB_4_GUIDE.md) | Lab | ~75 min | Deploy Reviewer + Deployer Agents |
-| [W4](curriculum/workshops/W4/WORKSHOP_4_GUIDE.md) | Workshop | ~45 min | Create Continuous Improvement Loops |
-| [C1](curriculum/capstone/C1/CAPSTONE_1_GUIDE.md) | Capstone Lab | ~90 min | Run the Software Factory End-to-End |
+Each session has a concrete deliverable — what you should walk away having produced. The summary column below is the at-a-glance version; each guide opens with a full `## Deliverable` section that names the exact files, paths, and runtime state.
+
+| ID | Type | Duration | Title | Deliverable |
+|----|------|----------|-------|-------------|
+| `O1` | Orientation | ~30 min | Factory Roadmap for Your Project | `docs/PROJECT_MANIFEST.md` and `docs/SOFTWARE_FACTORY_MANIFEST.md` |
+| [W1](curriculum/workshops/W1/WORKSHOP_1_GUIDE.md) | Workshop | ~60 min | Run the 6-Agent Software Factory | Reference factory running against Fired Up Pizza and the `factory-activity-agent` skill installed |
+| [W2](curriculum/workshops/W2/WORKSHOP_2_GUIDE.md) | Workshop | ~45 min | From Individual AI Workflow to Software Factory Pipeline | `docs/factory-pipeline.md` |
+| [L1](curriculum/labs/L1/LAB_1_GUIDE.md) | Lab | ~60 min | Build a Structured Development Loop | A 6-agent factory installed against **your** project |
+| [W3](curriculum/workshops/W3/WORKSHOP_3_GUIDE.md) | Workshop | ~45 min | Architect Multi-Agent Coordination | `docs/coordination-channels.md` |
+| [L2](curriculum/labs/L2/LAB_2_GUIDE.md) | Lab | ~75 min | Deploy Planner + Architect Agents | Planner and Architect each equipped with at least one Skill/CLI capability |
+| [L3](curriculum/labs/L3/LAB_3_GUIDE.md) | Lab | ~75 min | Deploy Designer + Coder Agents | Designer and Coder each equipped with at least one MCP |
+| [L4](curriculum/labs/L4/LAB_4_GUIDE.md) | Lab | ~75 min | Deploy Reviewer + Deployer Agents | Reviewer and Deployer reading their manifest sections (Review Standards + Release Criteria) |
+| [W4](curriculum/workshops/W4/WORKSHOP_4_GUIDE.md) | Workshop | ~45 min | Create Continuous Improvement Loops | `docs/improvement-criteria.md` |
+| [C1](curriculum/capstone/C1/CAPSTONE_1_GUIDE.md) | Capstone Lab | ~90 min | Run the Software Factory End-to-End | All 6 custom agents wired together as a complete software factory running against your software project |
 
 ---
 

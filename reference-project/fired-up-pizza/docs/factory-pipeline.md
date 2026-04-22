@@ -121,13 +121,3 @@ strategy is noted so L1–L4 can close them.
 | **Accessibility scanner** | Reviewer caught missing `aria-live` / `aria-busy` manually on two runs (loyalty-points, order-history) — neither was spec-mandated | Reviewer | Add `axe-core` under `npm run a11y` and run during review; elevate Low-severity a11y findings to Medium after one grace release |
 | **Cross-stage observability** | `gc events` shows per-agent turns but not end-to-end feature latency (slings-per-feature, time-in-review) | All stages (shared) | Emit a single event stream keyed by bead ID; surface a dashboard from `gc session list --bead <id>`. Shared manifest item, not per-agent |
 | **Prompt-edit promotion threshold** | The Order-History retro asked: "when does a `DECISIONS.md` entry become a `feedback-loops/` rule?" — still unanswered | Shared (process, not agent) | Rule of thumb: promote after the same correction recurs across two features. Encode in the retrospective-card template |
-
----
-
-## References
-
-- [`workflow-card.md`](../workflow-card.md) — the solo-AI workflow this maps out of
-- [`docs/PROJECT_MANIFEST.md`](./PROJECT_MANIFEST.md) — shared project context
-- [`CLAUDE.md`](../CLAUDE.md) — cross-cutting agent rules
-- [`orchestrator.yaml`](../orchestrator.yaml) — the W3 artifact that wires these stages together
-- [`DECISIONS.md`](../DECISIONS.md) — running log of pack-prompt edits
