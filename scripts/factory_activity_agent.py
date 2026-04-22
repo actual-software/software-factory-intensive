@@ -643,6 +643,18 @@ def install(activity, dry_run=False, clone_url=None):
     run(["gc", "doctor", "--fix"], dry_run=dry_run, check=False)
 
     # --- Step 4: Add Rig ---
+    # Sweep stale session beads BEFORE gc rig add so the reconciler starts
+    # clean. Must happen before rig add because gc rig add triggers its own
+    # internal restart cycle (unregister → register → start), which is the
+    # LAST restart during install. A second explicit gc stop/start after rig
+    # add would wipe the rig's beads database: gc rig add stores the rig DB
+    # in the rig's .beads/embeddeddolt/, but the city's Dolt server data_dir
+    # only covers the city's .beads/dolt/. The internal restart in gc rig add
+    # registers both; a subsequent stop/start regenerates the server config
+    # with only the city data_dir, losing the rig DB.
+    print("\n##### Sweep stale sessions")
+    close_stale_sessions(factory_dir, dry_run=dry_run)
+
     print("\n##### Add Rig")
     project_name = f"{alias_lower}-project"
     run(
@@ -683,28 +695,15 @@ def install(activity, dry_run=False, clone_url=None):
             )
         city_toml_dest.write_text(content)
 
-    # --- Step 5: Restart Factory ---
-    # Sweep stale session beads BEFORE restart so the reconciler
-    # starts clean and doesn't see orphaned sessions from a previous install.
-    print("\n##### Sweep stale sessions")
-    close_stale_sessions(factory_dir, dry_run=dry_run)
-
-    # Start the factory so gc manages the Dolt server lifecycle.
-    # Use stop → start (not restart) to avoid config-drift: gc restart
-    # does an unregister/register cycle that changes the config hash,
-    # which would immediately drain any sessions just spawned.
-    print("\n##### Restart Factory")
-    run(["gc", "stop"], cwd=str(factory_dir), dry_run=dry_run, check=False)
-    run(["gc", "start"], cwd=str(factory_dir), dry_run=dry_run, check=False)
-
-    # Wait for the reconciler to finish spawning sessions before proceeding.
-    # This ensures agents are active before we sling work, and catches any
-    # orphaned session beads created during the restart.
+    # --- Step 5: Wait for reconciler ---
+    # gc rig add's internal restart is the last restart during install.
+    # Wait for the reconciler to settle so agents are active before we
+    # sling work, and catch any orphaned session beads from the restart.
     wait_for_reconciler(factory_dir, dry_run=dry_run)
 
     # --- Step 6: Register custom bead types ---
     # gc doctor --fix registers all required types (molecule, session, convoy, etc.)
-    # Must run after gc start so the Dolt server is available.
+    # Must run after gc rig add so the rig's Dolt database is accessible.
     print("\n##### Register custom bead types")
     run(
         ["gc", "doctor", "--fix"],
