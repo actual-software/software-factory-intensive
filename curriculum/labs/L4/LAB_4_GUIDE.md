@@ -35,8 +35,6 @@ Through this lab you will:
 - Wire each agent to its manifest section and verify that changes to the manifest change the agent's verdicts
 - Exercise the full Reviewer → Deployer handoff on the feature branch you produced in L3
 
-> **Fired Up Pizza reference:** The reference project has a complete Review Standards and Release Criteria pair in [`reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md`](../../../reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md), plus example outputs at [`reference-project/fired-up-pizza/review-reports/`](../../../reference-project/fired-up-pizza/review-reports/) and [`reference-project/fired-up-pizza/release-gates/`](../../../reference-project/fired-up-pizza/release-gates/). Use them to see the *shape*; your standards and criteria must come from your team.
-
 ## What You'll Build
 
 ```
@@ -288,9 +286,3 @@ Before leaving this lab, verify all of these:
 **[W4](../../workshops/W4/WORKSHOP_4_GUIDE.md)** introduces continuous improvement loops — the practice of feeding signals from finished runs back into your configuration so each run produces better outputs than the last. Your L4 review reports and release gates are the primary signal source.
 
 **[C1](../../capstone/C1/CAPSTONE_1_GUIDE.md)** is the capstone run — an unfamiliar feature request sent end-to-end through the factory you just completed.
-
-Bring to W4:
-
-- [ ] A running L4 factory with at least one complete Planner → Deployer run
-- [ ] `review-reports/` and `release-gates/` with real content
-- [ ] Your iteration log covering L2 → L4 edits

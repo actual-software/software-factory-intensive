@@ -35,10 +35,13 @@ Task status transitions are the primary answer you already saw, but they are not
 Gas City exposes each of these as a named primitive. Pick the wrong one for a handoff and the factory stalls silently; pick a mix without a clear owner per handoff and agents race, duplicate, or loop forever. W3 is where you learn the channels the curriculum ships with, exercise each one hands-on, and decide which channel you want carrying which handoff in *your* factory. Other factories may add more — what matters is that every handoff has *some* named channel and every channel has *some* owner.
 
 Through this workshop you will:
+
 - Read about the coordination channels shipped with the curriculum and the role each one plays
 - Install the W3 factory and exercise every channel with live commands — see how each one actually behaves
 - Decide which channel you prefer for each meaningful handoff between agents in your factory
 - Record those preferences in `docs/coordination-channels.md` so L2–L4 inherit them
+
+> **Fired Up Pizza reference:** The reference project has a completed `coordination-channels.md` you can view at [`reference-project/fired-up-pizza/docs/coordination-channels.md`](../../../reference-project/fired-up-pizza/docs/coordination-channels.md). Use it as an example of how each agent-to-agent handoff is assigned to a specific channel and owner.
 
 ## Coordination Channels in This Factory
 

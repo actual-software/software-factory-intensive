@@ -23,19 +23,27 @@ manifest-section tightening is overdue.
 | 2026-04-12 | Coder     | `packs/actual/builder/prompts/builder.md.tmpl`                              | Final-step hard gate: `npm run lint && npm run type-check` must exit 0 before flipping bead to `needs-review`         | **Loop 1** — Criterion 3 (lint regressions to zero) |
 | 2026-04-14 | Reviewer  | `packs/actual/reviewer/prompts/reviewer.md.tmpl`                            | Added per-AC test mapping requirement: every acceptance criterion in the work package must be matched to a test       | Criterion 4 (AC-test coverage at first review) |
 | 2026-04-15 | (channel) | `packs/actual/improver/formulas/orders/improver-cooldown/order.toml`        | Cooldown shortened from `24h` to `6h` so feedback signals surface within one working day                              | Faster loop iteration on improvement criteria |
-| 2026-04-18 | Planner   | *(planned, not yet applied)* `packs/actual/planner/prompts/planner.md.tmpl` | **Loop 2 lever** — require an explicit "Happy path narrative" subsection in every work package (3–5 concrete actions) | Criterion 1 (review loop-backs ≤1 of 5) |
+| 2026-04-18 | Planner   | *(deferred — see c1-run-report)* `packs/actual/planner/prompts/planner.md.tmpl` | **Loop 2 lever (deferred)** — require a "Happy path narrative" subsection in every work package. Criterion 1 was already at target on the C1 run, so this lever was de-prioritised in favour of the Criterion 2 lever queued below. | Criterion 1 (review loop-backs ≤1 of 5) |
+| 2026-04-19 | Reviewer  | `docs/PROJECT_MANIFEST.md → Review Standards → Security`                    | **C1 intervention 1** — added rule: "Free-form user input rendered in staff views must be sanitized against XSS." Reviewer initially missed an unsanitized render in the order-notes feature; rule was added and Reviewer re-slung. | Criterion 2 (High-severity findings → 0) |
+| 2026-04-19 | Coder     | `packs/actual/builder/prompts/builder.md.tmpl`                              | **C1 intervention 2** — pre-flight: any new React prop accepting freeform strings must either be sanitized at the API boundary or document its sanitizer at render. Triggered after the Coder reached for `dangerouslySetInnerHTML` post-Reviewer-flag. | Criterion 2 (High-severity findings → 0) |
+| 2026-04-19 | Coder     | *(planned, queued by C1)* `packs/actual/builder/prompts/builder.md.tmpl → ## Pre-flight checks` | **Loop 2 lever (new — promoted by C1)** — any new surface accepting freeform user input must include a Zod schema validating length + character set, *or* an explicit sanitizer call at render, *or* a justification in the commit message. Promotes the C1 in-run intervention into a permanent pre-flight check. | Criterion 2 (eliminate repeat High-severity XSS findings on first review) |
 
 ---
 
 ## Patterns surfaced from this log
 
-- **Reviewer is the most-edited stage** (5 edits). The bottleneck is the
+- **Reviewer is the most-edited stage** (6 edits). The bottleneck is the
   manifest's Review Standards section catching up to the team's tacit rules,
-  not the Reviewer prompt itself. Most recent two edits were manifest-side.
-- **Coder edits cluster on hard gates** (3 edits). Lint, type-check, and
-  schema introspection were all originally guidelines and had to become
-  blocking. Pattern: anything the Reviewer flags repeatedly gets promoted
-  to a Coder pre-flight gate.
+  not the Reviewer prompt itself. The most recent three edits were
+  manifest-side; the C1 run added another.
+- **Coder edits cluster on hard gates** (5 edits). Lint, type-check, schema
+  introspection, and now input-sanitization were all originally guidelines
+  and had to become blocking. Pattern: anything the Reviewer flags
+  repeatedly gets promoted to a Coder pre-flight gate.
 - **Channel-level change** (improver cooldown) had outsized effect — feedback
   rules now surface same-day. Worth checking whether the supervisor / nudge
   cadences need a similar tightening.
+- **C1 surfaced a meta-pattern**: in-run interventions to *catch* a problem
+  (the 2026-04-19 Reviewer + Coder edits) are a strong leading indicator of
+  the next planned loop. Promote them to permanent pre-flight checks rather
+  than leaving them as ad-hoc tightenings — see the new Loop 2 row above.

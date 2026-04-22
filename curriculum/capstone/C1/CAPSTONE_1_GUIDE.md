@@ -6,7 +6,7 @@
 |---|---|
 | **Estimated duration** | ~90 minutes |
 | **Type** | CAPSTONE |
-| **Deliverable** | 6-agent software factory applied to an unfamiliar feature request, with a high-quality feature produced for your software project |
+| **Deliverable** | 6-agent software factory applied to an unfamiliar feature request, with a high-quality feature produced for your software project, and a `docs/c1-run-report.md` and `docs/factory-iterations.md` |
 
 ## Overview
 
@@ -15,13 +15,14 @@ Every session so far asked you to *build* a part of the factory. The capstone as
 You will pick a feature you have not already run through the factory. You will put it in front of the Planner the same way a real request arrives — via the source wired in L1 — and watch the pipeline carry it through all six stages with only the interventions your configuration already licenses.
 
 Through this capstone you will:
+
 - Submit one feature request the factory has never seen
 - Observe all six stages produce their artifacts end-to-end
 - Intervene only through config (prompt edits, manifest edits) — never by typing content into chat
 - Audit the run against the improvement criteria you authored in W4
 - Decide one follow-up change to enter back into the loop
 
-> **Fired Up Pizza reference:** For a finished end-to-end run, see the reference project's [`factory-run-report.md`](../../../reference-project/fired-up-pizza/factory-run-report.md) and [`retrospective-card.md`](../../../reference-project/fired-up-pizza/retrospective-card.md). The shape of your output should look similar, populated with *your* project's artifacts.
+> **Fired Up Pizza reference:** The reference project has a completed `c1-run-report.md` you can view at [`reference-project/fired-up-pizza/docs/c1-run-report.md`](../../../reference-project/fired-up-pizza/docs/c1-run-report.md).
 
 ## What the Run Produces
 
@@ -50,7 +51,6 @@ Through this capstone you will:
      │   src/** + tests on feature branch     │
      |   review-reports/<slug>-review.md      │
      │   release-gates/<slug>-gate.md         │
-     │   docs/c1-run-report.md  (audit)       │
      └────────────────────────────────────────┘
 ```
 
@@ -252,7 +252,7 @@ Write the three answers in a short `## Capstone Decision` section at the end of 
 Before closing the capstone, verify all of these:
 
 - [ ] Six stage artifacts exist for the chosen feature (work package, ADR, spec, commits, review report, release gate)
-- [ ] `docs/c1-run-report.md` is committed with run summary, interventions, criterion audit, and a follow-up
+- [ ] `docs/c1-run-report.md` including a run summary, interventions, criterion audit, and a follow-up
 - [ ] Every intervention during the run is logged in `docs/factory-iterations.md`
 - [ ] The factory runs with only config-level interventions — no chat-level content injection
 - [ ] The capstone decision section names whether to ship, loop, and retire

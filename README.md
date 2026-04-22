@@ -166,8 +166,8 @@ Each session has a concrete deliverable — what you should walk away having pro
 | [L2](curriculum/labs/L2/LAB_2_GUIDE.md) | Lab | ~75 min | Deploy Planner + Architect Agents | Planner and Architect each equipped with at least one Skill/CLI capability |
 | [L3](curriculum/labs/L3/LAB_3_GUIDE.md) | Lab | ~75 min | Deploy Designer + Coder Agents | Designer and Coder each equipped with at least one MCP |
 | [L4](curriculum/labs/L4/LAB_4_GUIDE.md) | Lab | ~75 min | Deploy Reviewer + Deployer Agents | Reviewer and Deployer reading their manifest sections (Review Standards + Release Criteria) |
-| [W4](curriculum/workshops/W4/WORKSHOP_4_GUIDE.md) | Workshop | ~45 min | Create Continuous Improvement Loops | `docs/improvement-criteria.md` |
-| [C1](curriculum/capstone/C1/CAPSTONE_1_GUIDE.md) | Capstone Lab | ~90 min | Run the Software Factory End-to-End | All 6 custom agents wired together as a complete software factory running against your software project |
+| [W4](curriculum/workshops/W4/WORKSHOP_4_GUIDE.md) | Workshop | ~45 min | Create Continuous Improvement Loops | `docs/improvement-criteria.md` and `docs/factory-iterations.md` |
+| [C1](curriculum/capstone/C1/CAPSTONE_1_GUIDE.md) | Capstone Lab | ~90 min | Run the Software Factory End-to-End | All 6 custom agents wired together as a complete software factory running against your software project, with a `docs/c1-run-report.md` describing the run |
 
 ---
 

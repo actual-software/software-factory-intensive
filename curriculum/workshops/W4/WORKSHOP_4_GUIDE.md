@@ -25,16 +25,18 @@ The improvement-criteria file becomes the audit lens you apply to the C1 capston
 A software factory that runs the same way on day 1 and day 100 is not a factory — it's a script. What turns a pipeline of specialists into something that *improves* is a feedback loop that reads the factory's own signals (review findings, release-gate failures, rollback events, real-world bugs) and feeds them back into the configuration that shaped the run.
 
 W4 is where you set the rules for that loop. The workshop has two halves:
+
 1. **Decide what "improvement" means** for your factory — the specific criteria you'd use to judge "is run N+1 better than run N?"
 2. **Run the loop once** — pick a signal from your L2–L4 runs, translate it into a config change, and show a measurable improvement against your criteria.
 
 Through this workshop you will:
+
 - Catalogue the signals your factory is already emitting
 - Author `improvement-criteria.md` — the rules you'll apply every time you consider a change
 - Pick one signal, make one config change, and re-run to prove the change moved the criteria
 - Leave with a repeatable loop: signals → criteria → change → evidence
 
-> **Fired Up Pizza reference:** The reference project has a completed run report and retrospective at [`reference-project/fired-up-pizza/factory-run-report.md`](../../../reference-project/fired-up-pizza/factory-run-report.md) and [`reference-project/fired-up-pizza/retrospective-card.md`](../../../reference-project/fired-up-pizza/retrospective-card.md). Skim them as examples of what "signals captured" looks like — but your criteria must reflect your own project's priorities.
+> **Fired Up Pizza reference:** The reference project has a completed [`improvement-criteria.md`](../../../reference-project/fired-up-pizza/docs/improvement-criteria.md) (signal inventory + criteria + a recorded Loop 1 result) and a [`factory-iterations.md`](../../../reference-project/fired-up-pizza/docs/factory-iterations.md) (the running config-change log the criteria measure against). Use them as the shape your own deliverables should take, not the contents — your signals and criteria must come from your project.
 
 ## The Loop You're Building
 
@@ -274,9 +276,3 @@ Before leaving this workshop, verify all of these:
 ## Next Steps
 
 **[C1](../../capstone/C1/CAPSTONE_1_GUIDE.md)** is the capstone run — an unfamiliar feature sent end-to-end through your factory. The improvement criteria you authored here are what you'll use to judge whether the capstone run surfaces new signals worth another loop.
-
-Bring to C1:
-
-- [ ] `improvement-criteria.md` committed
-- [ ] Your running L4 factory with the Part 4 config change applied
-- [ ] An unfamiliar feature request (something you haven't yet run through the factory)

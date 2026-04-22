@@ -339,6 +339,6 @@ Before leaving this workshop, verify all of these:
 
 ## Next Steps
 
-**[W2](../W2/README.md)** turns the lens inward: *how* do the agents do their job? You'll trace a new feature through the six packs, read each agent's prompt template and formula, and start building the mental model you'll need in L1/L2 when the packs become *your* configuration to edit.
+**[W2](../W2/WORKSHOP_2_GUIDE.md)** turns the lens inward: *how* do the agents do their job? You'll trace a new feature through the six packs, read each agent's prompt template and formula, and start building the mental model you'll need in L1/L2 when the packs become *your* configuration to edit.
 
-**[L1](../L1/README.md)** is where the factory becomes *yours*. You'll register your own project as the workspace rig, point the six shipped packs at it, and watch the same cycle you just saw run against *your* codebase's first feature task.
+**[L1](../L1/LAB_1_GUIDE.md)** is where the factory becomes *yours*. You'll register your own project as the workspace rig, point the six shipped packs at it, and watch the same cycle you just saw run against *your* codebase's first feature task.

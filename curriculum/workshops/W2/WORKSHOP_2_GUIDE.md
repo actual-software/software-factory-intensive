@@ -10,12 +10,11 @@
 
 ## Deliverable
 
-By the end of this workshop, you will have a single committed file:
+By the end of this workshop, you will have a single file `~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md`, containing:
 
-- `~/Projects/factory/workshop_w2/w2-project/docs/factory-pipeline.md`, containing:
-  - `## Current Workflow Inventory` — every model, skill, MCP, memory file, knowledge source, CLI, and playbook you currently rely on as a solo AI user.
-  - A six-row mapping table assigning each capability to the Planner / Architect / Designer / Coder / Reviewer / Deployer that should own it (with a `## Shared Knowledge Base` subsection for cross-stage items).
-  - `## Missing Capabilities` — capabilities your factory will need but doesn't yet have, each with a tentative implementation strategy.
+- `## Current Workflow Inventory` — every model, skill, MCP, memory file, knowledge source, CLI, and playbook you currently rely on as a solo AI user.
+- A six-row mapping table assigning each capability to the Planner / Architect / Designer / Coder / Reviewer / Deployer that should own it (with a `## Shared Knowledge Base` subsection for cross-stage items).
+- `## Missing Capabilities` — capabilities your factory will need but doesn't yet have, each with a tentative implementation strategy.
 
 You will copy this file forward into L1, W3, L2, L3, and L4 — it is the design source the rest of the curriculum customises against.
 
@@ -26,10 +25,14 @@ When you code solo with an AI assistant, you've already accumulated more than a 
 W2 is the bridge from "I drive an AI" to "I maintain an autonomous software production line". You will not install or customize agents yet (that begins in L1); you will audit what you already have, see what each factory stage consumes and produces, and decide what belongs where.
 
 Through this workshop you will:
+
 - Inventory the capabilities that power your current solo workflow
 - Read the six factory stages (Planner, Architect, Designer, Coder, Reviewer, Deployer) through the lens of *what each stage needs to do its job*
 - Map each of your capabilities onto the pipeline stage(s) that should own it
 - Surface gaps — capabilities no agent currently owns — so L1–L4 can close them
+
+
+> **Fired Up Pizza reference:** The reference project has a completed `factory-pipeline.md` you can view at [`reference-project/fired-up-pizza/docs/factory-pipeline.md`](../../../reference-project/fired-up-pizza/docs/factory-pipeline.md). You can view that as an example of how capabilities might be mapped to the set of agents.
 
 ## The Pipeline You're Mapping Onto
 
