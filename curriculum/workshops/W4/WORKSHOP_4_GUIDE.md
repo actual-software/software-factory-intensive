@@ -6,7 +6,7 @@
 |---|---|
 | **Estimated duration** | ~45 minutes |
 | **Type** | WORKSHOP |
-| **Deliverable** | Clear `improvement-criteria.md` that outlines the criteria for improvement of the software factory, and a demonstrable improvement in the factory based on the criteria |
+| **Deliverable** | `docs/improvement-criteria.md` (signal inventory + criteria + Loop 1 result) and `docs/factory-iterations.md` (the running config-change log, first authored in Part 4), plus a demonstrable improvement in the factory against those criteria |
 
 ## Deliverable
 
@@ -16,9 +16,10 @@ By the end of this workshop, you will have:
   - `## Signal Inventory` — every signal your factory currently emits, with source and volume so far.
   - 4–8 **Improvement Criteria**, each with a signal, a direction, a target, a measurement method, and a cadence (per-run / weekly / per-incident / one-off).
   - `## Loop 1 Result` — the before/after numbers from one full signal → config change → re-run loop.
-- One config edit applied to your L4 factory and re-run against a comparable feature
+- `~/Projects/factory/workshop_w4/w4-project/docs/factory-iterations.md` — the running log of config-level changes made to the factory. W4 is where this file is first authored (Part 4 Step 3); C1 and every future loop will append new rows to it.
+- One config edit applied to your L4 factory and re-run against a comparable feature.
 
-The improvement-criteria file becomes the audit lens you apply to the C1 capstone run.
+The improvement-criteria file becomes the audit lens you apply to the C1 capstone run; the iteration log becomes the durable record of every config change made thereafter.
 
 ## Overview
 
@@ -92,7 +93,7 @@ The install step copies your **central deliverables folder** (`software-factory-
 ls ~/Projects/factory/workshop_w4/w4-project/docs/
 ```
 
-You should see `PROJECT_MANIFEST.md`, `SOFTWARE_FACTORY_MANIFEST_.md`, `factory-pipeline.md`, `coordination-channels.md`, and `factory-iterations.md`.
+You should see `PROJECT_MANIFEST.md`, `SOFTWARE_FACTORY_MANIFEST_.md`, `factory-pipeline.md`, and `coordination-channels.md`. `factory-iterations.md` will be created in Part 4 of this workshop.
 
 ## Part 2: Catalogue the Signals You Already Have (10 min)
 

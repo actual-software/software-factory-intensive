@@ -85,7 +85,7 @@ The install step copies your **central deliverables folder** (`software-factory-
 ls ~/Projects/factory/lab_l4/l4-project/docs/
 ```
 
-You should see `PROJECT_MANIFEST.md`, `SOFTWARE_FACTORY_MANIFEST_.md`, `factory-pipeline.md`, `coordination-channels.md`, and `factory-iterations.md`.
+You should see `PROJECT_MANIFEST.md`, `SOFTWARE_FACTORY_MANIFEST_.md`, `factory-pipeline.md`, and `coordination-channels.md`. (`factory-iterations.md` is authored in W4; you won't have it yet.)
 
 Per-feature artifacts from L3 — the feature branch source, `work-packages/`, and `design/` — live outside `docs/` and are *not* auto-carried. Pull them in so the Reviewer has something to evaluate:
 

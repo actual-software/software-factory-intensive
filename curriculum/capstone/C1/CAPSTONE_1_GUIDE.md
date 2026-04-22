@@ -6,7 +6,7 @@
 |---|---|
 | **Estimated duration** | ~90 minutes |
 | **Type** | CAPSTONE |
-| **Deliverable** | 6-agent software factory applied to an unfamiliar feature request, with a high-quality feature produced for your software project, and a `docs/c1-run-report.md` and `docs/factory-iterations.md` |
+| **Deliverable** | 6-agent software factory applied to an unfamiliar feature request, with a high-quality feature produced for your software project, and a `docs/c1-run-report.md` describing the run (new entries are also appended to `docs/factory-iterations.md`, authored in W4) |
 
 ## Overview
 
@@ -75,7 +75,7 @@ The install step copies your **central deliverables folder** (`software-factory-
 ls ~/Projects/factory/capstone_c1/c1-project/docs/
 ```
 
-You should see every authored deliverable: `PROJECT_MANIFEST.md`, `factory-pipeline.md`, `coordination-channels.md`, `improvement-criteria.md` (from W4), `factory-iterations.md`, and the `adr/` directory.
+You should see every authored deliverable: `PROJECT_MANIFEST.md`, `factory-pipeline.md`, `coordination-channels.md`, `improvement-criteria.md` (from W4), `factory-iterations.md` (from W4), and the `adr/` directory.
 
 Per-feature artifacts (`work-packages/`, `design/`, `review-reports/`, `release-gates/`) and your project source live outside `docs/`, so pull them in from L4:
 

@@ -67,7 +67,7 @@ The install step copies your **central deliverables folder** (`software-factory-
 ls ~/Projects/factory/lab_l3/l3-project/docs/
 ```
 
-You should see `PROJECT_MANIFEST.md`, `SOFTWARE_FACTORY_MANIFEST.md`, `factory-pipeline.md`, `coordination-channels.md`, and `factory-iterations.md`.
+You should see `PROJECT_MANIFEST.md`, `SOFTWARE_FACTORY_MANIFEST.md`, `factory-pipeline.md`, and `coordination-channels.md`. (`factory-iterations.md` is authored in W4; you won't have it yet.)
 
 Per-feature artifacts from L2 — `work-packages/` and your project source — are *not* in `docs/`, so they aren't carried by the central-docs seed. Pull them in by hand if you want to continue the same feature in L3:
 

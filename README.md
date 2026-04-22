@@ -98,7 +98,7 @@ cp /path/to/software-factory-intensive/reference-project/fired-up-pizza/docs/fac
    /path/to/software-factory-intensive/docs/
 ```
 
-The reference set covers every cross-session deliverable: `PROJECT_OVERVIEW.md`, `PROJECT_MANIFEST.md`, `factory-pipeline.md`, `coordination-channels.md`, `improvement-criteria.md`, `factory-iterations.md`, plus an example `adr/` and `gates/`. From the next install onwards, your session workspaces pick these up automatically.
+The reference set covers every cross-session deliverable: `PROJECT_OVERVIEW.md`, `PROJECT_MANIFEST.md`, `factory-pipeline.md`, `coordination-channels.md`, `improvement-criteria.md`, `factory-iterations.md`, `c1-run-report.md`, plus an example `adr/` and `gates/`. From the next install onwards, your session workspaces pick these up automatically.
 
 ---
 
