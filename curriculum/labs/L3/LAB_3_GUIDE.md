@@ -66,10 +66,10 @@ Creates `~/Projects/factory/lab_l3/l3-project/` and `~/Projects/factory/lab_l3/l
 The install step copies your **central deliverables folder** (`software-factory-intensive/docs/`) into the L3 workspace. Spot-check the docs that flow automatically:
 
 ```bash
-ls ~/Projects/factory/lab_l3/l3-project/docs/         # manifest + factory-pipeline + coordination-channels + adr/ + factory-iterations
+ls ~/Projects/factory/lab_l3/l3-project/docs/
 ```
 
-You should see `PROJECT_MANIFEST.md`, `factory-pipeline.md`, `coordination-channels.md`, `factory-iterations.md`, and the `adr/` directory with the ADRs you authored in L2.
+You should see `PROJECT_MANIFEST.md`, `SOFTWARE_FACTORY_MANIFEST.md`, `factory-pipeline.md`, `coordination-channels.md`, and `factory-iterations.md`.
 
 Per-feature artifacts from L2 — `work-packages/` and your project source — are *not* in `docs/`, so they aren't carried by the central-docs seed. Pull them in by hand if you want to continue the same feature in L3:
 

@@ -84,11 +84,10 @@ Creates `~/Projects/factory/lab_l4/l4-project/` and `~/Projects/factory/lab_l4/l
 The install step copies your **central deliverables folder** (`software-factory-intensive/docs/`) into the L4 workspace. Spot-check what flows automatically:
 
 ```bash
-ls ~/Projects/factory/lab_l4/l4-project/docs/         # manifest + factory-pipeline + coordination-channels + adr/ + factory-iterations
-ls ~/Projects/factory/lab_l4/l4-project/docs/adr/
+ls ~/Projects/factory/lab_l4/l4-project/docs/
 ```
 
-You should see `PROJECT_MANIFEST.md` (with the L4 additions you'll make in Part 3 still pending), `factory-pipeline.md`, `coordination-channels.md`, `factory-iterations.md`, and the ADRs from L2.
+You should see `PROJECT_MANIFEST.md`, `SOFTWARE_FACTORY_MANIFEST_.md`, `factory-pipeline.md`, `coordination-channels.md`, and `factory-iterations.md`.
 
 Per-feature artifacts from L3 — the feature branch source, `work-packages/`, and `design/` — live outside `docs/` and are *not* auto-carried. Pull them in so the Reviewer has something to evaluate:
 

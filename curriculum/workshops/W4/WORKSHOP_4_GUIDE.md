@@ -90,7 +90,7 @@ The install step copies your **central deliverables folder** (`software-factory-
 ls ~/Projects/factory/workshop_w4/w4-project/docs/
 ```
 
-You should see `PROJECT_MANIFEST.md` (with your L4 Review Standards and Release Criteria), `factory-pipeline.md`, `coordination-channels.md`, `factory-iterations.md`, and the `adr/` directory.
+You should see `PROJECT_MANIFEST.md`, `SOFTWARE_FACTORY_MANIFEST_.md`, `factory-pipeline.md`, `coordination-channels.md`, and `factory-iterations.md`.
 
 ## Part 2: Catalogue the Signals You Already Have (10 min)
 
