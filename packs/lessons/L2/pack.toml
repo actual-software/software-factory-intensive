@@ -1,0 +1,7 @@
+[pack]
+name = "sfi-l2"
+schema = 2
+version = "1.0.0"
+
+[agent_defaults]
+default_sling_formula = "mol-feature-intake"

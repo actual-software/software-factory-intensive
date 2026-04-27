@@ -1,42 +1,33 @@
-# L1 · Build a Structured Development Loop — Activity
+# L1 · Set Up the Factory Runtime — Activity
 
 **Walkthrough:** [`../../../curriculum/labs/L1/README.md`](../../../curriculum/labs/L1/README.md)
-**Reference examples:**
-* [`../../../reference-project/fired-up-pizza/CLAUDE.md`](../../../reference-project/fired-up-pizza/CLAUDE.md)
-* [`../../../reference-project/fired-up-pizza/DECISIONS.md`](../../../reference-project/fired-up-pizza/DECISIONS.md)
+
+L1 converts your W1 workflow card into agent-readable config and registers your project with Gas City.
 
 ## Deliverables
 
-Two files in this folder (mirroring the reference project):
+Create or update these files:
 
-* `CLAUDE.md` — your filled-in agent-instructions file. Start from the shipped reference structure, fill the Tech Stack / Project Structure / Rules / Release Criteria sections in for *your* project. If you're using a non-Claude assistant, name it `AGENTS.md` instead — the content is identical.
-* `DECISIONS.md` — a log with one entry per `CLAUDE.md` rule change during L1. Date, short description, and the commit SHA that made the change.
+- `CLAUDE.md` or `AGENTS.md` in your project rig — converted from your W1 workflow card with project-specific rules, commands, and safety boundaries.
+- `../../../my-factory/PROJECT_MANIFEST.md` with overview, tech stack, and project structure. Review Standards and Release Criteria are added before L4 and C1 respectively.
 
-You'll also generate your project's `PROJECT_MANIFEST.md` during L1. That file belongs in `../../../my-factory/PROJECT_MANIFEST.md` (template already placed there) — not in this folder.
+## Factory State After L1
 
-## Workspace wiring
+`my-factory` should be registered, formula v2 should be enabled in `city.toml`, and your project should be added as a rig:
 
-L1 registers `../../../my-factory/` as a Gas City workspace and adds your project repo as a rig. No pack is included yet — the first pack gets added in L2. After L1, `../../../my-factory/city.toml` should have:
-
-```toml
-[workspace]
-name = "my-factory"
-provider = "claude"
-includes = []
-
-[[rigs]]
-name = "your-project"
-path = "../../path/to/your-project"
-includes = []
+```bash
+cd ../../../my-factory
+gc register .
+gc rig add /path/to/your-project
+gc doctor --fix
 ```
 
-## Exit criteria
+No feature workflow runs in L1. The first runnable formula flow starts in L2.
 
-* [ ] `activities/labs/L1/CLAUDE.md` exists with at least 5 project-specific rules
-* [ ] `activities/labs/L1/DECISIONS.md` has an entry per rule change during the lab
-* [ ] `../../../my-factory/PROJECT_MANIFEST.md` filled in (Overview, Tech Stack, Project Structure sections minimum)
-* [ ] `gc status` from `../../../my-factory/` shows your rig registered
+## Exit Criteria
 
-## Skipped this session?
-
-Every later lab reads from `PROJECT_MANIFEST.md`. At the very minimum, copy the reference manifest to `../../../my-factory/PROJECT_MANIFEST.md` and replace the domain-specific sections with your project's. Without a filled manifest, the Planner and Architect have nothing to ground their output on.
+- [ ] `CLAUDE.md` or `AGENTS.md` exists in the project rig with project-specific rules.
+- [ ] `my-factory/PROJECT_MANIFEST.md` has overview, tech stack, and project structure.
+- [ ] `my-factory/city.toml` enables formula v2.
+- [ ] `my-factory/pack.toml` selects `../packs/lessons/L2` as `factory`.
+- [ ] `gc status` from `../../../my-factory/` shows the city and rig.

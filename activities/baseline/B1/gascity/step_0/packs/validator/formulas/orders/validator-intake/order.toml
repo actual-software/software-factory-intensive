@@ -1,6 +1,0 @@
-[order]
-description = "Wake the validator when any bead is labelled needs-tests"
-formula = "mol-acceptance-tests"
-gate = "condition"
-check = "bd ready --label=needs-tests --limit=1 | grep -q ."
-pool = "validator"

@@ -1,0 +1,11 @@
+✔ add returns the sum of two numbers (0.648583ms)
+✔ subtract returns the difference of two numbers (0.080958ms)
+✔ multiply returns the product of two numbers (0.054917ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 95.628708

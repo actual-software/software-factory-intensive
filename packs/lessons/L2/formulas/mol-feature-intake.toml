@@ -1,0 +1,22 @@
+description = """
+Feature-intake factory graph.
+
+Turns one feature request into a plan artifact and an architecture artifact.
+The graph owns the order of work; labels are not used as the workflow engine.
+"""
+formula = "mol-feature-intake"
+version = 2
+contract = "graph.v2"
+
+[[steps]]
+id = "plan"
+title = "Write the feature plan"
+description = "Planner reads the request and project context, then writes docs/plans/<slug>.md."
+metadata = { "gc.run_target" = "factory.planner", artifact_path = "docs/plans/<slug>.md" }
+
+[[steps]]
+id = "architecture"
+title = "Write the architecture decision"
+description = "Architect reads the plan and project context, then writes docs/architecture/<slug>.md."
+needs = ["plan"]
+metadata = { "gc.run_target" = "factory.architect", artifact_path = "docs/architecture/<slug>.md" }

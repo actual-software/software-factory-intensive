@@ -1,42 +1,49 @@
-# C1 · Build a Structured Development Loop — Activity
+# C1 Activity Checkpoint
 
-**Walkthrough:** [`../../../curriculum/labs/C1/README.md`](../../../curriculum/labs/C1/README.md)
-**Reference examples:**
-* [`../../../reference-project/fired-up-pizza/CLAUDE.md`](../../../reference-project/fired-up-pizza/CLAUDE.md)
-* [`../../../reference-project/fired-up-pizza/DECISIONS.md`](../../../reference-project/fired-up-pizza/DECISIONS.md)
+**Walkthrough:** [`../../../curriculum/capstone/C1/README.md`](../../../curriculum/capstone/C1/README.md)
 
-## Deliverables
+C1 switches the active factory pack to `packs/lessons/C1`, then runs the full
+release-delivery formula graph.
 
-Two files in this folder (mirroring the reference project):
-
-* `CLAUDE.md` — your filled-in agent-instructions file. Start from the shipped reference structure, fill the Tech Stack / Project Structure / Rules / Release Criteria sections in for *your* project. If you're using a non-Claude assistant, name it `AGENTS.md` instead — the content is identical.
-* `DECISIONS.md` — a log with one entry per `CLAUDE.md` rule change during C1. Date, short description, and the commit SHA that made the change.
-
-You'll also generate your project's `PROJECT_MANIFEST.md` during C1. That file belongs in `../../../my-factory/PROJECT_MANIFEST.md` (template already placed there) — not in this folder.
-
-## Workspace wiring
-
-C1 registers `../../../my-factory/` as a Gas City workspace and adds your project repo as a rig. No pack is included yet — the first pack gets added in L2. After C1, `../../../my-factory/city.toml` should have:
+Factory selection in `my-factory/pack.toml`:
 
 ```toml
-[workspace]
-name = "my-factory"
-provider = "claude"
-includes = []
-
-[[rigs]]
-name = "your-project"
-path = "../../path/to/your-project"
-includes = []
+[defaults.rig.imports.factory]
+source = "../packs/lessons/C1"
 ```
 
-## Exit criteria
+Sync the existing project rig:
 
-* [ ] `activities/labs/C1/CLAUDE.md` exists with at least 5 project-specific rules
-* [ ] `activities/labs/C1/DECISIONS.md` has an entry per rule change during the lab
-* [ ] `../../../my-factory/PROJECT_MANIFEST.md` filled in (Overview, Tech Stack, Project Structure sections minimum)
-* [ ] `gc status` from `../../../my-factory/` shows your rig registered
+```bash
+cd my-factory
+gc --rig <rig> import remove factory
+gc --rig <rig> import add ../packs/lessons/C1 --name factory
+gc restart
+```
 
-## Skipped this session?
+Start the run:
 
-Every later lab reads from `PROJECT_MANIFEST.md`. At the very minimum, copy the reference manifest to `../../../my-factory/PROJECT_MANIFEST.md` and replace the domain-specific sections with your project's. Without a filled manifest, the Planner and Architect have nothing to ground their output on.
+```bash
+gc sling planner \
+  "Add a multiply operation: multiply(a, b) returns a*b" \
+  --on mol-release-delivery
+```
+
+Expected project outputs:
+
+- `docs/plans/<slug>.md`
+- `docs/architecture/<slug>.md`
+- `docs/designs/<slug>.md`
+- one implementation commit with passing tests
+- `docs/validation/<slug>.md`
+- `docs/reviews/<slug>.md`
+- `docs/releases/<slug>.md`
+- `activities/capstone/C1/retrospective.md` — factory run retrospective with W4 criteria evaluation
+
+## Exit Criteria
+
+- [ ] The run started with one `gc sling` on `mol-release-delivery`.
+- [ ] The formula routed all seven roles.
+- [ ] The release gate includes an explicit verdict backed by validation and review evidence.
+- [ ] Retrospective exists with at least one W4 criterion evaluated.
+- [ ] At least one config change is documented with file and reason.

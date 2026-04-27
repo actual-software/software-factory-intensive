@@ -1,0 +1,18 @@
+[workspace]
+provider = "claude"
+
+[[rigs]]
+name = "rig"
+[rigs.imports]
+[rigs.imports.factory]
+source = "../packs/lessons/L2"
+
+[session]
+startup_timeout = "3m"
+
+[daemon]
+formula_v2 = true
+patrol_interval = "30s"
+max_restarts = 5
+restart_window = "1h"
+shutdown_timeout = "5s"

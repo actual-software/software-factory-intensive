@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Walkthrough Runs"
+  short_description: "Clean and run tutorial walkthroughs safely"
+  default_prompt: "Use $clean-walkthrough-runs before running the tutorial walkthrough harness."

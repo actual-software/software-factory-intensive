@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# .githooks/pre-commit — run the non-LLM test harnesses before each commit.
+#
+# Enable once per clone:
+#   git config core.hooksPath .githooks
+#
+# Runs the three harnesses that don't need live LLMs, and short-circuits
+# when the staged changes can't possibly affect a given harness. That way
+# a commit touching only curriculum/ prose doesn't take 5 minutes.
+#
+# Bypass with `git commit --no-verify` when you know better.
+#
+# Covered:
+#   - migration-check.sh      — static structural invariants (~2s)
+#   - behavioral-smoke.sh     — scratch factory boot (~60s)
+#   - tutorial-check.sh       — README setup commands (~2-5min)
+#
+# NOT covered (requires live LLM tokens — run manually before release):
+#   - tutorial-walkthrough.sh
+
+set -uo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+# Detect staged files. On initial commit, diff against the empty tree.
+if git rev-parse --verify HEAD >/dev/null 2>&1; then
+  staged="$(git diff --cached --name-only --diff-filter=ACMR)"
+else
+  staged="$(git diff --cached --name-only --diff-filter=ACMR -- .)"
+fi
+
+if [ -z "$staged" ]; then
+  echo "pre-commit: no staged files, skipping"
+  exit 0
+fi
+
+# --- Scope detection --------------------------------------------------
+# Decide which harnesses the staged changes could possibly invalidate.
+
+need_migration=0
+need_smoke=0
+need_tutorial=0
+
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
+  case "$f" in
+    # Pack structure / TOML layout — migration-check catches regressions
+    packs/*|packs/*/*|packs/*/*/*|packs/*/*/*/*|packs/*/*/*/*/*)
+      need_migration=1; need_smoke=1; need_tutorial=1 ;;
+    activites/*/*/gascity/step_0/packs/*)
+      need_migration=1; need_smoke=1; need_tutorial=1 ;;
+    # Factory templates / scaffolding
+    my-factory/pack.toml.template|my-factory/city.toml.template|my-factory/.gitignore)
+      need_smoke=1; need_tutorial=1 ;;
+    my-factory/README.md)
+      need_tutorial=1 ;;
+    activites/workshops/W2/README.md|activites/labs/L2/README.md)
+      need_tutorial=1 ;;
+    # Installation / version floor
+    installation.md)
+      need_tutorial=1 ;;
+    # The harness itself — run all three if any harness file changes
+    test-harness/*|test-harness/*/*|test-harness/*/*/*)
+      need_migration=1; need_smoke=1; need_tutorial=1 ;;
+    # .githooks changes — re-run to catch hook regressions
+    .githooks/*)
+      need_migration=1; need_smoke=1; need_tutorial=1 ;;
+  esac
+done <<< "$staged"
+
+# If nothing matched, skip the harnesses entirely.
+if [ $((need_migration + need_smoke + need_tutorial)) -eq 0 ]; then
+  echo "pre-commit: staged changes don't affect test harnesses, skipping"
+  exit 0
+fi
+
+echo "pre-commit: running test harnesses (scope-based)"
+echo
+
+rc=0
+
+if [ "$need_migration" = "1" ]; then
+  echo "── migration-check.sh ──"
+  if bash test-harness/migration-check.sh; then
+    echo "✓ migration-check passed"
+  else
+    echo "✗ migration-check failed — blocking commit"
+    rc=1
+  fi
+  echo
+fi
+
+if [ "$need_smoke" = "1" ]; then
+  # behavioral-smoke.sh already includes lint + migration-check + dry-run
+  # walkthroughs, so there's no need to also run tutorial-check.sh (which
+  # runs the same dry-run). Running both concurrently corrupts Dolt state.
+  echo "── behavioral-smoke.sh ──"
+  if bash test-harness/behavioral-smoke.sh; then
+    echo "✓ behavioral-smoke passed"
+  else
+    echo "✗ behavioral-smoke failed — blocking commit"
+    rc=1
+  fi
+  echo
+elif [ "$need_tutorial" = "1" ]; then
+  echo "── tutorial-check.sh ──"
+  if bash test-harness/tutorial-check.sh; then
+    echo "✓ tutorial-check passed"
+  else
+    echo "✗ tutorial-check failed — blocking commit"
+    rc=1
+  fi
+  echo
+fi
+
+if [ "$rc" -ne 0 ]; then
+  echo "pre-commit: one or more harnesses failed. Fix, or bypass with 'git commit --no-verify'."
+fi
+
+exit "$rc"

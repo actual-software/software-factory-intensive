@@ -1,6 +1,0 @@
-[order]
-description = "Wake the architect when any bead is labelled needs-architecture"
-formula = "mol-architect-review"
-gate = "condition"
-check = "bd ready --label=needs-architecture --limit=1 | grep -q ."
-pool = "architect"

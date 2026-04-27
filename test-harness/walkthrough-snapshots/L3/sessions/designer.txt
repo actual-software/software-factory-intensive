@@ -1,0 +1,72 @@
+Owner: Factory Harness · Type: task
+     … +4 lines (ctrl+o to expand)
+
+⏺ Bash(bd show rig-qldd 2>&1)
+  ⎿  ✓ rig-qldd · Write the feature plan   [● P2 · CLOSED]
+     Type: task
+     Created: 2026-04-27 · Updated: 2026-04-27
+     … +19 lines (ctrl+o to expand)
+
+⏺ Bash(bd show rig-n17z 2>&1)
+  ⎿  ✓ rig-n17z · Write the architecture decision   [● P2 · CLOSED]
+     Type: task
+     Created: 2026-04-27 · Updated: 2026-04-27
+     … +21 lines (ctrl+o to expand)
+
+⏺ Good. The feature is "Add a negate operation: negate(x) returns -x". The slug
+  is negate-op. Let me read the plan and architecture artifacts, and explore the
+   project source.
+
+  Listed 4 directories (ctrl+o to expand)
+
+⏺ Found the project rig at
+  /private/tmp/sfi-tutorial-walkthrough/1777265943-13479/L3/rig/. Let me read
+  all the key files.
+
+  Searched for 2 patterns, read 2 files (ctrl+o to expand)
+
+⏺ Now let me read the source, tests, and project rules.
+
+  Read 3 files (ctrl+o to expand)
+
+⏺ Let me check for existing design artifacts to match conventions.
+
+  Read 1 file, listed 2 directories (ctrl+o to expand)
+
+⏺ I have everything I need. Now I'll write the design artifact following the
+  established pattern.
+
+⏺ Write(/private/tmp/sfi-tutorial-walkthrough/1777265943-13479/L3/rig/docs/desig
+       ns/negate-op.md)
+  ⎿  Wrote 104 lines to ../../../../../rig/docs/designs/negate-op.md
+       1 # Negate Operation Design
+       2
+       3 ## Interface
+       4
+       5 Add one exported function to `src/calculator.js`:
+       6
+       7 ```js
+       8 function negate(x) {
+       9   return -x;
+      10 }
+     … +123 lines (ctrl+o to expand)
+
+⏺ Design artifact written. Now I'll close the current formula step.
+
+⏺ Bash(bd close rig-in4f --reason "Design artifact written to
+      docs/designs/negate-op.md" 2>&1)
+  ⎿  ✓ Closed rig-in4f — Write the implementation design: Design artifact w
+     ritten to docs/designs/negate-op.md
+
+⏺ Design step complete. Wrote docs/designs/negate-op.md covering the negate(x)
+  function interface, behavior table, edge cases (signed zero, Infinity, NaN,
+  coercion), a 6-test plan, and build notes targeting src/calculator.js and
+  test/calculator.test.js. Step rig-in4f is now closed.
+
+✻ Crunched for 1m 32s
+
+────────────────────────────────────────────────────────────────────────────────
+❯ 
+────────────────────────────────────────────────────────────────────────────────
+  /private/tmp/sfi-tutorial-walkthrough/1777265943-13479/L3/my-factory/.gc/ag…
+  ⏵⏵ bypass permissions on (shift+tab to cycle)

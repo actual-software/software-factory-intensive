@@ -31,10 +31,10 @@ src/
 public/             # Static assets
 docs/               # ADRs and documentation
   adr/              # Architecture Decision Records
-work-packages/      # Planner output
-design/             # Designer component specs
-review-reports/     # Reviewer output
-release-gates/      # Deployer output
+docs/plans/      # Planner output
+docs/designs/             # Designer component specs
+docs/reviews/     # Reviewer output
+docs/releases/      # Deployer output
 feedback-loops/     # Continuous improvement artifacts
 ```
 
@@ -82,11 +82,11 @@ What each factory agent receives as input:
 | Agent | Receives | From |
 |-------|----------|------|
 | Planner | Feature request (bead title + description) | Ticket backlog or Jira sync |
-| Architect | Work package | `work-packages/<slug>.md` |
-| Designer | Work package + ADR | `work-packages/` + `docs/adr/` |
-| Coder | Component spec + test cases | `design/<slug>-spec.md` + work package |
-| Reviewer | Code diff + spec + review standards | Feature branch + `design/` + this manifest |
-| Deployer | Review report + release criteria | `review-reports/` + this manifest |
+| Architect | Work package | `docs/plans/<slug>.md` |
+| Designer | Work package + ADR | `docs/plans/` + `docs/architecture/` |
+| Coder | Component spec + test cases | `docs/designs/<slug>-spec.md` + work package |
+| Reviewer | Code diff + spec + review standards | Feature branch + `docs/designs/` + this manifest |
+| Deployer | Review report + release criteria | `docs/reviews/` + this manifest |
 
 Each agent reads this manifest for project context. The agent's prompt defines its output format and quality gate.
 

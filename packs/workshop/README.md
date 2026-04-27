@@ -9,11 +9,11 @@ Gas City pack that pre-configures external service integrations for the Software
 cp packs/workshop/env.example .env
 # Edit .env with your tokens
 
-# 2. Add the workshop pack to your city's includes.
-#    In the Software Factory Intensive curriculum, that's my-factory/city.toml:
-#      includes = [..., "../packs/workshop"]
+# 2. The workshop pack is already wired into my-factory/pack.toml.template
+#    via a workspace-scope import ([imports.workshop] source = "../packs/workshop"),
+#    so its commands surface as `gc workshop ...` once you've copied the template.
 cd my-factory
-gc service restart
+gc restart
 
 # 3. Run setup to write credentials into beads config
 gc workshop setup
@@ -75,22 +75,22 @@ Validated via CLI authentication:
 | Service | Config Prefix | Access Method |
 |---------|--------------|---------------|
 | GitHub | `GITHUB_*` | MCP server + `gh` CLI + bd sync |
-| GitLab | `GITLAB_*` | MCP server + bd sync |
+| GitLab | `GITLAB_*` | bd sync only |
 
 ## Doctor Checks
 
 Run `gc doctor` to validate all configured integrations:
 
 ```
-  ✓ check-core-tools    — all core tools present
-  ✓ check-github        — authenticated as octocat
-  ✓ check-jira          — authenticated as user@company.com (project: PROJ)
-  ⚠ check-linear        — LINEAR_API_KEY not set
-  ⚠ check-observability — no observability services configured (optional)
-  ⚠ check-cloud         — no cloud CLIs authenticated (optional)
+  ✓ workshop:check-core-tools    — all core tools present
+  ✓ workshop:check-github        — authenticated as octocat
+  ✓ workshop:check-jira          — authenticated as user@company.com (project: PROJ)
+  ⚠ workshop:check-linear        — LINEAR_API_KEY not set
+  ⚠ workshop:check-observability — no observability services configured (optional)
+  ⚠ workshop:check-cloud         — no cloud CLIs authenticated (optional)
 ```
 
-Only `check-core-tools` is required. All other checks are informational -- configure only the integrations your project needs.
+Checks are pack-prefixed in real `gc doctor` output. Only `workshop:check-core-tools` is required. All other checks are informational — configure only the integrations your project needs.
 
 ## CLI Commands
 
@@ -104,30 +104,29 @@ gc workshop sync-all   # Run all configured issue tracker syncs
 
 ```
 packs/workshop/
-├── pack.toml                          # Pack metadata + doctor + commands
+├── pack.toml                          # Pack metadata (schema = 2)
 ├── env.example                        # Credential template
 ├── README.md                          # This file
-├── doctor/
-│   ├── check-core-tools.sh           # gc, bd, dolt, tmux, jq, git, curl
-│   ├── check-github.sh               # GitHub token validation
-│   ├── check-jira.sh                 # Jira auth + project access
-│   ├── check-linear.sh               # Linear API key validation
-│   ├── check-gitlab.sh               # GitLab token validation
-│   ├── check-observability.sh        # Sentry, DataDog, PostHog, Grafana, OTel
-│   └── check-cloud.sh               # AWS, GCP, Azure CLI auth
-├── orders/
-│   ├── sync-jira/order.toml          # 5-min Jira sync
-│   ├── sync-linear/order.toml        # 5-min Linear sync
-│   ├── sync-github/order.toml        # 5-min GitHub sync
-│   └── sync-gitlab/order.toml        # 5-min GitLab sync
 ├── commands/
-│   ├── status.sh                     # Integration status dashboard
-│   ├── setup.sh                      # Write env vars to bd config
-│   └── sync-all.sh                   # Run all configured syncs
-└── overlays/
-    └── default/
-        └── .claude/
-            └── settings.json         # MCP servers for agent tool access
+│   ├── setup/{command.toml,run.sh}        # Write env vars to bd config
+│   ├── status/{command.toml,run.sh}       # Integration status dashboard
+│   └── sync-all/{command.toml,run.sh}     # Run all configured syncs
+├── doctor/
+│   ├── check-cloud/{doctor.toml,run.sh}          # AWS, GCP, Azure CLI auth
+│   ├── check-core-tools/{doctor.toml,run.sh}     # gc, bd, dolt, tmux, jq, git, curl
+│   ├── check-github/{doctor.toml,run.sh}         # GitHub token validation
+│   ├── check-gitlab/{doctor.toml,run.sh}         # GitLab token validation
+│   ├── check-jira/{doctor.toml,run.sh}           # Jira auth + project access
+│   ├── check-linear/{doctor.toml,run.sh}         # Linear API key validation
+│   └── check-observability/{doctor.toml,run.sh}  # Sentry, DataDog, PostHog, Grafana, OTel
+├── orders/
+│   ├── sync-github.toml               # 5-min GitHub sync
+│   ├── sync-gitlab.toml               # 5-min GitLab sync
+│   ├── sync-jira.toml                 # 5-min Jira sync
+│   └── sync-linear.toml               # 5-min Linear sync
+└── overlay/
+    └── .claude/
+        └── settings.json              # MCP servers for agent tool access
 ```
 
 ## Adding More Integrations
@@ -135,7 +134,7 @@ packs/workshop/
 To add a new integration:
 
 1. Add env vars to `env.example`
-2. Add a doctor check in `doctor/check-<name>.sh`
-3. If it has bd support, add an order in `orders/sync-<name>/order.toml`
-4. If it has an MCP server, add it to `overlays/default/.claude/settings.json`
-5. Update `commands/setup.sh` and `commands/status.sh`
+2. Add a doctor check in `doctor/check-<name>/run.sh` + `doctor/check-<name>/doctor.toml`
+3. If it has bd support, add an order in `orders/sync-<name>.toml`
+4. If it has an MCP server, add it to `overlay/.claude/settings.json`
+5. Update `commands/setup/run.sh` and `commands/status/run.sh`

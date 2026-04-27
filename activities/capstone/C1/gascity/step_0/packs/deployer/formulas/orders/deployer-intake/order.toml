@@ -1,6 +1,0 @@
-[order]
-description = "Wake the deployer when any bead is labelled needs-deploy"
-formula = "mol-deployer-gate"
-gate = "condition"
-check = "gc bd --rig c1-project list --label=needs-deploy --status=open --no-assignee --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"
-pool = "deployer"

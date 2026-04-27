@@ -1,0 +1,36 @@
+description = """
+Feature-delivery factory graph.
+
+Turns one feature request into planning, architecture, design, and an
+implemented project change. The graph owns the order of work.
+"""
+formula = "mol-feature-delivery"
+version = 2
+contract = "graph.v2"
+
+[[steps]]
+id = "plan"
+title = "Write the feature plan"
+description = "Planner reads the request and project context, then writes docs/plans/<slug>.md."
+metadata = { "gc.run_target" = "factory.planner", artifact_path = "docs/plans/<slug>.md" }
+
+[[steps]]
+id = "architecture"
+title = "Write the architecture decision"
+description = "Architect reads the plan and project context, then writes docs/architecture/<slug>.md."
+needs = ["plan"]
+metadata = { "gc.run_target" = "factory.architect", artifact_path = "docs/architecture/<slug>.md" }
+
+[[steps]]
+id = "design"
+title = "Write the implementation design"
+description = "Designer reads the plan and architecture, then writes docs/designs/<slug>.md."
+needs = ["architecture"]
+metadata = { "gc.run_target" = "factory.designer", artifact_path = "docs/designs/<slug>.md" }
+
+[[steps]]
+id = "build"
+title = "Implement and test the change"
+description = "Builder reads the upstream artifacts, updates project code and tests, runs the test suite, and commits the result."
+needs = ["design"]
+metadata = { "gc.run_target" = "factory.builder", artifact = "implementation commit" }

@@ -1,0 +1,7 @@
+# Multiply Operation Release Gate
+## Verdict
+## Required Checks
+## Evidence
+## Risks
+## Decision Notes
+## References

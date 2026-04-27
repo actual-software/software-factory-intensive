@@ -1,0 +1,6 @@
+[pack]
+name = "my-factory"
+schema = 2
+
+[defaults.rig.imports.factory]
+source = "../packs/lessons/L2"

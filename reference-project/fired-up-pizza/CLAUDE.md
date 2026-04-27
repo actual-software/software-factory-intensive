@@ -12,12 +12,12 @@ Read the manifest before starting any work. It is the single source of truth for
 
 Features flow through six stages. Each agent reads its inputs from the repo and writes its outputs as committed files:
 
-1. **Planner** → `work-packages/<slug>.md`
-2. **Architect** → `docs/adr/NNNN-<slug>.md`
-3. **Designer** → `design/<slug>-spec.md`
+1. **Planner** → `docs/plans/<slug>.md`
+2. **Architect** → `docs/architecture/NNNN-<slug>.md`
+3. **Designer** → `docs/designs/<slug>-spec.md`
 4. **Coder** → `src/` implementation
-5. **Reviewer** → `review-reports/<slug>-review.md`
-6. **Deployer** → `release-gates/<slug>-gate.md`
+5. **Reviewer** → `docs/reviews/<slug>-review.md`
+6. **Deployer** → `docs/releases/<slug>-gate.md`
 
 ## Rules
 

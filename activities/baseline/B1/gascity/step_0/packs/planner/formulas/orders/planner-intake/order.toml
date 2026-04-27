@@ -1,6 +1,0 @@
-[order]
-description = "Wake the planner when any bead is labelled needs-plan"
-formula = "mol-plan-breakdown"
-gate = "condition"
-check = "bd ready --label=needs-plan --limit=1 | grep -q ."
-pool = "planner"

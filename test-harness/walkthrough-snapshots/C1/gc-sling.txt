@@ -1,0 +1,2 @@
+Created rig-hgz — "Add a multiply operation: multiply(a, b) returns a*b"
+Attached workflow rig-mu3c (formula "mol-release-delivery") to rig-mu3c

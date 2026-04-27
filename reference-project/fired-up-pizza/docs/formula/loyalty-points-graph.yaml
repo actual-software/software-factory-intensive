@@ -1,0 +1,106 @@
+# Orchestrator · Fired Up Pizza
+#
+# The W3 deliverable. This file sequences the 6-agent pipeline and names
+# the handoffs that move a bead from "feature request" to "release gate
+# PASS" without a human typing into any agent chat.
+#
+# Rules enforced:
+#   - Every stage writes its artifact to a committed file before the next
+#     stage starts.
+#   - Two stages require human approval (architect and deployer).
+#   - Any reviewer verdict other than APPROVE routes back to the coder
+#     via the on_reject rule — the loop is config, not chat.
+
+version: 1
+
+pipeline:
+  - stage: plan
+    agent: planner
+    input:
+      type: bead
+    output:
+      path: docs/plans/<slug>.md
+    next: architect
+
+  - stage: architect
+    agent: architect
+    input:
+      type: work_package
+      path: docs/plans/<slug>.md
+    output:
+      path: docs/architecture/NNNN-<slug>.md
+    gate:
+      type: human
+      justification: docs/gates/approve_architect.md
+      prompt: |
+        Architect has proposed an ADR. Does the decision correctly address
+        the open question from the work package? Are the trade-offs
+        acknowledged? Approve only if yes; reject with a comment naming
+        the missing trade-off.
+    next: designer
+
+  - stage: design
+    agent: designer
+    input:
+      type: work_package_plus_adr
+      paths:
+        - docs/plans/<slug>.md
+        - docs/architecture/NNNN-<slug>.md
+    output:
+      path: docs/designs/<slug>-spec.md
+    next: code
+
+  - stage: code
+    agent: coder
+    input:
+      type: design_spec
+      path: docs/designs/<slug>-spec.md
+    output:
+      type: feature_branch
+      branch_prefix: feat/
+    next: review
+
+  - stage: review
+    agent: reviewer
+    input:
+      type: code_diff_plus_spec
+      paths:
+        - docs/designs/<slug>-spec.md
+        - branch: feat/<slug>
+    output:
+      path: docs/reviews/<slug>-review.md
+    on_reject:
+      # When the Reviewer verdict is REQUEST CHANGES or BLOCK, route back
+      # to the coder with the review report as new input. The coder must
+      # address every finding; re-running the reviewer closes the loop.
+      # Max 3 retries before the pipeline halts and opens a human gate.
+      route_to: code
+      max_retries: 3
+    gate:
+      type: human
+      justification: docs/gates/approve_deploy.md
+      prompt: |
+        Reviewer has APPROVED. Confirm there are no open Medium/High
+        findings, that the required tests are green, and that the feature
+        branch is mergeable with main. Approve only if all three are
+        verified.
+    next: deploy
+
+  - stage: deploy
+    agent: deployer
+    input:
+      type: review_report_plus_release_criteria
+      paths:
+        - docs/reviews/<slug>-review.md
+        - docs/PROJECT_MANIFEST.md
+    output:
+      path: docs/releases/<slug>-gate.md
+
+defaults:
+  provider: claude          # other providers (codex, cursor, gemini, etc.) are also supported
+  idle_timeout: "2h"
+  working_dir: fired-up-pizza
+
+observability:
+  events: gc events
+  session_log: gc session peek <agent>

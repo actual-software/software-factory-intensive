@@ -1,0 +1,8 @@
+# Gitignored: runtime copies of the committed templates. gc register and
+# gc rig add mutate these files; keeping them out of git avoids dirty
+# trees and merge conflicts on curriculum pulls.
+# See workshop:#602 (register mutates city.toml) and the workshop
+# comment on gastownhall/gascity#600 for upstream context.
+pack.toml
+city.toml
+.gc/

@@ -1,0 +1,25 @@
+sfi-walkthrough-L2-1777265040-66194  /private/tmp/sfi-tutorial-walkthrough/1777265040-66184/L2/my-factory
+  Controller: supervisor-managed (PID 6690)
+  Authority: supervisor process PID 6690
+  Suspended:  no
+
+Agents:
+  dog                     scaled (min=0, max=3)
+    dog-1                 running
+    dog-2                 running
+    dog-3                 running
+  rig/factory.architect   stopped
+  rig/factory.planner     stopped
+  control-dispatcher      running
+  rig/control-dispatcher  stopped
+
+4/7 agents running
+
+Named sessions:
+  control-dispatcher      awake (always)
+  rig/control-dispatcher  creating (always)
+
+Rigs:
+  rig                     /private/tmp/sfi-tutorial-walkthrough/1777265040-66184/L2/rig
+
+Sessions: 5 active, 0 suspended

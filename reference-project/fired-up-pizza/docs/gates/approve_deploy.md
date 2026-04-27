@@ -22,8 +22,8 @@ Specifically, this gate catches scenarios the Reviewer can't:
 
 | Check | How to verify |
 |-------|---------------|
-| Reviewer verdict is `APPROVE` (not `REQUEST CHANGES`) | `head review-reports/<slug>-review.md` — first section is the verdict |
-| No open High-severity findings | `grep -A1 "High" review-reports/<slug>-review.md` returns nothing *or* every High has a `Resolved:` line |
+| Reviewer verdict is `APPROVE` (not `REQUEST CHANGES`) | `head docs/reviews/<slug>-review.md` — first section is the verdict |
+| No open High-severity findings | `grep -A1 "High" docs/reviews/<slug>-review.md` returns nothing *or* every High has a `Resolved:` line |
 | Tests pass on the feature branch | `git checkout feat/<slug> && npm test` exits 0 |
 | Branch is mergeable with main | `git fetch origin main && git merge-tree $(git merge-base feat/<slug> origin/main) feat/<slug> origin/main` shows no conflict markers |
 | Related tickets closed / updated | `gh issue list --label "blocks:<slug>"` is empty |

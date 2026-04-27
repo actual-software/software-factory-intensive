@@ -1,0 +1,35 @@
+[lesson]
+id = "L3"
+pack_dir = "packs/lessons/L3"
+entry_formula = "mol-feature-delivery"
+entry_agent = "planner"
+roles = ["planner", "architect", "designer", "builder"]
+docs = [
+  "activities/labs/L3/README.md",
+  "curriculum/labs/L3/README.md",
+  "curriculum/labs/L3/PROMPT.md",
+]
+
+[[steps]]
+id = "plan"
+needs = []
+target = "factory.planner"
+artifact = "docs/plans/<slug>.md"
+
+[[steps]]
+id = "architecture"
+needs = ["plan"]
+target = "factory.architect"
+artifact = "docs/architecture/<slug>.md"
+
+[[steps]]
+id = "design"
+needs = ["architecture"]
+target = "factory.designer"
+artifact = "docs/designs/<slug>.md"
+
+[[steps]]
+id = "build"
+needs = ["design"]
+target = "factory.builder"
+artifact = "implementation commit"

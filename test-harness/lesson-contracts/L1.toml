@@ -1,0 +1,15 @@
+[lesson]
+id = "L1"
+pack_dir = ""
+entry_formula = ""
+entry_agent = ""
+roles = []
+docs = [
+  "activities/labs/L1/README.md",
+  "curriculum/labs/L1/README.md",
+]
+
+# L1 has no formula steps — it is a setup-only lesson.
+# The walkthrough validates: CLAUDE.md exists, PROJECT_MANIFEST.md created,
+# city.toml enables FormulaV2, pack.toml selects L2, gc register + rig add
+# succeed, and project tests pass.

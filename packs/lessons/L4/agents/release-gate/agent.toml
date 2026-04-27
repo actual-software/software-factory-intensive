@@ -1,0 +1,8 @@
+scope = "rig"
+wake_mode = "fresh"
+work_dir = ".gc/agents/{{.Rig}}/delivery-review-release-gate"
+nudge = "Run gc prime, inspect the routed formula step, write docs/releases/<slug>.md with a PASS or FAIL verdict, then close the current step."
+idle_timeout = "1h"
+min_active_sessions = 0
+max_active_sessions = 1
+default_sling_formula = "mol-delivery-review"

@@ -1,30 +1,39 @@
-# W4 · Continuous Improvement Loops — Activity
+# W4 · Create Continuous Improvement Loops — Activity
 
 **Walkthrough:** [`../../../curriculum/workshops/W4/README.md`](../../../curriculum/workshops/W4/README.md)
-**Reference examples:** [`../../../reference-project/fired-up-pizza/feedback-loops/`](../../../reference-project/fired-up-pizza/feedback-loops/)
+
+W4 designs feedback loops for the active factory. It does not add a new runtime pack by itself.
 
 ## Deliverables
 
-A `feedback-loops/` subfolder in here, containing at least three `.md` files — one per loop type:
+Create `feedback-loops/` in this folder and add one short markdown file per proposed rule:
 
-* `reactive-<topic>.md` — a specific reviewer finding that was encoded as a pack-prompt rule
-* `aggregate-<topic>.md` — a pattern that emerged across multiple runs and was folded into the manifest or a pack prompt
-* `external-<topic>.md` — a signal from outside the factory (customer report, ops alert) that fed back into a pack or the manifest
+```text
+activities/workshops/W4/feedback-loops/
+  reactive-<topic>.md
+  aggregate-<topic>.md
+  external-<topic>.md
+```
 
-Each loop file follows the reference shape: *What triggered it → What rule was added → Where (exact file path) → Commit SHA*.
+Each rule file should include:
 
-## Workspace wiring
+- signal observed
+- trigger threshold
+- target runtime file or project instruction file
+- proposed change
+- rollback condition
+- owner for review
 
-W4 doesn't add packs. It **edits** prompts on packs you've already installed — typically the Builder's `../../../packs/builder/prompts/builder.md.tmpl` and the Release-Gate's `../../../packs/release-gate/prompts/release-gate.md.tmpl`. If you're running a customised copy under `activities/<session>/packs/`, edit the copy and commit; otherwise edit the shipped pack and commit.
+## Where Runtime Changes Go
 
-The `includes` list in `../../../my-factory/city.toml` does not change in W4.
+Rules discovered here should be applied to the self-contained factory pack that will run the next lab or capstone. For example, if the next run uses C1, apply the prompt or formula change inside `../../../packs/lessons/C1/`.
 
-## Exit criteria
+Keep lesson framing out of the pack internals. The activity can explain why the rule was written; the pack should simply encode the durable factory behavior.
 
-* [ ] `feedback-loops/` has at least one reactive, one aggregate, and one external rule file.
-* [ ] Each rule file links to a specific commit that changed a pack prompt or the manifest.
-* [ ] The pack prompt change and the feedback-loop file are in the **same commit** — that's the audit trail.
+## Exit Criteria
 
-## Skipped this session?
-
-C1 measures "feedback-loop hits during the run". Without W4 loops, that field will be zero — still valid, but you lose the signal that your factory is self-correcting.
+- [ ] At least one reactive rule is written.
+- [ ] At least one aggregate rule is written.
+- [ ] At least one external-signal rule is written.
+- [ ] Each rule names the exact file it would change and how to verify it worked.
+- [ ] At least one rule includes before/after measurement evidence.

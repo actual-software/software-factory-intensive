@@ -1,6 +1,0 @@
-[order]
-description = "Wake the builder when any bead is labelled ready-to-build"
-formula = "mol-tdd-build"
-gate = "condition"
-check = "gc bd --rig l4-project list --label=ready-to-build --status=open --no-assignee --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"
-pool = "builder"

@@ -1,0 +1,14 @@
+{
+  "repo": "/Users/csells/Code/actual-software/software-factory-intensive",
+  "backup_root": "/Users/csells/Code/actual-software/software-factory-intensive/.agents/migration/20260425-224534",
+  "created_gemini_symlink": false,
+  "merged_skills": [
+    {
+      "name": "validate-lesson-content",
+      "source": "claude"
+    }
+  ],
+  "deduped_skills": [],
+  "conflicts": [],
+  "warnings": []
+}

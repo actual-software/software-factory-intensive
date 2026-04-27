@@ -1,0 +1,5 @@
+ M .beads/config.yaml
+ D .beads/config.yaml.gc-init-backup.18917
+ M .beads/metadata.json
+ D .beads/metadata.json.gc-init-backup.18917
+ M .gitignore

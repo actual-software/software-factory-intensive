@@ -1,0 +1,9 @@
+{
+  "name": "calculator",
+  "version": "0.1.0",
+  "description": "Minimal JavaScript calculator project",
+  "main": "src/calculator.js",
+  "scripts": {
+    "test": "node --test"
+  }
+}

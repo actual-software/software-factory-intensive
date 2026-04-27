@@ -8,7 +8,7 @@
 
 ## Signal
 
-Source: `work-packages/*.md`
+Source: `docs/plans/*.md`
 Pattern: Any work package where at least one Acceptance Criterion contains the words `fast`, `nice`, `clean`, `good`, `intuitive`, `simple`, or `obvious` — words that are not measurable.
 
 Detection script: `feedback-loops/rules/detect-vague-acs.sh`
@@ -21,7 +21,7 @@ Detection script: `feedback-loops/rules/detect-vague-acs.sh`
 set -euo pipefail
 
 VAGUE='\b(fast|nice|clean|good|intuitive|simple|obvious)\b'
-OFFENDERS=$(grep -lniE "$VAGUE" work-packages/*.md 2>/dev/null || true)
+OFFENDERS=$(grep -lniE "$VAGUE" docs/plans/*.md 2>/dev/null || true)
 
 if [[ -n "$OFFENDERS" ]]; then
   echo "Vague ACs found in:"
@@ -40,12 +40,12 @@ As of 2026-04-15 the counter reached 5/5 — triggered.
 
 Two files:
 
-1. `packs/planner/prompts/planner.md` — Quality Gate section.
+1. `packs/lessons/C1/agents/planner/prompt.template.md` — Quality Gate section.
 2. `docs/PROJECT_MANIFEST.md` — Success Criteria section.
 
 ## Action
 
-**1. Tighten the Planner Quality Gate.** Append to `packs/planner/prompts/planner.md`:
+**1. Tighten the Planner Quality Gate.** Append to `packs/lessons/C1/agents/planner/prompt.template.md`:
 
 ```markdown
 ## Quality Gate: Measurable Acceptance Criteria

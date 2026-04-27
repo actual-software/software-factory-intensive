@@ -1,42 +1,37 @@
-# L3 · Build a Structured Development Loop — Activity
+# L3 Activity Checkpoint
 
 **Walkthrough:** [`../../../curriculum/labs/L3/README.md`](../../../curriculum/labs/L3/README.md)
-**Reference examples:**
-* [`../../../reference-project/fired-up-pizza/CLAUDE.md`](../../../reference-project/fired-up-pizza/CLAUDE.md)
-* [`../../../reference-project/fired-up-pizza/DECISIONS.md`](../../../reference-project/fired-up-pizza/DECISIONS.md)
 
-## Deliverables
+L3 switches the active factory pack to `packs/lessons/L3`, then runs one
+formula graph through Planner, Architect, Designer, and Builder.
 
-Two files in this folder (mirroring the reference project):
-
-* `CLAUDE.md` — your filled-in agent-instructions file. Start from the shipped reference structure, fill the Tech Stack / Project Structure / Rules / Release Criteria sections in for *your* project. If you're using a non-Claude assistant, name it `AGENTS.md` instead — the content is identical.
-* `DECISIONS.md` — a log with one entry per `CLAUDE.md` rule change during L3. Date, short description, and the commit SHA that made the change.
-
-You'll also generate your project's `PROJECT_MANIFEST.md` during L3. That file belongs in `../../../my-factory/PROJECT_MANIFEST.md` (template already placed there) — not in this folder.
-
-## Workspace wiring
-
-L3 registers `../../../my-factory/` as a Gas City workspace and adds your project repo as a rig. No pack is included yet — the first pack gets added in L2. After L3, `../../../my-factory/city.toml` should have:
+Factory selection in `my-factory/pack.toml`:
 
 ```toml
-[workspace]
-name = "my-factory"
-provider = "claude"
-includes = []
-
-[[rigs]]
-name = "your-project"
-path = "../../path/to/your-project"
-includes = []
+[defaults.rig.imports.factory]
+source = "../packs/lessons/L3"
 ```
 
-## Exit criteria
+Sync the existing project rig after changing the city-wide factory selection:
 
-* [ ] `activities/labs/L3/CLAUDE.md` exists with at least 5 project-specific rules
-* [ ] `activities/labs/L3/DECISIONS.md` has an entry per rule change during the lab
-* [ ] `../../../my-factory/PROJECT_MANIFEST.md` filled in (Overview, Tech Stack, Project Structure sections minimum)
-* [ ] `gc status` from `../../../my-factory/` shows your rig registered
+```bash
+cd my-factory
+gc --rig <rig> import remove factory
+gc --rig <rig> import add ../packs/lessons/L3 --name factory
+gc restart
+```
 
-## Skipped this session?
+Start the run:
 
-Every later lab reads from `PROJECT_MANIFEST.md`. At the very minimum, copy the reference manifest to `../../../my-factory/PROJECT_MANIFEST.md` and replace the domain-specific sections with your project's. Without a filled manifest, the Planner and Architect have nothing to ground their output on.
+```bash
+gc sling planner \
+  "Add a percent operation: percent(whole, fraction) returns whole*fraction/100" \
+  --on mol-feature-delivery
+```
+
+Expected project outputs:
+
+- `docs/plans/<slug>.md`
+- `docs/architecture/<slug>.md`
+- `docs/designs/<slug>.md`
+- one implementation commit with passing tests

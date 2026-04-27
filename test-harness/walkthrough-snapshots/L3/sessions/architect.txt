@@ -1,0 +1,72 @@
+⎿  ◐ rig-afh8 · mol-feature-delivery   [● P2 · IN_PROGRESS]
+     Type: task
+     Created: 2026-04-27 · Started: 2026-04-27 · Updated: 2026-04-27
+     … +25 lines (ctrl+o to expand)
+
+  Searched for 2 patterns (ctrl+o to expand)
+
+⏺ Let me check the source request and the plan artifacts.
+
+⏺ Bash(gc bd show rig-5vx 2>&1)
+  ⎿  ○ rig-5vx · Add a negate operation: negate(x) returns -x   [● P2 · OPE
+     N]
+     Owner: Factory Harness · Type: task
+     … +4 lines (ctrl+o to expand)
+
+⏺ Bash(gc bd show rig-qldd 2>&1)
+  ⎿  ✓ rig-qldd · Write the feature plan   [● P2 · CLOSED]
+     Type: task
+     Created: 2026-04-27 · Updated: 2026-04-27
+     … +19 lines (ctrl+o to expand)
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ The feature request is "Add a negate operation: negate(x) returns -x" and the
+  plan artifact is docs/plans/negate-op.md. Let me read it along with project
+  context.
+
+  Read 1 file, listed 1 directory (ctrl+o to expand)
+
+⏺ Let me look at the existing architecture pattern and the source code for full
+  context.
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ I have all the context. Now I'll write the architecture decision for the
+  negate operation and then close the step.
+
+⏺ Write(/private/tmp/sfi-tutorial-walkthrough/1777265943-13479/L3/rig/docs/archi
+       tecture/negate-op.md)
+  ⎿  Wrote 115 lines to ../../../../../rig/docs/architecture/negate-op.md
+      2 # Negate Operation Architecture
+      3 ## Context
+      4
+        `-x`. There request asks for a `negate(x)` function that returns
+      6 project is a minimal CommonJS calculator with three existing pure
+         functions
+        r.js`) and atract`, `percent`) in a single module (`src/calculato
+      8 single test file (`test/calculator.test.js`). There are no extern
+        al
+      9 dependencies.
+     … +149 lines (ctrl+o to expand)
+
+⏺ Architecture artifact written. Now closing the current formula step.
+
+⏺ Bash(gc bd close rig-n17z --reason "Architecture artifact written to
+      docs/architecture/negate-op.md" 2>&1)
+  ⎿  ✓ Closed rig-n17z — Write the architecture decision: Architecture arti
+     fact written to docs/architecture/negate-op.md
+
+⏺ Architecture step complete. Wrote docs/architecture/negate-op.md with the
+  decision to add negate directly to src/calculator.js using plain unary minus,
+  no input validation, and allowing JavaScript's natural -0 behavior —
+  consistent with all existing calculator functions. Step rig-n17z is now
+  closed.
+
+✻ Baked for 1m 18s
+
+────────────────────────────────────────────────────────────────────────────────
+❯ 
+────────────────────────────────────────────────────────────────────────────────
+  /private/tmp/sfi-tutorial-walkthrough/1777265943-13479/L3/my-factory/.gc/ag…
+  ⏵⏵ bypass permissions on (shift+tab to cycle)

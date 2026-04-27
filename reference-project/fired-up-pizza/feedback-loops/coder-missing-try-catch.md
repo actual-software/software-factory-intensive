@@ -8,7 +8,7 @@
 
 ## Signal
 
-Source: `review-reports/*.md`
+Source: `docs/reviews/*.md`
 Pattern: Any High-severity finding whose title contains the substring `uncaught async` OR `unhandled promise rejection`.
 
 ## Trigger
@@ -17,7 +17,7 @@ One occurrence in a single Reviewer run. Reactive loops are cheap — catching i
 
 ## Target
 
-`packs/coder/prompts/coder.md` — Error Handling section.
+`packs/lessons/C1/agents/builder/prompt.template.md` — Error Handling section.
 
 ## Action
 
@@ -40,8 +40,8 @@ Then re-sling the Coder against the same bead. The Reviewer is expected to re-ru
 ## Verification
 
 - `grep -c "try \{" src/api/orders.ts` increased by at least 1 after re-sling
-- `review-reports/<slug>-review.md` no longer contains the High-severity finding
-- `git log --oneline packs/coder/prompts/coder.md` shows the rule was added in a commit referencing this feedback loop
+- `docs/reviews/<slug>-review.md` no longer contains the High-severity finding
+- `git log --oneline packs/lessons/C1/agents/builder/prompt.template.md` shows the rule was added in a commit referencing this feedback loop
 
 ## History
 

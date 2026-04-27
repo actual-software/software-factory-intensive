@@ -1,0 +1,2 @@
+Created rig-0h4 — "Add a percent operation: percent(whole, fraction) returns whole*fraction/100"
+Attached workflow rig-rsdw (formula "mol-feature-delivery") to rig-rsdw

@@ -1,0 +1,23 @@
+[lesson]
+id = "L2"
+pack_dir = "packs/lessons/L2"
+entry_formula = "mol-feature-intake"
+entry_agent = "planner"
+roles = ["planner", "architect"]
+docs = [
+  "activities/labs/L2/README.md",
+  "curriculum/labs/L2/README.md",
+  "curriculum/labs/L2/PROMPT.md",
+]
+
+[[steps]]
+id = "plan"
+needs = []
+target = "factory.planner"
+artifact = "docs/plans/<slug>.md"
+
+[[steps]]
+id = "architecture"
+needs = ["plan"]
+target = "factory.architect"
+artifact = "docs/architecture/<slug>.md"

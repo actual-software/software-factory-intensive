@@ -1,0 +1,7 @@
+# Multiply Operation Design
+## Interface
+## Behavior
+## Edge Cases
+## Test Plan
+## Build Notes
+## References

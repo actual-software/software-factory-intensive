@@ -1,0 +1,7 @@
+# Clamp Operation Review
+## Verdict
+## Summary
+## Findings
+## Test Evidence
+## Recommendation
+## References

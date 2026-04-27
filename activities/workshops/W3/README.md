@@ -1,29 +1,47 @@
 # W3 · Architect Multi-Agent Coordination — Activity
 
 **Walkthrough:** [`../../../curriculum/workshops/W3/README.md`](../../../curriculum/workshops/W3/README.md)
-**Reference examples:**
-* [`../../../reference-project/fired-up-pizza/orchestrator.yaml`](../../../reference-project/fired-up-pizza/orchestrator.yaml)
-* [`../../../reference-project/fired-up-pizza/docs/gates/approve_deploy.md`](../../../reference-project/fired-up-pizza/docs/gates/approve_deploy.md)
+
+W3 produces a formula graph design note.
 
 ## Deliverables
 
-Two files in this folder:
+Create:
 
-* `orchestrator.yaml` — a 6-stage pipeline definition covering PM → Architect → Designer → Builder → Reviewer → Release-Gate, including any human gates and per-stage `on_reject` behaviour.
-* `gates/approve_deploy.md` (or similar) — a short justification doc for each human gate you introduce. Name the gate, the signal it checks, and the escalation path.
+```text
+activities/workshops/W3/formula-design.md
+activities/workshops/W3/gates/<gate-name>.md
+```
 
-The shipped packs use **label-based handoff** (`needs-architecture`, `needs-plan`, `needs-design`, `ready-to-build`, `needs-review`, `ready-to-ship`). Your orchestrator file should either reflect those labels or describe how your customisations override them.
+`formula-design.md` should list:
 
-## Workspace wiring
+- step IDs
+- target agents such as `factory.builder`
+- dependency list for each step
+- expected inputs
+- expected artifact
+- close condition
+- failure or retry behavior
 
-W3 is a design session — no new packs are installed and `../../../my-factory/city.toml` is not changed. L4 is where the Reviewer and Release-Gate packs get wired in, at which point this orchestrator becomes load-bearing.
+Gate docs should explain:
 
-## Exit criteria
+- what signal the gate checks
+- why a human decision is required
+- what PASS means
+- what FAIL means
+- how the run should continue after the decision
 
-* [ ] `orchestrator.yaml` present, 6 stages, each referencing a specific pack label and a specific artifact path.
-* [ ] Every human gate introduced has a corresponding `.md` doc in `gates/` justifying its existence.
-* [ ] The orchestrator can be read top-to-bottom without needing to open a pack file — it's self-describing.
+## Reference Examples
 
-## Skipped this session?
+- [`../../../packs/lessons/L4/formulas/mol-delivery-review.toml`](../../../packs/lessons/L4/formulas/mol-delivery-review.toml)
+- [`../../../packs/lessons/C1/formulas/mol-release-delivery.toml`](../../../packs/lessons/C1/formulas/mol-release-delivery.toml)
+- [`../../../reference-project/fired-up-pizza/docs/formula/loyalty-points-graph.yaml`](../../../reference-project/fired-up-pizza/docs/formula/loyalty-points-graph.yaml)
 
-L4 and C1 both assume an orchestrator exists. If you skip W3, you can drive the pipeline manually (`gc sling <agent> <bead-id>` for each stage) — note this explicitly in the C1 run report under "Config Discipline".
+## Exit Criteria
+
+- [ ] `formula-design.md` is present and readable top to bottom.
+- [ ] Every step has a target, dependency list, artifact, and close condition.
+- [ ] Human gates are justified in `gates/`.
+- [ ] The design can be translated directly into a formula `[[steps]]` graph.
+- [ ] Decision boundaries are documented in `formula-design.md`.
+- [ ] One external trigger is described as an order spec.

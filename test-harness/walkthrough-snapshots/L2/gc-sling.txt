@@ -1,0 +1,2 @@
+Created rig-lm3 — "Plan the memory feature: store, recall, and clear calculator memory"
+Attached workflow rig-9a4n (formula "mol-feature-intake") to rig-9a4n

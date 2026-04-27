@@ -1,0 +1,73 @@
+1 bead(s): 0 closed, 1 ready, 0 blocked
+
+⏺ Now let me find the project root and read the upstream artifacts.
+
+  Searched for 2 patterns, listed 2 directories (ctrl+o to expand)
+
+⏺ The project rig is at
+  /private/tmp/sfi-tutorial-walkthrough/1777248518-98674/L4/rig. Let me read the
+   upstream artifacts and source files.
+
+  Read 2 files, listed 1 directory (ctrl+o to expand)
+
+⏺ Now let me read the upstream planning artifacts and the project manifest.
+
+  Read 4 files, listed 1 directory (ctrl+o to expand)
+
+⏺ Now let me run the tests and check the implementation commit.
+
+⏺ Bash(cd /private/tmp/sfi-tutorial-walkthrough/1777248518-98674/L4/rig && git
+      log --oneline -5 2>&1)
+  ⎿  7c52e77 Add mod(a, b) operation returning a % b
+     2062375 add project manifest with review standards
+     9e88fc1 Add clamp(x, lo, hi) to calculator module
+     … +2 lines (ctrl+o to expand)
+  ⎿  Shell cwd was reset to /private/tmp/sfi-tutorial-walkthrough/177724851
+     8-98674/L4/my-factory/.gc/agents/rig/delivery-review-reviewer
+
+⏺ Bash(cd /private/tmp/sfi-tutorial-walkthrough/1777248518-98674/L4/rig && npm
+      test 2>&1)
+  ⎿  > calculator@0.1.0 test
+     > node --test
+     … +20 lines (ctrl+o to expand)
+  ⎿  Shell cwd was reset to /private/tmp/sfi-tutorial-walkthrough/177724851
+     8-98674/L4/my-factory/.gc/agents/rig/delivery-review-reviewer
+
+⏺ Bash(cd /private/tmp/sfi-tutorial-walkthrough/1777248518-98674/L4/rig && git
+      show 7c52e77 --stat && echo "---DIFF---" && git show 7c52e77 2>&1)
+  ⎿  commit 7c52e77e95abde8bf5eb21a3359941dd190648fb
+     Author: Factory Harness <factory@example.local>
+     Date:   Sun Apr 26 17:34:52 2026 -0700
+     … +186 lines (ctrl+o to expand)
+  ⎿  Shell cwd was reset to /private/tmp/sfi-tutorial-walkthrough/177724851
+     8-98674/L4/my-factory/.gc/agents/rig/delivery-review-reviewer
+
+⏺ All 12 tests pass. Implementation matches the design spec exactly. Let me
+  check the reviews directory and write the review artifact.
+
+  Listed 1 directory (ctrl+o to expand)
+
+⏺ Write(/private/tmp/sfi-tutorial-walkthrough/1777248518-98674/L4/rig/docs/revie
+       ws/mod.md)
+  ⎿  Wrote 62 lines to ../../../../../rig/docs/reviews/mod.md
+       2 # Modulo Operation Review
+       3 ## Verdict
+       4
+       5 APPROVE
+       6
+       8 ## Summary
+       9 The `mod(a, b)` function is correctly implemented in `src/calcul
+         ator.js` using
+      10 JS-native `%` semantics, exported alongside existing functions,
+         documented with
+     … +67 lines (ctrl+o to expand)
+
+⏺ Now let me close the current formula step.
+
+✳ Incubating… (1m 29s · ↓ 3.8k tokens · thought for 10s)
+
+────────────────────────────────────────────────────────────────────────────────
+❯ 
+────────────────────────────────────────────────────────────────────────────────
+  /private/tmp/sfi-tutorial-walkthrough/1777248518-98674/L4/my-factory/.gc/ag…
+  ⏵⏵ bypass permissions on (shift+tab to cycle)
