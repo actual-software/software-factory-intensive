@@ -1,0 +1,6 @@
+[order]
+description = "Run the feedback harvest on a daily cooldown"
+formula = "mol-feedback-harvest"
+gate = "cooldown"
+interval = "24h"
+pool = "improver"

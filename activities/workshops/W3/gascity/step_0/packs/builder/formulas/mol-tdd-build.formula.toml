@@ -1,0 +1,369 @@
+description = """
+TDD build cycle — polecat isolation + red/green per task.
+
+Takes a `ready-to-build` bead, creates an isolated worktree and feature
+branch, then enforces a strict red/green TDD loop before submitting the
+branch for review. Self-terminates after submit.
+
+## Contract
+
+1. Caller slings with a bead labelled `ready-to-build` and `--on mol-tdd-build`.
+2. Builder creates an isolated worktree and feature branch per bead.
+3. RED: writes failing tests expressing the acceptance criteria; verifies failure.
+4. GREEN: writes minimal implementation; verifies all tests pass.
+5. Pushes branch, relabels bead `needs-review`, closes bead, exits via drain-ack.
+
+## Hard Gates
+
+- After RED commit: `$TEST_CMD` MUST FAIL. If it passes, the tests are wrong.
+- After GREEN commit: `$TEST_CMD` MUST PASS. Never hand off red tests.
+
+## Rejection-Aware Resume
+
+If `metadata.rejection_reason` is set on the bead, a previous attempt was
+rejected. Reuse the existing worktree and branch, rebase onto latest base,
+and fix the rejection reason rather than starting over.
+
+## Variables
+
+| Variable | Source | Description |
+|----------|--------|-------------|
+| test_cmd | caller | Test command (auto-detect if empty) |
+| commit_scope | caller | Conventional commit type (default: "feat") |
+| base_branch | caller | Branch to fork from (default: "main") |
+"""
+formula = "mol-tdd-build"
+version = 1
+
+[vars]
+[vars.test_cmd]
+description = "Command to run the test suite. Empty means auto-detect from rig type."
+default = ""
+
+[vars.commit_scope]
+description = "Conventional-commit type (feat|fix|refactor|...)"
+default = "feat"
+
+[vars.base_branch]
+description = "Base branch to fork the feature branch from."
+default = "main"
+
+[[steps]]
+id = "load-context"
+title = "Read the bead, acceptance criteria, and check for rejection resume"
+description = """
+**1. Find the root bead:**
+```bash
+ROOT_ID=$(bd mol current --json | jq -r '.molecule_id')
+bd show $ROOT_ID
+```
+
+**2. Pull plan artifact** if the bead carries a `plan:*` label:
+```bash
+PLAN_SLUG=$(bd show $ROOT_ID --json | jq -r '.labels[] | select(startswith("plan:")) | sub("plan:";"")')
+if [ -n "$PLAN_SLUG" ] && [ -f "docs/plans/$PLAN_SLUG.md" ]; then
+    cat "docs/plans/$PLAN_SLUG.md"
+fi
+```
+
+**3. Read all applicable rules:**
+```bash
+ls docs/rules/*.md 2>/dev/null | xargs -I {} sh -c 'echo "--- {} ---"; cat {}'
+```
+
+**4. Check for rejection resume:**
+```bash
+REJECTION=$(bd show $ROOT_ID --json | jq -r '.metadata.rejection_reason // empty')
+if [ -n "$REJECTION" ]; then
+    echo "RESUMING rejected work: $REJECTION"
+fi
+```
+
+**5. Extract acceptance criteria** from bead notes. Write them into the
+bead notes as an explicit exit contract so you can verify them at self-review:
+```bash
+bd update $ROOT_ID --notes "<existing notes>
+exit_contract:
+- <acceptance criterion 1>
+- <acceptance criterion 2>"
+```
+
+**Exit criteria:** Acceptance criteria named, resume path identified.
+"""
+
+[[steps]]
+id = "workspace-setup"
+title = "Create isolated worktree and feature branch"
+needs = ["load-context"]
+description = """
+Create a dedicated git worktree so this task is isolated from the main
+working tree. If resuming a rejected attempt, reuse the existing worktree.
+
+**1. Check for existing worktree (resume path):**
+```bash
+ROOT_ID=$(bd mol current --json | jq -r '.molecule_id')
+WORK_DIR=$(bd show $ROOT_ID --json | jq -r '.metadata.work_dir // empty')
+BRANCH=$(bd show $ROOT_ID --json | jq -r '.metadata.branch // empty')
+BASE="{{base_branch}}"
+```
+
+**2a. Resume — reuse existing worktree:**
+```bash
+if [ -n "$WORK_DIR" ] && [ -d "$WORK_DIR" ]; then
+    cd "$WORK_DIR"
+    git fetch origin
+    git rebase "origin/$BASE"
+    echo "Resumed worktree at $WORK_DIR on branch $BRANCH"
+```
+
+**2b. New — create worktree and feature branch:**
+```bash
+else
+    BRANCH="builder/$ROOT_ID"
+    WORK_DIR="worktrees/$ROOT_ID"
+    git fetch origin
+    git worktree add "$WORK_DIR" -b "$BRANCH" "origin/$BASE"
+    cd "$WORK_DIR"
+    bd update $ROOT_ID --set-metadata work_dir="$WORK_DIR" --set-metadata branch="$BRANCH"
+    echo "Created worktree at $WORK_DIR on branch $BRANCH"
+fi
+```
+
+From here, all implementation work happens inside `$WORK_DIR`. Remember
+the path — you will need it in every subsequent step.
+
+**Exit criteria:** Working directory is the isolated worktree; branch and
+work_dir recorded in bead metadata.
+"""
+
+[[steps]]
+id = "preflight"
+title = "Capture pre-existing test failures on base branch"
+needs = ["workspace-setup"]
+description = """
+Run the test suite on the clean base-branch state to record which tests
+were already failing BEFORE this task started. Do NOT fix pre-existing
+failures — they are the baseline. The RED step only adds new tests.
+
+**1. Determine the test command:**
+```bash
+TEST_CMD="{{test_cmd}}"
+if [ -z "$TEST_CMD" ]; then
+    if [ -f go.mod ]; then TEST_CMD="go test ./..."
+    elif [ -f package.json ]; then TEST_CMD="npm test --silent"
+    elif [ -f Cargo.toml ]; then TEST_CMD="cargo test"
+    elif [ -f pyproject.toml ] || [ -f setup.py ]; then TEST_CMD="pytest -q"
+    else
+        bd update $ROOT_ID --notes "<existing notes>
+preflight: no test runner detected — skip"
+        exit 0
+    fi
+fi
+echo "Test command: $TEST_CMD"
+```
+
+**2. Run and capture:**
+```bash
+if $TEST_CMD 2>&1 | tee /tmp/tdd-preflight.log; then
+    PREFLIGHT="pass"
+    FAILURES="0"
+else
+    PREFLIGHT="fail"
+    FAILURES=$(grep -c 'FAIL\|FAILED\|Error\|error' /tmp/tdd-preflight.log || echo "unknown")
+fi
+
+bd update $ROOT_ID --notes "<existing notes>
+preflight: $PREFLIGHT — $FAILURES pre-existing failures
+test_cmd: $TEST_CMD"
+```
+
+**Exit criteria:** Baseline recorded in bead notes. Pre-existing failures
+documented and will not be treated as regressions.
+"""
+
+[[steps]]
+id = "red"
+title = "Write failing tests expressing the acceptance criteria (RED)"
+needs = ["preflight"]
+description = """
+Write the tests FIRST, before any implementation. Tests must express each
+acceptance criterion from the exit contract. They must reference code that
+does not yet exist (or is not yet correct) — that is what makes them RED.
+
+**1. Write the test file(s):**
+
+Cover every acceptance criterion. Reference the interface/function you plan
+to implement. Do not write any production code yet.
+
+Naming convention:
+- Go: `<feature>_test.go`
+- JS/TS: `<feature>.test.ts` or `<feature>.spec.ts`
+- Rust: tests in the same file under `#[cfg(test)]`
+- Python: `test_<feature>.py`
+
+**2. Run and verify RED — HARD GATE:**
+```bash
+if $TEST_CMD 2>&1 | tee /tmp/tdd-red.log; then
+    echo "HARD GATE FAILURE: tests passed — they are not testing the right thing."
+    echo "The tests must FAIL before implementation. Fix the tests."
+    cat /tmp/tdd-red.log
+    exit 1
+else
+    echo "RED confirmed — tests fail as expected."
+fi
+```
+
+**3. Commit the failing tests:**
+```bash
+BEAD_TITLE=$(bd show $ROOT_ID --json | jq -r '.title')
+git add <test files>
+git commit -m "test({{commit_scope}}): red — $BEAD_TITLE (refs $ROOT_ID)"
+RED_SHA=$(git rev-parse HEAD)
+bd update $ROOT_ID --notes "<existing notes>
+tdd_red: committed $RED_SHA"
+```
+
+**Exit criteria:** Failing tests committed, failure confirmed by test run,
+SHA recorded in bead notes.
+"""
+
+[[steps]]
+id = "green"
+title = "Write minimal implementation to make tests pass (GREEN)"
+needs = ["red"]
+description = """
+Write the minimum production code needed to make the RED tests pass.
+No gold-plating. No abstractions not required by the tests. If in doubt,
+write less and let the tests tell you what's missing.
+
+**1. Write the implementation:**
+
+- Follow existing code patterns (check neighbouring files for style and naming)
+- Do not introduce new dependencies without a note in the bead
+- Do not modify files outside the scope implied by the acceptance criteria
+- Reuse existing helpers — do not introduce new abstractions for one-time use
+
+**2. Run and verify GREEN — HARD GATE:**
+```bash
+if $TEST_CMD 2>&1 | tee /tmp/tdd-green.log; then
+    echo "GREEN — all tests pass."
+else
+    echo "HARD GATE FAILURE: tests still failing after implementation."
+    tail -30 /tmp/tdd-green.log
+    echo "Fix the implementation before proceeding. Do not hand off red tests."
+    exit 1
+fi
+```
+
+**3. Commit the implementation:**
+```bash
+git add <implementation files>
+git commit -m "{{commit_scope}}: green — $BEAD_TITLE (refs $ROOT_ID)"
+GREEN_SHA=$(git rev-parse HEAD)
+bd update $ROOT_ID --notes "<existing notes>
+tdd_green: committed $GREEN_SHA"
+```
+
+**Exit criteria:** All tests pass. Green commit landed. SHA recorded.
+"""
+
+[[steps]]
+id = "self-review"
+title = "Review diff, check scope, verify quality gates"
+needs = ["green"]
+description = """
+Review the full changeset before submitting. This is the last checkpoint
+before the branch goes to the reviewer.
+
+**1. Review the full diff:**
+```bash
+git diff "origin/{{base_branch}}...HEAD" --stat
+git diff "origin/{{base_branch}}...HEAD"
+```
+
+Check for:
+- Files outside the scope implied by the acceptance criteria
+- New dependencies added without a bead note
+- Speculative abstractions (code for future requirements)
+- Comments explaining what the code does (well-named code needs no explanation)
+
+**2. ADR check (if actual CLI available):**
+```bash
+if command -v actual >/dev/null 2>&1; then
+    cd "$RIG_ROOT"
+    status_output=$(actual status --verbose 2>&1 || true)
+    if echo "$status_output" | grep -qiE 'out of date|drift|diverged'; then
+        ARCH_ID=$(bd create \\
+            --title "Resync ADRs before reviewing $ROOT_ID" \\
+            --label needs-architecture \\
+            --notes "TDD builder stopped: ADR drift detected.
+$status_output
+Originating bead: $ROOT_ID" \\
+            --json | jq -r '.id')
+        bd dep add $ROOT_ID --blocked-by $ARCH_ID
+        exit 0
+    fi
+fi
+```
+
+**3. Run quality gates (skip commands that are not configured):**
+```bash
+# Typecheck, lint, build — run whatever the rig supports.
+# Tests already confirmed GREEN in the previous step — no need to rerun.
+```
+
+**4. Verify clean working tree:**
+```bash
+if [ -n "$(git status --porcelain)" ]; then
+    echo "Working tree is not clean — stage and commit any remaining changes."
+    git status
+    exit 1
+fi
+```
+
+**Exit criteria:** Diff reviewed and clean, quality gates pass, working
+tree clean, no scope creep.
+"""
+
+[[steps]]
+id = "submit-and-exit"
+title = "Push branch, hand off to reviewer, self-terminate"
+needs = ["self-review"]
+description = """
+Push the feature branch, route the bead to the reviewer, clean up the
+worktree, and exit. Do not stay alive after submit.
+
+**1. Push the feature branch:**
+```bash
+git push origin HEAD
+```
+
+**2. Update the bead — swap labels and close:**
+```bash
+bd update $ROOT_ID --add-label needs-review --remove-label ready-to-build
+bd close $ROOT_ID --reason "TDD build complete: branch $BRANCH pushed (refs $ROOT_ID)"
+```
+
+**3. Notify the reviewer:**
+```bash
+gc mail send reviewer "Handoff: $ROOT_ID — branch $BRANCH is ready for review.
+Commits: red tests + green implementation."
+```
+
+**4. Remove the worktree:**
+```bash
+cd "$RIG_ROOT"
+git worktree remove "$WORK_DIR" --force
+```
+
+**5. Self-terminate:**
+```bash
+gc runtime drain-ack
+```
+
+The controller will kill this session. A new builder session starts fresh
+for the next `ready-to-build` bead.
+
+**Exit criteria:** Branch pushed, bead closed with `needs-review` label,
+reviewer notified, worktree removed, session terminated.
+"""

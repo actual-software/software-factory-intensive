@@ -1,0 +1,6 @@
+[order]
+description = "Wake the architect when any bead is labelled needs-architecture"
+formula = "mol-architect-review"
+gate = "condition"
+check = "gc bd --rig c1-project list --label=needs-architecture --status=open --no-assignee --json 2>/dev/null | jq -e 'length > 0' > /dev/null 2>&1"
+pool = "architect"

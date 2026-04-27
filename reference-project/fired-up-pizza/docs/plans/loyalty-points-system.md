@@ -83,4 +83,3 @@ Required tests the Coder must write (enforced by the Reviewer):
 
 - Manifest: `docs/PROJECT_MANIFEST.md`
 - Tickets: `tickets.md` (there is no existing loyalty ticket; this work package was created from a bead initiated by the founder)
-- Factory wiring: `docs/factory-wiring.md`

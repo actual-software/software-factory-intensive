@@ -1,0 +1,45 @@
+# actual-planner — Product-Manager agent for the Actual Software Factory.
+#
+# The first stage of the pipeline. Takes feature requests (labelled
+# needs-plan) and produces a formal Product Requirements Document
+# (docs/PRD.md) by reading the project manifest for tech stack
+# constraints, user use cases, and product requirements.
+#
+# Persona anchor: product-manager from
+# actual-factory/extensions/factory-vscode/shared/actual-agents/built-in-agents.ts
+
+[pack]
+name = "actual-planner"
+schema = 1
+
+[[doctor]]
+name = "check-planner"
+script = "doctor/check-planner.sh"
+description = "Verify planner prerequisites (bd, gc, git, jq)"
+
+[[commands]]
+name = "status"
+description = "Show planner work status for the current rig"
+script = "commands/status.sh"
+
+[formulas]
+dir = "formulas"
+
+# ── PLANNER — Product-Manager voice. Rig-scoped singleton. ──────
+[[agent]]
+name = "planner"
+scope = "rig"
+wake_mode = "fresh"
+work_dir = ".gc/agents/{{.Rig}}/planner"
+prompt_template = "prompts/planner.md.tmpl"
+nudge = "Check your hook for work and act on it."
+overlay_dir = "overlays/default"
+idle_timeout = "2h"
+min_active_sessions = 0
+max_active_sessions = 1
+work_query = "gc bd --rig l3-project list --label=needs-plan --status=open --json 2>/dev/null"
+
+[[named_session]]
+template = "planner"
+scope = "rig"
+mode = "on_demand"
