@@ -1,14 +1,38 @@
 # L2 - Deploy Planner + Architect Agents
 
-> **What you will build:** a two-agent lesson factory. One `gc sling` creates
-> a formula graph with two steps. The planner step runs first; when it
-> closes, the architect step becomes ready and runs.
+> **Goal:** Understand the role of the Planner and Architect agents in the software factory, and explore the unique configurations that best adapt these agents to your specific software project.
 
 | | |
 |---|---|
-| **Estimated duration** | 60-75 minutes |
+| **Estimated duration** | ~75 minutes |
 | **Type** | LAB |
-| **Deliverable** | One plan, one architecture decision, and notes linking them to the formula run |
+| **Deliverable** | Working Planner + Architect agents with at least one supported MCP server each |
+
+## What You'll Build
+
+```
+   feature request source
+              │
+              ▼
+   ┌────────────────────┐
+   │   Planner (L2)     │    ←  MCP: Context7, a team-specific
+   │                    │       research skill or other capability
+   │   produces:        │
+   │   docs/plans/      │
+   │   <slug>.md        │
+   └──────────┬─────────┘
+              │
+              ▼
+   ┌────────────────────┐
+   │  Architect (L2)    │    ←  MCP: ADR seeding a standards-library, or other capability
+   │                    │
+   │  produces:         │
+   │  docs/architecture/│
+   │  <slug>.md         │
+   └────────────────────┘
+```
+
+Each stage will have access to: **the manifest** (what to honor), **the task input** (what to work on), and **a capability** (what to use to accomplish the task). Capabilities are one of the many parts that distinguish generic agents "playing the role" from true customized agents.
 
 ## Mental Model
 
@@ -109,7 +133,7 @@ Your workflow card described how you work with one agent. The planner prompt doe
 
 ## Part 3: Run The Formula
 
-From `my-factory`, sling one request to the lesson Planner:
+From `my-factory`, sling one request to the lesson Planner (replace the feature name with your own):
 
 ```bash
 gc sling planner "Plan the loyalty points feature for Fired Up Pizza" --on mol-feature-intake
@@ -180,7 +204,7 @@ The architecture artifact should include:
 
 ## Part 5: Attach a Real Capability
 
-The planner and architect currently work from project context alone. Ground one of them in a real external system.
+The planner and architect currently work from project context alone. Ground one of them in a real external system, using your `workflow-card.md` and `factory-map.md` as guides.
 
 ### Add an MCP server to the planner
 
@@ -188,25 +212,33 @@ Packs have a `mcp/` directory for MCP server definitions. Each server is a TOML 
 
 1. Create the MCP config:
 
-       mkdir -p packs/lessons/L2/agents/planner/mcp
-       $EDITOR packs/lessons/L2/agents/planner/mcp/context7.toml
+For the Planner we will use Context7, which is an MCP server that provides up-to-date library documentation. Context7 requires no credentials to access public codebases and documentation.
 
-   Contents:
+```bash
+mkdir -p packs/lessons/L2/agents/planner/mcp
+$EDITOR packs/lessons/L2/agents/planner/mcp/context7.toml
+```
 
-   ```toml
-   name = "context7"
-   description = "Up-to-date library documentation via Context7"
-   command = "npx"
-   args = ["-y", "@upstash/context7-mcp"]
-   ```
-
-   Context7 requires no credentials. For MCP servers that need auth (GitHub, Sentry, Linear), add an `[env]` section to the TOML — see `packs/workshop/orders/sync-linear.toml` for an example of env var usage.
+```bash
+echo '
+name = "context7"
+description = "Up-to-date library documentation via Context7"
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+' > packs/lessons/L2/agents/planner/mcp/context7.toml
+```
 
 2. Edit the planner prompt to use the MCP:
 
-       $EDITOR packs/lessons/L2/agents/planner/prompt.template.md
+```bash
+$EDITOR packs/lessons/L2/agents/planner/prompt.template.md
+```
 
-   Add to the Inputs section: "Before writing acceptance criteria, use the Context7 MCP to look up the latest node:test API. Reference specific node:test features (describe, it, assert methods) in the acceptance criteria."
+Add to the Inputs section:
+
+```markdown
+Before writing acceptance criteria, use the Context7 MCP to look up the latest node:test API. Reference specific node:test features (describe, it, assert methods) in the acceptance criteria.
+```
 
 3. Restart and re-sling:
 
@@ -236,7 +268,11 @@ Prompt or config changes:
 What I would change before L3:
 ```
 
-Commit the generated artifacts and your notes.
+## Part 7: Continue adding capabilities
+
+Based on your experience with the Planner, explore other MCP servers you can add to the Architect (or more on the Planner) to customize these agents specially for your project.
+
+Once you are done, commit the generated artifacts and your notes.
 
 ## Exit Criteria
 
@@ -246,3 +282,7 @@ Commit the generated artifacts and your notes.
 - The project rig contains an architecture artifact under `docs/architecture/`.
 - One prompt edit or MCP addition produced a visible artifact change.
 - `activities/labs/L2/notes.md` records the root bead, artifact paths, and config changes.
+
+## Next Steps
+
+**[L3](../L3/README.md)** adds the Designer and Coder against the same project. The Designer reads your ADRs and produces specs; the Coder implements them.

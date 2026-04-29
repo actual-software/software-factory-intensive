@@ -2,170 +2,176 @@
 
 ## Overview
 
-Fired Up Pizza is a web application for a pizza restaurant. Customers can browse the menu, customize pizzas, place orders, and track delivery. Staff can manage menu items, view incoming orders, and update order status.
+Fired Up Pizza is a web application for a small neighborhood pizza restaurant. Customers browse the menu, customize pizzas (size, crust, toppings), place an order against their phone number, and track it through `placed → preparing → ready → delivered`. Staff use the same application to manage menu items, watch the live order queue, and advance order status as pizzas move through the kitchen. The MVP replaces a phone-only workflow that loses orders and leaves customers in the dark, and is intentionally lean enough to run on a single machine via `npm install && npm run dev` — no cloud, no payment processor, no external auth.
 
 ## Tech Stack
 
-| Layer | Technology | Notes |
-|-------|-----------|-------|
-| Frontend | React 18 + TypeScript | Vite build tooling |
-| Styling | Tailwind CSS | Utility-first, no component library |
-| State | React hooks + Context | No external state manager |
-| Routing | React Router v6 | Client-side routing |
-| Backend | Node.js + Express | REST API |
-| Database | SQLite (via better-sqlite3) | Single-file, no setup required |
-| Testing | Vitest + React Testing Library | Unit + component tests |
-| Linting | ESLint + Prettier | Config in repo root |
+| Layer    | Technology                          | Notes                                             |
+|----------|-------------------------------------|---------------------------------------------------|
+| Frontend | React 18 + TypeScript               | Vite build tooling                                |
+| Styling  | Tailwind CSS                        | Utility-first, no component library, no inline styles |
+| State    | React hooks + Context               | No external state manager                         |
+| Routing  | React Router v6                     | Customer-facing + staff dashboard share routes    |
+| Backend  | Node.js + Express                   | REST API                                          |
+| Database | SQLite via `better-sqlite3`         | Single file, zero external DB server              |
+| Testing  | Vitest + React Testing Library      | Unit + component tests                            |
+| Linting  | ESLint + Prettier                   | TypeScript strict mode required                   |
 
 ## Project Structure
 
+(proposed — update when scaffolded)
+
 ```
-src/
-  components/       # Reusable UI components
-  pages/            # Route-level page components
-  api/              # Express API routes
-  db/               # Database schema and queries
-  hooks/            # Custom React hooks
-  types/            # TypeScript type definitions
-  utils/            # Shared utilities
-public/             # Static assets
-docs/               # ADRs and documentation
-  adr/              # Architecture Decision Records
-docs/plans/      # Planner output
-docs/designs/             # Designer component specs
-docs/reviews/     # Reviewer output
-docs/releases/      # Deployer output
-feedback-loops/     # Continuous improvement artifacts
+fired-up-pizza/
+├── src/
+│   ├── client/              # React app (customer + staff views)
+│   │   ├── components/      # Shared UI components
+│   │   ├── pages/           # Route-level views
+│   │   ├── hooks/           # Custom React hooks
+│   │   └── lib/             # Client-side helpers
+│   ├── server/              # Express REST API
+│   │   ├── routes/          # /api/v1/* handlers
+│   │   ├── db/              # better-sqlite3 access + migrations
+│   │   └── lib/             # Server-side helpers
+│   └── shared/              # Types/schema shared client+server
+├── tests/                   # Vitest specs (mirror src/ layout)
+├── docs/
+│   ├── plans/               # Planner output
+│   ├── architecture/        # Architect ADRs
+│   ├── designs/             # Designer specs
+│   ├── reviews/             # Reviewer reports
+│   └── releases/            # Deployer release gates
+├── package.json
+├── vite.config.ts
+└── tsconfig.json
 ```
 
 ## Domain Model
 
-```
-Menu
-  MenuItem: { id, name, description, price, category, image, available }
-  Category: { id, name, sortOrder }
+Core entities and relationships:
 
-Orders
-  Order: { id, items[], status, total, customerName, customerPhone, createdAt }
-  OrderItem: { menuItemId, quantity, customizations[] }
-  OrderStatus: placed → preparing → ready → delivered | cancelled
+- **MenuItem**: `id`, `name`, `description`, `base_price` (cents), `category`, `available` (boolean)
+- **Topping**: `id`, `name`, `price` (cents), `available` (boolean)
+- **Order**: `id`, `phone_number`, `status` (`placed | preparing | ready | delivered | cancelled`), `created_at`
+- **OrderItem**: `id`, `order_id` (→ Order), `menu_item_id` (→ MenuItem), `size`, `crust`, `topping_ids[]` (→ Topping)
+- **Customer**: identified by `phone_number` only — no separate Customer entity
+- **Staff**: role-only — no separate Staff entity for MVP
 
-Customizations
-  Topping: { id, name, price, category: meat|veggie|cheese }
-  Size: small | medium | large (price multiplier)
-  Crust: thin | regular | thick
-```
+Pricing rule: prices are **recomputed from the menu at display time** rather than cached on `OrderItem`. The schema stores only references; display logic joins through MenuItem + Topping. Trade-off accepted: historical orders reflect current menu prices, not the price at the time of order.
+
+Status transitions: **linear only** — `placed → preparing → ready → delivered`. `cancelled` is reachable from any non-terminal state. Backtracking (e.g. `ready → preparing`) is explicitly out of scope; if staff need to undo a transition, they cancel and re-create.
 
 ## Conventions
 
-- Component files: PascalCase (`MenuItemCard.tsx`)
-- Utility files: camelCase (`formatPrice.ts`)
-- Test files: co-located (`MenuItemCard.test.tsx`)
-- API routes: `/api/v1/<resource>` (REST, JSON)
-- Commits: conventional commits (`feat:`, `fix:`, `docs:`)
-- Branches: `plan/<slug>`, `feat/<slug>`, `fix/<slug>`
+- File naming: kebab-case for non-component files (`order-service.ts`); PascalCase for React components (`OrderCard.tsx`)
+- Test files: co-located, suffix `.test.ts` / `.test.tsx`
+- API routes: `/api/v1/<resource>` (e.g. `/api/v1/orders`, `/api/v1/menu-items`)
+- Commits: conventional commits — `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
+- Branches: `<slug>-<feature>` per work item; never commit directly to `main`
+- Pricing: store and compute in **cents** internally; format as dollars only at display boundaries
+- TypeScript: strict mode required (no `any` without justification)
+- Styling: Tailwind utility classes only — no inline `style={}` attributes
 
 ## Constraints
 
-- No external auth provider — simple phone number lookup for MVP
-- No payment processing — order placement is "pay at counter"
-- No real-time updates — polling or manual refresh for order status
-- SQLite only — no external database server required
-- Must run with `npm install && npm run dev` — zero additional setup
+- No online payment processing — pay-at-counter model only
+- No SMS or push notifications — order status visible only via in-app polling
+- No multi-location support — single-restaurant scope
+- No external auth provider — customer identity is phone number lookup only
+- No external database server — SQLite single-file only
+- No real-time infrastructure (websockets, SSE) — polling or manual refresh is acceptable
+- No container, no cloud deployment target for MVP
+- Must run with `npm install && npm run dev` — zero additional setup steps
 
 ---
 
 ## Task Inputs
 
-What each factory agent receives as input:
+(pipeline-critical — verify before running factory)
 
-| Agent | Receives | From |
-|-------|----------|------|
-| Planner | Feature request (bead title + description) | Ticket backlog or Jira sync |
-| Architect | Work package | `docs/plans/<slug>.md` |
-| Designer | Work package + ADR | `docs/plans/` + `docs/architecture/` |
-| Coder | Component spec + test cases | `docs/designs/<slug>-spec.md` + work package |
-| Reviewer | Code diff + spec + review standards | Feature branch + `docs/designs/` + this manifest |
-| Deployer | Review report + release criteria | `docs/reviews/` + this manifest |
-
-Each agent reads this manifest for project context. The agent's prompt defines its output format and quality gate.
+| Agent     | Receives                                                | From                                |
+|-----------|---------------------------------------------------------|-------------------------------------|
+| Planner   | Feature request + PROJECT_MANIFEST.md                   | Human / GitHub Issues               |
+| Architect | Planner work package + Tech Stack + Constraints sections | `docs/plans/<slug>.md`             |
+| Designer  | Architect ADR + Domain Model + Conventions sections     | `docs/architecture/NNNN-<slug>.md`  |
+| Coder     | Designer spec + Conventions section                     | `docs/designs/<slug>-spec.md`       |
+| Reviewer  | Code diff + Review Standards section                    | Feature branch `<slug>-<feature>`   |
+| Deployer  | Reviewer report + Release Criteria section              | `docs/reviews/<slug>-review.md`     |
 
 ## Services to Connect
 
-| Service | Purpose | Config |
-|---------|---------|--------|
-| GitHub | Source control, pull requests | `GITHUB_TOKEN` with repo scope |
-| npm registry | Package dependencies | Default public registry |
-| SQLite | Local database (no server needed) | Built into the app via better-sqlite3 |
+| Service        | Purpose                              | Config                                    |
+|----------------|--------------------------------------|-------------------------------------------|
+| GitHub         | Source control + PR flow             | Public repo, standard PR workflow         |
+| GitHub Issues  | Backlog / Planner input              | Or in-repo `tickets.md` if Planner prefers|
 
-For MVP, no external deployment target, CI/CD, or monitoring is required. The app runs locally with `npm run dev`.
+(No CI/CD, observability, comms, or analytics services for MVP. Revisit if/when the app moves off single-machine deployment.)
 
 ## Success Criteria
 
 ### Per-Feature Success
 
-- All acceptance criteria from the work package are met
-- Code review approved with no high-severity findings
-- All tests pass (`npm test` exits 0)
-- Lint clean (`npm run lint` exits 0)
-- Feature branch is mergeable (no conflicts with main)
+- [ ] A customer can place an order end-to-end without making a phone call (browse → customize → submit)
+- [ ] A customer can track an order through all four status stages (placed / preparing / ready / delivered) by phone-number lookup
 
 ### Factory-Level Success
 
-- Feature completed with zero ad-hoc prompts (all behavior from config)
-- All 6 pipeline stages produced committed artifacts
-- Each handoff between agents used the defined artifact paths (no out-of-band communication)
+- [ ] App starts on a clean clone with `npm install && npm run dev` — zero additional setup
+- [ ] All Vitest + React Testing Library tests pass on a fresh checkout
+- [ ] TypeScript strict mode (`tsc --noEmit`) and ESLint both pass without errors on every merged PR
 
 ---
 
 ## Review Standards
 
-Applied by the Reviewer agent when evaluating code.
+(default — customize for this project)
 
 ### Spec Compliance
 
-- Every prop/input from the component spec must be implemented
-- Every interaction from the spec must work as described
-- Edge cases (empty, error, loading) must be handled
-- Data types must match the spec exactly
+- Every shipped behavior maps to a bullet in the Designer's spec — no scope creep without an updated spec
+- Domain Model entities/fields/relationships in code match Section 4 of this manifest
+- Status transitions in code match the documented linear flow — no backtracking paths
+- Pricing logic recomputes from MenuItem + Topping at display time (no cached `unit_price` on `OrderItem`)
 
 ### Style
 
-- No inline styles — use Tailwind CSS classes
-- Components under 200 lines (split if larger)
-- No `any` types in TypeScript
-- Consistent naming per project conventions
+- TypeScript strict mode — no `any` without an inline justification comment
+- No inline `style={}` — Tailwind utility classes only
+- Components are functional, hooks-based — no class components
+- API route handlers are thin; business logic lives in `src/server/lib/` or `src/server/db/`
+- All monetary values flow as cents through code, formatted to dollars only in display layer
 
 ### Security
 
-- No user input rendered without sanitization
-- API endpoints validate all input parameters
-- No secrets or credentials in code
-- SQL queries use parameterized statements (no string concatenation)
+- Phone numbers are normalized + validated before use as identity (E.164 or documented format)
+- All Express routes validate input shape before touching the DB (zod or equivalent)
+- SQL access goes through parameterized statements only — no string-concatenated queries
+- No customer PII (phone numbers) in client logs or error messages
 
 ### Severity Scale
 
-- **Low**: style nit, minor improvement opportunity
-- **Medium**: missing test, incomplete error handling, accessibility gap
-- **High**: security issue, data corruption risk, spec violation
+- **Low**: cosmetic issues, minor inconsistencies
+- **Medium**: functional gaps, missing edge cases, style violations
+- **High**: data loss, security vulnerability, spec violation, broken status flow, pricing miscalculation
 
 ---
 
 ## Release Criteria
 
-Evaluated by the Deployer agent before a feature is marked deployment-ready.
+(default — customize for this project)
 
 ### Required (all must PASS)
 
-1. All acceptance criteria from the work package are met
-2. Review report verdict is APPROVE (no open high-severity findings)
-3. Tests pass (`npm test` exits 0)
-4. Lint clean (`npm run lint` exits 0)
-5. No untracked files in feature scope (`git status` clean)
-6. Branch mergeable with main (no conflicts)
+1. [ ] All Vitest tests pass on a clean checkout
+2. [ ] `tsc --noEmit` passes with strict mode enabled
+3. [ ] ESLint passes with no errors
+4. [ ] App boots successfully via `npm install && npm run dev`
+5. [ ] Reviewer report exists and contains no `High` severity findings
+6. [ ] All commits on the merged branch follow conventional-commit format
+7. [ ] Designer spec for the feature is committed to `docs/designs/`
 
 ### Informational (reported but non-blocking)
 
-- Test coverage percentage
-- Bundle size delta
-- Number of new dependencies added
+- Test coverage delta vs. previous release
+- Bundle size delta (Vite build output)
+- Count of `Low` / `Medium` review findings deferred

@@ -17,7 +17,7 @@ the work order.
 - The implementation diff, recent commit, source files, tests, and test output
   you can reproduce.
 - The project manifest at `docs/PROJECT_MANIFEST.md` or
-  `my-factory/PROJECT_MANIFEST.md` — specifically the Review Standards
+  `docs/SOFTWARE_FACTORY_MANIFEST.md` — specifically the Review Standards
   section. If Review Standards exist, they are authoritative for this review.
 
 ## Graph Work Process

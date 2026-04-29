@@ -1,4 +1,6 @@
-# L1 · Set Up the Factory Runtime
+# L1 · CLAUDE.md + first feature
+
+> **Goal:** Understand how the configuration of a software factory depends on the nature of the project it is building, and how to adapt the configuration to the specific needs of the project.
 
 L1 converts the workflow card from W1 into agent-readable config and registers your project with Gas City. You are not running agents yet — that starts in L2.
 
@@ -8,12 +10,32 @@ L1 converts the workflow card from W1 into agent-readable config and registers y
 | **Type** | LAB |
 | **Deliverable** | A registered Gas City city with your project rig ready for L2 |
 
+## Architecture
+
+```
+┌──────────────────────────────────────────────────────────┐
+│        PROJECT_MANIFEST.md and CLAUDE.md                 │
+│  Overview · Tech Stack · Domain Model · Conventions      │
+│  Review Standards · Release Criteria · Task Inputs       │
+└───────┬──────────────────────────────────────────────────┘
+        │
+        ▼
+┌──────────────────────────────────────────────────────────┐
+│   6-agent factory installed against YOUR project         │
+│                                                          │
+│   Planner ──▶ Architect ──▶ Designer ──▶ Coder           │
+│       ▲                                     │            │
+│       │                                     ▼            │
+│  input sources                     Reviewer ──▶ Deployer │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+```
+
 ## Goal
 
 By the end of L1:
 
 - Your W1 workflow card is converted to a `CLAUDE.md`
-- A minimal project manifest is in place
 - Gas City is registered with formula v2 enabled
 - Your project rig is ready for L2
 
@@ -39,23 +61,7 @@ Map from your workflow card:
 
 Keep it concrete. Every bullet should name a file, command, or specific rule — the same specificity discipline from W1.
 
-## 2. Create a Minimal Project Manifest (~3 min)
-
-```bash
-cd /path/to/software-factory-intensive
-cp curriculum/PROJECT_MANIFEST_TEMPLATE.md my-factory/PROJECT_MANIFEST.md
-$EDITOR my-factory/PROJECT_MANIFEST.md
-```
-
-Fill in only these sections now:
-
-- overview
-- tech stack
-- project structure
-
-You will add Review Standards before L4 and Release Criteria before C1, when the agents that read them are introduced. The manifest grows incrementally across the course.
-
-## 3. Register the City (~5 min)
+## 2. Register the City (~5 min)
 
 Create local runtime config from templates:
 
@@ -90,7 +96,7 @@ gc status
 
 This creates the project rig. Later labs keep using the same rig so artifacts accumulate naturally.
 
-## 4. Verify (~2 min)
+## 3. Verify (~2 min)
 
 From the project repo:
 
@@ -106,13 +112,13 @@ If a command fails, fix `CLAUDE.md` before moving on. Later agents will rely on 
 ## Exit Criteria
 
 - [ ] `CLAUDE.md` or `AGENTS.md` exists in the project rig with project-specific rules.
-- [ ] `my-factory/PROJECT_MANIFEST.md` has overview, tech stack, and project structure.
+- [ ] `docs/PROJECT_MANIFEST.md` has overview, tech stack, and project structure.
 - [ ] `my-factory/city.toml` enables formula v2.
 - [ ] `my-factory/pack.toml` selects `../packs/lessons/L2` as `factory`.
 - [ ] `gc status` shows your city and project rig.
 
 ## Next
 
-W2 comes next — you'll design the factory structure (roles, artifacts, handoff contracts) before running it. Then L2 runs the first slice of that design: Planner and Architect agents on a real feature request.
+**[W2](../../workshops/W2/README.md)** comes next — you'll design the factory structure (roles, artifacts, handoff contracts) before running it. Then **[L2](../../labs/L2/README.md)** runs the first slice of that design: Planner and Architect agents on a real feature request.
 
 You do not need to run agents before W2. The design comes first so you understand what each role does before watching it work. Your rig stays registered — L2 will use the same one.

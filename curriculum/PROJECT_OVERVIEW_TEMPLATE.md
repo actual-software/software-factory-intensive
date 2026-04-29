@@ -41,16 +41,3 @@ Flag which you already use vs. which you're considering.
 ## 4. Open Questions / Concerns
 
 What are you unsure about going in? Architectural uncertainty, unclear user needs, missing tooling, tech-debt hotspots. Surface it here so your agent can ask better probing questions.
-
----
-
-## Pre-Curriculum Checklist
-
-- [ ] Overview written (this file)
-- [ ] Project repo cloned locally
-- [ ] Dependencies install cleanly
-- [ ] Gas City installed (`gc --version`)
-- [ ] At least one CLI coding agent installed and authenticated
-- [ ] `gc doctor` passes `check-core-tools`
-
-See [`installation.md`](../installation.md) for full setup details.

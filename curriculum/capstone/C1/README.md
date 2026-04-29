@@ -1,7 +1,42 @@
-# C1: Run the Full Release Delivery Factory
+# C1: Run the Software Factory End-to-End
 
-> **What you will do:** switch the active factory to the C1 pack and run the
-> full formula graph from feature request through release gate.
+> **Goal:** Demonstrate your understanding of the software factory pipeline by running an unfamiliar feature request through your complete software factory, guided entirely by the configuration you have assembled.
+
+| | |
+|---|---|
+| **Estimated duration** | ~90 minutes |
+| **Type** | CAPSTONE |
+| **Deliverable** | 6-agent software factory applied to an unfamiliar feature request, with a high-quality feature produced for your software project, and a `retrospective.md` describing the run |
+
+## Architecture
+
+```
+   Unfamiliar feature request (from a real source)
+                        │
+                        ▼
+  ┌───────────────────────────────────────────────┐
+  │   The full factory, already assembled:        │
+  │                                               │
+  │   Planner → Architect → Designer →            │
+  │                                               │
+  │   Coder → Reviewer → Deployer                 │
+  │                                               │
+  │   (plus the coordination channels from W3 and │
+  │    the capabilities attached in L2–L4)        │
+  └─────────────────────┬─────────────────────────┘
+                        │
+                        ▼
+     ┌────────────────────────────────────────┐
+     │    Feature delivered + audit record    │
+     │                                        │
+     │   docs/plans/<slug>.md                 │
+     │   docs/architecture/<slug>.md          │
+     │   docs/designs/<slug>.md               │
+     │   src/** + tests on feature branch     │
+     |   docs/reviews/<slug>.md               │
+     │   docs/releases/<slug>.md              │
+     └────────────────────────────────────────┘
+```
 
 ## Mental Model
 
@@ -147,12 +182,15 @@ Revisit your W4 feedback rules. For each rule you applied:
 
 | Rule | Signal Observed? | Metric Before | Metric After |
 |------|-----------------|---------------|--------------|
+| | | | |
 
 ## Config Changes Made During This Run
 | File | Change | Why |
 |------|--------|-----|
+| | | | |
 
 ## What I Would Change Before the Next Run
+- [observation with root cause]
 ```
 
 If no W4 criteria or config changes applied during the run, record that
@@ -164,6 +202,14 @@ explicitly instead of inventing one.
 - No stage labels or manual downstream beads were used.
 - All seven agents received and completed their formula steps.
 - The release gate includes an explicit verdict backed by validation and review evidence.
-- Retrospective exists and evaluates any W4 criteria that applied.
+- Retrospective exists and evaluates any W4 criteria that were applied during the run.
 - Config changes are documented with file and reason, or the retrospective
   explicitly says that no config changes were made.
+
+## Next Steps
+
+After C1, the factory is yours to run on real work. The habits that matter most going forward:
+
+- **Keep the iteration log alive.** Every prompt edit you make in the weeks ahead deserves a line.
+- **Run W4's loop on a cadence.** Pick at least one criterion to review per sprint.
+- **Grow the manifest deliberately.** When a new recurring review finding appears, promote it to a Review Standard. When a new deploy gate becomes mandatory, add it to Release Criteria.

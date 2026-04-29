@@ -1,11 +1,51 @@
 # W2 · Design The Software Factory
 
+> **Goal:** Create a factory map that explains which role owns each kind of decision, which artifact each role writes, which formula step should route to that role, which checks prove the step is done, and which context the next step needs.
+
+| | |
+|---|---|
+| **Estimated duration** | ~45 minutes |
+| **Type** | WORKSHOP |
+| **Deliverable** | `factory-map.md` that explains which role owns each kind of decision, which artifact each role writes, which formula step should route to that role, which checks prove the step is done, and which context the next step needs |
+
+## Architecture
+
+```
+  ┌──────────────┐
+  │  Your Solo   │  ← models, memory, skills, MCP servers,
+  │  AI Workflow │    knowledge bases, CLI tools, playbooks
+  └──────┬───────┘
+         │
+         ▼
+┌──────────────────────────────────────────────────────────────┐
+│  Feature Request                                             │
+│        │                                                     │
+│        ▼                                                     │
+│  ┌───────────┐   plan   ┌───────────┐   decide   ┌──────────┐│
+│  │  Planner  │─────────▶│ Architect │───────────▶│ Designer ││
+│  └───────────┘          └───────────┘            └────┬─────┘│
+│                                                       │ spec │
+│                                                       ▼      │
+│  ┌───────────┐   gate   ┌───────────┐   review   ┌──────────┐│
+│  │  Deployer │◀─────────│  Reviewer │◀───────────│  Coder   ││
+│  └─────┬─────┘          └───────────┘            └──────────┘│
+│        │                                                     │
+└────────┼─────────────────────────────────────────────────────┘
+         ▼
+   Functional Software
+```
+
+## Deliverable
+
 W2 is a design workshop. You are not wiring separate runtime packs. You are deciding what roles, artifacts, and quality gates your small factory should have before the L2-L4 lesson packs run it.
 
-## Goal
+You will create a single file in this folder:
 
-Create a factory map that explains:
+```bash
+activities/workshops/W2/factory-map.md
+```
 
+The `factory-map.md` file will explain how your factory should flow:
 - which role owns each kind of decision
 - which artifact each role writes
 - which formula step should route to that role
@@ -145,4 +185,4 @@ The lesson packs don't match your design exactly — they're generic calculator-
 
 ## Next
 
-L2 runs the first slice of this factory: Planner and Architect. The L2 lesson pack is a pre-built 2-agent factory, not your custom design — you'll use the lesson packs to learn the mechanics, then apply your W2 design to your own project afterward.
+**[L2](../../labs/L2/README.md)** runs the first slice of this factory: Planner and Architect. The L2 lesson pack is a pre-built 2-agent factory, not your custom design — you'll use the lesson packs to learn the mechanics, then apply your W2 design to your own project afterward.

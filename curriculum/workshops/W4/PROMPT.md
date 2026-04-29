@@ -15,15 +15,7 @@ Read:
 - activities/workshops/W4/README.md
 - the active lesson pack under packs/lessons/
 
-Create or update activities/workshops/W4/feedback-loops/*.md.
+Help the participant create `improvement-criteria.md` and `factory-iterations.md` files based on the instructions in the W4 README.md.
 
-For each rule include:
-- signal
-- trigger threshold
-- target file
-- proposed change
-- verification
-- rollback condition
-
-Recommend at most one small runtime change to apply now. Runtime changes should go into the active self-contained lesson pack or project instructions, not into a separate reusable-role topology.
+Recommend at least one small runtime change to apply now. Runtime changes should go into the active self-contained lesson pack or project instructions.
 ```

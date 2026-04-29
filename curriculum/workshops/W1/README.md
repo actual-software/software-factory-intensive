@@ -10,6 +10,43 @@
 
 ---
 
+## Architecture
+
+```
+     tickets.md (FUP-1 … FUP-6)
+         │
+         ▼
+┌──────────────────────────────────────────────────────────┐
+│  Planner        (consumes tickets.md)                    │
+│    decomposes → sets beads for Architect and Designer    │
+└─────────────┬──────────────────────────────┬─────────────┘
+              │                              │
+              ▼                              ▼
+   ┌──────────────────────┐        ┌────────────────────┐
+   │  Architect           │        │  Designer          │
+   │  writes ADR;         │        │  writes spec;      │
+   │  flips → beads       │        │  flips →           │
+   │  for Designer        │        │  beads for Coder   │
+   │  beads for Coder     │        │                    │
+   └──────────┬───────────┘        └─────────┬──────────┘
+              │                              │
+              └──────────┬───────────────────┘
+                         ▼
+              ┌─────────────────────────┐
+              │  Reviewer               │
+              │  verdict: pass →        │
+              │    beads to Deployer    │
+              │  verdict: changes →     │
+              │    beads for Coder      │
+              └──────────┬──────────────┘
+                         ▼
+              ┌─────────────────────────┐
+              │  Deployer               │
+              │  tags; rollback plan;   │
+              │  closes task            │
+              └─────────────────────────┘
+```
+
 ## Why This Workshop Exists
 
 The factory is six agents — but each one is still, fundamentally, "a Claude session you've configured well." If you can't get a *single* agent to do what you want reliably and repeatably, a factory of six won't rescue you. It'll multiply the chaos.
@@ -46,8 +83,8 @@ Before starting, verify each of these:
 
 | Prerequisite | How to verify | If it's missing |
 |--------------|---------------|-----------------|
-| Project Manifest filled in | `cat ~/path/to/your-repo/docs/PROJECT_MANIFEST.md` shows tech stack, conventions, domain model | Copy from [`curriculum/PROJECT_MANIFEST_TEMPLATE.md`](../../PROJECT_MANIFEST_TEMPLATE.md) and fill it in — 15 min max |
 | Your project repo cloned locally | `cd ~/path/to/your-repo && git status` runs cleanly | `git clone <your-repo-url>` and verify you can commit from this checkout |
+| Project Manifest filled in | `cat ~/path/to/your-repo/docs/PROJECT_MANIFEST.md` shows tech stack, conventions, domain model | Copy from [`curriculum/PROJECT_MANIFEST_TEMPLATE.md`](../../PROJECT_MANIFEST_TEMPLATE.md) and fill it in — 15 min max |
 | An AI coding assistant you've used | You can name at least 3 sessions where the agent produced useful code, and at least 1 where it went off the rails | If you haven't used one seriously, spend 30 min before this workshop doing a small task with Claude Code or similar |
 | A scratch doc or notebook | Any plain text or markdown file you can jot notes into | Create `~/scratch/w1-notes.md` or open a fresh note in your editor of choice |
 | Fired Up Pizza reference open (recommended) | [`reference-project/fired-up-pizza/workflow-card.md`](../../../reference-project/fired-up-pizza/workflow-card.md) open in a second editor window | Read it once end-to-end; you'll use it as a pattern |
@@ -62,11 +99,10 @@ Before you write your own card, skim the finished equivalent in the reference pr
 
 - [`reference-project/fired-up-pizza/workflow-card.md`](../../../reference-project/fired-up-pizza/workflow-card.md) — a completed `workflow-card.md` for the Fired Up Pizza project
 
-That card is exactly what this session asks you to produce for your own project — same four sections, project-specific content. Your `workflow-card.md` lives in your *project* repo (not the city). In L1 you'll evolve it into agent instructions (`CLAUDE.md` / `AGENTS.md`) that target the built-in `claude` agent.
+That card is exactly what this session asks you to produce for your own project — same four sections, project-specific content. Your `workflow-card.md` lives in your *project* repo (not the city). In L1 you'll evolve it into agent instructions (`CLAUDE.md` / `AGENTS.md`) that target your built-in agent.
 
 Notice a few things as you read the reference:
 
-- **Every bullet names a concrete artifact** — `src/pages/MenuPage.tsx`, `FUP-3`, `npm run lint && npm run type-check && npm test`. There are no abstractions like "relevant files" or "proper testing."
 - **The Iteration Loop section tells you exactly what to do when a gate fails** — `git reset --hard HEAD` and re-sling, *not* type a correction into chat. That sentence is doing most of the work.
 - **The Decision Checkpoint lists five "I decide" items and five "agent decides" items** — not three vague categories. The specificity is what makes it actionable.
 
@@ -188,13 +224,13 @@ Open it in your editor and paste this scaffold:
 [Which decisions you make yourself; which you delegate to the agent.]
 ```
 
-Now fill in each section in order.
+Now fill in each section in order:
 
 ### Step 2.1: Write the Prompt Template (~5 min)
 
 The Prompt Template section answers: **what fields are in every prompt I send to the agent?**
 
-This is structural — it names the *fields*, not the values. For the Cart Total feature, a prompt instantiated from the template looks like this:
+This is structural — it names the *fields*, not the values. For the Cart Total feature, a prompt instantiated from the template may look like this:
 
 ```
 Target: src/components/Cart.tsx (FUP-3)
@@ -217,7 +253,7 @@ Every prompt I paste into Claude Code for this project includes, in order:
 - **Target**: a file path under `src/` or a ticket ID (`FUP-3`, etc.). No "the cart thing."
 - **Acceptance criteria**: pasted verbatim from the ticket. If I'm inventing the AC on the fly, I write them down first and paste the exact text.
 - **Stack constraints**: "React 18 + TypeScript strict, Tailwind CSS utility classes, no inline styles, no `any` types." These never change.
-- **Reference files**: two similar existing files the agent should read first for pattern-matching.
+- **Reference files**: two similar existing files the agent should read first for pattern-matching (e.g., for a new page component I'd reference `src/pages/MenuPage.tsx` and `src/pages/OrderStatusPage.tsx`).
 - **Testing hint**: "Vitest + React Testing Library. Co-located `<Name>.test.tsx` file."
 ```
 
@@ -290,7 +326,7 @@ Notice the negative rule at the end: "I do *not* reset between small slices." Ne
 
 The Iteration Loop section answers: **what steps does the agent go through, from receiving a task to merging the result?**
 
-This is the longest section — it has numbered steps, and each step names a concrete action. For the Cart Total feature, the loop is:
+This section has numbered steps, and each step names a concrete action. For the Cart Total feature, the loop is:
 
 1. Agent reads the spec (ticket + reference files), writes a 3-line plan.
 2. I confirm or redirect the plan.
@@ -359,7 +395,7 @@ Agent: reads the updated CLAUDE.md, produces new code that uses `Cents` correctl
 
 **What's happening here:** The disciplined path is ~3× slower *this time* and ~100× faster *over the next six months*. That asymmetry is the reason the Iteration Loop section of your card insists on the disciplined path. Without the card, you'd default to ad-hoc; with the card, the disciplined path is the named, expected behavior.
 
-When you write your own Iteration Loop, make sure step 5 is unambiguous about this choice. A card that says "handle test failures appropriately" preserves the ambiguity the anti-pattern thrives in.
+When you write your own Iteration Loop, make sure your gate check step is unambiguous about this choice. A card that says "handle test failures appropriately" preserves the ambiguity the anti-pattern thrives in.
 
 ### Step 2.4: Write the Decision Checkpoint (~5 min)
 
@@ -385,13 +421,13 @@ Decisions the agent owns:
 - Function-level implementation details within a file.
 - Test case design (which cases to write, how to structure fixtures).
 - Error-message wording for user-facing error states (as long as it matches the existing voice — cheerful, specific, non-technical).
-- File organization *within* a component directory.
+- File organization *within* a component directory (if it's adding a sub-component, that's the agent's call).
 - Choosing between equivalent idiomatic approaches in React or TypeScript.
 ```
 
 **What's happening here:** The "I keep for myself" list is your leverage point — it's where you insert yourself into the loop to prevent the agent from making a choice that's expensive to reverse. The "agent owns" list is equally important: it says "don't stop the agent for this; let it decide." Without the second list, the agent will constantly pause for confirmations on things you don't care about.
 
-**Pitfall:** If you list fewer than three items on either side, you haven't thought hard enough. Sit with it for another two minutes. The goal is a card a stranger could read and predict, with ~90% accuracy, which side of the line a novel decision will land on.
+**Pitfall:** If you list fewer than three items on either side, you probably haven't thought hard enough. Sit with it for another two minutes. The goal is a card a stranger could read and predict, with ~90% accuracy, which side of the line a novel decision will land on.
 
 ### Tailor to Your Project Type
 
@@ -476,38 +512,6 @@ git push -u origin workflow-card
 
 **Why commit in a branch?** The card is a living artifact. Treating it as PR-worthy from day one reinforces that changes to how-you-work-with-agents deserve the same scrutiny as code changes. In L1 this same discipline applies to `CLAUDE.md`.
 
-### Step 4.1: Open a PR against main (optional, ~2 min)
-
-If your project has any collaborators — even just future-you — open a PR against `main` rather than merging directly. The PR description should include:
-
-```markdown
-## What
-Adds `workflow-card.md` — the agreed rules for working with an AI coding
-assistant on this project.
-
-## Why
-Captures four things in one place:
-- Prompt Template (what every prompt must include)
-- Context Reset Rule (when to start a fresh session)
-- Iteration Loop (the slice-test-commit cycle)
-- Decision Checkpoint (what I decide vs. what the agent decides)
-
-This is the seed for `CLAUDE.md` / `AGENTS.md` (see W1 README for the
-curriculum context).
-```
-
-The PR is deliberately tiny — just the one file. That's the point. Small, reviewable, mergeable.
-
-### Step 4.2: Verify the artifact
-
-```bash
-git log --oneline -1
-ls -la workflow-card.md
-wc -l workflow-card.md
-```
-
-You should see a commit with your message, a file with non-zero size, and a line count somewhere between 40 and 120. Cards shorter than 40 lines usually skipped a section; cards longer than 120 usually bled into agent-instruction territory and should be trimmed.
-
 ---
 
 ## Connection to Gas City
@@ -539,78 +543,6 @@ If any of that feels abstract right now, good. It's meant to. Come back to this 
 Rather than providing drafting prompts inline, every session ships with a sister `PROMPT.md` file: [`curriculum/workshops/W1/PROMPT.md`](./PROMPT.md). Paste it into Claude Code (or your preferred CLI coding agent) at the start of the session. It knows how to walk you through these steps, pull context from your Project Overview, and keep your card concrete.
 
 If you want to work without the facilitation prompt, the four quality-bar items above are sufficient guidance on their own. Many participants find it easier to write the first draft alone and then ask the local agent to critique it for specificity — which is itself a tiny instance of the Iteration Loop you're designing.
-
----
-
-## Industry Context: Why "Individual Workflow" Comes First
-
-The W1 → W2 → L1 order is intentional and evidence-based. A few sources worth skimming:
-
-- [**GitHub — "Does AI actually boost developer productivity? The evidence says yes."**](https://github.blog/news-insights/research/does-ai-actually-boost-developer-productivity-the-evidence-says-yes/) — surveys and experiments consistently find that developers who work deliberately with AI (written rules, named workflows) sustain productivity gains, while ad-hoc users regress.
-- [**Stanford CRFM — "Holistic Evaluation of Language Models"**](https://crfm.stanford.edu/helm/latest/) — when evaluating LLM-driven coding, context handling is repeatedly the dominant variable. Your Context Reset Rule is the mitigation developers apply in practice.
-- [**Anthropic — "Claude Code: Best practices for agentic coding"**](https://www.anthropic.com/engineering/claude-code-best-practices) — recommends starting every agent-assisted workflow with (1) a written spec, (2) a named iteration loop, and (3) explicit decision boundaries. Those are exactly the four sections of your workflow card.
-- [**Cognition — "Don't Build Multi-Agents"**](https://cognition.ai/blog/dont-build-multi-agents) — post-mortems on failed autonomous runs overwhelmingly trace back to missing decision boundaries. Your Decision Checkpoint section is the guard rail.
-
-If you find yourself thinking "is this overkill for a single-agent workflow?", the answer is: every one of these sources is about single agents. Scaling to six multiplies the cost of missing the discipline.
-
----
-
-## Inline Insight: Why "Prompt Template" Isn't "Prompt"
-
-A prompt template is structural — it names the fields every prompt must include. A prompt is instantiated from the template for a specific task.
-
-```
-Template:   [File path] + [Acceptance criteria] + [Stack constraints] + [Reference files]
-Prompt:     src/components/Cart.tsx + FUP-3 ACs + "TS strict, Tailwind" + "see src/components/MenuCard.tsx"
-```
-
-The value of the template is that it's *boring and invariant*. You never have to think about "what context should I give?" — you fill in the blanks. In L1, the template becomes the "Role" and "Iteration Rule" sections of `CLAUDE.md`. In L2+, it becomes each pack's `## Inputs` section.
-
-If you notice yourself thinking "I'll just dash off a quick prompt without the template this time," that's a signal you've found a case the template doesn't cover. Update the template — don't skip it.
-
----
-
-## Inline Insight: What "Specific" Actually Means
-
-"Be specific" is the most-given and least-actionable piece of advice in the workflow-card genre. Here's a more useful operationalization: **a bullet is specific if and only if it survives search-and-replace.**
-
-- "Include relevant context" → replace "context" with "cartographic metadata" and the sentence still parses. Not specific.
-- "Include the acceptance criteria verbatim from the Jira ticket" → replace any noun and the sentence breaks. Specific.
-
-The test works because specificity is the property of referring to exactly one concrete thing in the world. Generic nouns ("context," "patterns," "conventions") refer to many things, so they tolerate substitution. Concrete nouns (`src/components/Cart.tsx`, `FUP-3`, `npm run type-check`) don't.
-
-Apply the test to every bullet in your card. Bullets that pass become the ones the agent (and future-you) can actually act on. Bullets that fail become the ones that feel productive to write and produce no behavior change.
-
----
-
-## Inline Insight: The Cost Asymmetry of Config vs. Chat
-
-Ad-hoc prompting feels cheap in the moment and expensive in aggregate. Config changes feel expensive in the moment and cheap in aggregate. The workshop is an attempt to make you *feel* the second curve, not just know about it.
-
-Concretely:
-
-- A chat correction costs ~30 seconds to type. A config change costs ~5 minutes to write, review, and commit. The chat correction looks like a 10× win per incident.
-- But chat corrections don't compound. Every new session re-pays the full cost of every correction you've ever made, because none of them survived.
-- Config changes compound. Every session after the change inherits the new constraint for free. If you hit the same correction 10 times in a month, the break-even is at incident #2, and everything after is pure profit.
-
-The card you're writing today is the substrate that makes config changes durable. Without it, a correction you want to persist has nowhere to live — so it ends up in chat by default. With it, every correction has a home: the Prompt Template field, the Context Reset trigger, the Iteration Loop step, or the Decision Checkpoint list.
-
-When you hit a correction in L1 and feel the "it's faster to just type it here" pull, remember: the pull is real, and it's lying about the cost.
-
----
-
-## Inline Insight: Why Iteration Loops Fail Silently
-
-The classic failure mode of a workflow card isn't "the card is wrong." It's "the card is silent."
-
-Watch yourself during a real session. The moment you skip a step of your card — because it's Friday, because the task is small, because you're tired — is the moment the card stops being a card and starts being decoration. Every skipped step is a small debt you pay back later in a polluted session, a hallucinated API, or a PR comment you have to re-explain three times.
-
-Two defenses:
-
-- **Make skipped steps visible.** Section 3 of the Fired Up Pizza reference says: "If I skip a step I have to say why in the commit body." That single sentence converts a private rationalization ("it was fine, I didn't need to run type-check") into a public artifact (a commit message that reads "feat(cart): show order total — skipped type-check because this is a comment-only change"). Skipped steps you have to justify get skipped less.
-- **Make the loop mechanical, not judgmental.** "Run the gates *after every slice*" is mechanical — you either did or you didn't. "Run the gates *when appropriate*" is judgmental — every skip is defensible. Judgment is what you're trying to offload into the card; if the card defers to judgment at the critical moment, it's not doing its job.
-
-When you re-read your Iteration Loop, ask of every step: *is this mechanical or judgmental?* Convert judgmental steps to mechanical ones until none remain.
 
 ---
 
@@ -789,21 +721,13 @@ No `gc` commands this session. No `bd` commands. No agent slinging. The only cer
 | Component | File / Location | What It Does |
 |-----------|-----------------|--------------|
 | Workflow Card | `workflow-card.md` (root of project repo) | One-page document with 4 sections encoding your AI-assistant discipline |
-| Section 1 — Prompt Template | `## 1. Prompt Template` | Lists the fields every prompt must include (Target, ACs, Stack, References, Testing) |
-| Section 2 — Context Reset Rule | `## 2. Context Reset Rule` | Lists the triggers that cause you to start a fresh session |
-| Section 3 — Iteration Loop | `## 3. Iteration Loop` | Numbered steps from spec → plan → slice → gate → commit → PR, including the gate-fail branch |
-| Section 4 — Decision Checkpoint | `## 4. Decision Checkpoint` | Two lists: decisions you keep, decisions the agent owns |
 | Scratch doc | `~/scratch/w1-notes.md` (or equivalent) | Raw material from Discovery Questions — not committed, but referenced while drafting |
-| Branch | `workflow-card` (in your project repo) | Feature branch for the card commit, treating the card as PR-worthy code |
-| Commit | `docs: add AI workflow card (W1)` | Single commit adding the file — the audit trail for the card's origin |
-| Reference card | `reference-project/fired-up-pizza/workflow-card.md` | The finished example you pattern-matched against |
-| PROMPT.md (sister file) | `curriculum/workshops/W1/PROMPT.md` | Optional facilitator prompt to paste into Claude Code while drafting |
 
 ---
 
 ## Next Steps
 
-In **L1** (next), you'll:
+In **[L1](../../labs/L1/README.md)** (next), you'll:
 
 1. Install Gas City and add your project as a rig.
 2. Convert `workflow-card.md` into agent instructions (`CLAUDE.md` / `AGENTS.md`) tailored for the `claude` agent.
@@ -811,13 +735,3 @@ In **L1** (next), you'll:
 4. Update the instructions file when output is wrong — never touch the chat.
 
 The card you just wrote is the blueprint. L1 puts it to work.
-
-After L1, the progression continues:
-
-- **W2** — map the six-agent factory to your project's domain. Your workflow card's Decision Checkpoint becomes the starting point for agent-role boundaries.
-- **L2** — install Planner + Architect. Each one gets its own six-section prompt, structurally identical to your four-section card.
-- **L3** — install Designer + Coder. Now four agents are reading your conventions; the card's Stack constraints field is the common spine.
-- **L4** — install Reviewer + Release Gate. The Iteration Loop you wrote becomes the formula graph's schedule.
-- **W3 / W4 / C1** — formula design, feedback loops, and capstone. The card hasn't gone anywhere; it's just been promoted from a document you read to a system you run.
-
-Every session from here builds on this one. Keep the card open in a tab.

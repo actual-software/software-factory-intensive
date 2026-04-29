@@ -16,17 +16,24 @@ Install these before starting the curriculum. All sessions assume the tools belo
 
 ## 2. Gas City
 
-Gas City is the orchestration framework this workshop is built on. It manages agents, packs, rigs, and beads.
+Gas City is the orchestration framework this workshop is built on. It manages agents, packs, rigs, and beads. Please follow the steps below to install Gas City, and refer to the [Gas City documentation](https://github.com/gastownhall/gascity/blob/main/docs/getting-started/installation.md) for additional details.
 
 ```bash
 # macOS / WSL / Linux (with Homebrew)
 brew install gastownhall/gascity/gascity
 
-# Verify (must report >= 0.15.0 — schema=2 packs require v2-capable gc)
+# Verify (must report >= 1.0.0)
 gc version
 ```
 
-**Minimum version: 0.15.0.** The factory uses Pack v2 (`schema = 2` in pack.toml). Earlier Gas City releases will fail to load the packs.
+If you already have an older version of Gas City installed, you may need to uninstall it and install the latest version:
+```bash
+brew uninstall gascity
+brew install gastownhall/gascity/gascity
+
+# or
+brew link --overwrite gascity
+```
 
 Gas City brings in the core tool dependencies it needs: `tmux`, `jq`, `git`, `dolt`. On macOS they are installed as Homebrew dependencies. On Linux, install any missing ones via your package manager.
 
@@ -91,7 +98,13 @@ gc doctor
 
 ---
 
-## 5. Clone This Repo
+## 5. Python installation
+
+[Python 3.8+](https://www.python.org/downloads/) is required to run the factory-activity-agent script, which makes the curriculum setup and teardown much easier. You can check your Python version with `python3 --version`.
+
+---
+
+## 6. Clone This Repo
 
 ```bash
 git clone https://github.com/actual-software/software-factory-intensive.git

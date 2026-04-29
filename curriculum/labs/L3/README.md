@@ -1,8 +1,37 @@
-# L3: Deliver a Feature Through the Factory
+# L3: Deploy Designer + Coder Agents
 
-> **What you will do:** switch the active factory to the L3 pack and run one
-> formula that plans, architects, designs, builds, tests, and commits a small
-> feature.
+> **Goal:** Extend your software factory with the next two specialists, and demonstrate that it can now carry a planned feature from concept through to a committed implementation.
+
+| | |
+|---|---|
+| **Estimated duration** | ~75 minutes |
+| **Type** | LAB |
+| **Deliverable** | Working Designer + Coder agents, with at least one supported Skill or CLI tool each |
+
+## Architecture
+
+```
+    docs/plans/<slug>.md   docs/architecture/<slug>.md
+           (from L2)                (from L2)
+                │                      │
+                └──────────┬───────────┘
+                           ▼
+                ┌──────────────────────┐
+                │   Designer (L3)      │  ←  Skill or CLI tool: e.g. Figma,
+                │                      │     design-system repo,
+                │   produces:          │     a screenshot tool
+                │   docs/designs/      │
+                │   <slug>.md          │
+                └──────────┬───────────┘
+                           │  handoff (file)
+                           ▼
+                ┌──────────────────────┐
+                │   Coder (L3)         │  ←  Skill or CLI tool: e.g. GitHub,
+                │                      │     Postgres (staging),
+                │   produces:          │     or test runner tool
+                │   src/** + tests     │
+                └──────────────────────┘
+```
 
 ## Mental Model
 
@@ -148,41 +177,55 @@ Packs have a `skills/` directory. Each skill is a subdirectory with a `SKILL.md`
 
 1. Create a testing-conventions skill for the builder:
 
-       mkdir -p packs/lessons/L3/agents/builder/skills/testing-conventions
-       $EDITOR packs/lessons/L3/agents/builder/skills/testing-conventions/SKILL.md
+```bash
+mkdir -p packs/lessons/L3/agents/builder/skills/testing-conventions
+$EDITOR packs/lessons/L3/agents/builder/skills/testing-conventions/SKILL.md
+```
 
-   Contents:
+Contents:
 
-   ```markdown
-   ---
-   name: testing-conventions
-   description: Project-specific testing conventions for the calculator.
-   ---
+```markdown
+---
+name: testing-conventions
+description: Project-specific testing conventions for the calculator.
+---
 
-   These rules are mandatory for all test files in this project:
+These rules are mandatory for all test files in this project:
 
-   - Import `assert` from `node:assert/strict` and use `assert.strictEqual` for every comparison. Never use `assert.equal` or `assert.ok` for value checks.
-   - Structure every test file with `describe()` blocks. Each exported function gets its own `describe('functionName', () => { ... })` block. Do NOT use bare `test()` calls at the top level.
-   - Inside each `describe()` block, use `it()` for individual test cases, not `test()`.
-   - Include at least one edge case per function: zero input, negative input, and boundary values.
-   - Each `it()` description must state the expected behavior, not the implementation detail.
-   ```
+- Import `assert` from `node:assert/strict` and use `assert.strictEqual` for every comparison. Never use `assert.equal` or `assert.ok` for value checks.
+- Structure every test file with `describe()` blocks. Each exported function gets its own `describe('functionName', () => { ... })` block. Do NOT use bare `test()` calls at the top level.
+- Inside each `describe()` block, use `it()` for individual test cases, not `test()`.
+- Include at least one edge case per function: zero input, negative input, and boundary values.
+- Each `it()` description must state the expected behavior, not the implementation detail.
+```
 
 2. Edit the builder prompt to reference the skill:
 
-       $EDITOR packs/lessons/L3/agents/builder/prompt.template.md
+```bash
+$EDITOR packs/lessons/L3/agents/builder/prompt.template.md
+```
 
-   Add to the Inputs section: "Before writing tests, read the testing-conventions skill and follow its rules for assert methods, describe blocks, and edge cases."
+Add to the Inputs section:
+
+```markdown
+Before writing tests, read the testing-conventions skill and follow its rules for assert methods, describe blocks, and edge cases.
+```
 
 3. Restart and re-sling with a different feature:
 
-       gc restart
-       gc sling planner "Add a <different feature>" \
-         --on mol-feature-delivery
+```bash
+gc restart
+gc sling planner "Add a <different feature>" \
+  --on mol-feature-delivery
+```
 
 4. Compare the builder's test code from the two commits. The second commit should use `assert.strictEqual` (not `assert.equal`), `describe()` blocks, and explicit edge case tests — because the skill told it to.
 
 In L2 you added an MCP (external data). Here you added a skill (internal rules). Different mechanisms, same idea — tell the agent what you want in a file it reads every time, not in a chat message it forgets.
+
+## 8. Continue adding additional skills (including CLI tools)
+
+For the rest of the lab, continue adding new skills to the other agents. For example, you can try adding the [Actual CLI](https://cli.actual.ai/) tool along with the [Actual CLI Skill](https://github.com/actualai/actual-cli-skill) to the architecture agent.
 
 ## Exit Criteria
 
@@ -191,3 +234,7 @@ In L2 you added an MCP (external data). Here you added a skill (internal rules).
 - The graph routed all four roles.
 - The builder committed the implementation and tests.
 - Testing-conventions skill added to builder with visible impact on test code (assert.strictEqual, describe blocks).
+
+## Next Steps
+
+**[W3](../../workshops/W3/README.md)** introduces multi-agent coordination. You will create a formula graph design note in `formula-design.md` that explains how your factory should coordinate work.

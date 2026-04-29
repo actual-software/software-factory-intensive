@@ -42,25 +42,15 @@ The PROMPT.md includes:
 ## Progression
 
 ```
-W1: Individual workflow
+W1: Optimize the Individual AI Workflow
  └→ L1: CLAUDE.md + first feature
-     └→ W2: 6-agent architecture
-         └→ L2: Planner + Architect packs
-             └→ L3: Designer + Coder packs
-                 └→ W3: Multi-agent coordination
-                     └→ L4: Reviewer + Deployer packs
-                         └→ W4: Feedback loops
-                             └→ C1: Full factory run
+     └→ W2: Design The Software Factory
+         └→ L2: Deploy Planner + Architect Agents
+             └→ L3: Deploy Designer + Coder Agents
+                 └→ W3: Architect Multi-Agent Coordination
+                     └→ L4: Deploy Reviewer + DevOps Agents
+                         └→ W4: Create Continuous Improvement Loops
+                             └→ C1: Run the Software Factory End-to-End
 ```
 
 Each session builds on the previous. Exit criteria gates determine whether you're ready for the next session — unmet gates mean revisit the current session before moving on.
-
-## Prerequisite Materials
-
-Before starting the curriculum, write a **Project Overview** for the software project you'll build your factory around. Use [`PROJECT_OVERVIEW_TEMPLATE.md`](./PROJECT_OVERVIEW_TEMPLATE.md) as the starting point — it's a loosely structured brief covering user needs, tech stack, constraints, and potential integrations.
-
-The overview is what *you* write. The structured [`PROJECT_MANIFEST_TEMPLATE.md`](./PROJECT_MANIFEST_TEMPLATE.md) — a skeleton every factory agent reads — is generated from your overview by your local coding agent during L1. Don't hand-fill the manifest yourself.
-
-The reference project ([Fired Up Pizza](../reference-project/fired-up-pizza/)) has both:
-- [`docs/PROJECT_OVERVIEW.md`](../reference-project/fired-up-pizza/docs/PROJECT_OVERVIEW.md) — the kind of brief you should arrive with
-- [`docs/PROJECT_MANIFEST.md`](../reference-project/fired-up-pizza/docs/PROJECT_MANIFEST.md) — what your agent will generate from it

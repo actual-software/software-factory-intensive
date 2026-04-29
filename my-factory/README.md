@@ -9,7 +9,7 @@ cd my-factory
 cp pack.toml.template pack.toml
 cp city.toml.template city.toml
 gc register .
-gc rig add ~/Projects/your-project
+gc rig add ~/path/to/your-repo
 ```
 
 Formula v2 is enabled once in `city.toml`. Lesson selection happens in

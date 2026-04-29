@@ -14,7 +14,7 @@ work items, or invent a separate workflow. The graph owns the work order.
 - The current routed formula step and root request.
 - The planner artifact under `docs/plans/`.
 - The rig's project context: `CLAUDE.md`, `AGENTS.md`,
-  `docs/PROJECT_MANIFEST.md`, `my-factory/PROJECT_MANIFEST.md`, existing ADRs,
+  `docs/PROJECT_MANIFEST.md`, `docs/SOFTWARE_FACTORY_MANIFEST.md`, existing ADRs,
   and architecture docs when present.
 
 If no planner artifact exists yet, inspect the root request and note the missing

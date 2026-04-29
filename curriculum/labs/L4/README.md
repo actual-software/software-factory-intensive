@@ -1,8 +1,39 @@
-# L4: Review and Gate a Delivered Feature
+# L4 · Deploy Reviewer + DevOps Agents
 
-> **What you will do:** switch the active factory to the L4 pack and run one
-> formula that plans, architects, designs, builds, reviews, and gates a small
-> feature.
+> **Goal:** Complete your software factory by adding its final two specialists, and tie the output back to the `PROJECT_MANIFEST.md` as a reference for the Review and Release criteria.
+
+| | |
+|---|---|
+| **Estimated duration** | ~75 minutes |
+| **Type** | LAB |
+| **Deliverable** | Working Reviewer + DevOps (a.k.a Release Gate) agents, with the `PROJECT_MANIFEST.md` as a reference for the Review and Release criteria |
+
+## Architecture
+
+```
+            feature branch (from L3)
+                     │
+                     ▼
+          ┌──────────────────────┐
+          │  Reviewer (L4)       │  ← reads: PROJECT_MANIFEST.md
+          │                      │           (Review Standards section)
+          │  produces:           │
+          │  docs/reviews/       │
+          │  <slug>.md           │
+          └──────────┬───────────┘
+                     │  verdict: APPROVE (else loop back to Coder)
+                     ▼
+          ┌──────────────────────┐
+          │  DevOps   (L4)       │  ← reads: PROJECT_MANIFEST.md
+          │                      │           (Release Criteria section)
+          │  produces:           │
+          │  docs/releases/      │
+          │  <slug>.md           │
+          └──────────────────────┘
+                     │
+                     ▼
+               Ready to ship
+```
 
 ## Mental Model
 
@@ -130,7 +161,7 @@ The reviewer and release-gate prompts in this lesson pack read `PROJECT_MANIFEST
 
 You're about to prove that by adding standards and watching the output change.
 
-Open the manifest you created in L1 at `my-factory/PROJECT_MANIFEST.md` and add:
+Open the manifest you created at `docs/PROJECT_MANIFEST.md` and add:
 
 - Add at least 4 Review Standards with checkable rules and severity mapping
 - Add at least 6 Release Criteria with binary PASS/FAIL gates and evidence sources
@@ -165,4 +196,8 @@ If the manifest change produced no visible difference, the reviewer or release-g
 - No stage labels or manual downstream beads were used.
 - All six agents received and completed their formula steps.
 - The release gate includes an explicit verdict backed by evidence.
-- Manifest load-bearing test completed — reviewer cited Review Standards from PROJECT_MANIFEST.md.
+- Manifest load-bearing test completed — reviewer cited Review Standards from `docs/PROJECT_MANIFEST.md`.
+
+## Next Steps
+
+**[W4](../../workshops/W4/README.md)** introduces continuous improvement loops — the practice of feeding signals from finished runs back into your configuration so each run produces better outputs than the last. Your L4 review reports and release gates are an example of a primary signal source that may feed into this loop.

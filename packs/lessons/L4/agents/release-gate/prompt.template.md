@@ -16,7 +16,7 @@ owns the work order.
 - Upstream planning, architecture, and design artifacts.
 - The implementation diff, recent commit, and reproducible test output.
 - The project manifest at `docs/PROJECT_MANIFEST.md` or
-  `my-factory/PROJECT_MANIFEST.md` — specifically the Release Criteria
+  `docs/SOFTWARE_FACTORY_MANIFEST.md` — specifically the Release Criteria
   section. If Release Criteria exist, each criterion must appear in
   Required Checks with a PASS or FAIL verdict and evidence.
 

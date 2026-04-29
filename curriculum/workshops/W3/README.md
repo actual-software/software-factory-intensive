@@ -1,12 +1,40 @@
 # W3 · Architect Multi-Agent Coordination
 
+> **Goal:** Learn how coordination channels move work between specialists in a software factory, and demonstrate your understanding by producing a `formula-design.md` file that explains how your factory should coordinate work.
+
+| | |
+|---|---|
+| **Estimated duration** | ~45 minutes |
+| **Type** | WORKSHOP |
+| **Deliverable** | A `formula-design.md` file that explains how your factory should coordinate work |
+
+## Architecture
+
+## Coordination Patterns in a Factory
+
+```
+  ┌──────────────────────────────────────────────────────────────────┐
+  │                       6-agent Factory                            │
+  │     Planner · Architect · Designer · Coder · Reviewer · Deployer │
+  └───┬──────────────┬─────────────┬─────────────┬────────────┬──────┘
+      │              │             │             │            │
+      │ tasks        │ mail        │ orders      │ nudge      │ session
+      │ (beads +     │ (inbox)     │ (exec /     │ (recover   │ attach
+      │  status)     │             │  formula)   │  missed)   │ (human)
+      ▼              ▼             ▼             ▼            ▼
+  ┌──────────┐ ┌──────────┐ ┌──────────────┐ ┌─────────┐ ┌──────────┐
+  │ Shared   │ │ Durable  │ │ Event- or    │ │ Deferred│ │ Direct   │
+  │ tasks-   │ │ async    │ │ schedule-    │ │ wake-up │ │ prompt   │
+  │ in-      │ │ messages │ │ driven wake  │ │ sweeps  │ │ to one   │
+  │ progress │ │          │ │              │ │         │ │ agent    │
+  └──────────┘ └──────────┘ └──────────────┘ └─────────┘ └──────────┘
+```
+
+## Overview
+
 In L2 you ran a 2-step formula and watched plan flow to architecture. That formula was a TOML file with two `[[steps]]` and one `needs` dependency. W3 teaches you to design your own formula graphs — deciding which steps your factory needs, what each step produces, and where human judgment belongs.
 
 We'll use the L4 formula as a reference because it has 6 steps and shows patterns (review, release-gate) that L2's simple graph doesn't. You're not running L4 yet — just reading its structure to learn the design vocabulary.
-
-## Goal
-
-Produce a graph design note that explains how your factory should coordinate work.
 
 ## 1. Read a formula graph
 
@@ -174,6 +202,6 @@ These are observability tools, not workflow dispatch.
 - [ ] Decision boundaries are documented in `formula-design.md`.
 - [ ] One external trigger is described as an order spec.
 
-## Next
+## Next Steps
 
-L4 uses a graph with review and release-gate steps. The review loop remains student-driven: read the review, update code or factory config, and re-run the formula when needed.
+**[L4](../../labs/L4/README.md)** uses a graph with review and release-gate steps. The review loop remains student-driven: read the review, update code or factory config, and re-run the formula when needed.

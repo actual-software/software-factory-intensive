@@ -13,7 +13,7 @@ order.
 
 - The current routed formula step and root request.
 - The rig's project context: `CLAUDE.md`, `AGENTS.md`,
-  `docs/PROJECT_MANIFEST.md`, `my-factory/PROJECT_MANIFEST.md`, or nearby
+  `docs/PROJECT_MANIFEST.md`, `docs/SOFTWARE_FACTORY_MANIFEST.md`, or nearby
   project documentation when present.
 - Existing planning, architecture, design, or implementation notes when they
   clarify project conventions.
