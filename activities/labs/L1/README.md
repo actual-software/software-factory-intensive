@@ -6,7 +6,7 @@ L1 converts your W1 workflow card into agent-readable config and registers your 
 
 ## Deliverables
 
-Create or update these files:
+You will create or update these files:
 
 - The relevant agent instruction file (ex. `CLAUDE.md` for Claude Code, `AGENTS.md` for OpenCode/Codex CLI/etc.) in your project rig — converted from your W1 workflow card with project-specific rules, commands, and safety boundaries.
 - `docs/PROJECT_MANIFEST.md` with overview, tech stack, and project structure. Review Standards and Release Criteria are added before L4 and C1 respectively.
