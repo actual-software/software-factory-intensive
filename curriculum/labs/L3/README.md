@@ -78,6 +78,16 @@ When the planner closes its step, the store checks which other steps depended on
 
 The agents don't know about each other. Each one works its assigned bead, reads whatever project files exist (including artifacts upstream agents wrote), and closes the bead when done. The store evaluates dependencies and surfaces the next ready step.
 
+## Working directory
+
+Unless a step says otherwise, run all commands in this lab from:
+
+```
+~/path/to/software-factory-intensive/my-factory
+```
+
+"Step 6: Inspect Outputs" is the only step that cds into the rig; the snippet flags it explicitly.
+
 ## 1. Enable formula v2
 
 This is a one-time city setting. Confirm `my-factory/city.toml` contains:
@@ -103,10 +113,9 @@ source = "../packs/lessons/L3"
 ## 3. Sync the Existing Rig
 
 Root default imports are applied when a rig is created. Because you are keeping
-the same rig from L2, sync it explicitly:
+the same rig from L2, sync it explicitly. From `my-factory/`:
 
 ```bash
-cd my-factory
 gc --rig <rig> import remove factory
 gc --rig <rig> import add ../packs/lessons/L3 --name factory
 gc restart
@@ -153,14 +162,16 @@ Use all six observability commands from L2. Watch the four-agent handoff.
 
 ## 6. Inspect Outputs
 
-In your project rig, verify:
+**Switch to:** `~/path/to/your-project` for this step, then return to `my-factory` for steps 7–8.
 
 ```bash
+cd ~/path/to/your-project
 ls docs/plans
 ls docs/architecture
 ls docs/designs
 git log --oneline -5
-npm test
+npm test       # or `node --test`
+cd -           # back to my-factory
 ```
 
 Expected outputs:

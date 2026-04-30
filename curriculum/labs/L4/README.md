@@ -61,6 +61,16 @@ The imported agents are rig-scoped:
 <rig>/factory.release-gate
 ```
 
+## Working directory
+
+Unless a step says otherwise, run all commands in this lab from:
+
+```
+~/path/to/software-factory-intensive/my-factory
+```
+
+"Step 6: Inspect Outputs" and "Step 7: Prove the manifest is load-bearing" both step into the rig; their snippets flag it.
+
 ## 1. Confirm formula v2
 
 Confirm `my-factory/city.toml` contains:
@@ -85,8 +95,9 @@ source = "../packs/lessons/L4"
 
 ## 3. Sync the Existing Rig
 
+From `my-factory/`:
+
 ```bash
-cd my-factory
 gc --rig <rig> import remove factory
 gc --rig <rig> import add ../packs/lessons/L4 --name factory
 gc restart
@@ -125,16 +136,18 @@ Use the observability commands from L2. Watch for review findings and release ve
 
 ## 6. Inspect Outputs
 
-In your project rig:
+**Switch to:** `~/path/to/your-project` for this step, then return to `my-factory`.
 
 ```bash
+cd ~/path/to/your-project
 ls docs/plans
 ls docs/architecture
 ls docs/designs
 ls docs/reviews
 ls docs/releases
 git log --oneline -5
-npm test
+npm test       # or `node --test`
+cd -           # back to my-factory
 ```
 
 Expected outputs:
@@ -162,7 +175,9 @@ The reviewer and release-gate prompts in this lesson pack read `PROJECT_MANIFEST
 
 You're about to prove that by adding standards and watching the output change.
 
-Open the manifest you created at `docs/PROJECT_MANIFEST.md` and add:
+**Step into:** `~/path/to/your-project` to edit the manifest, then return to `my-factory` for the re-sling.
+
+Open the manifest you created at `~/path/to/your-project/docs/PROJECT_MANIFEST.md` and add:
 
 - Add at least 4 Review Standards with checkable rules and severity mapping
 - Add at least 6 Release Criteria with binary PASS/FAIL gates and evidence sources

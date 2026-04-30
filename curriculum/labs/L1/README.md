@@ -40,12 +40,30 @@ By the end of L1:
 - Gas City is registered with formula v2 enabled
 - Your project rig is ready for L2
 
+## Directories used in this lab
+
+L1 moves between two directories. Each step below tells you which one to be in.
+
+- `~/path/to/your-project` — your project repo (the rig).
+- `~/path/to/software-factory-intensive` — this curriculum repo (where `my-factory/` lives).
+
+## Prerequisites
+
+Before starting, confirm you have already produced the two files described in the main [`README.md`](../../../README.md) ("Before You Start", sections 5–6):
+
+- `~/path/to/your-project/docs/PROJECT_OVERVIEW.md`
+- `~/path/to/your-project/docs/PROJECT_MANIFEST.md`
+
+If you haven't, create them now from `curriculum/PROJECT_OVERVIEW_TEMPLATE.md` and `curriculum/PROJECT_MANIFEST_TEMPLATE.md` — L2 onward will read them.
+
 ## 1. Convert Your Workflow Card to Agent Instructions (~5 min)
+
+**Working in:** `~/path/to/your-project`.
 
 Your W1 workflow card already contains your project rules. Convert it into the file(s) your CLI coding agent(s) read at the project root:
 
 ```bash
-cd /path/to/your-project
+cd ~/path/to/your-project
 # For Claude Code:
 $EDITOR CLAUDE.md
 # For OpenCode, Codex CLI, Gemini CLI, etc.:
@@ -67,9 +85,12 @@ Keep it concrete. Every bullet should name a file, command, or specific rule —
 
 ## 2. Register the City (~5 min)
 
+**Switch to:** `~/path/to/software-factory-intensive` (the curriculum repo) for the rest of this lab.
+
 Create local runtime config from templates:
 
 ```bash
+cd ~/path/to/software-factory-intensive
 cp my-factory/pack.toml.template my-factory/pack.toml
 cp my-factory/city.toml.template my-factory/city.toml
 ```
@@ -88,27 +109,45 @@ The default `my-factory/pack.toml` selects the first runnable lesson factory:
 source = "../packs/lessons/L2"
 ```
 
-Register and add your project rig:
+Register the city and add your project rig. From `my-factory/`:
 
 ```bash
-cd my-factory
+cd my-factory     # now in ~/path/to/software-factory-intensive/my-factory
 gc register .
-gc rig add /path/to/your-project
+gc rig add ~/path/to/your-project
 gc doctor --fix
 gc status
 ```
 
-This creates the project rig. Later labs keep using the same rig so artifacts accumulate naturally.
+`gc rig add` derives the rig name from the project directory's basename (e.g. `your-project`). Note this name — every later lab will refer to it as `<rig>`.
+
+Later labs keep using the same rig so artifacts accumulate naturally.
+
+### Initialize the city's beads database
+
+If you cloned the curriculum repo, `my-factory/` lives inside it and inherits the curriculum's git remote. The supervisor needs its own beads store, but `bd init` in this directory refuses by default to avoid colliding with that remote. Initialize it explicitly:
+
+```bash
+# still in my-factory/
+git config beads.role maintainer
+bd init --reinit-local --prefix mf --discard-remote --destroy-token DESTROY-mf
+```
+
+`mf` is the city's prefix; `DESTROY-mf` is the matching destroy-token format documented in `bd help init-safety`. This local-only init never affects the curriculum repo's git history (the city's `.beads/` is in `.gitignore`).
+
+If you skip this, the supervisor will log `bd create: ... issue_prefix config is missing` for every internal order (`wisp-compact`, `dolt-health`, etc.) and L2's first sling will fail to spawn agent sessions.
+
+`bd init` and the supervisor will also drop a few transient files into `my-factory/` (`AGENTS.md`, `CLAUDE.md`, `.claude/`, `control-dispatcher-trace.log`, `packs.lock`). They are listed in `my-factory/.gitignore`, so `git status` should still come up clean.
 
 ## 3. Verify (~2 min)
 
-From the project repo:
+**Switch to:** `~/path/to/your-project`.
 
 ```bash
-cd /path/to/your-project
+cd ~/path/to/your-project
 git status --short
 npm test
-# or your project's equivalent
+# or your project's equivalent (e.g. `node --test`)
 ```
 
 If a command fails, fix your agent instruction file (ex. `CLAUDE.md`) before moving on. Later agents will rely on these instructions.
@@ -116,10 +155,10 @@ If a command fails, fix your agent instruction file (ex. `CLAUDE.md`) before mov
 ## Exit Criteria
 
 - [ ] The relevant agent instruction file (ex. `CLAUDE.md` for Claude Code, `AGENTS.md` for OpenCode/Codex CLI/etc.) exists in the project rig with project-specific rules.
-- [ ] `docs/PROJECT_MANIFEST.md` has overview, tech stack, and project structure.
+- [ ] `~/path/to/your-project/docs/PROJECT_MANIFEST.md` exists with overview, tech stack, and project structure.
 - [ ] `my-factory/city.toml` enables formula v2.
 - [ ] `my-factory/pack.toml` selects `../packs/lessons/L2` as `factory`.
-- [ ] `gc status` shows your city and project rig.
+- [ ] `gc status` (run from `my-factory/`) shows your city and project rig.
 
 ## Next
 

@@ -6,3 +6,17 @@
 pack.toml
 city.toml
 .gc/
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+
+# Artifacts created when bd init / gc register run inside the city
+# directory — these are agent-instruction copies, Claude Code hooks,
+# and runtime traces that have no role in the committed curriculum.
+.claude/
+AGENTS.md
+CLAUDE.md
+control-dispatcher-trace.log
+packs.lock

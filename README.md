@@ -142,20 +142,27 @@ Each session has a concrete deliverable — what you should walk away having pro
 
 ## Quickstart
 
-Create local runtime config from the templates:
+The Quickstart spans two directories. Each block is annotated with which one to be in. From `~/path/to/software-factory-intensive` (the curriculum repo), create local runtime config from the templates:
 
 ```bash
 cp my-factory/pack.toml.template my-factory/pack.toml
 cp my-factory/city.toml.template my-factory/city.toml
 ```
 
-Register the city and add your project rig:
+Then, from `my-factory/`, register the city and add your project rig:
 
 ```bash
-cd my-factory
+cd my-factory     # now in ~/path/to/software-factory-intensive/my-factory
 gc register .
 gc rig add ~/path/to/your-repo/
 gc doctor --fix
+```
+
+If `gc doctor` reports `bd create: ... issue_prefix config is missing`, the city's beads database needs an explicit local init (the curriculum repo's git remote confuses bd's bootstrap). Run, still inside `my-factory/`:
+
+```bash
+git config beads.role maintainer
+bd init --reinit-local --prefix mf --discard-remote --destroy-token DESTROY-mf
 ```
 
 The default template selects the L2 factory:
@@ -165,7 +172,7 @@ The default template selects the L2 factory:
 source = "../packs/lessons/L2"
 ```
 
-When you move to another runnable lesson, update that source path and sync the existing rig:
+When you move to another runnable lesson, update that source path and sync the existing rig (still in `my-factory/`):
 
 ```bash
 gc --rig your-project import remove factory

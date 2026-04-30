@@ -65,6 +65,8 @@ The imported agents are rig-scoped:
 <rig>/factory.release-gate
 ```
 
+"Step 6: Inspect Outputs" cds into the rig; the snippet flags it. The retrospective in step 7 is written under the curriculum repo's `activities/capstone/C1/`.
+
 ## 1. Confirm formula v2
 
 Confirm `my-factory/city.toml` contains:
@@ -89,8 +91,9 @@ source = "../packs/lessons/C1"
 
 ## 3. Sync the Existing Rig
 
+From `my-factory/`:
+
 ```bash
-cd my-factory
 gc --rig <rig> import remove factory
 gc --rig <rig> import add ../packs/lessons/C1 --name factory
 gc restart
@@ -127,9 +130,10 @@ factory.planner -> factory.architect -> factory.designer -> factory.builder -> f
 
 ## 6. Inspect Outputs
 
-In your project rig:
+**Switch to:** `~/path/to/your-project` for this step, then return to `my-factory`.
 
 ```bash
+cd ~/path/to/your-project
 ls docs/plans
 ls docs/architecture
 ls docs/designs
@@ -137,7 +141,8 @@ ls docs/validation
 ls docs/reviews
 ls docs/releases
 git log --oneline -5
-npm test
+npm test       # or `node --test`
+cd -           # back to my-factory
 ```
 
 Expected outputs:
