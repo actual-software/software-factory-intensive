@@ -14,8 +14,8 @@ cd my-factory
 gc --rig <rig> import remove factory
 gc --rig <rig> import add ../packs/lessons/C1 --name factory
 gc restart
-gc sling planner \
-  "Add a multiply operation: multiply(a, b) returns a*b" \
+gc sling <rig>/factory.planner \
+  "<an unfamiliar feature request from the participant's real backlog>" \
   --on mol-release-delivery
 ```
 

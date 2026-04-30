@@ -25,8 +25,8 @@ gc restart
 Start the run:
 
 ```bash
-gc sling planner \
-  "Add a clamp operation: clamp(x, lo, hi) returns x bounded to [lo, hi]" \
+gc sling <rig>/factory.planner \
+  "<a small feature for your project>" \
   --on mol-delivery-review
 ```
 

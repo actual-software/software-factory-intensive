@@ -80,10 +80,10 @@ Before mapping roles, catalog what your factory can use:
 
 | Category | What You Have | Relevant Roles |
 |----------|---------------|----------------|
-| AI Models | Claude via Claude Code | All agents |
+| AI Models | Your CLI coding agent(s) (Claude Code, Codex CLI, OpenCode, etc.) | All agents |
 | CLI Tools | npm, gh, your test runner | Builder, Release Gate |
 | MCP Servers | GitHub, Sentry, etc. | Reviewer, Architect |
-| Project Instructions | CLAUDE.md, AGENTS.md | All agents |
+| Project Instructions | Agent instruction files (CLAUDE.md, AGENTS.md, etc.) | All agents |
 | Knowledge Sources | PROJECT_MANIFEST.md, ADRs | Planner, Architect |
 | External Services | Linear, Jira, etc. | Planner (via orders) |
 
@@ -91,7 +91,7 @@ Inspect the workshop pack to see what integrations are available:
 
 ```bash
 ls packs/workshop/orders/
-ls packs/workshop/mcp/
+ls packs/workshop/doctor/
 ```
 
 Compare your inventory to a lesson pack:
@@ -174,7 +174,7 @@ Compare your factory map to the actual graph steps. Look for:
 - checks that belong in a prompt, validator, or release gate
 - roles that should be skipped for small changes
 
-The lesson packs don't match your design exactly — they're generic calculator-project factories. Your design should reflect your real project's roles and artifacts. The point of comparison is structural: does your graph have the same shape of dependencies and handoffs?
+The lesson packs don't match your design exactly — they're generic, project-agnostic factories. Your design should reflect your real project's roles and artifacts. The point of comparison is structural: does your graph have the same shape of dependencies and handoffs?
 
 ## Exit Criteria
 

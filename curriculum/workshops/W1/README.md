@@ -6,7 +6,7 @@
 |---|---|
 | **Estimated duration** | ~60 minutes |
 | **Type** | WORKSHOP |
-| **Deliverable** | `workflow-card.md` committed to your project repo |
+| **Deliverable** | `activities/workshops/W1/workflow-card.md` committed to this curriculum repo (then converted into agent instructions in your project repo during L1) |
 
 ---
 
@@ -49,11 +49,11 @@
 
 ## Why This Workshop Exists
 
-The factory is six agents — but each one is still, fundamentally, "a Claude session you've configured well." If you can't get a *single* agent to do what you want reliably and repeatably, a factory of six won't rescue you. It'll multiply the chaos.
+The factory is six agents — but each one is still, fundamentally, "a CLI coding agent session you've configured well." If you can't get a *single* agent to do what you want reliably and repeatably, a factory of six won't rescue you. It'll multiply the chaos.
 
 The enemy you're unlearning today is **ad-hoc prompting**: fixing bad agent output by typing a correction into the chat. Every time you do that, you lose information — the correction only lives in your head and the current session's context. When that session ends, the correction is gone. *Config persists. Chat doesn't.*
 
-This workshop produces a one-page `workflow-card.md` that encodes **your** discipline for working with an AI assistant. It's the seed for `CLAUDE.md` / `AGENTS.md` in L1, and the mental model you'll apply six times over across W2–L4.
+This workshop produces a one-page `workflow-card.md` that encodes **your** discipline for working with an AI assistant. It's the seed for the relevant agent instruction files (ex. `CLAUDE.md` for Claude Code, `AGENTS.md` for OpenCode/Codex CLI/etc.) in L1, and the mental model you'll apply six times over across W2–L4.
 
 Writing a workflow card feels like overkill the first time. It isn't. Every bullet you commit now saves you from re-deciding the same thing mid-session for weeks afterward. By the time you reach L3 and are running four agents in parallel, the discipline you build here is the difference between a factory that produces work and a factory that produces confusion.
 
@@ -66,7 +66,7 @@ Your workflow (in your head)
       ↓
 Written down as workflow-card.md (this workshop)
       ↓
-Handed to Claude Code as CLAUDE.md (L1)
+Handed to your relevant coding agent's context files (ex. CLAUDE.md for Claude Code) (L1)
       ↓
 Split across 6 agent prompts in packs/ (L2-L4)
       ↓
@@ -99,7 +99,7 @@ Before you write your own card, skim the finished equivalent in the reference pr
 
 - [`reference-project/fired-up-pizza/workflow-card.md`](../../../reference-project/fired-up-pizza/workflow-card.md) — a completed `workflow-card.md` for the Fired Up Pizza project
 
-That card is exactly what this session asks you to produce for your own project — same four sections, project-specific content. Your `workflow-card.md` lives in your *project* repo (not the city). In L1 you'll evolve it into agent instructions (`CLAUDE.md` / `AGENTS.md`) that target your built-in agent.
+That card is exactly what this session asks you to produce for your own project — same four sections, project-specific content. Your `workflow-card.md` lives in this curriculum repo at `activities/workshops/W1/workflow-card.md`. In L1 you'll evolve it into your relevant coding agent's context files (ex. `CLAUDE.md` for Claude Code, `AGENTS.md` for OpenCode/Codex CLI/etc.) inside your project repo.
 
 Notice a few things as you read the reference:
 
@@ -199,11 +199,12 @@ Write down three bullets describing your current practice, without judging it:
 
 ## Step 2: Draft Your Workflow Card (~20 min)
 
-Create `workflow-card.md` at `activities/workshops/W1/workflow-card.md` (inside this repo) using the template below. Spend about 5 minutes per section. Write the content inline — don't try to outline first and flesh out later.
+Create `workflow-card.md` at `activities/workshops/W1/workflow-card.md` (inside this curriculum repo) using the template below. Spend about 5 minutes per section. Write the content inline — don't try to outline first and flesh out later.
 
 ```bash
-cd ~/path/to/your-repo
-touch workflow-card.md
+cd /path/to/software-factory-intensive
+mkdir -p activities/workshops/W1
+$EDITOR activities/workshops/W1/workflow-card.md
 ```
 
 Open it in your editor and paste this scaffold:
@@ -293,13 +294,13 @@ Cover empty cart, single item, item with toppings, size multiplier edge cases.
 
 Compare this to the prompt you *would* have written without a template — probably two sentences, missing the stack constraints, with "see the Cart component" instead of the file path. The template is the forcing function that makes the concrete prompt easy to produce.
 
-**Pitfall:** If instantiating the template is painful — if you find yourself typing the same stack constraints for the tenth time — that's a signal those constraints belong in `CLAUDE.md` (L1), not in every prompt. The template is meant to be the *minimum* fields for a single task; long-lived constraints graduate to the agent instructions file.
+**Pitfall:** If instantiating the template is painful — if you find yourself typing the same stack constraints for the tenth time — that's a signal those constraints belong in the relevant agent instruction files (ex. `CLAUDE.md`) (L1), not in every prompt. The template is meant to be the *minimum* fields for a single task; long-lived constraints graduate to the agent instructions file.
 
 ### Step 2.2: Write the Context Reset Rule (~5 min)
 
 The Context Reset Rule section answers: **when do I throw away the current session and start fresh?**
 
-Most people's current reset rule is "never" — they keep piling onto the same session until Claude starts contradicting itself. That's context pollution. The cost of a polluted session is always higher than the cost of re-establishing context in a new session.
+Most people's current reset rule is "never" — they keep piling onto the same session until the agent starts contradicting itself. That's context pollution. The cost of a polluted session is always higher than the cost of re-establishing context in a new session.
 
 Write triggers — conditions that, when observed, cause you to reset. Example:
 
@@ -480,7 +481,7 @@ Re-read Section 3 (Iteration Loop). Simulate this scenario: the agent writes cod
 
 Walk through the card step by step:
 
-- Does the card tell you what to do next? (Reset? Re-prompt? Edit `CLAUDE.md`?)
+- Does the card tell you what to do next? (Reset? Re-prompt? Edit the relevant agent instruction file, ex. `CLAUDE.md`?)
 - Does it tell you *where* to record the missing constraint?
 - Does it tell you how to verify you fixed the root cause, not just the symptom?
 
@@ -502,15 +503,15 @@ Self-review feels productive when you're fixing typos and reformatting bullets. 
 
 ## Step 4: Commit the Card (~5 min)
 
+You're going to hand this card to your coding agent in L1 and let it shape the conversion to agent instructions. Commit it locally so the file is captured in version control — pushing to a remote is optional.
+
 ```bash
-cd ~/path/to/your-repo
-git checkout -b workflow-card
-git add workflow-card.md
-git commit -m "docs: add AI workflow card (W1)"
-git push -u origin workflow-card
+cd /path/to/software-factory-intensive
+git add activities/workshops/W1/workflow-card.md
+git commit -m "docs(w1): add AI workflow card"
 ```
 
-**Why commit in a branch?** The card is a living artifact. Treating it as PR-worthy from day one reinforces that changes to how-you-work-with-agents deserve the same scrutiny as code changes. In L1 this same discipline applies to `CLAUDE.md`.
+**Why commit it?** The card is a living artifact. Treating it as a tracked file from day one reinforces that changes to how-you-work-with-agents deserve the same scrutiny as code changes. In L1 this same discipline applies to your coding agent's instruction files (ex. `CLAUDE.md` for Claude Code).
 
 ---
 
@@ -520,7 +521,7 @@ You didn't run any `gc` commands this session — intentional. W1 is a design wo
 
 | Workflow Card Section | L1 & Beyond Equivalent |
 |-----------------------|------------------------|
-| Prompt Template | The `## Role` and `## Inputs` sections of `CLAUDE.md` — plus each lesson pack's `agents/<role>/prompt.template.md` file |
+| Prompt Template | The `## Role` and `## Inputs` sections of your agent instruction file (ex. `CLAUDE.md`) — plus each lesson pack's `agents/<role>/prompt.template.md` file |
 | Context Reset Rule | Gas City `idle_timeout` in `city.toml`, plus per-agent session lifecycle rules |
 | Iteration Loop | The bead → sling → watch → review → iterate-config loop (L1 Step 4–7) |
 | Decision Checkpoint | Human-gate beads (`--requires-approval`) in W3; review policies in `docs/REVIEW_POLICY.md` |
@@ -530,7 +531,7 @@ Skim [`packs/lessons/L2/agents/planner/prompt.template.md`](../../../packs/lesso
 The progression you'll see across the curriculum is:
 
 - **W1 (now):** one card, one project, one human in the loop.
-- **L1:** the same card, split into `CLAUDE.md` (role, rules, pipeline) for a single `claude` agent.
+- **L1:** the same card, split into the relevant agent instruction files (ex. `CLAUDE.md` for Claude Code) describing role, rules, and pipeline for your coding agent(s).
 - **L2–L4:** six agent packs, each with its own six-section prompt — but each pack's prompt is structurally the same as your card's four sections, scaled up.
 - **W3 / W4:** formula design and feedback loops — which are just *the card's Iteration Loop*, promoted from "a thing you do manually" to "a thing the factory does automatically."
 
@@ -540,7 +541,7 @@ If any of that feels abstract right now, good. It's meant to. Come back to this 
 
 ## Using Your Local Agent for This Session
 
-Rather than providing drafting prompts inline, every session ships with a sister `PROMPT.md` file: [`curriculum/workshops/W1/PROMPT.md`](./PROMPT.md). Paste it into Claude Code (or your preferred CLI coding agent) at the start of the session. It knows how to walk you through these steps, pull context from your Project Overview, and keep your card concrete.
+Rather than providing drafting prompts inline, every session ships with a sister `PROMPT.md` file: [`curriculum/workshops/W1/PROMPT.md`](./PROMPT.md). Paste it into your CLI coding agent (Claude Code, Codex CLI, OpenCode, etc.) at the start of the session. It knows how to walk you through these steps, pull context from your Project Overview, and keep your card concrete.
 
 If you want to work without the facilitation prompt, the four quality-bar items above are sufficient guidance on their own. Many participants find it easier to write the first draft alone and then ask the local agent to critique it for specificity — which is itself a tiny instance of the Iteration Loop you're designing.
 
@@ -568,7 +569,7 @@ Imagine it's your next working session. The agent is implementing the Cart Total
 
 ### Scenario 3: Two gate failures in a row, same failure mode
 
-Imagine you run `npm run type-check` and it fails. You update `CLAUDE.md` with a new constraint, `git reset --hard HEAD`, re-sling. The agent produces new code. You run `npm run type-check` again — it fails again, same error.
+Imagine you run `npm run type-check` and it fails. You update the relevant agent instruction file (ex. `CLAUDE.md`) with a new constraint, `git reset --hard HEAD`, re-sling. The agent produces new code. You run `npm run type-check` again — it fails again, same error.
 
 - **Expected outcome:** Your Iteration Loop, or your Context Reset Rule, should tell you what to do: reset the session entirely (the second failure suggests context pollution, not a missing constraint). Either the Context Reset Rule has a trigger like "two consecutive gate failures with the same error" or the Iteration Loop has an escape-hatch step.
 - **What it tests:** Whether your card handles the repeated-failure case, or whether it silently assumes the first fix always works.
@@ -580,20 +581,22 @@ Run through all three mentally. If any scenario leaves you guessing, edit the ca
 
 ## Your Final File Structure
 
-After completing W1, your project repo should contain:
+After completing W1, the curriculum repo should contain your card under `activities/`:
 
 ```
-your-repo/
-├── workflow-card.md               # ← Just committed, on the `workflow-card` branch
-├── docs/
-│   └── PROJECT_MANIFEST.md        # Already filled in before the workshop
-├── src/ ...                       # Your existing code (untouched)
-└── ... (rest of your repo)
+software-factory-intensive/
+├── activities/
+│   └── workshops/
+│       └── W1/
+│           └── workflow-card.md   # ← Just committed
+├── curriculum/ ...
+├── packs/ ...
+└── ... (rest of the curriculum repo)
 ```
 
-Your scratch doc (Discovery Questions notes) stays outside the repo — that's fine. It's raw material, not an artifact.
+Your project repo (which holds `docs/PROJECT_MANIFEST.md`) is untouched in W1. Your scratch doc (Discovery Questions notes) stays outside any repo — that's fine. It's raw material, not an artifact.
 
-No Gas City directory is created this session. No agents are installed. No beads exist. All of that starts in L1, and the card you just wrote is the primary input to L1 Step 2 ("Convert `workflow-card.md` into `CLAUDE.md`").
+No Gas City directory is created this session. No agents are installed. No beads exist. All of that starts in L1, and the card you just wrote is the primary input to L1 Step 1 ("Convert your workflow card into your coding agent's instruction file in your project repo").
 
 ---
 
@@ -606,7 +609,7 @@ When you review your own output, check:
 - **Failure-mode coverage** — The Iteration Loop says what happens when a gate fails. The Context Reset Rule covers both "start fresh" triggers and "don't reset" exceptions.
 - **Project specificity** — The card only makes sense for *this* project. A copy-pasted universal template fails this bar.
 - **One-page scroll** — You can scroll from top to bottom of the rendered card in one screen at normal zoom. If not, trim.
-- **Committed to a branch** — The card is on a feature branch, not on main. Evidence of config discipline from day one.
+- **Committed** — The card is committed to the curriculum repo so its history is the audit trail for how your AI workflow evolved.
 
 ---
 
@@ -618,8 +621,8 @@ When you review your own output, check:
 | My editor keeps autoformatting the markdown and breaking code fences | Disable "format on save" for `.md` files in the project, or commit the file and then review the diff before re-editing. Your autoformatter is probably fine; most breakage is from trailing-whitespace rules on list items. |
 | I wrote the card but it still feels abstract | Open the Fired Up Pizza reference side by side and compare your Section 3 line-by-line. The reference's bullets start with imperative verbs and name commands. If yours don't, the Stranger Test will fail. |
 | The card references a file that doesn't exist yet (`src/components/Cart.tsx`) | That's okay — the card is aspirational as well as descriptive. Just make sure the path is plausible (follows your project's directory conventions). If it's purely invented, replace it with a file that *does* exist and serves the same pattern-matching purpose. |
-| I can't decide if my Context Reset Rule should include "at the start of each day" | It shouldn't — that's a schedule, not a trigger. Reset triggers describe the state of the session, not the clock. If you want a daily refresh, put that in `CLAUDE.md` later as an agent lifecycle rule. |
-| My Iteration Loop has 12 steps | You're including steps that belong in `CLAUDE.md` (the agent's process) rather than your own (the human's process). The Loop section describes what happens between slinging work and merging it — not the internal steps the agent takes. Cut to 5–7. |
+| I can't decide if my Context Reset Rule should include "at the start of each day" | It shouldn't — that's a schedule, not a trigger. Reset triggers describe the state of the session, not the clock. If you want a daily refresh, put that in the relevant agent instruction file (ex. `CLAUDE.md`) later as an agent lifecycle rule. |
+| My Iteration Loop has 12 steps | You're including steps that belong in the relevant agent instruction file (ex. `CLAUDE.md`) (the agent's process) rather than your own (the human's process). The Loop section describes what happens between slinging work and merging it — not the internal steps the agent takes. Cut to 5–7. |
 | I don't know which commands to put in the Iteration Loop because my project doesn't have tests yet | Put in the commands you'd run if you had tests (`npm test`), plus a note that tests are aspirational. Then add "set up test infrastructure" to your backlog. A card that acknowledges a gap is stronger than a card that silently omits it. |
 | The PROMPT.md sister file seems to duplicate the README | It does, intentionally. The README is the written guide; PROMPT.md is the facilitator script for your local agent. You can use either or both. They cover the same steps at different levels of prescription. |
 | I have two projects and want one card to cover both | Don't. Write two cards. The whole point is project-specific discipline — a card that averages two projects will be useless for both. |
@@ -628,12 +631,12 @@ When you review your own output, check:
 
 ## Exit Criteria
 
-- [ ] `workflow-card.md` committed to your project repo with all 4 sections filled in
+- [ ] `activities/workshops/W1/workflow-card.md` committed in this curriculum repo with all 4 sections filled in
 - [ ] Every section references something concrete (path / command / ticket)
 - [ ] You can re-read the card as a stranger to the codebase and not have to stop to ask a question
 - [ ] You can state in one sentence what your Context Reset Rule is
 - [ ] Your Decision Checkpoint has at least three entries under "I decide" and three under "Agent decides"
-- [ ] The card is on a feature branch (`workflow-card` or equivalent), pushed to origin
+- [ ] The card is committed in the curriculum repo (a feature branch is optional — pushing to a remote is your choice)
 - [ ] The Iteration Loop tells you explicitly what to do when a gate fails
 
 ---
@@ -662,11 +665,11 @@ When you review your own output, check:
 
 ### Issue: My Prompt Template lists 12 fields.
 
-**Solution:** You're confusing *what the agent needs to know* with *what you want the agent to acknowledge*. Prune ruthlessly — only fields that, if omitted, would cause the agent to produce worse output belong in the template. "Reminder to use conventional commits" is a `CLAUDE.md` rule, not a prompt template field.
+**Solution:** You're confusing *what the agent needs to know* with *what you want the agent to acknowledge*. Prune ruthlessly — only fields that, if omitted, would cause the agent to produce worse output belong in the template. "Reminder to use conventional commits" is a rule for the relevant agent instruction file (ex. `CLAUDE.md`), not a prompt template field.
 
 ### Issue: The Iteration Loop step for "when a gate fails" is vague or missing.
 
-**Solution:** This is the single most common gap. Rewrite step 5 to name (a) the specific file you edit, (b) the specific git command you run, and (c) the specific trigger for re-sling. "If a gate fails, update `CLAUDE.md` with the missing constraint, `git reset --hard HEAD`, and re-sling the bead" is a passing step. "Adjust the plan and retry" is a failing step.
+**Solution:** This is the single most common gap. Rewrite step 5 to name (a) the specific file you edit, (b) the specific git command you run, and (c) the specific trigger for re-sling. "If a gate fails, update the relevant agent instruction file (ex. `CLAUDE.md`) with the missing constraint, `git reset --hard HEAD`, and re-sling the bead" is a passing step. "Adjust the plan and retry" is a failing step.
 
 ### Issue: I wrote the card for "AI in general" instead of this project.
 
@@ -678,7 +681,7 @@ When you review your own output, check:
 
 ### Issue: I'm worried the card will go stale.
 
-**Solution:** It will, and that's fine. The card is a living artifact — every L1+ session that edits `CLAUDE.md` is, indirectly, a signal that your original card needs an update. Plan to re-read it at the start of L1 and again at the start of L3; those are the natural re-calibration points.
+**Solution:** It will, and that's fine. The card is a living artifact — every L1+ session that edits the relevant agent instruction files (ex. `CLAUDE.md`) is, indirectly, a signal that your original card needs an update. Plan to re-read it at the start of L1 and again at the start of L3; those are the natural re-calibration points.
 
 ---
 
@@ -688,28 +691,21 @@ W1 has very few commands — it's a design workshop — but the git workflow for
 
 ```bash
 # STEP 2 — Create the workflow card
-cd ~/path/to/your-repo
-touch workflow-card.md
-# (edit workflow-card.md in your editor — fill in all 4 sections)
+cd /path/to/software-factory-intensive
+mkdir -p activities/workshops/W1
+$EDITOR activities/workshops/W1/workflow-card.md
+# (fill in all 4 sections inline)
 
 # STEP 3 — Self-review (no commands; this is reading and rewriting)
 
-# STEP 4 — Commit and push
-cd ~/path/to/your-repo
-git checkout -b workflow-card
-git add workflow-card.md
-git commit -m "docs: add AI workflow card (W1)"
-git push -u origin workflow-card
+# STEP 4 — Commit
+git add activities/workshops/W1/workflow-card.md
+git commit -m "docs(w1): add AI workflow card"
 
 # STEP 4.2 — Verify
 git log --oneline -1
-ls -la workflow-card.md
-wc -l workflow-card.md            # expect 40–120 lines
-
-# OPTIONAL — Open a PR against main
-# (Use your git host's UI or `gh pr create`, if installed)
-gh pr create --title "docs: add AI workflow card (W1)" \
-  --body "Seed document for CLAUDE.md / AGENTS.md — see W1 README."
+ls -la activities/workshops/W1/workflow-card.md
+wc -l activities/workshops/W1/workflow-card.md   # expect 40–120 lines
 ```
 
 No `gc` commands this session. No `bd` commands. No agent slinging. The only ceremony is the branch-commit-push loop, which itself is the smallest instance of the Iteration Loop your card encodes.
@@ -720,7 +716,7 @@ No `gc` commands this session. No `bd` commands. No agent slinging. The only cer
 
 | Component | File / Location | What It Does |
 |-----------|-----------------|--------------|
-| Workflow Card | `workflow-card.md` (root of project repo) | One-page document with 4 sections encoding your AI-assistant discipline |
+| Workflow Card | `activities/workshops/W1/workflow-card.md` (curriculum repo) | One-page document with 4 sections encoding your AI-assistant discipline |
 | Scratch doc | `~/scratch/w1-notes.md` (or equivalent) | Raw material from Discovery Questions — not committed, but referenced while drafting |
 
 ---
@@ -730,7 +726,7 @@ No `gc` commands this session. No `bd` commands. No agent slinging. The only cer
 In **[L1](../../labs/L1/README.md)** (next), you'll:
 
 1. Install Gas City and add your project as a rig.
-2. Convert `workflow-card.md` into agent instructions (`CLAUDE.md` / `AGENTS.md`) tailored for the `claude` agent.
+2. Convert `workflow-card.md` into your coding agent's instruction files (ex. `CLAUDE.md` for Claude Code, `AGENTS.md` for OpenCode/Codex CLI/etc.) tailored for your coding agent(s).
 3. Pick a small ticket, sling it to the agent, and watch the iteration loop run.
 4. Update the instructions file when output is wrong — never touch the chat.
 

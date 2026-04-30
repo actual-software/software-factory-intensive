@@ -154,7 +154,7 @@ Bad reasons to branch:
 Open the capstone formula:
 
 ```bash
-sed -n '1,320p' packs/lessons/C1/formulas/mol-release-delivery.toml
+cat packs/lessons/C1/formulas/mol-release-delivery.toml
 ```
 
 Compare it with your design note. Mark:

@@ -18,8 +18,8 @@ W1 is a concept session — no pack is installed and `../../../my-factory/city.t
 ## Exit criteria
 
 * [ ] `workflow-card.md` exists in this folder and is roughly the length of the reference.
-* [ ] At least one rule on the card is concrete enough that you could paste it into a `CLAUDE.md` file verbatim.
+* [ ] At least one rule on the card is concrete enough that you could paste it into your relevant agent instruction file (ex. `CLAUDE.md`) verbatim.
 
 ## Skipped this session?
 
-Nothing downstream depends on the card existing — but L1 asks you to pull rules from it into `CLAUDE.md`. If you skip W1, draft rules directly in L1 using the reference card as a starting point.
+Nothing downstream depends on the card existing — but L1 asks you to pull rules from it into the relevant agent instruction files (ex. `CLAUDE.md`). If you skip W1, draft rules directly in L1 using the reference card as a starting point.

@@ -26,17 +26,11 @@ source = "../packs/lessons/L2"
 The imported agents remain rig-scoped. With the binding named `factory`, the
 Planner target is `<rig>/factory.planner`.
 
-If your rig already exists, sync that rig to the same lesson pack:
+If you already ran `gc rig add` in L1 with the L2 default pack.toml, the import already points at L2 — you can skip the explicit sync. Otherwise:
 
 ```bash
 cd ../../../my-factory
-gc --rig <rig> import add ../packs/lessons/L2 --name factory
-```
-
-If `lesson` already exists, replace it:
-
-```bash
-gc --rig <rig> import remove factory
+gc --rig <rig> import remove factory   # only if it already exists
 gc --rig <rig> import add ../packs/lessons/L2 --name factory
 ```
 
@@ -46,7 +40,7 @@ gc --rig <rig> import add ../packs/lessons/L2 --name factory
 cd ../../../my-factory
 gc restart
 gc doctor
-gc sling planner "Plan the loyalty points feature for Fired Up Pizza" --on mol-feature-intake
+gc sling <rig>/factory.planner "<a small feature for your project>" --on mol-feature-intake
 gc events --follow
 ```
 

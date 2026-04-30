@@ -29,7 +29,7 @@ Then sling one feature request to the formula entrypoint shown in the activity R
 2. Write the requested activity deliverables in this directory.
 3. For runnable labs, select the matching self-contained factory pack.
 4. Sync the existing project rig's `factory` import.
-5. Start the formula with `gc sling planner ... --on <formula>`.
+5. Start the formula with `gc sling <rig>/factory.planner ... --on <formula>`.
 6. Inspect progress with `gc events --follow`, `gc session list`, `gc session peek`, and `gc graph`.
 
 ## Sessions

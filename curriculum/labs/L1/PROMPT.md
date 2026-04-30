@@ -1,6 +1,6 @@
 # L1 Facilitation Prompt
 
-Paste this into Claude Code at the start of the L1 session.
+Paste this into your CLI coding agent (Claude Code, Codex CLI, OpenCode, etc.) at the start of the L1 session.
 
 ---
 
@@ -23,12 +23,12 @@ The rest of this file provides supplementary guidance — discovery questions, p
 ## Discovery Questions
 
 1. **Which feature from your backlog will you implement?** Pick something small — one component or one API endpoint. For Fired Up Pizza, suggest "Menu display page" (FUP-1).
-2. **What quality gates does your project use?** (lint, tests, type checking?) These become the quality gate section of your CLAUDE.md.
+2. **What quality gates does your project use?** (lint, tests, type checking?) These become the quality gate section of your relevant agent instruction file (ex. `CLAUDE.md`).
 3. **What decisions should the agent NEVER make on its own?** (e.g., "never change the database schema without asking") These become decision checkpoints.
 
 ## What to Build
 
-Create `CLAUDE.md` in the project root (or update the existing one) with these four required sections:
+Create the relevant agent instruction file in the project root — `CLAUDE.md` for Claude Code, `AGENTS.md` for OpenCode/Codex CLI/etc., or both — with these four required sections:
 
 ```markdown
 # [Project Name] — Agent Instructions
@@ -59,30 +59,30 @@ Create `CLAUDE.md` in the project root (or update the existing one) with these f
 
 ## The Test
 
-After creating CLAUDE.md, the participant must:
+After creating the agent instruction file, the participant must:
 
 1. Pick one feature/story from their backlog
-2. Start a **fresh** Claude Code session
-3. Tell the agent: "Implement [feature] following the instructions in CLAUDE.md"
-4. **No further prompting allowed** — if the agent deviates, update CLAUDE.md and re-run
+2. Start a **fresh** session in their CLI coding agent (Claude Code, Codex CLI, OpenCode, etc.)
+3. Tell the agent: "Implement [feature] following the instructions in [CLAUDE.md / AGENTS.md]"
+4. **No further prompting allowed** — if the agent deviates, update the agent instruction file and re-run
 5. Goal: passing implementation in 3 runs or fewer
 
 Track each run in a decision log: what the agent did wrong, what config change fixed it.
 
 ## Suggestions Based on Project Type
 
-- **React projects**: Add to CLAUDE.md: "Follow existing component patterns in src/components. Use Tailwind for styling. Co-locate tests."
+- **React projects**: Add: "Follow existing component patterns in src/components. Use Tailwind for styling. Co-locate tests."
 - **API projects**: Add: "All endpoints follow REST conventions. Validate all inputs. Return structured JSON errors."
 - **Python projects**: Add: "Use type hints. Follow existing patterns in the codebase. Run pytest before committing."
 - **Monorepos**: Add: "Only modify files within the [package-name] workspace. Do not touch shared configs."
 
 ## Gas City Connection
 
-This CLAUDE.md is the foundation of the software factory. In W2, participants will see how the same config-over-prompting principle scales to 6 agents. The key insight: **if you had to re-prompt, your config was incomplete.**
+The agent instruction file is the foundation of the software factory. In W2, participants will see how the same config-over-prompting principle scales to 6 agents. The key insight: **if you had to re-prompt, your config was incomplete.**
 
 ## Exit Criteria
 
-- CLAUDE.md committed to repo
+- Agent instruction file (ex. `CLAUDE.md`) committed to repo
 - Feature branch with one completed story
 - Decision log has at least 1 entry (even if the first run succeeded — log what worked)
-- Feature passes the quality gate defined in CLAUDE.md
+- Feature passes the quality gate defined in the agent instruction file

@@ -48,18 +48,14 @@ cd ~/path/to/your-project/docs
 npx skills add https://github.com/audiojak/manifest-generator
 ```
 
-Follow the steps to install the skill for your specific coding agent(s). For example if you use Claude Code, enable this option:
+Follow the steps to install the skill for your specific coding agent(s). Each agent has its own skill location — for example, Claude Code reads `.claude/skills`, OpenCode/Codex CLI/etc. read other paths. Select the install option matching your agent, then choose the Installation scope and Method (Symlink recommended).
 
-```text
-Claude Code (.claude/skills)
-```
-
-Select the Installation scope and the Installation method (recommend Symlink) and proceed.
-
-Once the skill is installed, you can invoke it inside a session with your coding agent:
+Once the skill is installed, you can invoke it inside a session with your coding agent (Claude Code, Codex CLI, OpenCode, etc.):
 
 ```bash
-claude /manifest-generator # or other agent
+# Claude Code:
+claude /manifest-generator
+# Or invoke `/manifest-generator` inside whichever CLI coding agent you use.
 ```
 
 The agent should provide some prompts to guide you through the process. You can also reference the [Manifest Generator Skill](https://github.com/audiojak/manifest-generator) documentation for more details. The end result should be `PROJECT_MANIFEST.md` and `SOFTWARE_FACTORY_MANIFEST.md` files in your project directory.
@@ -135,7 +131,7 @@ Each session has a concrete deliverable — what you should walk away having pro
 | ID | Type | Duration | Title | Deliverable |
 |----|------|----------|-------|-------------|
 | [W1](curriculum/workshops/W1/README.md) | Workshop | ~60 min | Optimize the Individual AI Workflow | `workflow-card.md` that describes how *you*, personally, drive a CLI coding agent on a single feature end-to-end |
-| [L1](curriculum/labs/L1/README.md) | Lab | ~15 min | CLAUDE.md + first feature | Working `my-factory/` gas city implementation connected to your project rig |
+| [L1](curriculum/labs/L1/README.md) | Lab | ~15 min | Agent instructions + project rig | Working `my-factory/` gas city implementation connected to your project rig |
 | [W2](curriculum/workshops/W2/README.md) | Workshop | ~45 min | Design The Software Factory | `factory-map.md` that explains which role owns each kind of decision, which artifact each role writes, which formula step should route to that role, which checks prove the step is done, and which context the next step needs |
 | [L2](curriculum/labs/L2/README.md) | Lab | ~75 min | Deploy Planner + Architect Agents | Planner and Architect each equipped with at least one MCP capability |
 | [L3](curriculum/labs/L3/README.md) | Lab | ~75 min | Deploy Designer + Coder Agents | Designer and Coder each equipped with at least one Skill or CLI tool |
@@ -176,11 +172,11 @@ gc --rig your-project import remove factory
 gc --rig your-project import add ../packs/lessons/L3 --name factory
 ```
 
-Then sling work to the lesson formula:
+Then sling work to the lesson formula (replace `<rig>` with your rig name and the feature description with your own):
 
 ```bash
-gc sling planner \
-  "Add a percent operation: percent(whole, fraction) returns whole*fraction/100" \
+gc sling <rig>/factory.planner \
+  "<a small feature for your project>" \
   --on mol-feature-delivery
 ```
 

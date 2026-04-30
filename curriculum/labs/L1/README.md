@@ -1,4 +1,4 @@
-# L1 · CLAUDE.md + first feature
+# L1 · Agent instructions + project rig
 
 > **Goal:** Understand how the configuration of a software factory depends on the nature of the project it is building, and how to adapt the configuration to the specific needs of the project.
 
@@ -14,7 +14,8 @@ L1 converts the workflow card from W1 into agent-readable config and registers y
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│        PROJECT_MANIFEST.md and CLAUDE.md                 │
+│   PROJECT_MANIFEST.md and agent instructions             │
+│   (ex. CLAUDE.md for Claude Code, AGENTS.md for others)  │
 │  Overview · Tech Stack · Domain Model · Conventions      │
 │  Review Standards · Release Criteria · Task Inputs       │
 └───────┬──────────────────────────────────────────────────┘
@@ -35,25 +36,28 @@ L1 converts the workflow card from W1 into agent-readable config and registers y
 
 By the end of L1:
 
-- Your W1 workflow card is converted to a `CLAUDE.md`
+- Your W1 workflow card is converted to your relevant agent instruction files (ex. `CLAUDE.md` for Claude Code, `AGENTS.md` for OpenCode/Codex CLI/etc.)
 - Gas City is registered with formula v2 enabled
 - Your project rig is ready for L2
 
-## 1. Convert Your Workflow Card to CLAUDE.md (~5 min)
+## 1. Convert Your Workflow Card to Agent Instructions (~5 min)
 
-Your W1 workflow card already contains your project rules. Convert it into the file your CLI agent reads:
+Your W1 workflow card already contains your project rules. Convert it into the file(s) your CLI coding agent(s) read at the project root:
 
 ```bash
 cd /path/to/your-project
+# For Claude Code:
 $EDITOR CLAUDE.md
+# For OpenCode, Codex CLI, Gemini CLI, etc.:
+$EDITOR AGENTS.md
 ```
 
-If you use another agent that reads `AGENTS.md`, use that filename instead.
+You can create both files (some agents read one, some read the other; some read both). If you only use one agent, create only the file it reads.
 
 Map from your workflow card:
 
-| W1 Section | CLAUDE.md Equivalent |
-|------------|---------------------|
+| W1 Section | Agent Instruction File Equivalent |
+|------------|-----------------------------------|
 | Prompt Template | Project purpose, tech stack, build/test/lint commands |
 | Context Reset Rule | Session lifecycle notes |
 | Iteration Loop | Coding standards, source layout |
@@ -107,11 +111,11 @@ npm test
 # or your project's equivalent
 ```
 
-If a command fails, fix `CLAUDE.md` before moving on. Later agents will rely on these instructions.
+If a command fails, fix your agent instruction file (ex. `CLAUDE.md`) before moving on. Later agents will rely on these instructions.
 
 ## Exit Criteria
 
-- [ ] `CLAUDE.md` or `AGENTS.md` exists in the project rig with project-specific rules.
+- [ ] The relevant agent instruction file (ex. `CLAUDE.md` for Claude Code, `AGENTS.md` for OpenCode/Codex CLI/etc.) exists in the project rig with project-specific rules.
 - [ ] `docs/PROJECT_MANIFEST.md` has overview, tech stack, and project structure.
 - [ ] `my-factory/city.toml` enables formula v2.
 - [ ] `my-factory/pack.toml` selects `../packs/lessons/L2` as `factory`.

@@ -1,6 +1,6 @@
 # W1 Facilitation Prompt
 
-Paste this into Claude Code at the start of the W1 session.
+Paste this into your CLI coding agent (Claude Code, Codex CLI, OpenCode, etc.) at the start of the W1 session.
 
 ---
 
@@ -30,7 +30,7 @@ Before building the workflow card, ask the participant:
 
 ## What to Build
 
-Create `workflow-card.md` in the repo root with this structure:
+Create `activities/workshops/W1/workflow-card.md` (in this curriculum repo) with this structure:
 
 ```markdown
 # AI Workflow Card
@@ -64,8 +64,8 @@ Use the SPEC-CONTEXT-CONSTRAINT-CRITERIA structure:
 
 ## Gas City Connection
 
-Explain that this workflow card is the seed for what becomes the agent instructions file (`CLAUDE.md` / `AGENTS.md`) in Lab 1 — the config file that drives agent behavior without ad-hoc prompting. The discipline of encoding behavior in config (not chat) is the foundation of the entire software factory.
+Explain that this workflow card is the seed for what becomes the relevant agent instruction files (ex. `CLAUDE.md` for Claude Code, `AGENTS.md` for OpenCode/Codex CLI/etc.) in Lab 1 — the config files that drive agent behavior without ad-hoc prompting. The discipline of encoding behavior in config (not chat) is the foundation of the entire software factory.
 
 ## Exit Criteria
 
-The participant should commit `workflow-card.md` to their repo. Read it back as a stranger to their codebase and confirm: "Could I follow this card to get the same result without asking any questions?" If yes, it passes. If no, iterate on clarity.
+The participant should commit `activities/workshops/W1/workflow-card.md` in this curriculum repo. Read it back as a stranger to their codebase and confirm: "Could I follow this card to get the same result without asking any questions?" If yes, it passes. If no, iterate on clarity.

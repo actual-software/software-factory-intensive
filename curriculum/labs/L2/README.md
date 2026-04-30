@@ -84,24 +84,23 @@ are still rig-scoped, so the Planner target is:
 <rig>/factory.planner
 ```
 
-Because your rig already exists, sync that rig to the L2 pack:
+If you ran `gc rig add` in L1 with the default `pack.toml`, your rig already has a `factory` import pointing at L2 — you can skip ahead. Verify with:
 
 ```bash
 cd my-factory
+gc --rig <rig> import list
+```
+
+If the `factory` import does not exist (or points elsewhere), set it explicitly:
+
+```bash
+gc --rig <rig> import remove factory   # only if it already exists
 gc --rig <rig> import add ../packs/lessons/L2 --name factory
 ```
 
-If the `factory` import already exists from another lesson, replace it:
+Then check the factory:
 
 ```bash
-gc --rig <rig> import remove factory
-gc --rig <rig> import add ../packs/lessons/L2 --name factory
-```
-
-Restart and check the factory:
-
-```bash
-gc restart
 gc doctor
 ```
 
@@ -133,10 +132,19 @@ Your workflow card described how you work with one agent. The planner prompt doe
 
 ## Part 3: Run The Formula
 
-From `my-factory`, sling one request to the lesson Planner (replace the feature name with your own):
+If `gc sling` fails with `database not initialized: issue_prefix config is missing`, the rig's beads database wasn't fully bootstrapped by `gc rig add`. Initialize it explicitly from the rig directory:
 
 ```bash
-gc sling planner "Plan the loyalty points feature for Fired Up Pizza" --on mol-feature-intake
+cd /path/to/your-project
+bd init --force --prefix <prefix>   # use the same prefix gc rig add reported
+```
+
+Then return to `my-factory` and continue.
+
+From `my-factory`, sling one request to the lesson Planner using the rig-qualified target (replace `<rig>` with your rig name and the feature name with your own):
+
+```bash
+gc sling <rig>/factory.planner "Plan the loyalty points feature for Fired Up Pizza" --on mol-feature-intake
 ```
 
 Watch progress:
@@ -243,7 +251,7 @@ Before writing acceptance criteria, use the Context7 MCP to look up the latest n
 3. Restart and re-sling:
 
        gc restart
-       gc sling planner "Plan <another feature>" \
+       gc sling <rig>/factory.planner "Plan <another feature>" \
          --on mol-feature-intake
 
 4. Compare the two plan artifacts. The second plan should reference specific node:test API details (assert.strictEqual, describe blocks) that came from Context7 — not generic knowledge.

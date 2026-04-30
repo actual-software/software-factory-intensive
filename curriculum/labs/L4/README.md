@@ -95,9 +95,11 @@ gc doctor
 
 ## 4. Start the Formula
 
+Use the rig-qualified target (replace `<rig>` with your rig name and the feature description with your own):
+
 ```bash
-gc sling planner \
-  "Add a clamp operation: clamp(x, lo, hi) returns x bounded to [lo, hi]" \
+gc sling <rig>/factory.planner \
+  "<a small feature for your project>" \
   --on mol-delivery-review
 ```
 
@@ -152,8 +154,7 @@ A complete L4 run should produce artifacts with these sections:
 | Review | Verdict, Summary, Findings, Test Evidence, Recommendation, References |
 | Release gate | Verdict, Required Checks, Evidence, Risks, Decision Notes, References |
 
-For the example above, the feature adds `clamp(x, lo, hi)` and `npm test`
-should show 8 tests, 8 passing.
+For your chosen feature, `npm test` (or your project's equivalent) should exit 0 with the new tests included.
 
 ## 7. Prove the manifest is load-bearing
 
@@ -178,8 +179,8 @@ Use standards like these:
 Then re-sling with a different feature:
 
 ```bash
-gc sling planner \
-  "Add a modulo operation: mod(a, b) returns a%b" \
+gc sling <rig>/factory.planner \
+  "<a different small feature>" \
   --on mol-delivery-review
 ```
 
@@ -192,7 +193,7 @@ If the manifest change produced no visible difference, the reviewer or release-g
 
 ## Exit Criteria
 
-- The run started with one `gc sling planner ... --on mol-delivery-review`.
+- The run started with one `gc sling <rig>/factory.planner ... --on mol-delivery-review`.
 - No stage labels or manual downstream beads were used.
 - All six agents received and completed their formula steps.
 - The release gate includes an explicit verdict backed by evidence.

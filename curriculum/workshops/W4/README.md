@@ -67,8 +67,9 @@ The improvement-criteria file becomes the audit lens you apply to the C1 capston
 ```bash
 mkdir -p activities/workshops/W4/feedback-loops
 touch activities/workshops/W4/feedback-loops/improvement-criteria.md
+```
 
-In `feedback-loops/improvement-criteria.md`, add:
+In `activities/workshops/W4/feedback-loops/improvement-criteria.md`, add:
 
 ```markdown
 ## Signal Inventory
@@ -144,6 +145,19 @@ Rules of thumb:
 >
 > A self-improving software factory is the ultimate software factory, but it's also the most difficult to tune correctly. Too large of changes can lead to instability and regression, while too small of changes may not be effective. It is important to pick strong signals and connect them to very well-correlated adjustments in the factory's configuration.
 
+## 3. Decide Where The Rule Belongs
+
+| Rule Type | Typical Target |
+|---|---|
+| Better planning output | `packs/lessons/<active>/agents/planner/prompt.template.md` |
+| Better architecture decisions | `packs/lessons/<active>/agents/architect/prompt.template.md` |
+| Better implementation behavior | `packs/lessons/<active>/agents/builder/prompt.template.md` |
+| Better validation | `packs/lessons/<active>/agents/validator/prompt.template.md` or the formula validation step |
+| Better release decisions | `packs/lessons/<active>/agents/release-gate/prompt.template.md` |
+| Project-specific policy | the relevant agent instruction files (ex. `CLAUDE.md`, `AGENTS.md`) or `docs/PROJECT_MANIFEST.md` |
+
+The activity file explains the lesson learned. The runtime file should encode the durable behavior without saying it came from a workshop.
+
 ## 4. Write Feedback Rule Files (10 min)
 
 For 2-4 signals you identified in Part 1, write a feedback rule file.
@@ -182,20 +196,7 @@ How will a future run prove the change worked?
 When should the change be removed or simplified?
 ```
 
-## 3. Decide Where The Rule Belongs
-
-| Rule Type | Typical Target |
-|---|---|
-| Better planning output | `packs/lessons/<active>/agents/planner/prompt.template.md` |
-| Better architecture decisions | `packs/lessons/<active>/agents/architect/prompt.template.md` |
-| Better implementation behavior | `packs/lessons/<active>/agents/builder/prompt.template.md` |
-| Better validation | `packs/lessons/<active>/agents/validator/prompt.template.md` or the formula validation step |
-| Better release decisions | `packs/lessons/<active>/agents/release-gate/prompt.template.md` |
-| Project-specific policy | project `CLAUDE.md`, `AGENTS.md`, or `docs/PROJECT_MANIFEST.md` |
-
-The activity file explains the lesson learned. The runtime file should encode the durable behavior without saying it came from a workshop.
-
-## 4. Apply One Rule at a Time (10 min)
+## 5. Apply One Rule at a Time (10 min)
 
 Choose one rule and make the smallest real config change. Commit the rule file and the runtime change together so the audit trail shows why the factory changed.
 
@@ -207,7 +208,7 @@ git add packs/lessons/C1/agents/builder/prompt.template.md
 git commit -m "Teach builder async error handling rule"
 ```
 
-## 5. Measure One Improvement (10 min)
+## 6. Measure One Improvement (10 min)
 
 For a given rule, you should be able to measure an improvement in the factory against the criterion. Use the tools available to you to measure the signal before and after the config change. Record the results in the `improvement-criteria.md` file as follows:
 
@@ -221,7 +222,7 @@ For a given rule, you should be able to measure an improvement in the factory ag
 - Net movement: improved / no change / regressed
 ``` 
 
-## 6. Continue the Loop, Applying One Rule at a Time (10 min)
+## 7. Continue the Loop, Applying One Rule at a Time (10 min)
 
 As time permits, apply the remaining rules to the active lesson pack or project instructions and measure the improvement in the factory against the criterion. Record the results in the `improvement-criteria.md` file.
 
@@ -235,4 +236,4 @@ As time permits, apply the remaining rules to the active lesson pack or project 
 
 ## Next Steps
 
-**[C1](../../labs/C1/README.md)** runs the factory end-to-end, using the `improvement-criteria.md` file as the audit lens.
+**[C1](../../capstone/C1/README.md)** runs the factory end-to-end, using the `improvement-criteria.md` file as the audit lens.

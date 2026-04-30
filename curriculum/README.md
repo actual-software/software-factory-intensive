@@ -43,7 +43,7 @@ The PROMPT.md includes:
 
 ```
 W1: Optimize the Individual AI Workflow
- └→ L1: CLAUDE.md + first feature
+ └→ L1: Agent instructions + project rig
      └→ W2: Design The Software Factory
          └→ L2: Deploy Planner + Architect Agents
              └→ L3: Deploy Designer + Coder Agents

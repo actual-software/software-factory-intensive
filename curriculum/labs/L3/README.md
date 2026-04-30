@@ -121,13 +121,15 @@ gc rig list
 
 ## 4. Start the Formula
 
+Use the rig-qualified target (replace `<rig>` with your rig name and the feature description with your own):
+
 ```bash
-gc sling planner \
-  "Add a percent operation: percent(whole, fraction) returns whole*fraction/100" \
+gc sling <rig>/factory.planner \
+  "<a small feature for your project>" \
   --on mol-feature-delivery
 ```
 
-Capture the workflow bead id printed by `Attached workflow ...`.
+For example, on the Fired Up Pizza reference project: `"Add a loyalty-points line to the cart total"`. Capture the workflow bead id printed by `Attached workflow ...`.
 
 ## 5. Watch Progress
 
@@ -187,7 +189,7 @@ Contents:
 ```markdown
 ---
 name: testing-conventions
-description: Project-specific testing conventions for the calculator.
+description: Project-specific testing conventions for this project.
 ---
 
 These rules are mandatory for all test files in this project:
@@ -215,7 +217,7 @@ Before writing tests, read the testing-conventions skill and follow its rules fo
 
 ```bash
 gc restart
-gc sling planner "Add a <different feature>" \
+gc sling <rig>/factory.planner "<a different small feature>" \
   --on mol-feature-delivery
 ```
 
@@ -229,7 +231,7 @@ For the rest of the lab, continue adding new skills to the other agents. For exa
 
 ## Exit Criteria
 
-- The run started with one `gc sling planner ... --on mol-feature-delivery`.
+- The run started with one `gc sling <rig>/factory.planner ... --on mol-feature-delivery`.
 - No stage labels or manual downstream beads were used.
 - The graph routed all four roles.
 - The builder committed the implementation and tests.

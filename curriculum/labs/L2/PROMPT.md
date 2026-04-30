@@ -1,6 +1,6 @@
 # L2 Facilitation Prompt
 
-Paste this into Claude Code at the start of the L2 session.
+Paste this into your CLI coding agent (Claude Code, Codex CLI, OpenCode, etc.) at the start of the L2 session.
 
 ---
 
@@ -47,7 +47,7 @@ gc --rig <rig> import add ../packs/lessons/L2 --name factory
 The lab starts from one command:
 
 ```bash
-gc sling planner "Plan the loyalty points feature for Fired Up Pizza" --on mol-feature-intake
+gc sling <rig>/factory.planner "<a small feature for the participant's project>" --on mol-feature-intake
 ```
 
 Use `gc events --follow`, `gc graph <root-bead-id>`, and
