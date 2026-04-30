@@ -158,12 +158,7 @@ gc rig add ~/path/to/your-repo/
 gc doctor --fix
 ```
 
-If `gc doctor` reports `bd create: ... issue_prefix config is missing`, the city's beads database needs an explicit local init (the curriculum repo's git remote confuses bd's bootstrap). Run, still inside `my-factory/`:
-
-```bash
-git config beads.role maintainer
-bd init --reinit-local --prefix mf --discard-remote --destroy-token DESTROY-mf
-```
+If `gc doctor` reports `bd create: ... issue_prefix config is missing`, see [troubleshooting/beads.md#issue-issue_prefix-config-is-missing](troubleshooting/beads.md#issue-issue_prefix-config-is-missing).
 
 The default template selects the L2 factory:
 

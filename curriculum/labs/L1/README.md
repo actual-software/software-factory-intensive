@@ -125,7 +125,7 @@ Later labs keep using the same rig so artifacts accumulate naturally.
 
 ### Initialize the city's beads database
 
-If you cloned the curriculum repo, `my-factory/` lives inside it and inherits the curriculum's git remote. The supervisor needs its own beads store, but `bd init` in this directory refuses by default to avoid colliding with that remote. Initialize it explicitly:
+The supervisor needs its own beads store. Initialize it explicitly from `my-factory/`:
 
 ```bash
 # still in my-factory/
@@ -133,9 +133,7 @@ git config beads.role maintainer
 bd init --reinit-local --prefix mf --discard-remote --destroy-token DESTROY-mf
 ```
 
-`mf` is the city's prefix; `DESTROY-mf` is the matching destroy-token format documented in `bd help init-safety`. This local-only init never affects the curriculum repo's git history (the city's `.beads/` is in `.gitignore`).
-
-If you skip this, the supervisor will log `bd create: ... issue_prefix config is missing` for every internal order (`wisp-compact`, `dolt-health`, etc.) and L2's first sling will fail to spawn agent sessions.
+If you skip this, or if `gc doctor` / a later `gc sling` reports `bd create: ... issue_prefix config is missing`, see [troubleshooting/beads.md#issue-issue_prefix-config-is-missing](../../../troubleshooting/beads.md#issue-issue_prefix-config-is-missing).
 
 `bd init` and the supervisor will also drop a few transient files into `my-factory/` (`AGENTS.md`, `CLAUDE.md`, `.claude/`, `control-dispatcher-trace.log`, `packs.lock`). They are listed in `my-factory/.gitignore`, so `git status` should still come up clean.
 

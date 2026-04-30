@@ -63,12 +63,7 @@ Unless a step says otherwise, run all commands in this lab from:
 ~/path/to/software-factory-intensive/my-factory
 ```
 
-Two parts of the lab step out:
-
-- "Part 4: Inspect The Artifacts" reads files inside `~/path/to/your-project`.
-- The `bd init` recovery in Part 3 (only if you hit the issue_prefix error) cds into the rig and back.
-
-Both transitions are flagged in their snippets.
+"Part 4: Inspect The Artifacts" reads files inside `~/path/to/your-project`; the snippet flags the cd. If Part 3 hits the `issue_prefix` error you'll also temporarily cd into the rig — see the troubleshooting reference there.
 
 ## Prerequisites
 
@@ -148,18 +143,9 @@ Your workflow card described how you work with one agent. The planner prompt doe
 
 ## Part 3: Run The Formula
 
-**Working in:** `~/path/to/software-factory-intensive/my-factory` for this part. If you have to step into the rig for the bd-init recovery below, the snippet says so explicitly.
+**Working in:** `~/path/to/software-factory-intensive/my-factory` for this part.
 
-If `gc sling` fails with `database not initialized: issue_prefix config is missing`, the rig's beads database wasn't fully bootstrapped by `gc rig add`. Initialize it explicitly from the rig directory, then come back:
-
-```bash
-cd ~/path/to/your-project
-git config beads.role maintainer
-bd init --reinit-local --prefix <prefix>   # use the same prefix gc rig add reported
-cd -                                       # back to my-factory
-```
-
-`--reinit-local` replaced the deprecated `--force` in recent `bd` versions. The exact prefix appeared in the `gc rig add` output (e.g. `Prefix: swp` for a project named `your-project`).
+If `gc sling` fails with `database not initialized: issue_prefix config is missing`, the rig's beads database wasn't fully bootstrapped by `gc rig add` — see [troubleshooting/beads.md#issue-issue_prefix-config-is-missing](../../../troubleshooting/beads.md#issue-issue_prefix-config-is-missing) (scenario B). The fix runs `bd init` from the rig directory, then returns to `my-factory/`.
 
 From `my-factory`, sling one request to the lesson Planner using the rig-qualified target (replace `<rig>` with your rig name and the feature name with your own):
 
