@@ -29,7 +29,7 @@ Please read the [installation guide](installation.md) to install the necessary t
 
 ### 5. Software Project Overview
 
-You should bring a real software project to build your factory around. Before starting the curriculum, write a **Project Overview** for it in `~/path/to/your-project/docs/PROJECT_OVERVIEW.md` using [`PROJECT_OVERVIEW_TEMPLATE.md`](PROJECT_OVERVIEW_TEMPLATE.md) — a loosely structured document that answers a few questions about the project.
+You should bring a real software project to build your factory around. Before starting the curriculum, write a **Project Overview** for it in `~/path/to/your-project/docs/PROJECT_OVERVIEW.md` using [`PROJECT_OVERVIEW_TEMPLATE.md`](curriculum/PROJECT_OVERVIEW_TEMPLATE.md) — a loosely structured document that answers a few questions about the project.
 
 ```bash
 mkdir -p ~/path/to/your-project/docs
