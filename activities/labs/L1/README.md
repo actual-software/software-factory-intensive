@@ -29,5 +29,5 @@ No feature workflow runs in L1. The first runnable formula flow starts in L2.
 - [ ] The relevant agent instruction file (ex. `CLAUDE.md` for Claude Code, `AGENTS.md` for OpenCode/Codex CLI/etc.) exists in the project rig with project-specific rules.
 - [ ] `docs/PROJECT_MANIFEST.md` has overview, tech stack, and project structure.
 - [ ] `my-factory/city.toml` enables formula v2.
-- [ ] `my-factory/pack.toml` selects `../packs/lessons/L2` as `factory`.
+- [ ] `my-factory/city.toml` selects `../packs/lessons/L2` as the `factory` import (via `[[rigs]]` → `[rigs.imports.factory]`).
 - [ ] `gc status` from `my-factory/` shows the city and rig.

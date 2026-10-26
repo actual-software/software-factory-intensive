@@ -43,10 +43,12 @@ L4 keeps the same process shape as L3 and adds two downstream evidence steps:
 plan -> architecture -> design -> build -> review -> release gate
 ```
 
-The factory pack is selected in `my-factory/pack.toml`:
+The factory pack is selected in `my-factory/city.toml`:
 
 ```toml
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/L4"
 ```
 
@@ -82,24 +84,22 @@ formula_v2 = true
 
 ## 2. Select the L4 Factory Pack
 
-Edit `my-factory/pack.toml`:
+Edit `my-factory/city.toml` so the rig imports L4 as its factory pack:
 
 ```toml
-[pack]
-name = "my-factory"
-schema = 2
-
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/L4"
 ```
 
-## 3. Sync the Existing Rig
+## 3. Apply the Change
 
-From `my-factory/`:
+The active lesson is selected declaratively in `city.toml`, so the edit above
+is the whole switch. Apply it and confirm the factory resolves. From
+`my-factory/`:
 
 ```bash
-gc --rig <rig> import remove factory
-gc --rig <rig> import add ../packs/lessons/L4 --name factory
 gc restart
 gc doctor
 ```

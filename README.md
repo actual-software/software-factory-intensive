@@ -161,15 +161,16 @@ If `gc doctor` reports `bd create: ... issue_prefix config is missing`, see [tro
 The default template selects the L2 factory:
 
 ```toml
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/L2"
 ```
 
-When you move to another runnable lesson, update that source path and sync the existing rig (still in `my-factory/`):
+When you move to another runnable lesson, update that source path in `my-factory/city.toml`, then apply it (still in `my-factory/`):
 
 ```bash
-gc --rig your-project import remove factory
-gc --rig your-project import add ../packs/lessons/L3 --name factory
+gc restart
 ```
 
 Then sling work to the lesson formula (replace `<rig>` with your rig name and the feature description with your own):

@@ -21,25 +21,21 @@ Make sure `my-factory/city.toml` has formula v2 enabled:
 formula_v2 = true
 ```
 
-Make sure `my-factory/pack.toml` selects the L2 lesson pack:
+Make sure `my-factory/city.toml` selects the L2 lesson pack:
 
 ```toml
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/L2"
 ```
 
-Then sync the existing project rig:
+To switch the active lesson, point `[rigs.imports.factory].source` at the
+lesson you want, then apply it:
 
 ```bash
 cd my-factory
-gc --rig <rig> import add ../packs/lessons/L2 --name factory
-```
-
-If the participant already has a factory import, replace it:
-
-```bash
-gc --rig <rig> import remove factory
-gc --rig <rig> import add ../packs/lessons/L2 --name factory
+gc restart
 ```
 
 ## Run Command

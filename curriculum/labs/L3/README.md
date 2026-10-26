@@ -42,7 +42,9 @@ active for that rig.
 L3 uses:
 
 ```toml
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/L3"
 ```
 
@@ -99,25 +101,22 @@ formula_v2 = true
 
 ## 2. Select the L3 Factory Pack
 
-Edit `my-factory/pack.toml` so the active factory import points at L3:
+Edit `my-factory/city.toml` so the rig imports L3 as its factory pack:
 
 ```toml
-[pack]
-name = "my-factory"
-schema = 2
-
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/L3"
 ```
 
-## 3. Sync the Existing Rig
+## 3. Apply the Change
 
-Root default imports are applied when a rig is created. Because you are keeping
-the same rig from L2, sync it explicitly. From `my-factory/`:
+The active lesson is selected declaratively in `city.toml`, so the edit above
+is the whole switch — there is no separate per-rig import command. Apply it and
+confirm the factory resolves. From `my-factory/`:
 
 ```bash
-gc --rig <rig> import remove factory
-gc --rig <rig> import add ../packs/lessons/L3 --name factory
 gc restart
 gc doctor
 ```

@@ -6,19 +6,19 @@ L4 switches the active factory pack to `packs/lessons/L4`, then runs one
 formula graph through Planner, Architect, Designer, Builder, Reviewer, and
 Release Gate.
 
-Factory selection in `my-factory/pack.toml`:
+Factory selection in `my-factory/city.toml`:
 
 ```toml
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/L4"
 ```
 
-Sync the existing project rig:
+Apply the change after editing the city-wide factory selection:
 
 ```bash
 cd my-factory
-gc --rig <rig> import remove factory
-gc --rig <rig> import add ../packs/lessons/L4 --name factory
 gc restart
 ```
 

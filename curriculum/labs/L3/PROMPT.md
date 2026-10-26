@@ -5,14 +5,14 @@ You are facilitating L3.
 Keep participants on the formula path:
 
 ```toml
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/L3"
 ```
 
 ```bash
 cd my-factory
-gc --rig <rig> import remove factory
-gc --rig <rig> import add ../packs/lessons/L3 --name factory
 gc restart
 gc sling <rig>/factory.planner \
   "<a small feature for your project>" \

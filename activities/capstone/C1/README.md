@@ -5,19 +5,19 @@
 C1 switches the active factory pack to `packs/lessons/C1`, then runs the full
 release-delivery formula graph.
 
-Factory selection in `my-factory/pack.toml`:
+Factory selection in `my-factory/city.toml`:
 
 ```toml
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/C1"
 ```
 
-Sync the existing project rig:
+Apply the change after editing the city-wide factory selection:
 
 ```bash
 cd my-factory
-gc --rig <rig> import remove factory
-gc --rig <rig> import add ../packs/lessons/C1 --name factory
 gc restart
 ```
 

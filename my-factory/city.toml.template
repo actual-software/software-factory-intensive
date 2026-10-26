@@ -2,6 +2,18 @@
 name = "my-factory"
 provider = "claude"
 
+# Active lesson selection. gc imports this lesson pack into your rig as the
+# rig's "factory" pack. Set `name` below to your rig: the basename `gc rig add`
+# derives from your project directory (run `gc rig list` to see it). The value
+# "rig" here matches only the tutorial walkthrough's scratch rig; change it to
+# your own rig name when you set up your project. Point `source` at the lesson
+# you are working (../packs/lessons/L2, L3, L4, C1) to switch the active lesson.
+[[rigs]]
+name = "rig"
+[rigs.imports]
+[rigs.imports.factory]
+source = "../packs/lessons/L2"
+
 [session]
 startup_timeout = "3m"
 

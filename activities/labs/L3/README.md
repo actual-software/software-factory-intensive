@@ -5,19 +5,19 @@
 L3 switches the active factory pack to `packs/lessons/L3`, then runs one
 formula graph through Planner, Architect, Designer, and Builder.
 
-Factory selection in `my-factory/pack.toml`:
+Factory selection in `my-factory/city.toml`:
 
 ```toml
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/L3"
 ```
 
-Sync the existing project rig after changing the city-wide factory selection:
+Apply the change after editing the city-wide factory selection:
 
 ```bash
 cd my-factory
-gc --rig <rig> import remove factory
-gc --rig <rig> import add ../packs/lessons/L3 --name factory
 gc restart
 ```
 

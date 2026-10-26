@@ -102,10 +102,12 @@ Confirm `my-factory/city.toml` has formula v2 enabled:
 formula_v2 = true
 ```
 
-The default `my-factory/pack.toml` selects the first runnable lesson factory:
+The default `my-factory/city.toml` selects the first runnable lesson factory:
 
 ```toml
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/L2"
 ```
 

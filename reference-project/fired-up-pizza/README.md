@@ -13,10 +13,13 @@ cp my-factory/pack.toml.template my-factory/pack.toml
 cp my-factory/city.toml.template my-factory/city.toml
 ```
 
-Set the active factory to C1:
+Set the active factory to C1 in `my-factory/city.toml` (use the rig name that
+`gc rig add` derives from the project directory's basename — `fired-up-pizza`):
 
 ```toml
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "fired-up-pizza"
+[rigs.imports.factory]
 source = "../packs/lessons/C1"
 ```
 
@@ -26,8 +29,6 @@ Register the city and add this project as the rig:
 cd my-factory
 gc register .
 gc rig add ../reference-project/fired-up-pizza
-gc --rig fired-up-pizza import remove factory
-gc --rig fired-up-pizza import add ../packs/lessons/C1 --name factory
 gc doctor --fix
 ```
 

@@ -196,7 +196,32 @@ def check_root_factory(root: Path, findings: list[Finding]) -> None:
                 "city config still uses default_rig_includes",
                 root=root,
                 line=line_number(text, "default_rig_includes"),
-                hint="move active lesson selection to my-factory/pack.toml [defaults.rig.imports.factory]",
+                hint="move active lesson selection to city.toml [[rigs]] (set [rigs.imports.factory] source)",
+            )
+        rigs = data.get("rigs", [])
+        factory_source = None
+        if isinstance(rigs, list):
+            for rig in rigs:
+                if not isinstance(rig, dict):
+                    continue
+                source = (
+                    rig.get("imports", {})
+                    .get("factory", {})
+                    .get("source")
+                    if isinstance(rig.get("imports", {}), dict)
+                    else None
+                )
+                if "../packs/lessons/" in str(source):
+                    factory_source = source
+                    break
+        if factory_source is None:
+            add(
+                findings,
+                "SFI104",
+                path,
+                "city config does not select an active lesson via a [[rigs]] factory import",
+                root=root,
+                hint='expected a [[rigs]] entry with [rigs.imports.factory] source = "../packs/lessons/<lesson>"',
             )
 
     pack_files = [root / "my-factory" / "pack.toml.template", root / "my-factory" / "pack.toml"]
@@ -216,14 +241,15 @@ def check_root_factory(root: Path, findings: list[Finding]) -> None:
             .get("imports", {})
             .get("factory")
         )
-        if not isinstance(factory, dict) or "../packs/lessons/" not in str(factory.get("source", "")):
+        if isinstance(factory, dict):
             add(
                 findings,
-                "SFI112",
+                "SFI114",
                 path,
-                "root pack does not define the active factory default rig import",
+                "root pack still declares the legacy [defaults.rig.imports.factory] rig import",
                 root=root,
-                hint='expected [defaults.rig.imports.factory] source = "../packs/lessons/<lesson>"',
+                line=line_number(text, "[defaults.rig.imports.factory]"),
+                hint="move the active lesson selection to city.toml [[rigs]] (set [rigs.imports.factory] source)",
             )
         imports = data.get("imports", {})
         if "all" in imports:
@@ -571,23 +597,23 @@ def check_docs(root: Path, lesson_id: str, docs: list[str], findings: list[Findi
             add(findings, "SFI500", path, f"{lesson_id} expected doc is missing", root=root)
             continue
         text = read_text(path)
-        if "[defaults.rig.imports.factory]" not in text:
+        if "[rigs.imports.factory]" not in text:
             add(
                 findings,
                 "SFI501",
                 path,
-                f"{lesson_id} docs omit city-wide active lesson selection",
+                f"{lesson_id} docs omit the city.toml [[rigs]] active lesson selection",
                 root=root,
-                hint="show [defaults.rig.imports.factory]",
+                hint='show the city.toml [[rigs]] block with [rigs.imports.factory]',
             )
-        if not re.search(r"gc\s+--rig\s+\S+\s+import\s+(?:add|remove)\b", text):
+        if not re.search(r'source\s*=\s*"\.\./packs/lessons/', text):
             add(
                 findings,
                 "SFI502",
                 path,
-                f"{lesson_id} docs omit existing-rig factory import sync",
+                f"{lesson_id} docs omit the active lesson source path",
                 root=root,
-                hint="show gc --rig <rig> import remove/add factory",
+                hint='show [rigs.imports.factory] source = "../packs/lessons/<lesson>"',
             )
         if not re.search(r"gc\s+sling\s+\S*/factory\.", text):
             add(

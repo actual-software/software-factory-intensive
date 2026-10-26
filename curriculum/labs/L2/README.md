@@ -81,10 +81,12 @@ formula_v2 = true
 
 ## Part 1: Select L2 As The Active Lesson
 
-Open `my-factory/pack.toml` and set the city-wide active factory import:
+Open `my-factory/city.toml` and set the city-wide active factory import:
 
 ```toml
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/L2"
 ```
 
@@ -95,23 +97,15 @@ are still rig-scoped, so the Planner target is:
 <rig>/factory.planner
 ```
 
-If you ran `gc rig add` in L1 with the default `pack.toml`, your rig already has a `factory` import pointing at L2 — you can skip ahead. Verify with:
+If you kept the default `city.toml` source from L1, your rig `<rig>` already imports
+L2 as its `factory` pack — you can skip ahead. To switch the active lesson,
+point `[rigs.imports.factory].source` at the lesson you want
+(`../packs/lessons/L2`, `L3`, `L4`, or `C1`).
+
+Then apply the change and check the factory:
 
 ```bash
-cd my-factory
-gc --rig <rig> import list
-```
-
-If the `factory` import does not exist (or points elsewhere), set it explicitly:
-
-```bash
-gc --rig <rig> import remove factory   # only if it already exists
-gc --rig <rig> import add ../packs/lessons/L2 --name factory
-```
-
-Then check the factory:
-
-```bash
+gc restart
 gc doctor
 ```
 

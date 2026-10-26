@@ -24,15 +24,17 @@ write_l4_factory_configs() {
 [pack]
 name = "my-factory"
 schema = 2
-
-[defaults.rig.imports.factory]
-source = "../packs/lessons/L4"
 TOML
 
   cat > "$WALK_L4_FACTORY/city.toml" <<TOML
 [workspace]
 name = "$WALK_L4_CITY_NAME"
 provider = "claude"
+
+[[rigs]]
+name = "rig"
+[rigs.imports.factory]
+source = "../packs/lessons/L4"
 
 [session]
 startup_timeout = "3m"
@@ -95,19 +97,16 @@ lesson_run() {
   export WALK_FACTORY="$WALK_L4_FACTORY" WALK_RIG="$WALK_L4_RIG"
 
   echo
-  echo "[5/11] sync existing rig factory import"
-  local import_out
-  import_out="$(cd "$WALK_L4_FACTORY" && gc --rig rig import remove factory 2>&1 || true)"
-  log "gc --rig rig import remove factory:"
-  echo "$import_out" | sed 's/^/    /' | tee -a "$WALK_LOG"
-  import_out="$(cd "$WALK_L4_FACTORY" && gc --rig rig import add ../packs/lessons/L4 --name factory 2>&1)"
-  log "gc --rig rig import add ../packs/lessons/L4 --name factory:"
-  echo "$import_out" | sed 's/^/    /' | tee -a "$WALK_LOG"
-  if echo "$import_out" | grep -q 'Added import "factory"'; then
-    step_pass "existing rig imports packs/lessons/L4 as factory"
+  echo "[5/11] verify rig factory import is declared in city.toml"
+  # gc 1.2.1 selects the active lesson declaratively via the city.toml [[rigs]]
+  # block (written in write_l4_factory_configs), not the old imperative
+  # `gc --rig rig import add/remove factory` flow.
+  if grep -q '\[rigs.imports.factory\]' "$WALK_L4_FACTORY/city.toml" \
+     && grep -q '\.\./packs/lessons/L4' "$WALK_L4_FACTORY/city.toml"; then
+    step_pass "city.toml [[rigs]] selects packs/lessons/L4 as the factory import"
   else
-    step_fail "gc --rig rig import add ../packs/lessons/L4 --name factory failed"
-    fail "rig factory import sync failed"
+    step_fail "city.toml does not declare the factory import via [[rigs]]"
+    fail "rig factory import declaration missing"
   fi
 
   echo

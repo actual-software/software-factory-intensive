@@ -6,19 +6,20 @@ This directory holds the student-facing deliverables for each session. The long 
 
 Activities are where you write notes, run reports, and local design artifacts. They are not where workflow routing lives.
 
-For runnable labs, the active factory is selected from `my-factory/pack.toml`:
+For runnable labs, the active factory is selected from `my-factory/city.toml`:
 
 ```toml
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/L3"
 ```
 
-Students keep the same project rig across lessons. After changing the active lesson factory, sync the existing rig import:
+Students keep the same project rig across lessons. After changing the active lesson factory, apply the change:
 
 ```bash
 cd ../my-factory
-gc --rig your-project import remove factory
-gc --rig your-project import add ../packs/lessons/L3 --name factory
+gc restart
 ```
 
 Then sling one feature request to the formula entrypoint shown in the activity README.

@@ -46,10 +46,12 @@ C1 is the whole factory as one graph:
 plan -> architecture -> design -> build -> validate -> review -> release
 ```
 
-The factory pack is selected in `my-factory/pack.toml`:
+The factory pack is selected in `my-factory/city.toml`:
 
 ```toml
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/C1"
 ```
 
@@ -78,24 +80,22 @@ formula_v2 = true
 
 ## 2. Select the C1 Factory Pack
 
-Edit `my-factory/pack.toml`:
+Edit `my-factory/city.toml` so the rig imports C1 as its factory pack:
 
 ```toml
-[pack]
-name = "my-factory"
-schema = 2
-
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/C1"
 ```
 
-## 3. Sync the Existing Rig
+## 3. Apply the Change
 
-From `my-factory/`:
+The active lesson is selected declaratively in `city.toml`, so the edit above
+is the whole switch. Apply it and confirm the factory resolves. From
+`my-factory/`:
 
 ```bash
-gc --rig <rig> import remove factory
-gc --rig <rig> import add ../packs/lessons/C1 --name factory
 gc restart
 gc doctor
 ```

@@ -12,20 +12,19 @@ gc register .
 gc rig add ~/path/to/your-repo
 ```
 
-Formula v2 is enabled once in `city.toml`. Lesson selection happens in
-`pack.toml`:
+Formula v2 is enabled once in `city.toml`. Lesson selection also happens in
+`city.toml`, via the rig's `factory` import:
 
 ```toml
-[defaults.rig.imports.factory]
+[[rigs]]
+name = "<rig>"  # your rig: the basename gc rig add derives (see: gc rig list)
+[rigs.imports.factory]
 source = "../packs/lessons/L2"
 ```
 
-When switching lessons, change that source path and sync the existing project
-rig:
+When switching lessons, change that source path and apply it:
 
 ```bash
-gc --rig <rig> import remove factory
-gc --rig <rig> import add ../packs/lessons/L3 --name factory
 gc restart
 ```
 
