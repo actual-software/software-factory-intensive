@@ -1,0 +1,75 @@
+# actual-factory-w1 — Single Pack V2 containing all W1 Software Factory agents.
+#
+# Merges all 11 separate V1 packs (planner, architect, builder, designer,
+# validator, reviewer, deployer, improver, pm, deacon, witness) into one
+# flat Pack V2. No sub-pack dirs, no composition layer.
+#
+# Agents are discovered from agents/<name>/ directories.
+# Formulas are discovered from formulas/*.formula.toml.
+# Orders are discovered from orders/*.toml.
+# Commands are discovered from commands/<name>/run.sh.
+# Doctor checks are discovered from doctor/<name>/run.sh.
+
+[pack]
+name = "actual-factory-w1"
+schema = 2
+description = "W1 software factory — all pipeline agents in one Pack V2"
+
+# ── Rig-scoped pipeline agents ────────────────────────────────────────────
+
+[[named_session]]
+template = "planner"
+scope = "rig"
+mode = "on_demand"
+
+[[named_session]]
+template = "architect"
+scope = "rig"
+mode = "on_demand"
+
+[[named_session]]
+template = "builder"
+scope = "rig"
+mode = "on_demand"
+
+[[named_session]]
+template = "designer"
+scope = "rig"
+mode = "on_demand"
+
+[[named_session]]
+template = "validator"
+scope = "rig"
+mode = "on_demand"
+
+[[named_session]]
+template = "reviewer"
+scope = "rig"
+mode = "on_demand"
+
+[[named_session]]
+template = "deployer"
+scope = "rig"
+mode = "on_demand"
+
+[[named_session]]
+template = "improver"
+scope = "rig"
+mode = "on_demand"
+
+[[named_session]]
+template = "pm"
+scope = "rig"
+mode = "on_demand"
+
+# ── Supervisor agents ─────────────────────────────────────────────────────
+
+[[named_session]]
+template = "deacon"
+scope = "city"
+mode = "always"
+
+[[named_session]]
+template = "witness"
+scope = "rig"
+mode = "always"

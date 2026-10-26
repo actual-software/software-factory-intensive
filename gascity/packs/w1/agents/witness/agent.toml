@@ -1,0 +1,6 @@
+scope = "rig"
+wake_mode = "fresh"
+work_dir = ".gc/agents/{{.Rig}}/witness"
+prompt_template = "agents/witness/prompt.template.md"
+nudge = "Run gc prime to check rig work health and recover orphaned beads."
+idle_timeout = "2h"

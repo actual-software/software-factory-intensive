@@ -1,0 +1,10 @@
+scope = "rig"
+wake_mode = "fresh"
+work_dir = ".gc/agents/{{.Rig}}/deployer"
+prompt_template = "agents/deployer/prompt.template.md"
+nudge = "Check your hook for reviewed code ready for release evaluation."
+overlay_dir = "overlay/deployer"
+idle_timeout = "1h"
+min_active_sessions = 0
+max_active_sessions = 1
+work_query = "gc bd --rig w1-project list --label=needs-deploy --status=open --json 2>/dev/null"

@@ -1,0 +1,9 @@
+scope = "rig"
+wake_mode = "fresh"
+work_dir = ".gc/agents/{{.Rig}}/improver"
+prompt_template = "agents/improver/prompt.template.md"
+nudge = "Check your hook for work and act on it."
+overlay_dir = "overlay/improver"
+idle_timeout = "2h"
+min_active_sessions = 0
+max_active_sessions = 1

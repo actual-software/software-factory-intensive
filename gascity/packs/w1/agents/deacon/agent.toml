@@ -1,0 +1,6 @@
+scope = "city"
+wake_mode = "fresh"
+work_dir = ".gc/agents/deacon"
+prompt_template = "agents/deacon/prompt.template.md"
+nudge = "Run gc prime to dispatch labelled beads and check factory health."
+idle_timeout = "2h"
